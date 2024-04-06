@@ -321,6 +321,7 @@ function initialize() {
 
           enableCashShop:  false,  // Enable Cash Shop UI?
           enableBank:      false,  // Enable Bank UI? (Requires PACKETVER 20130724 above)
+          enableAchievement: false,  // Enable Achievement UI? (Requires PACKETVER 20150513 above)
           enableMapName:   false,  // Enable Map Name Banner? (Requires client data (GRF) newer than 2019.06.19)
           enableCheckAttendance: false, // Enable Check Attendance? (Requires PACKETVER 20180307 above)
           loadLua:         false,  // Enable this option to load LUA tables (currently only item table) from client/System/...

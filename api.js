@@ -262,6 +262,11 @@
 	ROBrowser.prototype.enableCheckAttendance = false;
 
 	/**
+	 * @var {boolean} Enable Achievement UI
+	 */
+	ROBrowser.prototype.enableAchievement = false;
+
+	/**
 	 * @var {boolean} User interface version selection mode (PacketVer | PreRenewal | Renewal)
 	 */
 	ROBrowser.prototype.clientVersionMode = "PacketVer";
@@ -445,6 +450,7 @@
 			enableBank:       this.enableBank,
 			enableMapName:    this.enableMapName,
 			enableCheckAttendance: this.enableCheckAttendance,
+			enableAchievement:this.enableAchievement,
 			version:          this.version,
 			clientHash:       this.clientHash,
 			calculateHash:    this.calculateHash,

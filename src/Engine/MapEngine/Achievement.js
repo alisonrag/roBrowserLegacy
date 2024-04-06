@@ -19,15 +19,15 @@ define(function( require )
 	var PACKET    = require('Network/PacketStructure');
 
     function onAllAchievementList(pkt){
-		
+		console.log('onAllAchievementList');
 	}
 	
     function onAchievementUpdate(pkt){
-		
+		console.log('onAchievementUpdate');
 	}
 
     function onRequestAchievementRewardACK(pkt){
-		
+		console.log('onRequestAchievementRewardACK');
 	}
 	/**
 	 * Initialize

@@ -247,6 +247,10 @@ define(function( require )
 				require('./MapEngine/Bank').init();
 			}
 
+			if(Configs.get('enableAchievement') && PACKETVER.value > 20150513) {
+				require('./MapEngine/Achievement').call();
+			}
+
 			// Prepare UI
 			Escape.prepare();
 			Inventory.prepare();

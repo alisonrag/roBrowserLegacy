@@ -127,6 +127,12 @@ define(function(require)
 	var buyingStoreItemList = new Array();
 
 	/**
+	 * @var achievementList list
+	 * json object
+	 */
+	var achievementList = {};
+
+	/**
 	 * Initialize DB
 	 */
 	DB.init = function init()
@@ -186,6 +192,7 @@ define(function(require)
 		if(PACKETVER.value >= 20100427) {
 			loadTable( 'data/buyingstoreitemlist.txt',		'#',	1, function(index, key){ buyingStoreItemList.push(parseInt(key, 10)); }, 			onLoad());
 		}
+		loadAchievementFile( 'System/achievement_list.lub', function(achievement_list){achievementList = achievement_list;}, onLoad());
 
 		Network.hookPacket( PACKET.ZC.ACK_REQNAME_BYGID,      onUpdateOwnerName);
 		Network.hookPacket( PACKET.ZC.ACK_REQNAME_BYGID2,     onUpdateOwnerName);
@@ -322,6 +329,171 @@ define(function(require)
 				}
 
 				callback.call( null, json);
+				onEnd();
+            },
+            onEnd
+        );
+	}
+
+	/* loadAchievementFile to json object
+	*
+	* @param {string} filename to load
+	* @param {function} onEnd to run once the file is loaded
+	*
+	* @author alisonrag
+	*/
+	function loadAchievementFile(filename, callback, onEnd){
+		Client.loadFile( filename,
+            async function (lua) {
+				console.log('Loading file "'+ filename +'"...');
+				let achievement_list = new Array();
+				try
+				{
+					if(lua instanceof ArrayBuffer) {
+						lua = new TextDecoder().decode(lua);
+					}
+
+					// load lua file
+					fengari.load(lua)();
+
+					// Get the global table "achievement_tbl"
+					fengari.lua.lua_getglobal(fengari.L, "achievement_tbl");
+
+					// Check if it's a table
+					if (!fengari.lua.lua_istable(fengari.L, -1)) {
+						console.log('[loadAchievementFile] achievement_tbl is not a table')
+						return;
+					}
+
+					// Push nil key to start iteration
+					fengari.lua.lua_pushnil(fengari.L);
+
+					// iterate over table
+					while (fengari.lua.lua_next(fengari.L, -2)) {
+						// get key (achievementId)
+						let achievementId = fengari.lua.lua_tointeger(fengari.L, -2);
+						let achievement = { UI_Type: 0, group: "", major: 0, minor: 0, title: "", content: { summary: "", details: "" }, resource: new Array(), reward: { title: 0, buff: 0,  item: 0 }, score: 0 };
+
+						// get UI_Type
+						fengari.lua.lua_getfield(fengari.L, -1, "UI_Type");
+						achievement.UI_Type = fengari.lua.lua_tointeger(fengari.L, -1);
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get group
+						fengari.lua.lua_getfield(fengari.L, -1, "group");
+						achievement.group = fengari.lua.lua_tojsstring(fengari.L, -1);
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get major
+						fengari.lua.lua_getfield(fengari.L, -1, "major");
+						achievement.major = fengari.lua.lua_tointeger(fengari.L, -1);
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get minor
+						fengari.lua.lua_getfield(fengari.L, -1, "minor");
+						achievement.minor = fengari.lua.lua_tointeger(fengari.L, -1);
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get title
+						fengari.lua.lua_getfield(fengari.L, -1, "title");
+						achievement.title = fengari.lua.lua_tojsstring(fengari.L, -1);
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get score
+						fengari.lua.lua_getfield(fengari.L, -1, "score");
+						achievement.score = fengari.lua.lua_tointeger(fengari.L, -1);
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get content
+						fengari.lua.lua_getfield(fengari.L, -1, "content");
+
+						if (fengari.lua.lua_istable(fengari.L, -1)) {
+							// get summary
+							fengari.lua.lua_getfield(fengari.L, -1, "summary");
+							achievement.content.summary = fengari.lua.lua_tojsstring(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+							// get details
+							fengari.lua.lua_getfield(fengari.L, -1, "details");
+							achievement.content.details = fengari.lua.lua_tojsstring(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+						}
+
+						// Pop content
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get reward
+						fengari.lua.lua_getfield(fengari.L, -1, "reward");
+
+						if (fengari.lua.lua_istable(fengari.L, -1)) {
+							// get title
+							fengari.lua.lua_getfield(fengari.L, -1, "title");
+							if(fengari.lua.lua_isinteger(fengari.L, -1)) achievement.reward.title = fengari.lua.lua_tointeger(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+							// get buff
+							fengari.lua.lua_getfield(fengari.L, -1, "buff");
+							if(fengari.lua.lua_isinteger(fengari.L, -1)) achievement.reward.buff = fengari.lua.lua_tointeger(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+							// get item
+							fengari.lua.lua_getfield(fengari.L, -1, "item");
+							if(fengari.lua.lua_isinteger(fengari.L, -1)) achievement.reward.item = fengari.lua.lua_tointeger(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+						}
+
+						// Pop reward
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// get resource
+						fengari.lua.lua_getfield(fengari.L, -1, "resource");
+
+						// Push nil key to start iteration
+						fengari.lua.lua_pushnil(fengari.L);
+
+						// iterate over table
+						while (fengari.lua.lua_next(fengari.L, -2)) {
+							// get key (resourceId)
+							let resourceId = fengari.lua.lua_tointeger(fengari.L, -2);
+							let resource = { text: "", count: 0, shortcut: 0};
+							// get shortcut
+							fengari.lua.lua_getfield(fengari.L, -1, "shortcut");
+							if(fengari.lua.lua_isinteger(fengari.L, -1)) resource.shortcut = fengari.lua.lua_tointeger(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+							// get count
+							fengari.lua.lua_getfield(fengari.L, -1, "count");
+							if(fengari.lua.lua_isinteger(fengari.L, -1)) resource.count = fengari.lua.lua_tointeger(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+							// get text
+							fengari.lua.lua_getfield(fengari.L, -1, "text");
+							if(fengari.lua.lua_isstring(fengari.L, -1)) resource.text = fengari.lua.lua_tojsstring(fengari.L, -1);
+							fengari.lua.lua_pop(fengari.L, 1);
+
+							// add resource
+							achievement.resource[resourceId] = resource;
+
+							// Pop the value and move to the next key
+							fengari.lua.lua_pop(fengari.L, 1);
+						}
+
+						// pop resource
+						fengari.lua.lua_pop(fengari.L, 1);
+
+						// add achievement to js Table
+						achievement_list[achievementId] = achievement;
+
+						// Pop the value and move to the next key
+						fengari.lua.lua_pop(fengari.L, 1);
+					}
+
+					// pop table
+					fengari.lua.lua_pop(fengari.L, 1);
+
+					// clean lua stack
+					fengari.lua.lua_settop(fengari.L, 0);
+				}
+				catch( hException )
+				{
+					console.error( 'error: ', hException );
+				}
+				callback.call( null, achievement_list);
 				onEnd();
             },
             onEnd
@@ -2081,6 +2253,10 @@ define(function(require)
 
 	DB.isBuyable = function isBuyable(id) {
 		return buyingStoreItemList.includes(id);
+	};
+
+	DB.getAchievementList = function getCheckAttendanceInfo() {
+		return achievementList;
 	};
 
 	/**

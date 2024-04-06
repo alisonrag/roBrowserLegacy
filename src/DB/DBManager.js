@@ -2255,7 +2255,7 @@ define(function(require)
 		return buyingStoreItemList.includes(id);
 	};
 
-	DB.getAchievementList = function getCheckAttendanceInfo() {
+	DB.getAchievementList = function getAchievementList() {
 		return achievementList;
 	};
 

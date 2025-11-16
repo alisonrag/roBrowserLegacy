@@ -1295,6 +1295,11 @@ define(function (require) {
 						WeaponHitSoundTable[weaponID] = decoded_soundFile;  
 						return 1;  
 					};  
+
+					ctx.AddExpansionWeapon = (weaponID, expansionWeaponID) => {
+						WeaponTypeExpansion[weaponID] = expansionWeaponID;
+						return 1;
+					};
 	
 					// mount file  
 					lua.mountFile('weapontable.lub', buffer);  
@@ -1315,10 +1320,21 @@ define(function (require) {
 								end  
 							end  
 							
-							-- Process WeaponHitWaveNameTable  
-							if type(WeaponHitWaveNameTable) == "table" then  
-								for weaponID, soundFile in pairs(WeaponHitWaveNameTable) do  
-									result, msg = AddWeaponHitSound(weaponID, soundFile)  
+							-- Process WeaponHitWaveNameTable  (seems like gravity is still using the hardcoded sound files)
+							-- uncomment this if you want to use the custom sound files
+							--if type(WeaponHitWaveNameTable) == "table" then  
+							--	for weaponID, soundFile in pairs(WeaponHitWaveNameTable) do  
+							--		result, msg = AddWeaponHitSound(weaponID, soundFile)  
+							--		if not result then  
+							--			return false, msg  
+							--		end  
+							--	end  
+							--end  
+
+							-- Process WeaponTypeExpansionTable
+							if type(Expansion_Weapon_IDs) == "table" then  
+								for weaponID, expansionWeaponID in pairs(Expansion_Weapon_IDs) do  
+									result, msg = AddExpansionWeapon(weaponID, expansionWeaponID)  
 									if not result then  
 										return false, msg  
 									end  
@@ -2540,7 +2556,7 @@ define(function (require) {
 		return isDualWeapon;
 	}
 
-	DB.getWeaponType = function getWeaponType(itemID, realType = false) {
+	DB.getWeaponType = function getWeaponType(itemID, realType = false, considerDualHandIds = false) {
 
 		const id = Number(itemID);
 
@@ -2548,13 +2564,17 @@ define(function (require) {
 			return WeaponType.NONE;
 		}
 
-		// if itemID is lesser then WeaponType.MAX, return the itemID
-		if (!realType && id < WeaponType.MAX) {
+		if (realType && id in WeaponTypeExpansion) {
+			return WeaponTypeExpansion[id];
+		}
+
+		if (considerDualHandIds && id <= WeaponType.SWORD_AXE) {
 			return id;
 		}
 
-		if(realType && id in WeaponTypeExpansion) {
-			return WeaponTypeExpansion[id];
+		// if itemID is lesser then WeaponType.MAX, return the itemID
+		if (id < WeaponType.MAX) {
+			return id;
 		}
 
 		// look for classnum in ItemTable
@@ -2662,14 +2682,9 @@ define(function (require) {
 			return null;
 		}
 
-		console.log(id, job, sex, leftid, 'getWeaponPath id, job, sex, leftid');
 		var baseClass = WeaponJobTable[job] || WeaponJobTable[0];
 
-		// ItemID to View Id
-		if ((id in ItemTable) && ('ClassNum' in ItemTable[id])) {
-			console.log(ItemTable[id].ClassNum, 'getWeaponPath ItemTable[id].ClassNum');
-			id = ItemTable[id].ClassNum;
-		}
+		id = DB.getWeaponType(id);
 
 		// TODO: CHECK IF THIS IS CORRECT
 		if (leftid) {
@@ -2701,10 +2716,7 @@ define(function (require) {
 
 		const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
 
-		// ItemID to View Id
-		if (id in ItemTable && 'ClassNum' in ItemTable[id]) {
-			id = ItemTable[id].ClassNum;
-		}
+		let realId = DB.getWeaponType(id, true, true);
 
 		return (
 			'data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/' +
@@ -2713,7 +2725,7 @@ define(function (require) {
 			baseClass +
 			'_' +
 			SexTable[sex] +
-			WeaponTrailTable[id]
+			WeaponTrailTable[realId]
 		);
 	};
 
@@ -2742,7 +2754,7 @@ define(function (require) {
 	 * @param {number} weapon id
 	 */
 	DB.getWeaponSound = function getWeaponSound(id) {
-		var type = DB.getWeaponViewID(id);
+		var type = DB.getWeaponType(id, true);
 		return WeaponSoundTable[type];
 	};
 
@@ -2752,13 +2764,16 @@ define(function (require) {
 	 * @param {number} weapon id
 	 */
 	DB.getWeaponHitSound = function getWeaponHitSound(id) {
-		var type = DB.getWeaponViewID(id, true);
+		var type = DB.getWeaponType(id, true, true);
 
-		if (type === WeaponType.NONE) {
-			return [WeaponHitSoundTable[type][Math.floor(Math.random() * 4)]];
+		let hitSound = WeaponHitSoundTable[type];
+
+		// if array return random item
+		if (Array.isArray(hitSound)) {
+			return hitSound[Math.floor(Math.random() * hitSound.length)];
 		}
 
-		return WeaponHitSoundTable[type];
+		return hitSound;
 	};
 
 	/**
@@ -2779,6 +2794,28 @@ define(function (require) {
 	 * @param {number} id weapon
 	 */
 	DB.getWeaponViewID = function getWeaponViewID(id) {
+
+		// validate if is number
+		if (isNaN(id)) {
+			return 0;
+		}
+
+		// if id is 0, return 0
+		if (id === 0) {
+			return 0;
+		}
+
+		// if less then weapon type.MAX, return the id
+		if (id < WeaponType.MAX) {
+			return id;
+		}
+
+		// try to get view from classnum in ItemTable
+		if (id in ItemTable && 'ClassNum' in ItemTable[id]) {
+			return ItemTable[id].ClassNum;
+		}
+
+		// all cases failed, return weapon type to use base sprite
 		return DB.getWeaponType(id);
 	};
 
@@ -2837,8 +2874,6 @@ define(function (require) {
 				break;
 		}
 
-		console.log(weapon, 'mountWeapon weapon');
-		console.log(weaponID, shieldID, 'mountWeapon weaponID, shieldID');
 		return weapon;
 	}
 
@@ -3289,7 +3324,7 @@ define(function (require) {
 			if (reformInfo) {
 				reformInfos.push(reformInfo);
 			} else {
-				console.log('Reform Info not found for reform ID:', reformId);
+				console.error('Reform Info not found for reform ID:', reformId);
 			}
 		}
 

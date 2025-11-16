@@ -189,7 +189,7 @@ define(function (require) {
 		if (entity.objecttype === Entity.TYPE_PC) {
 			// don't know why switch from katar to sword, knife server put it on the left hand instead of right hand first.
 			// so we have to swap it. maybe have a better solution.
-			if (pkt.weapon === 0 && pkt.shield !== 0 && !DB.isShield(pkt.shield)) {
+			if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield)) {
 				pkt.weapon = pkt.shield;
 				pkt.shield = 0;
 			}
@@ -197,16 +197,13 @@ define(function (require) {
 			let weaponType = DB.getWeaponType(pkt.weapon, true);
 			let viewId = DB.getWeaponViewID(pkt.weapon);
 			if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield) && pkt.weapon !== 0) {
-				console.log(pkt.weapon, pkt.shield, 'mountWeapon value, value2');
 				let secondaryWeaponType = DB.getWeaponType(pkt.shield, true);
 				entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
 				entity.shield = 0;
 			} else if (DB.isKatar(weaponType)) {
-				console.log(pkt.weapon, 'is katar');
 				entity.weapon = viewId;
 				entity.shield = viewId;
 			} else {
-				console.log(pkt.weapon, pkt.shield, viewId, 'regular weapon');
 				entity.weapon = viewId;
 				entity.shield = pkt.shield;
 			}
@@ -529,8 +526,6 @@ define(function (require) {
 					animSpeed = pkt.attackMT / m_attackMotion;
 
 					// Display throw arrow effect when using bows, not an elegant conditional but it works.. [Waken]
-					console.log(DB.getWeaponType(srcEntity.weapon, true), 'entity action weapon type');
-					console.log(DB.isBow(DB.getWeaponType(srcEntity.weapon, true)), 'entity action is bow');
 					if (DB.isBow(DB.getWeaponType(srcEntity.weapon, true))) {
 						delayTime = (m_attackMotion + (8 / m_motionSpeed)) * m_motionSpeed * 24.0;
 						pkt.attackMT += delayTime;
@@ -565,50 +560,12 @@ define(function (require) {
 					EffectManager.spam(EF_Init_Par);
 				}
 
-				//attack sound
-				if (weaponSound) {
-					Events.setTimeout(function () {
-						Sound.playPosition(weaponSound, srcEntity.position);
-					}, soundTime * 2);
-				}
-				//attack release sound for bow and dagger
-				if (weaponSoundRelease) {
-					Events.setTimeout(function () {
-						Sound.playPosition(weaponSoundRelease, srcEntity.position);
-					}, delayTime * 2);
-				}
-
-				//second hit (double attack)
-				if (pkt.count == 2) {
-					if (weaponSound) {
-						Events.setTimeout(function () {
-							Sound.play(weaponSound);
-						}, C_MULTIHIT_DELAY);
-					}
-					if (weaponSoundRelease) {
-						Events.setTimeout(function () {
-							Sound.play(weaponSoundRelease);
-						}, (pkt.attackMT * 0.25) + C_MULTIHIT_DELAY);
-					}
-				}
-				//left hand
-				if (pkt.leftDamage) {
-					if (weaponSoundLeft) {
-						Events.setTimeout(function () {
-							Sound.play(weaponSoundLeft);
-						}, C_MULTIHIT_DELAY * 1.75);
-					}
-					if (weaponSoundReleaseLeft) {
-						Events.setTimeout(function () {
-							Sound.play(weaponSoundRelease);
-						}, (pkt.attackMT * 0.25) + (C_MULTIHIT_DELAY * 1.75));
-					}
-				}
-
-
 				if (dstEntity) {
 					// only if damage and do not have endure
 					// and damage isn't absorbed (healing)
+
+					// Update entity position
+					srcEntity.lookTo(dstEntity.position[0], dstEntity.position[1]);
 
 					// Will be hit actions
 					onEntityWillBeHitSub(pkt, dstEntity);
@@ -693,9 +650,6 @@ define(function (require) {
 
 						}
 					}
-
-					// Update entity position
-					srcEntity.lookTo(dstEntity.position[0], dstEntity.position[1]);
 				}
 
 				srcEntity.attack_speed = pkt.attackMT;
@@ -1101,18 +1055,14 @@ define(function (require) {
 						let weaponType = DB.getWeaponType(pkt.value, true);
 						let viewId = DB.getWeaponViewID(pkt.value);
 
-						console.log(weaponType, viewId, 'weaponType, viewId');
 						if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2)) {
 							let secondaryWeaponType = DB.getWeaponType(pkt.value2, true);
-							console.log(weaponType, secondaryWeaponType, 'mountWeapon weaponType, secondaryWeaponType');
 							entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
 							entity.shield = 0;
 						} else if (DB.isKatar(weaponType)) {
-							console.log(pkt.value, 'is katar');
 							entity.weapon = viewId;
 							entity.shield = viewId;
 						} else {
-							console.log(pkt.value, pkt.value2, viewId, 'regular weapon');
 							entity.weapon = viewId;
 							entity.shield = pkt.value2;
 						}
@@ -1121,11 +1071,6 @@ define(function (require) {
 					entity.shield = pkt.value2;
 				}
 
-				if(entity.GID === 2000001){
-					console.log(entity.weapon, entity.shield, 'entity.weapon, entity.shield');
-					console.log(entity, 'entity');
-				}
-				
 				// load self aura
 				entity.aura.load(EffectManager);
 

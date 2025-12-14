@@ -234,7 +234,7 @@ define(function (require) {
 		// TODO: load these load files by PACKETVER
 		if (Configs.get('loadLua')) {
 			// Item
-			loadItemInfo('System/itemInfo.lub', null, onLoad()); // 2012-04-10
+			tryLoadItemInfo(['System/itemInfo.lub', 'System/itemInfo.lua', 'System/itemInfo_true.lub', 'System/itemInfo_true.lua'], onLoad());
 			loadLuaTable([DB.LUA_PATH + 'datainfo/accessoryid.lub', DB.LUA_PATH + 'datainfo/accname.lub'], 'AccNameTable', function (json) { HatTable = json; }, onLoad());
 			loadLuaTable([DB.LUA_PATH + 'datainfo/spriterobeid.lub', DB.LUA_PATH + 'datainfo/spriterobename.lub'], 'RobeNameTable', function (json) { RobeTable = json; }, onLoad());
 			loadLuaTable([DB.LUA_PATH + 'datainfo/npcidentity.lub', DB.LUA_PATH + 'datainfo/jobname.lub'], 'JobNameTable', function (json) { MonsterTable = json; }, onLoad());
@@ -584,6 +584,45 @@ define(function (require) {
 			onEnd
 		);
 	}
+	
+	function tryLoadItemInfo(files, onEnd) {
+		const totalFiles = files.length;
+		if (totalFiles === 0) {
+			if (typeof onEnd === 'function') {
+				onEnd();
+			}
+			return;
+		}
+
+		let finishedCount = 0;
+		let failedCount = 0;
+		const trackedOnEnd = (isSuccess) => {
+			finishedCount++;
+			if (!isSuccess) {
+				failedCount++;
+			}
+
+			if (finishedCount === totalFiles) {
+				if (failedCount === totalFiles) {
+					console.error(`[tryLoadItemInfo] ERROR: All ${totalFiles} tryes to find iteminfo failed. Verify your iteminfo filename.`);
+				}
+				if (typeof onEnd === 'function') {
+					onEnd();
+				}
+			}
+		};
+		
+		function tryNext(index) {
+			if (index >= totalFiles) {
+				return;
+			}
+			loadItemInfo(files[index], null, (isSuccess) => {
+				trackedOnEnd(isSuccess); //await last iteminfo finish loading 
+				tryNext(index + 1);
+			});		
+		}
+		tryNext(0);
+	}
 
 	/* Load ItemInfo file to object
 	*
@@ -593,8 +632,18 @@ define(function (require) {
 	* @author alisonrag
 	*/
 	function loadItemInfo(filename, callback, onEnd) {
-		Client.loadFile(filename,
-			async function (file) {
+		const failureHandler = (error) => {
+			if (typeof onEnd === 'function') {
+				onEnd(false);
+			}
+		};
+
+		const loadPromise = new Promise((resolve, reject) => {
+			Client.loadFile(filename, resolve, reject);
+		});
+		
+		loadPromise.then(async (file) => {
+				let wasSuccessful = false;
 				try {
 					console.log('Loading file "' + filename + '"...');
 					// check if file is ArrayBuffer and convert to Uint8Array if necessary
@@ -602,8 +651,11 @@ define(function (require) {
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
 					// create decoders
+					var servers = Configs.get('servers', []);
+					var langType = (servers[0] && servers[0].langtype) ? parseInt(servers[0].langtype, 10) : 1;
+					var autoEncoding = TextEncoding.detectEncodingByLangtype(langType, Configs.get('disableKorean'));
 					let iso88591Decoder = new TextEncoding.TextDecoder('iso-8859-1');
-					let userStringDecoder = new TextEncoding.TextDecoder('euc-kr'); // TODO: Add keys to config
+					let userStringDecoder = new TextEncoding.TextDecoder(autoEncoding);
 					// create itemInfo required functions in context
 					ctx.AddItem = (ItemID, unidentifiedDisplayName, unidentifiedResourceName, identifiedDisplayName, identifiedResourceName, slotCount, ClassNum) => {
 						ItemTable[ItemID] = {
@@ -644,66 +696,74 @@ define(function (require) {
 						return 1;
 					};
 					// mount file
-					lua.mountFile('iteminfo.lub', buffer);
+					lua.mountFile(filename, buffer);
 					// execute file
-					await lua.doFile('iteminfo.lub');
+					await lua.doFile(filename);
 					// create and execute our own main function
 					// this is necessary because some servers has main function on itemInfo.lub and others load it from itemInfo_f.lub
 					// doing this way we avoid to have to load the other file
 					// on my tests dont care if the main() is on itemInfo.lub or itemInfo_f.lub the content is always the same
 					lua.doStringSync(`
 						function main_item()
+							_processedItems = _processedItems or {} 
 							for ItemID, DESC in pairs(tbl) do
-								result, msg = AddItem(ItemID, DESC.unidentifiedDisplayName, DESC.unidentifiedResourceName, DESC.identifiedDisplayName, DESC.identifiedResourceName, DESC.slotCount, DESC.ClassNum)
-								if not result then
-								return false, msg
-								end
-								for k, v in pairs(DESC.unidentifiedDescriptionName) do
-								result, msg = AddItemUnidentifiedDesc(ItemID, v)
-								if not result then
-									return false, msg
-								end
-								end
-								for k, v in pairs(DESC.identifiedDescriptionName) do
-								result, msg = AddItemIdentifiedDesc(ItemID, v)
-								if not result then
-									return false, msg
-								end
-								end
-								if nil ~= DESC.EffectID then
-								result, msg = AddItemEffectInfo(ItemID, DESC.EffectID)
-								if not result then
-									return false, msg
-								end
-								end
-								if nil ~= DESC.costume then
-								result, msg = AddItemIsCostume(ItemID, DESC.costume)
-								if not result then
-									return false, msg
-								end
-								end
-								if nil ~= DESC.PackageID then
-								result, msg = AddItemPackageID(ItemID, DESC.PackageID)
-								if not result then
-									return false, msg
-								end
+								if not _processedItems[ItemID] and #DESC.identifiedDescriptionName > 0 then
+									_processedItems[ItemID] = true 
+									result, msg = AddItem(ItemID, DESC.unidentifiedDisplayName, DESC.unidentifiedResourceName, DESC.identifiedDisplayName, DESC.identifiedResourceName, DESC.slotCount, DESC.ClassNum)
+									if not result then
+										return false, msg
+									end
+									for k, v in pairs(DESC.unidentifiedDescriptionName) do
+										result, msg = AddItemUnidentifiedDesc(ItemID, v)
+										if not result then
+											return false, msg
+										end
+									end
+									for k, v in pairs(DESC.identifiedDescriptionName) do
+										result, msg = AddItemIdentifiedDesc(ItemID, v)
+										if not result then
+											return false, msg
+										end
+									end
+									if nil ~= DESC.EffectID then
+										result, msg = AddItemEffectInfo(ItemID, DESC.EffectID)
+										if not result then
+											return false, msg
+										end
+									end
+									if nil ~= DESC.costume then
+										result, msg = AddItemIsCostume(ItemID, DESC.costume)
+										if not result then
+											return false, msg
+										end
+									end
+									if nil ~= DESC.PackageID then
+										result, msg = AddItemPackageID(ItemID, DESC.PackageID)
+										if not result then
+											return false, msg
+										end
+									end
 								end
 							end
 							return true, "good"
 							end
 						main_item()
 						`);
+					wasSuccessful = true; 
 				} catch (error) {
 					console.error('[loadItemInfo] Error: ', error);
 				} finally {
 					// release file from memmory
-					lua.unmountFile('iteminfo.lub');
+					lua.unmountFile(filename);
 					// call onEnd
-					onEnd();
+					onEnd(wasSuccessful);
 				}
-			},
-			onEnd
-		);
+		}).catch((error) => {			
+			if (typeof onEnd === 'function') {
+				onEnd(false);
+			}
+
+		});
 	}
 
 	/**
@@ -2927,6 +2987,10 @@ define(function (require) {
 			var item = ItemTable[itemid] || unknownItem;
 
 			if (!item._decoded) {
+				var servers = Configs.get('servers', []);
+				var langType = (servers[0] && servers[0].langtype) ? parseInt(servers[0].langtype, 10) : 1;
+				var autoEncoding = TextEncoding.detectEncodingByLangtype(langType, Configs.get('disableKorean'));
+				TextEncoding.setCharset(autoEncoding);
 				item.identifiedDescriptionName = (item.identifiedDescriptionName && item.identifiedDescriptionName instanceof Array) ? TextEncoding.decodeString(item.identifiedDescriptionName.join('\n')) : '';
 				item.unidentifiedDescriptionName = (item.unidentifiedDescriptionName && item.unidentifiedDescriptionName instanceof Array) ? TextEncoding.decodeString(item.unidentifiedDescriptionName.join('\n')) : '';
 				item.identifiedDisplayName = TextEncoding.decodeString(item.identifiedDisplayName);

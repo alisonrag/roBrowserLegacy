@@ -56,13 +56,37 @@ define(function (require) {
 	 */
 	let _uniqueId = 1;
 
+	/**
+	 * Reset a constructor and clear its instances so it re-initializes on next use.
+	 *
+	 * @param {string} name constructor key in _list
+	 */
+	EffectManager.resetConstructor = function resetConstructor(name) {
+		if (_list[name]) {
+			delete _list[name];
+		}
+		// If we have a known constructor in scope, mark for re-init
+		switch (name) {
+		case 'TwoDEffect':
+			TwoDEffect.ready = false;
+			TwoDEffect.needInit = true;
+			break;
+		case 'ThreeDEffect':
+			ThreeDEffect.ready = false;
+			ThreeDEffect.needInit = true;
+			break;
+		default:
+			break;
+		}
+	};
+
 
 	/**
 	 * Initialize effects manager
 	 */
 	EffectManager.init = function init(gl) {
 		_gl = gl;
-		
+
 		if(Configs.get('development')){
 			Commands.add(
 				'd_effectmanager',
@@ -78,7 +102,7 @@ define(function (require) {
 				Commands.remove('d_effectmanager');
 			}
 		}
-		
+
 	};
 
 
@@ -127,9 +151,8 @@ define(function (require) {
 				effect.constructor.needInit = true;
 			}
 
-			if (!effect.constructor.renderBeforeEntities) {
-				effect.constructor.renderBeforeEntities = false;
-			}
+			// Keep constructor renderBeforeEntities as-is; do not override to false here,
+			// so external configuration (e.g., aura ordering) is respected.
 		}
 
 		if (effect.init) {
@@ -137,6 +160,21 @@ define(function (require) {
 		}
 
 		effect._Params = Params;
+
+		// Per-instance ordering: prefer explicit flag, else constructor default
+		if (effect._Params && effect._Params.Inst && typeof effect._Params.Inst.renderBeforeEntities !== 'undefined') {
+			effect.renderBeforeEntities = !!effect._Params.Inst.renderBeforeEntities;
+		} else {
+			effect.renderBeforeEntities = !!effect.constructor.renderBeforeEntities;
+		}
+
+		// Aura-specific: force renderBeforeEntities for known aura effect IDs to keep them under sprites.
+		if (effect._Params && effect._Params.Inst && effect._Params.Inst.effectID) {
+			const auraEffectIds = [200, 201, 202, 362, 397, 398, 881];
+			if (auraEffectIds.indexOf(effect._Params.Inst.effectID) !== -1) {
+				effect.renderBeforeEntities = true;
+			}
+		}
 
 		_list[name].push(effect);
 	};
@@ -256,20 +294,21 @@ define(function (require) {
 
 			constructor = list[0].constructor;
 
-			// Will be render after/before.
-			if (constructor.renderBeforeEntities !== renderBeforeEntities) {
-				continue;
-			}
-
+			// Initialize constructor if needed
 			if (!(constructor.ready) && constructor.needInit) {
 				constructor.init(gl);
 				constructor.needInit = false;
 			}
 
 			if (constructor.ready) {
-				constructor.beforeRender(gl, modelView, projection, fog, tick);
+				constructor.beforeRender(gl, modelView, projection, fog, tick, null);
 
 				for (j = 0, size = list.length; j < size; ++j) {
+					// Filter per-instance ordering against the pass flag
+					if (!!list[j].renderBeforeEntities !== renderBeforeEntities) {
+						continue;
+					}
+
 					if (!(list[j].ready) && list[j].needInit) {
 						list[j].init(gl);
 						list[j].needInit = false;
@@ -478,6 +517,11 @@ define(function (require) {
 
 		Params.Inst.position      = Params.Init.position;
 		Params.Inst.otherPosition = Params.Init.otherPosition;
+
+		// Propagate per-instance render ordering from effect definition
+		if (typeof Params.effect.renderBeforeEntities !== 'undefined') {
+			Params.Inst.renderBeforeEntities = !!Params.effect.renderBeforeEntities;
+		}
 
 		if (!Params.Inst.position) {
 			if (!Params.Init.ownerEntity) {
@@ -985,7 +1029,7 @@ define(function (require) {
 			});
 		}
 	};
-	
+
 	EffectManager.debug = function(){
 		console.log( '%c[DEBUG] EffectManager _list: ', 'color:#F5B342', _list );
 	};

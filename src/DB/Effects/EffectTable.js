@@ -418,6 +418,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 				wav: 'effect/ef_hit2'
 			},
@@ -438,6 +439,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			},
 			{
@@ -457,6 +459,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			},
 			{
@@ -476,6 +479,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			},
 			{
@@ -495,6 +499,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			},
 			{
@@ -514,6 +519,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			},
 			{
@@ -533,6 +539,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			},
 			{
@@ -552,6 +559,7 @@ define(function( require )
 				circleOuterSizeRand: [5,6],
 				circleInnerSize: 2.2,
 				type: '2D',
+				overlay: true,
 				zIndex: 1,
 			}
 		],
@@ -654,6 +662,7 @@ define(function( require )
 			sizeX: 10,
 			toAngle: 0,
 			type: '2D',
+			overlay: true,
 			wav: 'effect/ef_hit6'
 		}, {
 			alphaMax: 1,
@@ -669,6 +678,7 @@ define(function( require )
 			sizeX: 10,
 			toAngle: 90,
 			type: '2D',
+			overlay: true,
 			wav: 'effect/ef_hit6'
 		}],
 
@@ -1670,6 +1680,7 @@ define(function( require )
 
 		50: [{	//EF_FIRESPLASHHIT	Spinning Fire Thing
 			type: '2D',
+			overlay: true,
 			duration: 500,
 			file: 'effect/firering.tga',
 			sizeStart: 10,
@@ -3030,8 +3041,22 @@ define(function( require )
 
 		//159: [{}],	//EF_TOPRANK	   PvP circle
 		//160: [{}],	//EF_PARTY	   PvP Party Circle
-		//161: [{}],	//EF_RAIN	   (Nothing)
-		//162: [{}],	//EF_SNOW	   Snow
+		161: [{	//EF_RAIN	Rain weather
+			type: 'FUNC',
+			attachedEntity: true,
+			func: function( Params ) {
+				var RainWeatherEffect = require('Renderer/Effects/RainWeather');
+				RainWeatherEffect.startOrRestart(Params, this);
+			}
+		}],
+		162: [{	//EF_SNOW	Snow weather
+			type: 'FUNC',
+			attachedEntity: true,
+			func: function( Params ) {
+				var SnowWeatherEffect = require('Renderer/Effects/SnowWeather');
+				SnowWeatherEffect.startOrRestart(Params, this);
+			}
+		}],
 		//163: [{}],	//EF_SAKURA	   White Sakura Leaves
 		//164: [{}],	//EF_STATUS_STATE	   (Nothing)
 
@@ -3208,94 +3233,71 @@ define(function( require )
 			attachedEntity: false
 		}],
 
-		200: [{	//EF_LEVEL99	   Normal level 99 Aura (Middle)
-			type: 'CYLINDER',
-			textureName: 'ring_blue',
-			duration: 1033,
-			blendMode: 2,
-			red: 0.5,
-			green: 0.5,
-			blue: 1,
-			alphaMax: 0.17,
-			angleY: 180,
-			bottomSize: 0.77,
-			topSize: 3.77,
-			height: 1.5,
-			rotate: true,
-			repeat: true,
-			attachedEntity: true,
-		}, {
-			type: 'CYLINDER',
-			textureName: 'ring_blue',
-			duration: 1022,
-			blendMode: 2,
-			red: 0.5,
-			green: 0.5,
-			blue: 1,
-			alphaMax: 0.17,
-			angleY: 90,
-			bottomSize: 0.76,
-			topSize: 3.76,
-			height: 1.75,
-			rotate: true,
-			repeat: true,
-			attachedEntity: true,
-		}, {
-			type: 'CYLINDER',
-			textureName: 'ring_blue',
-			duration: 1000,
-			blendMode: 2,
-			red: 0.5,
-			green: 0.5,
-			blue: 1,
-			alphaMax: 0.17,
-			angleY: 0,
-			bottomSize: 0.75,
-			topSize: 3.75,
-			height: 2,
-			rotate: true,
-			repeat: true,
-			attachedEntity: true,
-		} ],
-
-		201: [ //EF_LEVEL99_2	   Normal level 99 Aura (Bottom)
+		200: [
+			// EF_LEVEL99 - Normal level 99 Aura (Rising Cone / Swirling Band)
+			// Math model from original game:
+			// - Ring radius ≈ 3.9, tilt 55°, vertical amplitude 15, 315° sweep
+			// - height_k(t) = H·sin(90+9(k−10))·sin(ωt), ω=1°/frame
+			// - Spin adds (ec+3)°/frame
 			{
 				type: 'FUNC',
 				attachedEntity: true,
-				func: function( Params ){
-					var Aura = require('Renderer/Effects/Aura');
-					this.add(new Aura(Params.Init.ownerEntity.position, 100, 15.0, 'pikapika2.bmp', Params.Inst.startTick), Params);
+				func: function(Params) {
+					var SwirlingAura = require('Renderer/Effects/SwirlingAura');
+					this.add(new SwirlingAura(
+						Params.Init.ownerEntity.position,
+						'ring_blue.tga',
+						Params.Inst.startTick
+					), Params);
 				}
 			}
 		],
 
-		202: [{	//EF_LEVEL99_3	   Lv 99 Aura Bubble
-			alphaMax: 0.78,
-			attachedEntity: true,
-			blendMode: 2,
-			duration: 2000,
-			duplicate: 5,
-			timeBetweenDupli: 400,
-			fadeIn: true,
-			fadeOut: true,
-			file: 'effect/freezing_circle.bmp',
-			posxStartRand: 0.5,
-			posxStartRandMiddle: 0,
-			posyStartRand: 0.5,
-			posyStartRandMiddle: 0,
-			posxEndRand: 4,
-			posxEndRandMiddle: 0,
-			posyEndRand: 4,
-			posyEndRandMiddle: 0,
-			poszEndRand: 1,
-			poszEndRandMiddle: 3,
-			poszStart: 0,
-			repeat: true,
-			size: 10,
-			sizeRand: 1.7,
-			type: '3D',
-			zIndex: 1
-		}],
+		201: [
+			// EF_LEVEL99_2 - Normal level 99 Aura (Bottom / Ground Ring)
+			// Uses GroundAura which renders flat quads on the ground plane
+			{
+				type: 'FUNC',
+				attachedEntity: true,
+				func: function(Params) {
+					var GroundAura = require('Renderer/Effects/GroundAura');
+					this.add(new GroundAura(
+						Params.Init.ownerEntity.position,
+						100,    // size (same as original Aura.js)
+						15.0,   // distance (same as original Aura.js)
+						'pikapika2.bmp',
+						Params.Inst.startTick
+					), Params);
+				}
+			}
+		],
+
+		202: [
+			// EF_LEVEL99_3 - Level 99 aura bubble sparkle (camera-facing diamonds)
+			{
+				type: 'FUNC',
+				attachedEntity: true,
+				func: function(Params) {
+					var Level99Bubble = require('Renderer/Effects/Level99Bubble');
+					// Default to blue variant (flag1 = 1) unless overridden
+					var flag1 = 1;
+
+					// Allow effect table or caller to override tint variant
+					if (typeof Params.effect.flag1 !== 'undefined') {
+						flag1 = Params.effect.flag1;
+					} else if (Params.Inst && typeof Params.Inst.flag1 !== 'undefined') {
+						flag1 = Params.Inst.flag1;
+					}
+
+					this.add(new Level99Bubble(
+						Params.Init.ownerEntity.position,
+						'whitelight.tga',
+						Params.Inst.startTick,
+						flag1
+					), Params);
+				}
+			}
+		],
 
 		203: [{	//EF_GUMGANG	   Fury (Visual Effect)
 			//super1..5.bmp
@@ -4399,6 +4401,7 @@ define(function( require )
 
 		274: [{	//EF_RG_COIN	   Steal Coin Animation
 			type: '2D',
+			overlay: true,
 			file: 'effect/coin_a.bmp',
 			blendMode: 2,
 			alphaMax: 0.8,
@@ -5246,6 +5249,7 @@ define(function( require )
 			animation: 4,
 			attachedEntity: true,
 			blendMode: 2,
+			renderBeforeEntities: true,
 			blue: 1,
 			bottomSize: 2.4,
 			duration: 500,
@@ -5268,6 +5272,7 @@ define(function( require )
 			animation: 4,
 			attachedEntity: true,
 			blendMode: 2,
+			renderBeforeEntities: true,
 			blue: 1,
 			bottomSize: 2.4,
 			duration: 500,
@@ -5584,6 +5589,7 @@ define(function( require )
 		321: [{  //EF_WARPZONE2	   Warp NPC
 			alphaMax: 0.4,
 			animation: 3,
+			renderBeforeEntities: true,
 			attachedEntity: true,
 			blendMode: 2,
 			bottomSize: 2,
@@ -5603,6 +5609,7 @@ define(function( require )
 		}, {
 			alphaMax: 0.4,
 			animation: 3,
+			renderBeforeEntities: true,
 			attachedEntity: true,
 			blendMode: 2,
 			bottomSize: 1.9,
@@ -5623,6 +5630,7 @@ define(function( require )
 			alphaMax: 1.0,
 			attachedEntity: true,
 			blendMode: 2,
+			renderBeforeEntities: true,
 			duration: 1000,
 			duplicate: 5,
 			timeBetweenDupli: 300,
@@ -8722,7 +8730,7 @@ define(function( require )
 				Camera.setQuake( start, duration );
 			}
 		}],
-		
+
 		//733: [{}],	//EF_SOULBREAKER4	   Fluffy Ball flying by
 
 		734: [{	//EF_CHAINL_STR	Chain Lightning
@@ -11436,7 +11444,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_parasite_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11453,7 +11461,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_stone_shooter_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11470,7 +11478,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_wootan_shooter_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11487,7 +11495,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_peach_tree_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11504,7 +11512,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_hermit_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11521,7 +11529,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_canon_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11538,7 +11546,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_canon1_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11555,7 +11563,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_canon2_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11572,7 +11580,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_canon3_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11589,7 +11597,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_tanee_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11606,7 +11614,7 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_ragged_projectile': [{
 			type: '3D',
 			alphaMax: 1,
@@ -11623,37 +11631,37 @@ define(function( require )
 			zOffset: 1,
 			zIndex: 1
 		}],
-		
+
 		'ef_mandragora_attack': [{
 			type: 'SPR',
 			file: '../npc/mandragora_atk',
 			attachedEntity: false
 		}],
-		
+
 		'ef_hydra_attack': [{
 			type: 'SPR',
 			file: '../npc/hydra_atk',
 			attachedEntity: false
 		}],
-		
+
 		'ef_odium_attack': [{
 			type: 'SPR',
 			file: '../npc/tha_odium_ef',
 			attachedEntity: false
 		}],
-		
+
 		'ef_drosera_attack': [{
 			type: 'SPR',
 			file: '../npc/drosera_bullet',
 			attachedEntity: false
 		}],
-		
+
 		'ef_mavka_attack': [{
 			type: 'SPR',
 			file: '../npc/mavka_bullet',
 			attachedEntity: false
 		}],
-		
+
 		'ef_entweihen_attack': [{
 			type: 'SPR',
 			file: '../npc/entweihen_bullet',
@@ -11765,115 +11773,115 @@ define(function( require )
 			file: '\xc3\xbb\xb7\xcf\xbb\xf6\xc6\xae\xb7\xa6',
 			attachedEntity: true,
 		}],
-		
+
 		'ef_trap_01': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa601',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_02': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa602',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_03': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa603',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_03_2': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa603_2',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_03_3': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa603_3',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_03_4': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa603_4',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_03_5': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa603_5',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_03_6': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa603_6',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_04': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa604',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_05': [{
 			type: 'RSM',
 			file: '\xbf\xdc\xba\xce\xbc\xd2\xc7\xb0\x5c\xc6\xae\xb7\xa605',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_thorn': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xb0\xa1\xbd\xc301',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_cobalt': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xba\xaf\xbc\xf601',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_maze': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xba\xaf\xc1\xf601',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_verdure': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xba\xaf\xc7\xb301',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_magenta': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xba\xaf\xc8\xad01',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_ice': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xbc\xf601',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_cluster': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xc1\xf601',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_shock': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xc7\xb301',
 			attachedEntity: true
 		}],
-		
+
 		'ef_trap_3_fire': [{
 			type: 'RSM',
 			file: 'event/3\xc2\xf7\xc6\xae\xb7\xa6_\xc8\xad01',

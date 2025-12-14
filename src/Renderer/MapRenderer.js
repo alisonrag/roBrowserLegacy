@@ -15,6 +15,7 @@ define(function( require )
 	/**
 	 * Load dependencies
 	 */
+	const getModule = require;
 	var Thread         = require('Core/Thread');
 	var SoundManager   = require('Audio/SoundManager');
 	var BGM            = require('Audio/BGM');
@@ -39,6 +40,7 @@ define(function( require )
 	var EffectManager  = require('Renderer/EffectManager');
 	var Sky            = require('Renderer/Effects/Sky');
 	var Damage         = require('Renderer/Effects/Damage');
+	var GraphicsSettings = require('Preferences/Graphics');
 	var MapPreferences = require('Preferences/Map');
 	const glMatrix     = require('Utils/gl-matrix');
 	const PACKETVER    = require('Network/PacketVerManager');
@@ -109,8 +111,9 @@ define(function( require )
 	 * Load a map
 	 *
 	 * @param {string} mapname to load
+	 * @param {bool} force reload map renderer
 	 */
-	MapRenderer.setMap = function loadMap( mapname )
+	MapRenderer.setMap = function loadMap( mapname, force = false )
 	{
 		// TODO: stop the map loading, and start to load the new map.
 		if (this.loading) {
@@ -130,7 +133,7 @@ define(function( require )
 		Cursor.setType(Cursor.ACTION.DEFAULT);
 
 		// Don't reload a map when it's just a local teleportation
-		if (this.currentMap !== mapname) {
+		if ( this.currentMap !== mapname || force ) {
 			this.loading = true;
 			BGM.stop();
 			this.currentMap = mapname;
@@ -169,6 +172,22 @@ define(function( require )
 		});
 	};
 
+	/**
+	 * Trick to reload sprite renderer
+	 * Same behavior to @refresh
+	 */
+	MapRenderer.forceReloadMap = function forceReloadMap() {
+		var gl = Renderer.getContext();
+		var sprFiles = MemoryManager.search(/\.spr$/i);
+		for (var i = 0; i < sprFiles.length; i++)  // reloads spr memory cache
+			MemoryManager.remove(gl, sprFiles[i]);
+		
+		getModule("Engine/MapEngine").onMapChange({
+			xPos: Session.Entity.position[0],
+			yPos: Session.Entity.position[1],
+			mapName: this.currentMap
+		}, true);
+	}	
 
 	/**
 	 * Clean up data
@@ -372,6 +391,17 @@ define(function( require )
 	var _pos = new Uint16Array(2);
 	MapRenderer.onRender = function OnRender( tick, gl )
 	{
+
+		var usePostProcessing = GraphicsSettings.bloom || false;
+		
+		if (usePostProcessing && gl.fbo && gl.fbo.framebuffer) {
+			gl.bindFramebuffer(gl.FRAMEBUFFER, gl.fbo.framebuffer);
+			gl.viewport(0, 0, gl.fbo.width, gl.fbo.height);
+		} else {
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+			gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+		}
+
 		var fog   = MapRenderer.fog;
 		fog.use   = MapPreferences.fog;
 		var light = MapRenderer.light;
@@ -448,6 +478,33 @@ define(function( require )
 
 		// Clean up
 		MemoryManager.clean(gl, tick);
+
+		if (usePostProcessing && Renderer.quadBuffer) {
+			
+			var inputTexture = gl.fbo.texture;
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+			gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			var finalProgramToUse = null;
+
+			if (usePostProcessing && Renderer.postProcessProgram) {
+ 				finalProgramToUse = Renderer.postProcessProgram;
+ 				gl.useProgram(finalProgramToUse);
+				gl.uniform1f(finalProgramToUse.uniform.uBloomIntensity, GraphicsSettings.bloomIntensity);
+				gl.uniform1f(finalProgramToUse.uniform.uBloomThreshold, 0.88); // ignore shadows
+				gl.uniform1f(finalProgramToUse.uniform.uBloomSoftKnee, 0.45); // soft transition
+			}
+			// Fallback
+ 			else if (Renderer.postProcessProgram) {
+ 				finalProgramToUse = Renderer.postProcessProgram;
+ 				gl.useProgram(finalProgramToUse);
+ 				gl.uniform1f(finalProgramToUse.uniform.uBloomIntensity, 0.0);
+ 			}
+			
+			if(finalProgramToUse) {
+				Renderer._drawPostProcessQuad(gl, finalProgramToUse, inputTexture);
+			}
+		}
 	};
 
 

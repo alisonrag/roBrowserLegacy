@@ -252,9 +252,9 @@ define(function()
 		REBELLION:          4215,
 		PECO_REBELLION:     4216,
 		//?                 4217,
-		DO_SUMMONER1:       4218,
+		DO_SUMMONER:       4218,
 		//?                 4219,
-		DO_SUMMONER_B1:     4220,
+		DO_SUMMONER_B:     4220,
 		NINJA_B:            4222,
 		KAGEROU_B:          4223,
 		OBORO_B:            4224,
@@ -265,12 +265,14 @@ define(function()
 		REBELLION_B:        4229,
 		//++
 		STAR2_B:            4238,
-		EMPEROR:            4239,
-		REAPER:             4240,
-		EMPEROR_B:          4241,
-		REAPER_B:           4242,
-		EMPEROR2:           4243,
-		EMPEROR2_B:         4244,
+		STAR_EMPEROR:       4239,
+		SOUL_REAPER:        4240,
+		STAR_EMPEROR_B:     4241,
+		SOUL_REAPER_B:      4242,
+		STAR_EMPEROR2:      4243,
+		STAR_EMPEROR2_B:    4244,
+		SOUL_REAPER2:       4245,
+		SOUL_REAPER2_B:     4246,
 
 		DRAGON_KNIGHT:      4252,
 		MEISTER:            4253,
@@ -300,6 +302,28 @@ define(function()
 		SPIRIT_HANDLER:     4308,
 
 		SKY_EMPEROR2: 	    4316,
+
+		COSTUME_SECOND_JOB_START:     4331,
+
+		RUNE_KNIGHT_2ND:      4332,
+		MECHANIC_2ND:         4333,
+		GUILLOTINE_CROSS_2ND: 4334,
+		WARLOCK_2ND:          4335,
+		ARCH_BISHOP_2ND:      4336,
+		RANGER_2ND:           4337,
+		ROYAL_GUARD_2ND:      4338,
+		GENETIC_2ND:          4339,
+		SHADOW_CHASER_2ND:    4340,
+		SORCERER_2ND:         4341,
+		SURA_2ND:             4342,
+		MINSTREL_2ND:         4343,
+		WANDERER_2ND:         4344,
+		RUNE_KNIGHT2_2ND:     4345,
+		RANGER2_2ND:          4346,
+		MECHANIC2_2ND:        4347,
+		ROYAL_GUARD2_2ND:     4348,
+
+		COSTUME_SECOND_JOB_END:       4350,
 
 	};
 });

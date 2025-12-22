@@ -89,10 +89,12 @@ define(["./JobConst"], function( JobId )
 	JobNameTable[JobId.RANGER2]          = "\xB7\xB9\xC0\xCE\xC1\xAE\xB4\xC1\xB4\xEB";
 	JobNameTable[JobId.MECHANIC2]        = "\xB8\xB6\xB5\xB5\xB1\xE2\xBE\xEE";
 
-	JobNameTable[JobId.SUPERNOVICE2]	 = "\xBD\xB4\xC6\xDB\xB3\xEB\xBA\xF1\xBD\xBA";
-	JobNameTable[JobId.KAGEROU] 		 = "kagerou";
-	JobNameTable[JobId.OBORO] 			 = "oboro";
-	JobNameTable[JobId.REBELLION] 		 = "rebellion";
+	JobNameTable[JobId.SUPERNOVICE2]     = "\xBD\xB4\xC6\xDB\xB3\xEB\xBA\xF1\xBD\xBA";
+	JobNameTable[JobId.KAGEROU] 	     = "kagerou";
+	JobNameTable[JobId.OBORO]            = "oboro";
+	JobNameTable[JobId.REBELLION]        = "rebellion";
+	JobNameTable[JobId.STAR_EMPEROR]     = "\xbc\xba\xc1\xa6";  
+	JobNameTable[JobId.SOUL_REAPER]      = "\xbc\xd2\xbf\xef\xb8\xae\xc6\xdb";
 
 	// 4th
 	JobNameTable[JobId.DRAGON_KNIGHT] = "dragon_knight";
@@ -177,7 +179,11 @@ define(["./JobConst"], function( JobId )
 	JobNameTable[JobId.FROG_OBORO]        = "frog_oboro";
 	JobNameTable[JobId.PECO_REBELLION]    = "peco_rebellion";
 	
-	JobNameTable[JobId.DO_SUMMONER1] 	  = "summoner";
+	// FIX ME: encoder.html cant solve Ø and Â encoding
+	JobNameTable[JobId.SOUL_REAPER2] = "ÇØÅÂ¼Ò¿ï¸®ÆÛ"; // 해태소울리퍼
+	JobNameTable[JobId.STAR_EMPEROR2] = "ÇØÅÂ¼ºÁ¦"; // 해태소울리
+
+	JobNameTable[JobId.DO_SUMMONER] 	  = "summoner";
 
 	JobNameTable[JobId.SHEEP_HPRIEST]     = "\xc7\xcf\xc0\xcc\xc7\xc1\xb8\xae\xbd\xba\xc6\xae\xbe\xcb\xc6\xc4\xc4\xab";
 	JobNameTable[JobId.OSTRICH_SNIPER]    = "\xc5\xb8\xc1\xb6\xbd\xba\xb3\xaa\xc0\xcc\xc6\xdb";
@@ -231,25 +237,26 @@ define(["./JobConst"], function( JobId )
 	duplicateEntry(JobId.BARD,             JobId.BARD_B);
 	duplicateEntry(JobId.DANCER,           JobId.DANCER_B);
 
-	duplicateEntry(JobId.RUNE_KNIGHT,      JobId.RUNE_KNIGHT_H,      JobId.RUNE_KNIGHT_B);
-	duplicateEntry(JobId.RUNE_KNIGHT2,     JobId.RUNE_KNIGHT2_H,     JobId.RUNE_KNIGHT2_B);
-	duplicateEntry(JobId.WARLOCK,          JobId.WARLOCK_H,          JobId.WARLOCK_B);
-	duplicateEntry(JobId.RANGER,           JobId.RANGER_H,           JobId.RANGER_B);
-	duplicateEntry(JobId.RANGER2,          JobId.RANGER2_H,          JobId.RANGER2_B);
-	duplicateEntry(JobId.ARCHBISHOP,       JobId.ARCHBISHOP_H,       JobId.ARCHBISHOP_B);
-	duplicateEntry(JobId.MECHANIC,         JobId.MECHANIC_H,         JobId.MECHANIC_B);
-	duplicateEntry(JobId.MECHANIC2,        JobId.MECHANIC2_H,        JobId.MECHANIC2_B);
-	duplicateEntry(JobId.GUILLOTINE_CROSS, JobId.GUILLOTINE_CROSS_H, JobId.GUILLOTINE_CROSS_B);
-	duplicateEntry(JobId.ROYAL_GUARD,      JobId.ROYAL_GUARD_H,      JobId.ROYAL_GUARD_B);
-	duplicateEntry(JobId.ROYAL_GUARD2,     JobId.ROYAL_GUARD2_H,     JobId.ROYAL_GUARD2_B);
-	duplicateEntry(JobId.SORCERER,         JobId.SORCERER_H,         JobId.SORCERER_B);
-	duplicateEntry(JobId.MINSTREL,         JobId.MINSTREL_H,         JobId.MINSTREL_B);
-	duplicateEntry(JobId.WANDERER,         JobId.WANDERER_H,         JobId.WANDERER_B);
-	duplicateEntry(JobId.SURA,             JobId.SURA_H,             JobId.SURA_B);
-	duplicateEntry(JobId.GENETIC,          JobId.GENETIC_H,          JobId.GENETIC_B);
-	duplicateEntry(JobId.SHADOW_CHASER,    JobId.SHADOW_CHASER_H,    JobId.SHADOW_CHASER_B);
-	
-	duplicateEntry(JobId.DO_SUMMONER1,     JobId.DO_SUMMONER_B1);
+	duplicateEntry(JobId.RUNE_KNIGHT,      JobId.RUNE_KNIGHT_H,      JobId.RUNE_KNIGHT_2ND,      JobId.RUNE_KNIGHT_B);
+	duplicateEntry(JobId.RUNE_KNIGHT2,     JobId.RUNE_KNIGHT2_H,     JobId.RUNE_KNIGHT2_2ND,     JobId.RUNE_KNIGHT2_B);
+	duplicateEntry(JobId.WARLOCK,          JobId.WARLOCK_H,          JobId.WARLOCK_2ND,          JobId.WARLOCK_B);
+	duplicateEntry(JobId.RANGER,           JobId.RANGER_H,           JobId.RANGER_2ND,           JobId.RANGER_B);
+	duplicateEntry(JobId.RANGER2,          JobId.RANGER2_H,          JobId.RANGER2_2ND,          JobId.RANGER2_B);
+	duplicateEntry(JobId.ARCHBISHOP,       JobId.ARCHBISHOP_H,       JobId.ARCHBISHOP_2ND,       JobId.ARCHBISHOP_B);
+	duplicateEntry(JobId.MECHANIC,         JobId.MECHANIC_H,         JobId.MECHANIC_2ND,         JobId.MECHANIC_B);
+	duplicateEntry(JobId.MECHANIC2,        JobId.MECHANIC2_H,        JobId.MECHANIC2_2ND,        JobId.MECHANIC2_B);
+	duplicateEntry(JobId.GUILLOTINE_CROSS, JobId.GUILLOTINE_CROSS_H, JobId.GUILLOTINE_CROSS_2ND, JobId.GUILLOTINE_CROSS_B);
+	duplicateEntry(JobId.ROYAL_GUARD,      JobId.ROYAL_GUARD_H,      JobId.ROYAL_GUARD_2ND,      JobId.ROYAL_GUARD_B);
+	duplicateEntry(JobId.ROYAL_GUARD2,     JobId.ROYAL_GUARD2_H,     JobId.ROYAL_GUARD2_2ND,     JobId.ROYAL_GUARD2_B);
+	duplicateEntry(JobId.SORCERER,         JobId.SORCERER_H,         JobId.SORCERER_2ND,         JobId.SORCERER_B);
+	duplicateEntry(JobId.MINSTREL,         JobId.MINSTREL_H,         JobId.MINSTREL_2ND,         JobId.MINSTREL_B);
+	duplicateEntry(JobId.WANDERER,         JobId.WANDERER_H,         JobId.WANDERER_2ND,         JobId.WANDERER_B);
+	duplicateEntry(JobId.SURA,             JobId.SURA_H,             JobId.SURA_2ND,             JobId.SURA_B);
+	duplicateEntry(JobId.GENETIC,          JobId.GENETIC_H,          JobId.GENETIC_2ND,          JobId.GENETIC_B);
+	duplicateEntry(JobId.SHADOW_CHASER,    JobId.SHADOW_CHASER_H,    JobId.SHADOW_CHASER_2ND,    JobId.SHADOW_CHASER_B);
+	duplicateEntry(JobId.SOUL_REAPER,      JobId.SOUL_REAPER_B);
+	duplicateEntry(JobId.STAR_EMPEROR,     JobId.STAR_EMPEROR_B);
+	duplicateEntry(JobId.DO_SUMMONER,      JobId.DO_SUMMONER_B);
 	
 
 	//MOUNTS
@@ -297,6 +304,8 @@ define(["./JobConst"], function( JobId )
 	duplicateEntry(JobId.FROG_NINJA       ,JobId.FROG_NINJA_B);
 	duplicateEntry(JobId.PECO_GUNNER      ,JobId.PECO_GUNNER_B);
 	duplicateEntry(JobId.PORING_TAEKWON   ,JobId.PORING_TAEKWON_B);
+	duplicateEntry(JobId.SOUL_REAPER2     ,JobId.SOUL_REAPER2_B);
+	duplicateEntry(JobId.STAR_EMPEROR2    ,JobId.STAR_EMPEROR2_B);
 
 	duplicateEntry(JobId.PORING_STAR      ,JobId.PORING_STAR_B);
 	duplicateEntry(JobId.FROG_LINKER      ,JobId.FROG_LINKER_B);

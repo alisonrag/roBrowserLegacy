@@ -42,9 +42,13 @@ define(function (require) {
 	var RandomOption = require('DB/Items/ItemRandomOptionTable');
 	var SKID = require('./Skills/SkillConst');
 	var SkillDescription = require('./Skills/SkillDescription');
+	var SkillInfo = require('./Skills/SkillInfo');	
+	var SkillTreeView = require('./Skills/SkillTreeView');
 	var JobHitSoundTable = require('./Jobs/JobHitSoundTable');
 	var WeaponTrailTable = require('./Items/WeaponTrailTable');
 	var TownInfo = require('./TownInfo');
+	var StatusInfo = require('./Status/StatusInfo');
+	var SC = require('./Status/StatusConst');
 	var XmlParse = require('Vendors/xmlparse');
 	var Base62 = require('Utils/Base62');
 
@@ -262,12 +266,30 @@ define(function (require) {
 			loadWeaponTable(DB.LUA_PATH + 'datainfo/weapontable.lub', null, onLoad());
 			
 			// Skill
-			loadLuaTable([DB.LUA_PATH + 'skillinfoz/skillid.lub', DB.LUA_PATH + 'skillinfoz/skilldescript.lub'], 'SKILL_DESCRIPT', function (json) { SkillDescription = json; }, onLoad());
-			// TODO: DB.LUA_PATH + skillinfoz/skillinfolist.lub	- Replaces part of DB/Skills/SkillInfo.js (if we can find a txt version, otherwise just overrides)
-			// TODO: DB.LUA_PATH + skillinfoz/skilltreeview.lub	- Replaces DB/Skills/SkillTreeView.js
-			
+			loadLuaTable(
+				[DB.LUA_PATH + 'skillinfoz/skillid.lub', DB.LUA_PATH + 'skillinfoz/skilldescript.lub'],
+				'SKILL_DESCRIPT',
+				function (json) {
+					SkillDescription = json;
+				},
+				function () {
+					// Calls after skillids and descs been populated
+					loadSkillInfoList(
+						DB.LUA_PATH + 'skillinfoz/skillinfolist.lub',
+						null,
+						function () {
+							loadSkillTreeView(
+								DB.LUA_PATH + 'skillinfoz/skilltreeview.lub',
+								null,
+								onLoad()
+							);
+						}
+					);
+				}
+			);
+
 			// Status
-			// TODO: DB.LUA_PATH + stateicon/stateiconinfo.lub
+			loadStateIconInfo(DB.LUA_PATH + 'stateicon/', null, onLoad());
 	
 			// Legacy Navigation
 			if(PACKETVER.value >= 20111010){
@@ -323,7 +345,7 @@ define(function (require) {
 			// TODO: System/achievements.lub
 			
 			// Town Info
-			// TODO: System/Towninfo.lub	- Replaces DB/TownInfo.js
+			loadTownInfoFile('System/Towninfo.lub', null, onLoad());
 		} else {
 			// Item
 			loadTable('data/num2itemdisplaynametable.txt', '#', 2, function (index, key, val) { (ItemTable[key] || (ItemTable[key] = {})).unidentifiedDisplayName = val.replace(/_/g, " "); }, onLoad());
@@ -490,6 +512,56 @@ define(function (require) {
 				} finally {
 					// release file from memmory
 					lua.unmountFile('CheckAttendance.lub');
+					// call onEnd
+					onEnd();
+				}
+			},
+			onEnd
+		);
+	}
+
+
+	/**
+	* Load Town Info file
+	*
+	* @param {string} filename - relative file path (e.g., 'System/Towninfo.lub')
+	* @param {function} callback - (Unused/Legacy)
+	* @param {function} onEnd - Function to run when done
+	*/
+	function loadTownInfoFile(filename, callback, onEnd) {
+		Client.loadFile(filename,
+			async function (file) {
+				console.log('Loading file "' + filename + '"...');
+				try {
+					let buffer = (file instanceof ArrayBuffer) ? new Uint8Array(file) : file;
+					// get context, a proxy. It will be used to interact with lua conveniently
+					const ctx = lua.ctx;
+					// create decoders
+					let iso88591Decoder = new TextEncoding.TextDecoder('iso-8859-1');
+					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
+					
+					// create AddTownInfo required functions in context
+					ctx.AddTownInfo = function AddTownInfo(mapName, name, X, Y, TYPE) {
+						mapName = iso88591Decoder.decode(mapName);
+						TownInfo[mapName] = [];
+						TownInfo[mapName].push({
+							Name: userStringDecoder.decode(name), 
+							X: X,
+							Y: Y,
+							Type: TYPE
+						});
+    					};
+					// mount file
+					lua.mountFile(filename, buffer);
+					// execute file
+					await lua.doFile(filename);
+					// execute main lua function
+					lua.doStringSync(`main()`);
+				} catch (error) {
+					console.error('[loadTownInfoFile] Error: ', error);
+				} finally {
+					// release file from memmory
+					lua.unmountFile(filename);
 					// call onEnd
 					onEnd();
 				}
@@ -1473,6 +1545,437 @@ define(function (require) {
 		);  
 	}
 
+	/**  
+	 * Loads skillinfolist.lub which replaces part of DB/Skills/SkillInfo.js  
+	 *  
+	 * @param {string} filename - The name of the file to load.  
+	 * @param {function} callback - The function to invoke with the loaded data.  
+	 * @param {function} onEnd - The function to invoke when loading is complete.  
+	 * @return {void}  
+	 */
+	function loadSkillInfoList(filename, callback, onEnd) {
+		Client.loadFile(filename,
+			async function (file) {
+				try {
+					console.log('Loading file "' + filename + '"...');
+
+					// check if file is ArrayBuffer and convert to Uint8Array if necessary  
+					let buffer = (file instanceof ArrayBuffer) ? new Uint8Array(file) : file;
+
+					// get context, a proxy. It will be used to interact with lua conveniently  
+					const ctx = lua.ctx;
+
+					// Create automatic JT_ mappings  
+					const jobIdWithJT = { ...JobId };  
+					for (const [key, value] of Object.entries(JobId)) {  
+						jobIdWithJT[`JT_${key}`] = value;  
+					}  
+					ctx.JOBID = jobIdWithJT; 
+
+					// create decoders  
+					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
+					let iso88591Decoder = new TextEncoding.TextDecoder('iso-8859-1');
+
+					// create required functions in context  
+					ctx.AddSkillInfo = (skillId, resName, skillName, maxLv, spAmount, bSeperateLv, attackRange, skillScale) => {
+						// Convert to format expected by SkillInfo.js  
+						SkillInfo[skillId] = {
+							Name: iso88591Decoder.decode(resName),
+							SkillName: userStringDecoder.decode(skillName),
+							MaxLv: maxLv,
+							SpAmount: spAmount,
+							bSeperateLv: bSeperateLv,
+							AttackRange: attackRange,
+							SkillScale: skillScale
+						};
+						return 1;
+					};
+					ctx.SKID = SKID;
+					await lua.doString(`
+						if SKID then
+							__SKID_ORIGINAL = SKID 
+
+							SKID = setmetatable({}, {
+								__index = function(t, k)
+								local id = __SKID_ORIGINAL[k]
+								return id ~= nil and id or 0 
+								end
+							})
+						end
+					`);
+
+					// mount file  
+					lua.mountFile('skillinfolist.lub', buffer);
+
+					// execute file  
+					await lua.doFile('skillinfolist.lub');
+
+					// create and execute our own main function  
+					lua.doStringSync(`  
+					function main_skillInfoList()  
+						if not SKILL_INFO_LIST then  
+							return false, "Error: SKILL_INFO_LIST is nil or not a table"  
+						end  
+					
+						for skillId, skillData in pairs(SKILL_INFO_LIST) do 
+							local resName = skillData[1] or "" 
+							local skillName = skillData.SkillName or ""  
+							local maxLv = skillData.MaxLv or 1  
+							local spAmount = skillData.SpAmount or {}  
+							local bSeperateLv = skillData.bSeperateLv or false  
+							local attackRange = skillData.AttackRange or {}  
+							local skillScale = skillData.SkillScale or {}  
+					
+							result, msg = AddSkillInfo(skillId, resName, skillName, maxLv, spAmount, bSeperateLv, attackRange, skillScale)  
+							if not result then  
+								return false, msg  
+							end  
+						end  
+						return true, "good"  
+						end
+					main_skillInfoList()  
+					`);  
+
+				} catch (error) {
+					console.error('[loadSkillInfoList] Error: ', error);
+				} finally {
+					// release file from memory  
+					lua.unmountFile('skillinfolist.lub');
+					// call onEnd  
+					onEnd();
+				}
+			},
+			onEnd
+		);
+	}
+	
+	/**  
+	* Loads jobinheritlist.lub and skilltreeview.lub which replaces DB/Skills/SkillTreeView.js  
+	*  
+	* @param {string} filename - The name of the file to load.  
+	* @param {function} callback - The function to invoke with the loaded data.  
+	* @param {function} onEnd - The function to invoke when loading is complete.  
+	* @return {void}  
+	*/  
+	function loadSkillTreeView(filename, callback, onEnd) {  
+		// First load jobinheritlist.lub  
+		Client.loadFile(DB.LUA_PATH + 'skillinfoz/jobinheritlist.lub',  
+			async function (file) {  
+				try {  
+					console.log(`Loading file ${DB.LUA_PATH}skillinfoz/jobinheritlist.lub...`);  
+					let buffer = (file instanceof ArrayBuffer) ? new Uint8Array(file) : file;  
+					const ctx = lua.ctx;  
+					
+					// Mount and execute jobinheritlist.lub  
+					lua.mountFile('jobinheritlist.lub', buffer);  
+					await lua.doFile('jobinheritlist.lub');  
+					
+					// Now load skilltreeview.lub  
+					loadSkillTreeViewData(filename, callback, onEnd);  
+					
+				} catch (error) {  
+					console.error('[loadSkillTreeView - jobinheritlist] Error: ', error);  
+					onEnd();  
+				}  
+			},  
+			onEnd  
+		);  
+	}  
+	
+	function loadSkillTreeViewData(filename, callback, onEnd) {  
+		Client.loadFile(filename,  
+			async function (file) {  
+				try {  
+					console.log('Loading file "' + filename + '"...');  
+					let buffer = (file instanceof ArrayBuffer) ? new Uint8Array(file) : file;  
+					const ctx = lua.ctx;  
+					// Create automatic JT_ mappings  
+					const jobIdWithJT = { ...JobId };  
+					for (const [key, value] of Object.entries(JobId)) {  
+						jobIdWithJT[`JT_${key}`] = value;  
+					}  
+					ctx.JOBID = jobIdWithJT; 
+					
+					// Function to add skill tree data using job hierarchy from jobinheritlist.lub  
+					ctx.AddSkillTreeView = function (jobId, beforeJob) {  
+						// Calculate list and beforeJob from inheritance chain  
+						let list = 1;						
+						// TODO: Find another way to do that
+						if (jobId === JobId.NOVICE) {  
+							list = 1;  
+						} else if (jobId < JobId.KNIGHT || jobId === JobId.TAEKWON || (jobId >= JobId.SUPERNOVICE && jobId <= JobId.NINJA) || jobId == JobId.DO_SUMMONER ) {  
+							list = 1;  
+						} else if (jobId < JobId.NOVICE_H || jobId == JobId.STAR || jobId == JobId.LINKER || (jobId >= JobId.KAGEROU && jobId <= JobId.REBELLION) || jobId == JobId.SUPERNOVICE2 || jobId == JobId.SPIRIT_HANDLER ) {  
+							list = 2;  
+						} else if ((jobId <= JobId.THIEF_H && jobId >= JobId.NOVICE_H) || (jobId >= JobId.NOVICE_B && jobId <= JobId.THIEF_B) || jobId == JobId.DO_SUMMONER_B || jobId == JobId.NINJA_B || jobId == JobId.TAEKWON_B || jobId == JobId.GUNSLINGER_B) {  
+							list = 1;  
+						} else if (jobId < JobId.RUNE_KNIGHT || (jobId >= JobId.KNIGHT_B && jobId <= JobId.DANCER_B) || (jobId >= JobId.KAGEROU_B && jobId <= JobId.REBELLION_B) ) {  
+							list = 2;  
+						} else if (jobId < JobId.DRAGON_KNIGHT || jobId == JobId.STAR_EMPEROR || jobId == JobId.SOUL_REAPER || (jobId >= JobId.RUNE_KNIGHT_B && jobId <= JobId.SHADOW_CHASER_B) || jobId === JobId.EMPEROR_B || jobId === JobId.REAPER_B ) {  
+							list = 3;  
+						} else if (jobId <= JobId.TROUVERE || ( jobId >= JobId.SKY_EMPEROR && jobId <= JobId.HYPER_NOVICE) ) {  
+							list = 4;  
+						} else {  
+							list = 1;
+							console.error(`[loadSkillTreeViewData] Failed to find inherith list job: (${jobId})`);
+						}
+						// Create the skill tree entry  
+						const entry = {  
+							list: list,  
+							beforeJob: beforeJob  
+						};  
+						
+						SkillTreeView[jobId] = entry;  
+						return 1;  
+					};  
+					
+					ctx.AddSkillToJob = function (jobId, pos, skillId) {  
+						if (SkillTreeView[jobId]) {  
+							SkillTreeView[jobId][skillId] = Number(pos);  
+						}  
+						return 1;  
+					};
+	
+					lua.doStringSync(`
+						JobSkillTab = {}
+					
+						function JobSkillTab.ChangeSkillTabName(in_job, in_1sttab, in_2ndtab, in_3rdtab, in_4thtab)
+							local tbl = {
+								job = in_job,
+								TabName1st = in_1sttab,
+								TabName2nd = in_2ndtab,
+								TabName3rd = in_3rdtab,
+								TabName4th = in_4thtab
+							}
+							JobSkillTab[#JobSkillTab + 1] = tbl
+							return true
+						end
+					`);
+
+					ctx.SKID = SKID;
+					await lua.doString(`
+						if SKID then
+							__SKID_ORIGINAL = SKID 
+
+							SKID = setmetatable({}, {
+								__index = function(t, k)
+								local id = __SKID_ORIGINAL[k]
+								return id ~= nil and id or 0 
+								end
+							})
+						end
+					`);
+
+					lua.mountFile('skilltreeview.lub', buffer);  
+					await lua.doFile('skilltreeview.lub');  
+	
+					lua.doStringSync(`    
+						function main_skillTreeView()    
+							if not SKILL_TREEVIEW_FOR_JOB then    
+								return false, "Error: SKILL_TREEVIEW_FOR_JOB is nil or not a table"    
+							end    
+					
+							for jobId, skillData in pairs(SKILL_TREEVIEW_FOR_JOB) do      
+								local beforeJob = JOB_INHERIT_LIST[jobId] or nil  
+								result, msg = AddSkillTreeView(jobId, beforeJob)      
+								if not result then      
+									return false, msg      
+								end   
+								
+								for pos, skillId in pairs(skillData) do    
+									result, msg = AddSkillToJob(jobId, pos, skillId)    
+									if not result then    
+										return false, msg    
+									end    
+								end  
+							end    
+							return true, "good"    
+						end    
+						
+						main_skillTreeView()    
+					`);
+	
+				} catch (error) {  
+					console.error('[loadSkillTreeView] Error: ', error);  
+				} finally {  
+					lua.unmountFile('skilltreeview.lub');  
+					lua.unmountFile('jobinheritlist.lub');  
+					onEnd();  
+				}  
+			},  
+			onEnd  
+		);  
+	}
+
+	/**
+	* Load State Icon Info (StatusInfo) from Lua files
+	* Loads efstids.lub, stateiconimginfo.lub, and stateiconinfo.lub sequentially,
+	* synchronizing EFST_IDs with StatusConst and populating the StatusInfo table.
+	*
+	* @param {string} basePath - Directory path (e.g., DB.LUA_PATH + 'stateicon/')
+	* @param {function} callback - (Unused/Legacy)
+	* @param {function} onEnd - Function to run when done
+	*/
+	function loadStateIconInfo(basePath, callback, onEnd) {
+		const files = [
+			'efstids.lub',
+			'stateiconimginfo.lub',
+			'stateiconinfo.lub'
+		];
+
+		let loadedBuffers = [];
+
+		const dirPath = basePath.endsWith('/') ? basePath : basePath + '/';
+
+		function loadNext(index) {
+			if (index >= files.length) {
+				processLuaData();
+				return;
+			}
+
+			let fullPath = dirPath + files[index];
+			console.log('Loading file "' + fullPath + '"...');
+
+			Client.loadFile(fullPath, function(data) {
+				loadedBuffers.push({ name: files[index], data: data });
+				loadNext(index + 1);
+			}, function() {
+				console.error('[loadStateIconInfo] - Failed to load ' + fullPath);
+				if (onEnd) onEnd();
+			});
+		}
+	
+		async function processLuaData() {
+			try {
+				const ctx = lua.ctx;
+				const userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
+				const isoDecoder = new TextEncoding.TextDecoder('iso-8859-1');
+
+				ctx.SetStatusConstants = (sourceTable) => {
+					if (typeof sourceTable === 'object' && sourceTable !== null) {
+						// Populate SC with constants from the Lua table (e.g., EFST_PROVOKE -> SC.PROVOKE)
+						for (const key in sourceTable) {
+							if (key.startsWith('EFST_')) {
+								const jsKey = key.replace('EFST_', ''); 
+								SC[jsKey] = sourceTable[key];
+							}
+						}
+						// Add BLANK back if it was cleared and not defined in LUB
+						if (!SC.BLANK) {
+							SC.BLANK = -1;
+						}
+					} else {
+						console.error('[loadStateIconInfo]: EFST_IDs table not received from Lua. Cannot synchronize StatusConst.');
+					}
+					return 1;
+				}
+
+				ctx.SetStatusInfo = (id, haveTimeLimit, posTimeLimitStr) => {
+					if (!StatusInfo[id]) StatusInfo[id] = {};
+					StatusInfo[id].haveTimeLimit = haveTimeLimit;
+					StatusInfo[id].posTimeLimitStr = posTimeLimitStr;
+					StatusInfo[id].descript = [];
+					return 1;
+				};
+
+				ctx.AddStatusDesc = (id, desc, r, g, b) => {
+					if (!StatusInfo[id]) return 0;
+					let text = userStringDecoder.decode(desc);
+					let color = null;
+					if (r >= 0 && g >= 0 && b >= 0) {
+						color = `rgb(${r}, ${g}, ${b})`;
+					}
+					StatusInfo[id].descript.push([text, color]);
+					return 1;
+				};
+
+				ctx.SetStatusIcon = (id, iconName) => {
+					let icon = isoDecoder.decode(iconName);
+					if (!StatusInfo[id]) StatusInfo[id] = { descript: [] }; 
+					StatusInfo[id].icon = icon;
+					return 1;
+				};
+
+				for (let i = 0; i < loadedBuffers.length; i++) {
+					let f = loadedBuffers[i];
+					let buffer = (f.data instanceof ArrayBuffer) ? new Uint8Array(f.data) : f.data;
+					lua.mountFile(f.name, buffer);
+					await lua.doFile(f.name);
+
+					// This prevents the 'table index is nil' crash in stateiconimginfo.lub.
+					// return SC.BLANK on nil
+					if (f.name === 'efstids.lub') {
+						await lua.doString(`
+							if EFST_IDs then
+								__EFST_IDS_ORIGINAL = EFST_IDs 
+
+								EFST_IDs = setmetatable({}, {
+									__index = function(t, k)
+										local id = __EFST_IDS_ORIGINAL[k]
+										return id ~= nil and id or -1
+									end
+								})
+							end
+						`);
+					}
+				}
+
+				lua.doStringSync(`
+					function extract_status_info()
+						-- Sync StatusConst (SC) with the full list of EFST_IDs from the original table
+						if type(__EFST_IDS_ORIGINAL) == "table" then
+							SetStatusConstants(__EFST_IDS_ORIGINAL)
+						end
+
+						-- Process Basic Info & Descriptions
+						if StateIconList ~= nil then
+							for id, info in pairs(StateIconList) do
+								SetStatusInfo(id, info.haveTimeLimit, info.posTimeLimitStr)
+
+								if info.descript ~= nil then
+									for _, descLine in ipairs(info.descript) do
+										local text = descLine[1]
+										local colorData = descLine[2]
+										local r, g, b = -1, -1, -1
+
+										if type(colorData) == "table" and #colorData >= 3 then
+											r = colorData[1]
+											g = colorData[2]
+											b = colorData[3]
+										end
+
+										AddStatusDesc(id, text, r, g, b)
+									end
+								end
+							end
+						end
+
+						-- Process Icons 
+						if StateIconImgList ~= nil then
+							for priorityId, list in pairs(StateIconImgList) do 
+								if type(list) == "table" then
+									for id, iconName in pairs(list) do
+										SetStatusIcon(id, iconName)
+									end
+								end
+							end
+						end
+					end
+
+					extract_status_info()
+				`);
+	
+			} catch (e) {
+				console.error("[loadStateIconInfo] Lua Error:", e);
+			} finally {
+				loadedBuffers.forEach(f => lua.unmountFile(f.name));
+				if (onEnd) onEnd();
+			}
+		}
+	
+		loadNext(0);
+	}
+	
 	/**
 	 * Remove LUA comments
 	 *
@@ -1969,7 +2472,7 @@ define(function (require) {
 	}
 
 	function isPlayer(jobid) {
-		return jobid < 45 || (jobid >= 4001 && jobid <= 4317) || jobid == 4294967294;
+		return jobid < 45 || (jobid >= 4001 && jobid <= 4350) || jobid == 4294967294;
 	}
 
 	DB.isDoram = function (jobid) {
@@ -1994,11 +2497,11 @@ define(function (require) {
 	/**
 	 * @return {string} path to body sprite/action
 	 * @param {number} id entity
-	 * @param {boolean} alternative sprite
 	 * @param {boolean} sex
+	 * @param {number} alternative sprite
 	 * @return {string}
 	 */
-	DB.getBodyPath = function getBodyPath(id, sex, alternative) {
+	DB.getBodyPath = function getBodyPath(id, sex, alternative = -1) {
 		// TODO: Warp STR file
 		if (id === 45) {
 			return null;
@@ -2012,12 +2515,28 @@ define(function (require) {
 		// PC
 		if (isPlayer(id)) {
 			// DORAM
-			if (DB.isDoram(id)) {
-				return 'data/sprite/\xb5\xb5\xb6\xf7\xc1\xb7/\xb8\xf6\xc5\xeb/' + SexTable[sex] + '/' + (ClassTable[id] || ClassTable[0]) + '_' + SexTable[sex];
+			var isDoram = DB.isDoram(id);
+			var result = isDoram ? 'data/sprite/\xb5\xb5\xb6\xf7\xc1\xb7/\xb8\xf6\xc5\xeb/' : 'data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/\xb8\xf6\xc5\xeb/';
+			result += SexTable[sex] + '/';
+
+			if(PACKETVER.value > 20141022){
+				if(alternative > 0){
+					if((PACKETVER.value > 20231220 && alternative > JobId.COSTUME_SECOND_JOB_START && alternative < JobId.COSTUME_SECOND_JOB_END) || alternative === 1)
+						result += 'costume_1/';
+
+					result += (ClassTable[id] || ClassTable[0]);
+					result += '_' + SexTable[sex];
+
+					if((PACKETVER.value > 20231220 && alternative > JobId.COSTUME_SECOND_JOB_START && alternative < JobId.COSTUME_SECOND_JOB_END) || alternative === 1)
+						result += '_1';
+					return result;
+				}
 			}
 
-			// TODO: check for alternative 3rd and MADO alternative sprites
-			return 'data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/\xb8\xf6\xc5\xeb/' + SexTable[sex] + '/' + (ClassTable[id] || ClassTable[0]) + '_' + SexTable[sex];
+			result += (ClassTable[id] || ClassTable[0]);
+			result += '_' + SexTable[sex];
+
+			return result;
 		}
 
 		// NPC

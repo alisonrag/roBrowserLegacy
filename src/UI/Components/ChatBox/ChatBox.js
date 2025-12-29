@@ -23,6 +23,7 @@ define(function(require)
 	var Preferences        = require('Core/Preferences');
 	var KEYS               = require('Controls/KeyEventHandler');
 	var Mouse         	   = require('Controls/MouseEventHandler');
+	var Cursor             = require('UI/CursorManager');
 	var BattleMode         = require('Controls/BattleMode');
 	var History            = require('./History');
 	var UIManager          = require('UI/UIManager');
@@ -84,6 +85,7 @@ define(function(require)
 		x:      0,
 		y:      Infinity,
 		height: 2,
+		fontScale: 1.0,
 		magnet_top: false,
 		magnet_bottom: true,
 		magnet_left: true,
@@ -171,13 +173,7 @@ define(function(require)
 	{
 		_heightIndex = _preferences.height - 1;
 		ChatBox.updateHeight();
-
-		this.ui.mouseover(function(){
-			Mouse.intersect = false;
-		})
-		.mouseout(function() {
-			Mouse.intersect = true;
-		});
+		ChatBox.applyFontScale();
 
 		this.ui.css({
 			top:  Math.min( Math.max( 0, _preferences.y - this.ui.height()), Renderer.height - this.ui.height()),
@@ -193,7 +189,9 @@ define(function(require)
 		this.draggable( this.ui.find('.battlemode') );
 
 		// Sorry for this un-documented code (see UIComponent for more informations)
-		this.__mouseStopBlock = this.ui.find('.input');
+		// Keep chat log area click-through for walking; only block over interactive UI parts.
+		// Note: tabs are created dynamically; their hover-block is handled via delegated events below.
+		this.__mouseStopBlock = this.ui.find('.input, .chat-function, .battlemode, .event_add_cursor');
 
 		// Setting chatbox scrollbar
 		Client.loadFiles([DB.INTERFACE_PATH + 'basic_interface/dialscr_down.bmp', DB.INTERFACE_PATH + 'basic_interface/dialscr_up.bmp'], function( down, up ){
@@ -230,7 +228,42 @@ define(function(require)
 			}.bind(this), 1);
 		}.bind(this));
 
+		// Move caret to end of text
+		this.ui.find('.input-chatbox').on('click focus', function() {  
+			var element = this;  
+			var range = document.createRange();  
+			var selection = window.getSelection();  
+
+			range.selectNodeContents(element);  
+			range.collapse(false); 
+			selection.addRange(range);  
+		});
+
 		this.ui.find('.input-chatbox')[0].maxLength = MAX_LENGTH;
+
+		this.ui.find('.input-chatbox').on('input', function(event) {  
+			var currentText = extractChatMessage(jQuery(this));  
+			if (currentText.length >= MAX_LENGTH) { // cap message to maximun lenght
+				event.preventDefault();  
+				return false;  
+			}  
+		});  
+
+		this.ui.find('.input-chatbox').on('keydown', function(event) {  
+			var currentText = extractChatMessage(jQuery(this));  
+      			// Allowed Keys (backspace, delete, arrows, etc)  
+			if (event.which >= 37 && event.which <= 40) return true; // arrows 
+			if (event.which === 8 || event.which === 46) return true; // backspace, delete  
+			if (event.which === 13) return true; // enter  
+			if (event.ctrlKey || event.altKey) return true;  
+      
+			// Block texting after reach max_lenght
+			if (currentText.length >= MAX_LENGTH) {  
+				event.preventDefault();  
+				return false;  
+			}  
+		});
+
 		this.ui.find('.input-chatbox').on('paste', function(event) {
 			// Contenteditable ignores maxLength; enforce plain-text paste + length limit.
 			event.preventDefault();
@@ -317,8 +350,7 @@ define(function(require)
 		});
 
 		this.ui.find('.draggable').mousedown(function(event){
-			event.stopImmediatePropagation();
-			return false;
+			event.stopPropagation();
 		});
 
 		// Send message to...
@@ -351,6 +383,82 @@ define(function(require)
 
 		// Scroll feature should block at each line
 		this.ui.find('.content').on('mousewheel DOMMouseScroll', onScroll);
+		// Tabs should behave like "UI" (no entity hover / map cursor changes), but opttab remains click-through.
+		(function initTabHoverBlock(){
+			var _tabIntersect, _tabEnter = 0;
+
+			ChatBox.ui.on('mouseenter', 'table.header tr td.tab, table.header tr td.tab *', function(){
+				if (_tabEnter === 0) {
+					_tabIntersect = Mouse.intersect;
+					_tabEnter++;
+					if (_tabIntersect) {
+						Mouse.intersect = false;
+						Cursor.setType(Cursor.ACTION.DEFAULT);
+						getModule('Renderer/EntityManager').setOverEntity(null);
+					}
+				}
+			});
+
+			ChatBox.ui.on('mouseleave', 'table.header tr td.tab, table.header tr td.tab *', function(){
+				if (_tabEnter > 0) {
+					_tabEnter--;
+					if (_tabEnter === 0 && _tabIntersect) {
+						Mouse.intersect = true;
+						getModule('Renderer/EntityManager').setOverEntity(null);
+					}
+				}
+			});
+
+			// Prevent walking when clicking tabs (MapControl listens on window mousedown).
+			ChatBox.ui.on('mousedown', 'table.header tr td.tab, table.header tr td.tab *', function(event){
+				event.stopPropagation();
+			});
+		})();
+
+		// Prevent map right-click (camera rotate) when using chat right-click features.
+		this.ui.on('mousedown', '.body, .contentwrapper, .content', function(event){
+			if (event.which !== 3) {
+				return true;
+			}
+
+			// Let other UI elements handle their own context menus, but never rotate the camera.
+			if (jQuery(event.target).closest('.event_add_cursor, .chat-function, td.tab').length) {
+				event.preventDefault();
+				event.stopPropagation();
+				return false;
+			}
+
+			event.preventDefault();
+			event.stopPropagation();
+			return false;
+		});
+
+		// Chat font scale context menu (right click).
+		this.ui.on('contextmenu', '.body, .contentwrapper, .content', function(event){
+			// Ignore right click on interactive elements (links, item links, scrollbars, etc.)
+			if (jQuery(event.target).closest('a, .item-link, .event_add_cursor, .chat-function, td.tab').length) {
+				return true;
+			}
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			Mouse.screen.x = event.pageX;
+			Mouse.screen.y = event.pageY;
+
+			ContextMenu.remove();
+			ContextMenu.append();
+			ContextMenu.addElement('Chat font x1.0', setChatFontScale(1.0));
+			ContextMenu.addElement('Chat font x1.2', setChatFontScale(1.2));
+			ContextMenu.addElement('Chat font x1.4', setChatFontScale(1.4));
+
+			return false;
+		});
+
+		// Clicking interactive elements in chat should not trigger map movement.
+		this.ui.on('mousedown', '.content a, .content .item-link', function(event){
+			event.stopPropagation();
+		});
 
 		this.ui.find('.battlemode .bmtoggle').click(function ( event ){
 			ChatBox.ui.find('.input').toggle();
@@ -806,6 +914,10 @@ define(function(require)
 			case KEYS.UP:
 				if (!jQuery('#NpcMenu').length) {
 					if (document.activeElement === messageBox[0]) {
+						if (shouldLetChatInputHandleVerticalArrows(messageBox[0], 'up')) {
+							event.stopImmediatePropagation();
+							return true;
+						}
 						messageBox.html(_historyMessage.previous()).select();
 						break;
 					}
@@ -821,6 +933,10 @@ define(function(require)
 			case KEYS.DOWN:
 				if (!jQuery('#NpcMenu').length) {
 					if (document.activeElement === messageBox[0]) {
+						if (shouldLetChatInputHandleVerticalArrows(messageBox[0], 'down')) {
+							event.stopImmediatePropagation();
+							return true;
+						}
 						messageBox.html(_historyMessage.next()).select();
 						break;
 					}
@@ -938,12 +1054,10 @@ define(function(require)
 
 		clone.find('span.item-link').each(function() {
 			var itemData = jQuery(this).attr('data-item') || jQuery(this).data('item') || '';
-			itemData = HTMLEntity.decodeHTMLEntities(String(itemData));
 			jQuery(this).replaceWith(document.createTextNode(itemData));
 		});
 
 		var result = clone.text();
-		result = HTMLEntity.decodeHTMLEntities(result);
 		result = result.replace(/\u00A0/g, ' ');
 		return result;
 	}
@@ -1122,22 +1236,21 @@ define(function(require)
 	ChatBox.updateHeight = function changeHeight( AlwaysVisible )
 	{
 		var HeightList = [ 0, 0, MAGIC_NUMBER, MAGIC_NUMBER*2, MAGIC_NUMBER*3, MAGIC_NUMBER*4, MAGIC_NUMBER*5 ];
-		_heightIndex   = (_heightIndex + 1) % HeightList.length;
+		var content    = this.ui.find('.contentwrapper');
+		var bottomBefore = getChatBottomAnchorPx(this.ui, this.__lastBottomY);
 
-		var content   = this.ui.find('.contentwrapper');
-		var height     = HeightList[ _heightIndex ];
-		var top        = parseInt( this.ui.css('top'), 10);
+		_heightIndex = (_heightIndex + 1) % HeightList.length;
 
-		this.ui.css('top', top - (height - content.height()) );
-		content.height(height);
-
-		// Don't remove UI
+		// Don't remove UI (button cycles to "input only" instead of hidden)
 		if (_heightIndex === 0 && AlwaysVisible) {
-			_heightIndex++;
+			_heightIndex = 1;
 		}
+
+		content.height( HeightList[ _heightIndex ] );
 
 		switch (_heightIndex) {
 			case 0:
+				this.__lastBottomY = bottomBefore;
 				this.ui.hide();
 				break;
 
@@ -1153,8 +1266,110 @@ define(function(require)
 				break;
 		}
 
-		content[this.activeTab].scrollTop = content[this.activeTab].scrollHeight;
+		// Keep the input/battlemode bar at the same screen position.
+		if (_heightIndex !== 0 && isFinite(bottomBefore)) {
+			var bottomAfter = getChatBottomAnchorPx(this.ui, bottomBefore);
+			if (isFinite(bottomAfter)) {
+				var top = parseInt(this.ui.css('top'), 10);
+				top = isFinite(top) ? top : 0;
+				this.ui.css('top', top + (bottomBefore - bottomAfter));
+				this.__lastBottomY = bottomBefore;
+			}
+		}
+
+		var active = this.ui.find('.content[data-content="'+ this.activeTab +'"]')[0];
+		if (active) {
+			active.scrollTop = active.scrollHeight;
+		}
 	};
+
+	function getChatBottomAnchorPx($ui, fallback)
+	{
+		var bar = $ui.find('.input:visible');
+		if (bar.length) {
+			var rect = bar[0].getBoundingClientRect();
+			return rect.bottom;
+		}
+
+		bar = $ui.find('.battlemode:visible');
+		if (bar.length) {
+			var rect2 = bar[0].getBoundingClientRect();
+			return rect2.bottom;
+		}
+
+		if (isFinite(fallback)) {
+			return fallback;
+		}
+
+		return NaN;
+	}
+
+	function shouldLetChatInputHandleVerticalArrows(inputEl, direction)
+	{
+		if (!inputEl || !window.getSelection) {
+			return false;
+		}
+
+		var sel = window.getSelection();
+		if (!sel || sel.rangeCount < 1) {
+			return false;
+		}
+
+		var range = sel.getRangeAt(0);
+		if (!range) {
+			return false;
+		}
+
+		var anchorNode = sel.anchorNode || range.startContainer;
+		if (!anchorNode) {
+			return false;
+		}
+
+		// Only consider caret inside the chat input.
+		if (anchorNode !== inputEl && !(inputEl.contains && inputEl.contains(anchorNode))) {
+			return false;
+		}
+
+		// If user has a selection, let the browser handle navigation.
+		if (!sel.isCollapsed) {
+			return true;
+		}
+
+		// Only do this when there is more than one visual line.
+		var text = extractChatMessage(jQuery(inputEl));
+		var hasNewline = text.indexOf('\n') > -1;
+		var hasOverflow = (inputEl.scrollHeight > inputEl.clientHeight + 1);
+		if (!hasNewline && !hasOverflow) {
+			return false;
+		}
+
+		var caretRect;
+		try {
+			caretRect = range.getClientRects && range.getClientRects().length ? range.getClientRects()[0] : range.getBoundingClientRect();
+		} catch(e) {
+			return true;
+		}
+
+		if (!caretRect) {
+			return true;
+		}
+
+		var inputRect = inputEl.getBoundingClientRect ? inputEl.getBoundingClientRect() : null;
+		if (!inputRect) {
+			return true;
+		}
+
+		// If caret is not on the first/last visible line, allow normal arrow behavior.
+		if (direction === 'up') {
+			return caretRect.top > (inputRect.top + 2);
+		}
+
+		if (direction === 'down') {
+			return caretRect.bottom < (inputRect.bottom - 2);
+		}
+
+		return false;
+	}
 
 
 	/**
@@ -1198,6 +1413,7 @@ define(function(require)
 	function onScroll( event )
 	{
 		var delta;
+		var lineHeight;
 
 		if (event.originalEvent.wheelDelta) {
 			delta = event.originalEvent.wheelDelta / 120 ;
@@ -1209,7 +1425,8 @@ define(function(require)
 			delta = -event.originalEvent.detail;
 		}
 
-		this.scrollTop = Math.floor(this.scrollTop/14) * 14 - (delta * 14);
+		lineHeight = getScrollLineHeightPx(this);
+		this.scrollTop = Math.floor(this.scrollTop / lineHeight) * lineHeight - (delta * lineHeight);
 		return false;
 	}
 
@@ -1286,44 +1503,125 @@ define(function(require)
 		};
 	}
 
-	function makeResizableDiv() {
-		const resizers = document.querySelectorAll('.draggable')
-		let original_height = 0;
-		let original_y = 0;
-		let original_mouse_y = 0;
-		for (let i = 0;i < resizers.length; i++) {
-			const currentResizer = resizers[i];
+	function setChatFontScale(scale)
+	{
+		return function setChatFontScaleClosure()
+		{
+			_preferences.fontScale = clampChatFontScale(scale);
+			_preferences.save();
+			ChatBox.applyFontScale();
+		};
+	}
 
-			currentResizer.addEventListener('mousedown', function(e) {
-				e.preventDefault();
-				original_height = ChatBox.ui.find('.contentwrapper').height();
-				original_y = parseInt( ChatBox.ui.css('top'), 10) + original_height;
-				original_mouse_y = e.pageY;
-				window.addEventListener('mousemove', resize);
-				window.addEventListener('mouseup', stopResize);
-			})
+	function clampChatFontScale(scale)
+	{
+		var allowed = [1.0, 1.2, 1.4];
+		var i, best = allowed[0], bestDist = Infinity;
 
-			function resize(e) {
-				if (currentResizer.classList.contains('draggable')) {
-					const height = fixHeight(original_height - (e.pageY - original_mouse_y));
-					if (height > MAGIC_NUMBER) {
-						ChatBox.ui.css('top', original_y - height);
-						ChatBox.ui.find('.contentwrapper').height(height);
-					}
-				}
-				// scroll down when resize
-				ChatBox.ui.find('.content')[ChatBox.activeTab].scrollTop = ChatBox.ui.find('.content')[ChatBox.activeTab].scrollHeight;
-			}
+		scale = parseFloat(scale);
+		if (!isFinite(scale) || scale <= 0) {
+			return 1.0;
+		}
 
-			function fixHeight(height){
-				return  Math.floor(height/MAGIC_NUMBER)*MAGIC_NUMBER;
-			}
-
-			function stopResize() {
-				window.removeEventListener('mousemove', resize);
+		for (i = 0; i < allowed.length; ++i) {
+			var dist = Math.abs(allowed[i] - scale);
+			if (dist < bestDist) {
+				bestDist = dist;
+				best = allowed[i];
 			}
 		}
-	  }
+
+		return best;
+	}
+
+	function getScrollLineHeightPx(element)
+	{
+		var style, lh;
+
+		try {
+			style = window.getComputedStyle(element);
+			lh = parseFloat(style.lineHeight);
+			if (isFinite(lh) && lh > 0) {
+				return Math.round(lh);
+			}
+		} catch(e) {}
+
+		return 14;
+	}
+
+	ChatBox.applyFontScale = function applyFontScale()
+	{
+		var scale = clampChatFontScale(_preferences.fontScale || 1.0);
+		var baseFont = 12;
+		var baseLineHeight = 14;
+		var baseInputLineHeight = 18;
+
+		var fontSize = Math.max(10, Math.round(baseFont * scale));
+		var lineHeight = Math.max(12, Math.round(baseLineHeight * scale));
+		var inputLineHeight = Math.max(14, Math.round(baseInputLineHeight * scale));
+
+		_preferences.fontScale = scale;
+
+		// Chat log
+		this.ui.find('.content').css({
+			fontSize: fontSize + 'px',
+			lineHeight: lineHeight + 'px'
+		});
+
+		// Chat input (match "whisp box" inputs)
+		this.ui.find('.input input, .input .message').css({
+			fontFamily: 'Arial',
+			fontSize: fontSize + 'px'
+		});
+		this.ui.find('.input .message').css({
+			lineHeight: inputLineHeight + 'px'
+		});
+	};
+
+	function makeResizableDiv() {
+		var resizer = ChatBox.ui.find('.event_add_cursor')[0];
+		if (!resizer) {
+			return;
+		}
+
+		var originalHeight = 0;
+		var originalAnchorY = 0;
+		var originalMouseY = 0;
+
+		var fixHeight = function fixHeight(height) {
+			return Math.floor(height / MAGIC_NUMBER) * MAGIC_NUMBER;
+		};
+
+		var resize = function resize(e) {
+			var height = fixHeight(originalHeight - (e.pageY - originalMouseY));
+			// Clamp to supported height steps (keep in sync with updateHeight()).
+			height = Math.max(MAGIC_NUMBER, Math.min(MAGIC_NUMBER * 5, height));
+
+			ChatBox.ui.css('top', originalAnchorY - height);
+			ChatBox.ui.find('.contentwrapper').height(height);
+			_heightIndex = Math.max(2, Math.min(6, (height / MAGIC_NUMBER) + 1));
+
+			var active = ChatBox.ui.find('.content[data-content="'+ ChatBox.activeTab +'"]')[0];
+			if (active) {
+				active.scrollTop = active.scrollHeight;
+			}
+		};
+
+		var stopResize = function stopResize() {
+			window.removeEventListener('mousemove', resize);
+			window.removeEventListener('mouseup', stopResize);
+		};
+
+		resizer.addEventListener('mousedown', function(e) {
+			e.preventDefault();
+			originalHeight = ChatBox.ui.find('.contentwrapper').height();
+			originalAnchorY = parseInt(ChatBox.ui.css('top'), 10) + originalHeight;
+			originalMouseY = e.pageY;
+
+			window.addEventListener('mousemove', resize);
+			window.addEventListener('mouseup', stopResize);
+		});
+	}
 
 	
 	

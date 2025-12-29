@@ -82,8 +82,14 @@
 	text-decoration:underline;
 }
 
-#chatbox .draggable {
-	height:10px;
+#chatbox .content a,
+#chatbox .content .item-link {
+	cursor: pointer;
+}
+
+#chatbox .event_add_cursor {
+	height:14px;
+	cursor: ns-resize;
 }
 
 #chatbox .battlemode {
@@ -117,6 +123,8 @@
 	height:18px;
 	background-color:transparent;
 	border:none;
+	font-family: Arial;
+	font-size: 12px;
 }
 
 #chatbox .input .username {
@@ -135,12 +143,13 @@
 	background-repeat:no-repeat;
 	padding:0;
 }
-
 #chatbox .input .wrapper {
-	display: flex;
+    display: flex;
     align-items: center;
     margin-left: 108px;
     height: 100%;
+    overflow: hidden;
+    width: calc(100% - 140px);
 }
 
 #chatbox .input .message {
@@ -148,11 +157,14 @@
 	padding-left:5px;
 	font-size:12px;
 	line-height:18px;
+	font-family: Arial;
 	outline:none;
-	white-space: pre-wrap;
-	word-break: break-word;
-	overflow-wrap: anywhere;
-	max-width: 100%;
+	white-space: nowrap;  
+	overflow-x: hidden;  
+	overflow-y: hidden;  
+	max-width: 100%;  
+	vertical-align: middle;
+	display: inline-block;
 }
 #chatbox .input .message.party { color:#840084; }
 #chatbox .input .message.guild { color:#008484; }
@@ -179,6 +191,9 @@
     position: absolute;
     right: 0px;
     top: 0px;
+	/* Expand the "no-walk" header zone around buttons (but don't move them visually). */
+	padding: 6px;
+	margin: -6px;
 }
 #chatbox .chat-function button{
     background-size: auto;

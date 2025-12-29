@@ -26,7 +26,7 @@ define( ['Core/MemoryItem'], function( MemoryItem )
 	 * Remove files from memory if not used until a period of time
 	 * @var {number}
 	 */
-	var _rememberTime = 2 * 60 * 1000; // 2 min
+	var _rememberTime = 30 * 1000; // 30s
 
 
 	/**
@@ -36,9 +36,9 @@ define( ['Core/MemoryItem'], function( MemoryItem )
 
 
 	/**
-	 * @var {number} perform the clean up every 30 secs
+	 * @var {number} perform the clean up every 10 secs
 	 */
-	var _cleanUpInterval = 30 * 1000;
+	var _cleanUpInterval = 10 * 1000;
 
 	/**
 	 * Async cleanup state tracking.
@@ -129,7 +129,7 @@ define( ['Core/MemoryItem'], function( MemoryItem )
 
 		var keys, item;
 		var i, count, tick;
-		var list = [];
+		var files = [];
 		_filesToClean = []; // Reset pending cleanup list
 
 		keys  = Object.keys(_memory);
@@ -158,11 +158,9 @@ define( ['Core/MemoryItem'], function( MemoryItem )
 			// Limit the number of removals per idle callback
 			var maxProcess = Math.min(5, _filesToClean.length - _cleanIndex);
 			
-			while (_cleanIndex < _filesToClean.length &&   
-					(processed < maxProcess || deadline.timeRemaining() > 0)) {  
-				
+			while (_cleanIndex < _filesToClean.length && processed < maxProcess && deadline.timeRemaining() > 0) {  
 				remove(gl, _filesToClean[_cleanIndex]);  
-				list.push(_filesToClean[_cleanIndex]);  
+				files.push(_filesToClean[_cleanIndex]);  
 				_cleanIndex++;  
 				processed++;  
 			}  
@@ -176,10 +174,9 @@ define( ['Core/MemoryItem'], function( MemoryItem )
 				_lastCheckTick = now;  
 				_filesToClean = [];  
 				
-				if (list.length) {  
-					console.log('%c[MemoryManager] - Removed ' + list.length +   
-								' unused elements from memory.', 'color:#d35111', list);  
-				}  
+				if (files.length) 
+					console.log('%c[MemoryManager] - Removed ' + files.length + ' unused elements from memory.', 'color:#d35111', {files});
+
 			}  
 		});
 	}

@@ -672,6 +672,8 @@ define(function(require)
 			this.ui.find('.hide').show();
 		}
 
+		InventoryV3.ui.find('.overlay').hide();
+
 		return item;
 	};
 
@@ -1068,6 +1070,7 @@ define(function(require)
 		// Set image to the drag drop element
 		var img   = new Image();
 		var url = this.querySelector('.icon').style.backgroundImage.match(/\((.*?)\)/)[1].replace(/('|")/g,'');
+		img.decoding = 'async';
 		img.src   = url.replace(/^\"/, '').replace(/\"$/, '');
 
 		event.originalEvent.dataTransfer.setDragImage( img, 12, 12 );
@@ -1089,7 +1092,7 @@ define(function(require)
 	 */
 	function onItemDragEnd()
 	{
-		delete window._OBJ_DRAG_;
+		//delete window._OBJ_DRAG_;
 	};
 
 
@@ -1153,7 +1156,7 @@ define(function(require)
 	 */
 	function transferItemToOtherUI(item)
 	{
-		var isStorageOpen = Storage.ui ? Storage.ui.is(':visible') : false;
+		var isStorageOpen = Storage.getUI().ui ? Storage.getUI().ui.is(':visible') : false;
 		var isCartOpen = CartItems.ui ? CartItems.ui.is(':visible') : false;
 
 		if (!item) {

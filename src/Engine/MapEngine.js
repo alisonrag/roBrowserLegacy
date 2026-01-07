@@ -78,6 +78,10 @@ define(function( require )
 	var MapName          = require('UI/Components/MapName/MapName');
 	var Announce         = require('UI/Components/Announce/Announce');
 	var Navigation         = require('UI/Components/Navigation/Navigation');
+	var CaptchaUpload    = require('UI/Components/Captcha/CaptchaUpload');
+	var CaptchaSelector  = require('UI/Components/Captcha/CaptchaSelector');
+	var CaptchaAnswer    = require('UI/Components/Captcha/CaptchaAnswer');
+	var CaptchaPreview   = require('UI/Components/Captcha/CaptchaPreview');
 	var PluginManager    = require('Plugins/PluginManager');
 
 	var UIVersionManager      = require('UI/UIVersionManager');
@@ -259,6 +263,7 @@ define(function( require )
 			require('./MapEngine/Rodex').call();
 			require('./MapEngine/Roulette').call();
 			require('./MapEngine/PCGoldTimer').call();
+			require('./MapEngine/Captcha').call();
 			if(Configs.get('enableCashShop')){
 				require('./MapEngine/CashShop').call();
 			}
@@ -292,6 +297,10 @@ define(function( require )
 			Roulette.prepare();
 			PCGoldTimer.prepare();
 			Navigation.prepare();
+			CaptchaUpload.prepare();
+			CaptchaSelector.prepare();
+			CaptchaAnswer.prepare();
+			CaptchaPreview.prepare();
 
 			if(Configs.get('enableMapName')){
 				MapName.prepare();
@@ -623,6 +632,35 @@ define(function( require )
 			// free and load aura so it loads in new map
 			Session.Entity.aura.free();
 			Session.Entity.aura.load(EffectManager);
+
+			// Spawn all signboards for the current map  
+			const mapName = MapRenderer.currentMap.replace('.gat', '').toLowerCase();  
+			const signboards = DB.getAllSignboardsForMap(mapName);  
+			
+			if (signboards) {  
+				for (let x in signboards) {  
+					for (let y in signboards[x]) {  
+						const signboardData = signboards[x][y];  
+						
+						// Create a dummy entity for the signboard  
+						const signboardEntity = new Entity();  
+						signboardEntity.set({  
+							objecttype: Entity.TYPE_EFFECT,  
+							GID: 'SIGNBOARD_' + x + '_' + y,  
+							PosDir: [parseInt(x), parseInt(y), 0],  
+							job: 0, // No job  
+							name: "",  
+							hp: -1,  
+							maxhp: -1,  
+							hideShadow: true,  
+						});  
+						
+						// Load signboard data  
+						signboardEntity.signboard.load(signboardData);  
+						EntityManager.add(signboardEntity);  
+					}  
+				}  
+			}
 
 			// Initialize camera
 			Camera.setTarget( Session.Entity );

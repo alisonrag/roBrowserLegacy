@@ -208,6 +208,11 @@ define(function (require) {
 	var QuestInfo = {};
 
 	/**
+	 * @var Title Table
+	 */
+	var TitleTable = {};  
+	
+	/**
 	 * @var User charpage init
 	 */
 	var servers = Configs.get('servers', []);
@@ -271,7 +276,12 @@ define(function (require) {
 
 			// Weapon tables  
 			loadWeaponTable(DB.LUA_PATH + 'datainfo/weapontable.lub', null, onLoad());
-			
+
+			// Title tables
+			if(PACKETVER.value >= 20170208){
+				loadTitleTable(DB.LUA_PATH + 'datainfo/titletable.lub', null, onLoad());
+			}
+
 			// Skill
 			loadLuaTable(
 				[DB.LUA_PATH + 'skillinfoz/skillid.lub', DB.LUA_PATH + 'skillinfoz/skilldescript.lub'],
@@ -297,7 +307,7 @@ define(function (require) {
 
 			// Status
 			loadStateIconInfo(DB.LUA_PATH + 'stateicon/', null, onLoad());
-	
+
 			// Legacy Navigation
 			if(PACKETVER.value >= 20111010){
 				loadLuaValue(DB.LUA_PATH + 'navigation/navi_map_krpri.lub', 'Navi_Map', function (json) { NaviMapTable = json; }, onLoad());
@@ -777,6 +787,57 @@ define(function (require) {
 		loadNext(0);
 	}
 
+	function loadTitleTable(filename, callback, onEnd) {  
+		Client.loadFile(filename,  
+			async function (file) {  
+				try {  
+					console.log('Loading file "' + filename + '"...');  
+					let buffer = (file instanceof ArrayBuffer) ? new Uint8Array(file) : file;  
+                  
+					const ctx = lua.ctx;  
+					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);  
+
+					ctx.AddTitle = function(titleID, titleName) {  
+						TitleTable[titleID] = userStringDecoder.decode(titleName);  
+						return 1;  
+					};  
+
+					lua.mountFile(filename, buffer);  
+					await lua.doFile(filename);  
+
+					lua.doStringSync(`  
+						function main_title()  
+							if title_tbl then  
+								for titleID, titleName in pairs(title_tbl) do  
+									result, msg = AddTitle(titleID, titleName)  
+									if not result then  
+										return false, msg  
+									end  
+								end  
+							end  
+						return true, "success"  
+						end
+						main_title()  
+					`);  
+                  
+				} catch (error) {  
+					console.error('[loadTitleTable] Error: ', error);  
+				} finally {  
+					lua.unmountFile(filename);  
+					onEnd();  
+				}  
+			},  
+			onEnd  
+		);  
+	}
+
+	DB.getAllTitles = function() {  
+		return TitleTable;  
+	};
+
+	DB.getTitleString = function(titleID) {  
+		return TitleTable[titleID] || "";  
+	};
 
 	/**
 	* Load Town Info file
@@ -4909,6 +4970,29 @@ define(function (require) {
 			}
 		}
 	};
+
+
+	/**
+	* Load Clan Emblem file
+	* Icons for group reads from texture/유저인터페이스/clan_system/...
+	*
+	* @param {integer} clanId
+	* @param {function} callback to run once the file is loaded
+	*
+	* @author alisonrag
+	*/
+	DB.loadClanEmblem = function loadClanEmblem(clanId, callback) {
+		Client.loadFile( DB.INTERFACE_PATH + "clan_system/clan_emblem" + clanId.toString().padStart(2, '0') + ".bmp", function(dataURI) {
+			let img = new Image();
+			img.decoding = 'async';
+			img.src = dataURI; // String Base64
+
+			// wait image load to call the callback
+			img.onload = function() {
+				callback(img);
+			};
+		});
+	}
 
 	/**
 	* Load Group Emblem file

@@ -11354,8 +11354,8 @@ define(['Utils/BinaryWriter', './PacketVerManager', 'Utils/Struct', 'Core/Config
 
 	// 0x988
 	PACKET.ZC.NOTIFY_CLAN_CONNECTINFO = function PACKET_ZC_NOTIFY_CLAN_CONNECTINFO(fp, end) {
-		this.NumConnect = fp.readShort();
-		this.NumTotal = fp.readShort();
+		this.membersOnline = fp.readShort();
+		this.membersTotal = fp.readShort();
 	};
 	PACKET.ZC.NOTIFY_CLAN_CONNECTINFO.size = 6;
 
@@ -11368,19 +11368,19 @@ define(['Utils/BinaryWriter', './PacketVerManager', 'Utils/Struct', 'Core/Config
 
 	// 0x98a
 	PACKET.ZC.CLANINFO = function PACKET_ZC_CLANINFO(fp, end) {
-		this.ClanID = fp.readLong();
-		this.ClanName = fp.readString(NAME_LENGTH);
-		this.MasterName = fp.readString(NAME_LENGTH);
-		this.Map = fp.readString(MAP_NAME_LENGTH_EXT);
-		this.AllyCount = fp.readUChar();
-		this.AntagonistCount = fp.readUChar();
-		this.AllyList = new Array(this.AllyCount);
-		for (let i = 0; i < this.AllyCount; i++) {
-			this.AllyList[i] = fp.readString(NAME_LENGTH);
+		this.clanId = fp.readLong();
+		this.name = fp.readString(NAME_LENGTH);
+		this.master = fp.readString(NAME_LENGTH);
+		this.territory = fp.readString(MAP_NAME_LENGTH_EXT);
+		this.allyCount = fp.readUChar();
+		this.antagonistCount = fp.readUChar();
+		this.allyList = new Array(this.allyCount);
+		for (let i = 0; i < this.allyCount; i++) {
+			this.allyList[i] = fp.readString(NAME_LENGTH);
 		}
-		this.AntagonistList = new Array(this.AntagonistCount);
-		for (let i = 0; i < this.AntagonistCount; i++) {
-			this.AntagonistList[i] = fp.readString(NAME_LENGTH);
+		this.antagonistList = new Array(this.antagonistCount);
+		for (let i = 0; i < this.antagonistCount; i++) {
+			this.antagonistList[i] = fp.readString(NAME_LENGTH);
 		}
 	};
 	PACKET.ZC.CLANINFO.size = -1;
@@ -11403,8 +11403,8 @@ define(['Utils/BinaryWriter', './PacketVerManager', 'Utils/Struct', 'Core/Config
 
 	// 0x98e
 	PACKET.ZC.NOTIFY_CLAN_CHAT = function PACKET_ZC_NOTIFY_CLAN_CHAT(fp, end) {
-		this.MemberName = fp.readString(NAME_LENGTH);
-		this.msg = fp.readString(end - fp.tell());
+		this.memberName = fp.readString(NAME_LENGTH);
+		this.message = fp.readString(end - fp.tell());
 	};
 	PACKET.ZC.NOTIFY_CLAN_CHAT.size = -1;
 
@@ -13429,6 +13429,27 @@ define(['Utils/BinaryWriter', './PacketVerManager', 'Utils/Struct', 'Core/Config
 		this.TitleID = fp.readULong(); //maybe change in future
 	};
 	PACKET.ZC.ACK_REQNAMEALL2.size = 106;
+
+	// 0x0a2f
+	PACKET.ZC.ACK_CHANGE_TITLE = function(fp, end) {  
+		this.result = fp.readUChar(); 
+		this.title_id = fp.readULong();  
+	};
+	PACKET.ZC.ACK_CHANGE_TITLE.size = 7;
+
+	// 0x0a2e
+	PACKET.CZ.REQ_CHANGE_TITLE = function() {  
+		this.title_id = 0;  
+	};
+	PACKET.CZ.REQ_CHANGE_TITLE.prototype.build = function() {  
+		var pkt_len = 2 + 4;  
+		var pkt_buf = new BinaryWriter(pkt_len);  
+      
+		pkt_buf.writeShort(0x0a2e);  
+		pkt_buf.writeULong(this.title_id);  
+		return pkt_buf;  
+	};
+	PACKET.CZ.REQ_CHANGE_TITLE.size = 6;
 
 	// 0xa37
 	PACKET.ZC.ITEM_PICKUP_ACK7 = function PACKET_ZC_ITEM_PICKUP_ACK7(fp, end) {

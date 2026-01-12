@@ -20,6 +20,7 @@ define(function (require) {
 	const PACKETVER = require("Network/PacketVerManager");
 	const Network = require("Network/NetworkManager");
 	const ControlPreferences = require("Preferences/Controls");
+	const UIPreferences = require("Preferences/UI");
 	const AudioPreferences = require("Preferences/Audio");
 	const MapPreferences = require("Preferences/Map");
 	const CameraPreferences = require("Preferences/Camera");
@@ -269,6 +270,21 @@ define(function (require) {
 				ControlPreferences.save();
 				return;
 			},
+		},
+		window: {
+			description: "Toggles snapping/magnetism between windows",
+			callback: function () {
+				UIPreferences.windowmagnet = !UIPreferences.windowmagnet;
+				this.addText(
+					"Window magnet " +
+						(UIPreferences.windowmagnet ? "ON" : "OFF"),
+					this.TYPE.INFO,
+					this.FILTER.PUBLIC_LOG
+				);
+				UIPreferences.save();
+				return;
+			},
+			aliases: ["wi"],
 		},
 
 		stand: {
@@ -844,42 +860,44 @@ define(function (require) {
 		},
 	};
 
-		// Dev-only weather helper to trigger weather effects locally.
-		if (Configs.get("development")) {
+	// Dev-only weather helper to trigger weather effects locally.
+	if (Configs.get("development")) {
 			CommandStore.weather = {
-				description: "Dev-only weather toggle. Usage: /weather snow|rain|off",
+				description: "Dev-only weather toggle. Usage: /weather snow|rain|leaves|sakura|fireworks|off",
 				callback: function (text) {
 					var args = text.trim().split(/\s+/).slice(1);
 					var mode = (args[0] || "").toLowerCase();
 
 					if (!mode || mode === "help") {
 						this.addText(
-							"Usage: /weather snow|rain|off",
+							"Usage: /weather snow|rain|leaves|sakura|fireworks|off",
 							this.TYPE.INFO,
 							this.FILTER.PUBLIC_LOG
 						);
 						return;
 					}
 
-				if (!Session.Entity) {
-					return;
-				}
+					if (!Session.Entity) {
+						return;
+					}
 
-				var ownerAID = Session.Entity.GID || Session.GID || Session.AID;
-				var EffectManager = getModule("Renderer/EffectManager");
+					var ownerAID = Session.Entity.GID || Session.GID || Session.AID;
+					var EffectManager = getModule("Renderer/EffectManager");
 					var SnowWeatherEffect = getModule("Renderer/Effects/SnowWeather");
 					var RainWeatherEffect = getModule("Renderer/Effects/RainWeather");
+					var SakuraWeatherEffect = getModule("Renderer/Effects/SakuraWeatherEffect");
+					var PokJukWeatherEffect = getModule("Renderer/Effects/PokJukWeatherEffect");
 
 					if (mode === "snow" || mode === "on") {
 						EffectManager.spam({
 							effectId: EffectConst.EF_SNOW,
 							ownerAID: ownerAID
-					});
-					this.addText(
-						"Snow started.",
-						this.TYPE.INFO,
-						this.FILTER.PUBLIC_LOG
-					);
+						});
+						this.addText(
+							"Snow started.",
+							this.TYPE.INFO,	
+							this.FILTER.PUBLIC_LOG
+						);
 						return;
 					}
 
@@ -896,9 +914,50 @@ define(function (require) {
 						return;
 					}
 
+					if (mode === "sakura") {
+						EffectManager.spam({
+							effectId: EffectConst.EF_SAKURA,
+							ownerAID: ownerAID
+						});
+						this.addText(
+							"Cherry tree leaves have begun to fall.",
+							this.TYPE.INFO,
+							this.FILTER.PUBLIC_LOG
+						);
+						return;
+					}
+
+					if (mode === "leaves") {
+						EffectManager.spam({
+							effectId: EffectConst.EF_MAPLE,
+							ownerAID: ownerAID
+						});
+						this.addText(
+							"Fallen leaves fall.",
+							this.TYPE.INFO,
+							this.FILTER.PUBLIC_LOG
+						);
+						return;
+					}
+
+					if (mode === "fireworks") {
+						EffectManager.spam({
+							effectId: EffectConst.EF_POKJUK,
+							ownerAID: ownerAID
+						});
+						this.addText(
+							"Fireworks are launched.",
+							this.TYPE.INFO,
+							this.FILTER.PUBLIC_LOG
+						);
+						return;
+					}
+
 					if (mode === "off" || mode === "stop" || mode === "clear") {
 						SnowWeatherEffect.stop(ownerAID, Renderer.tick);
 						RainWeatherEffect.stop(ownerAID, Renderer.tick);
+						SakuraWeatherEffect.stop(ownerAID, Renderer.tick);
+						PokJukWeatherEffect.stop(ownerAID, Renderer.tick);
 						this.addText(
 							"Weather stopping.",
 							this.TYPE.INFO,
@@ -908,7 +967,7 @@ define(function (require) {
 					}
 
 					this.addText(
-						"Unknown weather. Usage: /weather snow|rain|off",
+						"Unknown weather. Usage: /weather snow|rain|leaves|sakura|fireworks|off",
 						this.TYPE.INFO,
 						this.FILTER.PUBLIC_LOG
 					);

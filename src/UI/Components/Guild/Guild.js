@@ -27,6 +27,7 @@ define(function(require)
 	var Camera         = require('Renderer/Camera');
 	var Renderer       = require('Renderer/Renderer');
 	var Preferences    = require('Core/Preferences');
+	var PACKETVER      = require('Network/PacketVerManager');
 	var Client         = require('Core/Client');
 	var UIManager      = require('UI/UIManager');
 	var UIComponent    = require('UI/UIComponent');
@@ -38,6 +39,7 @@ define(function(require)
 	var htmlText       = require('text!./Guild.html');
 	var cssText        = require('text!./Guild.css');
 
+	var WinStats  = require('UI/Components/WinStats/WinStats');
 
 	/**
 	 * @var {Preferences} structure
@@ -391,7 +393,8 @@ define(function(require)
 		general.find('.exp .value').text(info.exp);
 		general.find('.tax .value').text(info.point);
 
-		Guild.onRequestGuildEmblem(info.GDID, info.emblemVersion, Guild.setEmblem.bind(this));
+		if (PACKETVER.value < 20170315)
+			Guild.onRequestGuildEmblem(info.GDID, info.emblemVersion, Guild.setEmblem.bind(this));
 
 		if (Session.isGuildMaster) {
 			general.find('.emblem_edit').show();
@@ -399,6 +402,8 @@ define(function(require)
 		else {
 			general.find('.emblem_edit').hide();
 		}
+
+		WinStats.getUI().update('guildname', info.guildname);
 
 		renderTendency(info.honor, info.virtue);
 	};

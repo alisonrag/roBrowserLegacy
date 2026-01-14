@@ -73,6 +73,7 @@ define(function( require )
 	var Roulette         = require('UI/Components/Roulette/Roulette');
 	var PCGoldTimer      = require('UI/Components/PCGoldTimer/PCGoldTimer');
 	var Refine           = require('UI/Components/Refine/Refine');
+	var Reputation       = require('UI/Components/Reputation/Reputation');
 	var PetInformations  = require('UI/Components/PetInformations/PetInformations');
 	var HomunInformations = require('UI/Components/HomunInformations/HomunInformations');
 	var MapName          = require('UI/Components/MapName/MapName');
@@ -87,7 +88,8 @@ define(function( require )
 	var SignboardManager = require('Renderer/SignboardManager');
 	var PvPTimer         = require('UI/Components/PvPTimer/PvPTimer');
 	var PvPCount         = require('UI/Components/PvpCount/PvpCount');
-
+	var PACKETVER        = require('Network/PacketVerManager');
+	var ShortCut         = require('UI/Components/ShortCut/ShortCut');  
 	var UIVersionManager      = require('UI/UIVersionManager');
 	// Version Dependent UIs
 	var BasicInfo = require('UI/Components/BasicInfo/BasicInfo');
@@ -346,6 +348,10 @@ define(function( require )
 
 			if (PACKETVER.value >= 20200916) {
 				ItemReform.prepare();
+			}
+
+			if (PACKETVER.value >= 20220330) {
+				Reputation.prepare();
 			}
 
 			// Bind UI
@@ -730,16 +736,7 @@ define(function( require )
 
 		// Wait a second, if no answer from the server, then close it.
 		Events.setTimeout(function(){
-			UIManager.removeComponents();
-			Network.close();
-			Renderer.stop();
-			MapRenderer.free();
-			SoundManager.stop();
-			BGM.stop();
-			Background.remove();
-			Background.setImage('bgi_temp.bmp', function(){
-				require('Engine/GameEngine').reload();
-			});
+			onExitSuccess();
 		}, 1000);
 	}
 
@@ -762,6 +759,9 @@ define(function( require )
 	 */
 	function onExitSuccess()
 	{
+		if (PACKETVER.value >= 20170315 && Session.WebToken)
+			ShortCut.saveToServer();  
+
 		UIManager.removeComponents();
 		Network.close();
 		Renderer.stop();

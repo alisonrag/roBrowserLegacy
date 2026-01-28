@@ -49,6 +49,7 @@ define(function( require )
 	var Storage          = require('UI/Components/Storage/Storage');
 	var CartItems        = require('UI/Components/CartItems/CartItems');
 	var Vending          = require('UI/Components/Vending/Vending');
+	var VendingReport    = require('UI/Components/VendingReport/VendingReport');
 	var ChangeCart       = require('UI/Components/ChangeCart/ChangeCart');
 	var ShortCut         = require('UI/Components/ShortCut/ShortCut');
 	var Equipment        = require('UI/Components/Equipment/Equipment');
@@ -87,7 +88,7 @@ define(function( require )
 	var PluginManager    = require('Plugins/PluginManager');
 	var SignboardManager = require('Renderer/SignboardManager');
 	var PvPTimer         = require('UI/Components/PvPTimer/PvPTimer');
-	var PvPCount         = require('UI/Components/PvpCount/PvpCount');
+	var PvPCount         = require('UI/Components/PvPCount/PvPCount');
 	var PACKETVER        = require('Network/PacketVerManager');
 	var ShortCut         = require('UI/Components/ShortCut/ShortCut');  
 	var UIVersionManager      = require('UI/UIVersionManager');
@@ -322,6 +323,10 @@ define(function( require )
 
 			if(Configs.get('enableBank')) {
 				Bank.prepare();
+			}
+
+			if(PACKETVER.value >= 20141016) {
+				VendingReport.prepare();
 			}
 
 			if(PACKETVER.value >= 20160601) {
@@ -768,10 +773,15 @@ define(function( require )
 		MapRenderer.free();
 		SoundManager.stop();
 		BGM.stop();
-		Background.remove();
-		Background.setImage('bgi_temp.bmp', function(){
+		if (PACKETVER.value < 20181114){
+			Background.remove();
+			Background.setImage('bgi_temp.bmp', function(){
+				require('Engine/GameEngine').reload();
+			});
+		}
+		else
 			require('Engine/GameEngine').reload();
-		});
+
 	}
 
 
@@ -819,6 +829,7 @@ define(function( require )
 			ChatBox.addText( DB.getMessage(502), ChatBox.TYPE.ERROR, ChatBox.FILTER.PUBLIC_LOG );
 		}
 		else {
+			require('Engine/MapEngine/Guild').guild_id = 0;
 			BasicInfo.getUI().remove();
 			PlayerViewEquip.getUI().remove();
 			StatusIcons.clean();

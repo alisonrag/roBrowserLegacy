@@ -46,7 +46,18 @@ define(function( require )
 	var MapPreferences = require('Preferences/Map');
 	const glMatrix     = require('Utils/gl-matrix');
 	const PACKETVER    = require('Network/PacketVerManager');
-	
+
+	var PostProcess    = require('Renderer/Effects/PostProcess');
+	var Bloom          = require('Renderer/Effects/Shaders/Bloom');
+	var VerticalFlip   = require('Renderer/Effects/Shaders/VerticalFlip');
+	var GaussianBlur   = require('Renderer/Effects/Shaders/GaussianBlur');
+	var CAS            = require('Renderer/Effects/Shaders/CAS'); 
+	var FXAA           = require('Renderer/Effects/Shaders/FXAA');
+	var Vibrance       = require('Renderer/Effects/Shaders/Vibrance'); 
+	var Cartoon        = require('Renderer/Effects/Shaders/Cartoon'); 
+
+	var WebGL         = require('Utils/WebGL');
+
 	const mat4         = glMatrix.mat4;
 
 	/**
@@ -211,6 +222,9 @@ define(function( require )
 		SoundManager.stop();
 		BGM.stop();
 
+		// Release WebGL resources for post-processing effects
+		PostProcess.clean( gl );
+
 		Mouse.intersect = false;
 
 		this.light   = null;
@@ -334,6 +348,22 @@ define(function( require )
 		Models.init( Renderer.getContext(), data );
 	}
 
+	/**
+	 * Register PostProcessing Modules in pass order
+	 */
+	function registerPostProcessModules( gl ){
+
+		if (WebGL.detectBadWebGL(gl))
+			GraphicsSettings.bloom = false;  
+		else  
+			PostProcess.register(Bloom, gl);   
+		PostProcess.register(GaussianBlur, gl);  
+		PostProcess.register(FXAA, gl);
+		PostProcess.register(CAS, gl);  
+		PostProcess.register(Cartoon, gl);
+		PostProcess.register(Vibrance, gl);  
+		PostProcess.register(VerticalFlip, gl); 
+	}
 
 	/**
 	 * Once the map finished to load
@@ -370,6 +400,7 @@ define(function( require )
 		Damage.init(gl);
 		EffectManager.init(gl);
 		ScreenEffectManager.init( gl, worldResource );
+		registerPostProcessModules( gl );
 
 		// Starting to render
 		Background.remove(function(){
@@ -396,16 +427,7 @@ define(function( require )
 	var _pos = new Uint16Array(2);
 	MapRenderer.onRender = function OnRender( tick, gl )
 	{
-
-		var usePostProcessing = GraphicsSettings.bloom || false;
-		
-		if (usePostProcessing && gl.fbo && gl.fbo.framebuffer) {
-			gl.bindFramebuffer(gl.FRAMEBUFFER, gl.fbo.framebuffer);
-			gl.viewport(0, 0, gl.fbo.width, gl.fbo.height);
-		} else {
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-			gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-		}
+		PostProcess.prepare( gl );
 
 		var fog   = MapRenderer.fog;
 		fog.use   = MapPreferences.fog;
@@ -419,8 +441,7 @@ define(function( require )
 		Mouse.world.y =  -1;
 		Mouse.world.z =  -1;
 
-		// Clear screen, update camera
-		gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+		// Update camera
 		Camera.update( tick );
 
 		modelView  = Camera.modelView;
@@ -500,26 +521,8 @@ define(function( require )
 		// Clean up
 		MemoryManager.clean(gl, tick);
 
-		if (usePostProcessing && Renderer.quadBuffer) {
-			
-			var inputTexture = gl.fbo.texture;
-			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-			gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			var finalProgramToUse = null;
-
-			if (Renderer.postProcessProgram) {
- 				finalProgramToUse = Renderer.postProcessProgram;
- 				gl.useProgram(finalProgramToUse);
-				gl.uniform1f(finalProgramToUse.uniform.uBloomIntensity, GraphicsSettings.bloomIntensity);
-				gl.uniform1f(finalProgramToUse.uniform.uBloomThreshold, 0.88); // ignore shadows
-				gl.uniform1f(finalProgramToUse.uniform.uBloomSoftKnee, 0.45); // soft transition
-			}
-			
-			if(finalProgramToUse) {
-				Renderer._drawPostProcessQuad(gl, finalProgramToUse, inputTexture);
-			}
-		}
+		// Finalize frame with post-processing effects
+		PostProcess.render( gl );
 	};
 
 

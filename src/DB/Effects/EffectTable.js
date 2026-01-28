@@ -301,7 +301,21 @@ define(function( require )
 	///
 	/// - sizeRandXMiddle, sizeRandYMiddle:
 	///   sets the middle value for the random range for the size X&Y values
-	///
+	///  
+	/// - zOffsetStart:  
+	///   initial Z offset when using fromSrc or toSrc  
+	///  
+	/// - zOffsetEnd:  
+	///   final Z offset when using fromSrc or toSrc  
+	///  
+	/// - arc:  
+	///   creates an arced trajectory using sine wave  
+	///   positive values create upward arc, negative values create downward arc  
+	///  
+	/// - retreat:  
+	///   makes projectile retreat backward before moving forward  
+	///   creates a "pull back" effect in the middle of the trajectory
+	///  
 	/// - rotate:
 	///   if set to true makes the texture rotate on it's y axis (turn around)
 	///
@@ -984,6 +998,7 @@ define(function( require )
 			attachedEntity: true,
 			blue: 1,
 			duration: 200,
+			delayLate: 250,
 			//duplicate: -1,
 			fadeIn: true,
 			fadeOut: true,
@@ -1000,6 +1015,22 @@ define(function( require )
 			type: '3D',
 			wav: 'effect/ef_soulstrike',
 			zIndex: 1
+		},
+		{
+			type: '3D',
+			duration: 250,
+			duplicate: 5,
+			timeBetweenDupli: 20,
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/particle1',
+			playSprite: true,
+			toSrc: true,
+			rotateToTarget: true,
+			sizeStart: 100.0,
+			sizeEnd: 500.0,
+			zOffsetStart: 3,
+			arc: 4.0,
+			retreat: 3.0,
+			soulStrikePattern: true
 		}],
 
 
@@ -1685,10 +1716,17 @@ define(function( require )
 
 
 		47: [{	//EF_TORCH	Torch
-			type: 'SPR',
-			file: 'torch_01',
-			duration: 250,
-			attachedEntity: true
+			type: '3D',                // C++: PP_3DPARTICLE
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/torch_01', // PT_USEORGARGB
+			attachedEntity: true,      // C++: m_pos = m_master->m_pos
+			playSprite: true,
+			duration: 600,            // 6 frames 100delay each
+			posz: 0.8,                // C++: m_deltaPos2.y = -10
+			posx: 0.1,		  // finetune
+			size: 100,                // C++: m_size (m_param[0]) 1.0f
+			angle: 270,
+			rotateToTarget: true,
+			repeat: true
 		}],
 
 
@@ -2462,18 +2500,57 @@ define(function( require )
 
 
 		93: [{	//EF_YUFITEL	Jupitel Thunder (Ball)
-			type: 'STR',
-			//file: 'ufidel',
-			//file: 'thunder_ball000%d',
-			wav:  'effect/hunter_shockwavetrap',
-			//rand: [1, 6],
-			attachedEntity: true
+			wav: 'effect/hunter_shockwavetrap',
+			attachedEntity: false
+		},{
+			type: '3D',
+			file: 'effect/thunder_center.bmp',
+			duration: 200, // Aprox. 20 frames on C++
+			size: 35,      // widthSize 3.5f
+			toSrc: true,   // PT3DTEX_CHKTARGETPOS
+			blendMode: 2,  // RF_EMISSIVE (Aprox. Additive)
+			alphaMax: 0.66 // 170/255 on C++
+		},{
+			type: '3D',
+			fileList: [
+				'effect/thunder_ball_a.bmp',
+				'effect/thunder_ball_b.bmp',
+				'effect/thunder_ball_c.bmp',
+				'effect/thunder_ball_d.bmp',
+				'effect/thunder_ball_e.bmp',
+				'effect/thunder_ball_f.bmp'
+			],
+			frameDelay: 10, // m_animSpeed = 1 on C++
+			duration: 200,  // Aprox. 20 frames on C++
+			size: 45,       // widthSize 4.5f
+			toSrc: true,   // PT3DTEX_CHKTARGETPOS
+			blendMode: 2  // RF_EMISSIVE (Aprox. Additive)
 		}],
 
 
 		94: [{	//EF_YUFITELHIT	Jupitel Thunder (Hit)
-			type: 'STR',
-			file: 'ufidel_pang',
+			type: '3D',
+			file: 'effect/thunder_pang.bmp',
+			duration: 100, // Aprox. 10 frames on C++
+			sizeStart: 0,
+			sizeEnd: 25,    // widthSpeed 2.5f (Growing up)
+			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
+			rotateToTarget: true, 
+			fadeOut: true,
+			attachedEntity: true
+		},{
+			type: '3D',
+			fileList: [
+				'effect/thunder_plazma_blast_a.bmp',
+				'effect/thunder_plazma_blast_b.bmp',
+				'effect/thunder_ball_d.bmp',
+				'effect/thunder_ball_e.bmp',
+				'effect/thunder_ball_f.bmp'
+			],
+			frameDelay: 10,
+			duration: 300, // duration 300 on C++ is equal to 3000ms on ROB but it's the total duration of all hits, ROB parse each
+			size: 75,       // widthSize 7.5f * 10
+			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
 			attachedEntity: true
 		}],
 
@@ -2649,8 +2726,44 @@ define(function( require )
 			attachedEntity: true
 		}],
 
-		//116: [{}],	//EF_WATERBALL	   Fling Watersphere
-		//117: [{}],	//EF_WATERBALL2	waterball  (caster or hit?)
+		116: [{  	//EF_WATERBALL	   Fling Watersphere  
+			type: '3D',    
+			duration: 500,    
+			fileList: [    
+				'effect/water_out_a.bmp',    
+				'effect/water_out_b.bmp',     
+				'effect/water_out_c.bmp'    
+			],
+			fadeOut: true,
+			posxRand: 1.5,  
+			poszRand: 1.5,  
+			posyStart: 0,
+			posyEnd: 3,
+			posySmooth: true,
+			size: 30.5,  
+			rotateWithCamera: true,  
+			blendMode: 2,  
+			attachedEntity: true,  
+			wav: 'effect/wizard_waterball_chulung'  
+		}],
+
+		117: [{  	//EF_WATERBALL2	waterball moving to target  
+			type: '3D',    
+			duration: 500,
+			duplicate: 20,
+			timeBetweenDupli: 50,  
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/waterball',  
+			playSprite: true,  
+			fromSrc: true,
+			rotateToTarget: true,  
+			fadeOut: true,
+			size: 50.0,
+			zOffsetStart: 5,
+			zOffsetEnd: 0,
+			arc: 7.5,
+			retreat: 5.0,
+			wav: 'effect/wizard_waterball_chulung'
+		}],
 
 		119: [{	//EF_DETECTING	Detect
 			wav:  'effect/hunter_detecting',
@@ -3454,8 +3567,55 @@ define(function( require )
 			attachedEntity: true
 		}],
 
-		216: [{}],	//EF_BLOODDRAIN
-		217: [{}],	//EF_ENERGYDRAIN
+		216: [{	//EF_BLOODDRAIN (Dracula / Beast Strafe)
+			type: '3D',
+			duration: 600,
+			duplicate: 5,
+			timeBetweenDupli: 0,
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/particle1',
+			playSprite: true,
+
+			toSrc: true,
+			rotateToTarget: true,
+			
+			// Blood Red
+			red: 1.0,
+			green: 0.4,
+			blue: 0.4,
+			
+			sizeStart: 150.0,
+			sizeEnd: 180.0,
+
+			zOffsetStart: 5,
+			arc: 3.0,
+			retreat: 3.0,
+			drainPattern: true
+		}],
+
+		217: [{	//EF_ENERGYDRAIN (Wizard Soul Drain)
+			type: '3D',
+			duration: 600,
+			duplicate: 5,
+			timeBetweenDupli: 0,
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/particle1',
+			playSprite: true,
+
+			toSrc: true,
+			rotateToTarget: true,
+			
+			// Dark Blue
+			red: 0.4,
+			green: 0.4,
+			blue: 1.0,
+			
+			sizeStart: 150.0,
+			sizeEnd: 180.0,
+			
+			zOffsetStart: 5,
+			arc: 3.0,
+			retreat: 3.0,
+			drainPattern: true
+		}],
 
 
 		218: [{	//EF_POTION_CON	Concentration Potion
@@ -5903,12 +6063,25 @@ define(function( require )
 		}],
 
 		334: [{	//EF_BLIND	   Blind
-			wav: '_blind'
+			type: 'FUNC',
+			attachedEntity: false,
+			wav: '_blind',
+			func: function( Params ) {
+				var Blind = require('Renderer/Effects/BlindEffect');
+				Blind.setActive(true);
+			}
 			/*file: 'effect/fullb.tga',
 			file: 'effect/white02.bmp',*/
 		}],
 
-		//335: [{}],	//EF_POISON	   Poison
+		335: [{	//EF_POISON	   Poison
+			type: 'FUNC',
+			attachedEntity: false,
+			func: function( Params ) {
+				var Poison = require('Renderer/Effects/PoisonEffect');
+				Poison.setActive(true);
+			}
+		}],
 
 		336: [{ //kyrie eleison / parrying	(when target blocked dmg)	//EF_GUARD	Kyrie Eleison/Parrying Shield
 			wav:  'effect/kyrie_guard',
@@ -6252,7 +6425,32 @@ define(function( require )
 			wav: 'effect/\xb8\xcd\xc8\xa3\xb0\xe6\xc6\xc4\xbb\xea',
 		}],
 		//377: [{}],	//EF_BASH3D2	   Matyr's Reckoning 2
-		//378: [{}],	//EF_ENERGYDRAIN2	   Soul Drain (1st Part)
+
+		378: [{	//EF_ENERGYDRAIN2          Soul Drain (1st Part)
+			type: '3D',
+			duration: 600,
+			duplicate: 5,
+			timeBetweenDupli: 0,
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/particle1',
+			playSprite: true,
+			
+			fromSrc: true,
+			toSrc: true,
+			rotateToTarget: true,
+			
+			// Cyan (Based on C++ random(81) + 160 simplified here)
+			red: 0.8,
+			green: 0.8,
+			blue: 1.0,
+			
+			sizeStart: 160.0,
+			sizeEnd: 190.0,
+			
+			zOffsetStart: 5,
+			arc: 3.0,
+			retreat: 3.0,
+			drainPattern: true
+		}],
 		//379: [{}],	//EF_TRANSBLUEBODY	   Soul Drain (2nd Part)
 
 		380: [{	//EF_MAGICCRASHER	   Magic Crasher
@@ -6299,7 +6497,31 @@ define(function( require )
 			attachedEntity: true
 		}],
 
-		//383: [{}],	//EF_ENERGYDRAIN3	   Health Conversion
+		383: [{	//EF_ENERGYDRAIN3 (Health Conversion)
+			type: '3D',
+			duration: 600,
+			duplicate: 5,
+			timeBetweenDupli: 0,
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/particle1',
+			playSprite: true,
+			
+			fromSrc: true,
+			toSrc: true,
+			rotateToTarget: true,
+			
+			// Green
+			red: 0.7,
+			green: 1.0,
+			blue: 0.7,
+			
+			sizeStart: 140.0,
+			sizeEnd: 170.0,
+			
+			zOffsetStart: 5,
+			arc: 3.0,
+			retreat: 3.0,
+			drainPattern: true
+		}],
 
 		384: [{	//EF_LINELINK2	   Soul Change (Sound Effect)
 			wav: 'effect/\xbc\xd2\xbf\xef\x20\xc3\xbc\xc0\xce\xc1\xf6',
@@ -6710,8 +6932,71 @@ define(function( require )
 
 		}],
 
-		//451: [{}],	//EF_SOULSTRIKE2	   Dark Strike
-		//452: [{}],	//EF_YUFITEL2	   Something Like Jupitel Thunder
+		451:[{ 	//EF_SOULSTRIKE2	   Dark Strike
+			alphaMax: 1,
+			attachedEntity: true,
+			blue: 1,
+			duration: 200,
+			delayLate: 250,
+			//duplicate: -1,
+			fadeIn: true,
+			fadeOut: true,
+			file: 'effect/pok3.tga',
+			toSrc: true,
+			green: 1,
+			poszEnd: 1,
+			poszSmooth: true,
+			poszStartRand: 5,
+			poszStartRandMiddle: 6,
+			red: 1,
+			size: 50,
+			timeBetweenDupli: 150,
+			type: '3D',
+			wav: 'effect/ef_soulstrike',
+			zIndex: 1
+		},
+		{
+			type: '3D',
+			duration: 250,
+			duplicate: 5,
+			timeBetweenDupli: 20,
+			absoluteSpriteName: 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/particle5',
+			playSprite: true,
+			toSrc: true,
+			rotateToTarget: true,
+			sizeStart: 100.0,
+			sizeEnd: 500.0,
+			zOffsetStart: 3,
+			arc: 4.0,
+			retreat: 4.0, //soulstrike2 have a little retreat upper
+			soulStrikePattern: true
+		}],
+
+		452: [{	//EF_YUFITELHIT2	Alternative Jupitel Thunder (Hit)
+			type: '3D',
+			file: 'effect/pokjuk_d.bmp',
+			duration: 100, // Aprox. 10 frames on C++
+			sizeStart: 0,
+			sizeEnd: 25,    // widthSpeed 2.5f (Growing up)
+			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
+			rotateToTarget: true, 
+			fadeOut: true,
+			attachedEntity: true
+		},{
+			type: '3D',
+			fileList: [
+				'effect/twirl_soft.bmp',
+				'effect/thunder_ball_b.bmp',
+				'effect/twirl_soft.bmp',
+				'effect/thunder_ball_c.bmp',
+				'effect/twirl_soft.bmp'
+			],
+			frameDelay: 10,
+			duration: 300, // duration 300 on C++ is equal to 3000ms on ROB but it's the total duration of all hits, ROB parse each
+			size: 75,       // widthSize 7.5f * 10
+			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
+			attachedEntity: true
+		}],
 
 		453: [{	//EF_NPC_STOP	   Paralized
 			type: 'SPR',

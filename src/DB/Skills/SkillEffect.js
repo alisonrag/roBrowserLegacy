@@ -120,9 +120,9 @@
 	 SkillEffect[SK.WZ_FIREPILLAR]                  = {effectId: 96, groundEffectId: 138, hitEffectId: 97};		//Fire Pillar
 	 SkillEffect[SK.WZ_SIGHTRASHER]                 = {effectId: 62, hitEffectId: 49};		//Sightrasher
 	 SkillEffect[SK.WZ_METEOR]                      = {effectId: 92, hitEffectId: 49};		//Meteor Storm
-	 SkillEffect[SK.WZ_JUPITEL]                     = {effectId: 93, hitEffectId: 94};		//Jupitel Thunder
+	 SkillEffect[SK.WZ_JUPITEL]                     = {effectId: 93, beforeHitEffectId: 94};		//Jupitel Thunder
 	 SkillEffect[SK.WZ_VERMILION]                   = {effectId: 90, hitEffectId: 52};		//Lord of Vermilion
-	 SkillEffect[SK.WZ_WATERBALL]                   = {beforeHitEffectId: 116, hitEffectId: 117};		//Water Ball
+	 SkillEffect[SK.WZ_WATERBALL]                   = {beforeHitEffectIdOnCaster: 116, hitEffectIdOnCaster: 117};		//Water Ball
 	 SkillEffect[SK.WZ_ICEWALL]                     = {groundEffectId: 74};		//Ice Wall
 	 SkillEffect[SK.WZ_FROSTNOVA]                   = {effectIdOnCaster: 28, hitEffectId: 51};		//Frost Nova
 	 SkillEffect[SK.WZ_STORMGUST]                   = {effectId: 89, hitEffectId: 51};		//Storm Gust
@@ -217,8 +217,8 @@
 	 SkillEffect[SK.NPC_SUMMONSLAVE]                = {};		//Follower Summons
 	 SkillEffect[SK.NPC_EMOTION]                    = {};		//Emotion
 	 SkillEffect[SK.NPC_TRANSFORMATION]             = {};		//Transformation
-	 SkillEffect[SK.NPC_BLOODDRAIN]                 = {};		//Sucking Blood
-	 SkillEffect[SK.NPC_ENERGYDRAIN]                = {};		//Energy Drain
+	 SkillEffect[SK.NPC_BLOODDRAIN]                 = {effectIdOnCaster: 216};		//Sucking Blood
+	 SkillEffect[SK.NPC_ENERGYDRAIN]                = {effectIdOnCaster: 217};		//Energy Drain
 	 SkillEffect[SK.NPC_KEEPING]                    = {effectId: 214};		//Keeping
 	 SkillEffect[SK.NPC_DARKBREATH]                 = {effectId: 212};		//Dark Breath
 	 SkillEffect[SK.NPC_DARKBLESSING]               = {};		//Dark Blessing
@@ -371,6 +371,7 @@
 	 // High Wizard
 	 SkillEffect[SK.HW_MAGICCRASHER]                = {effectId: 380};		//Stave Crasher
 	 SkillEffect[SK.HW_MAGICPOWER]                  = {hideCastAura: true, beginCastEffectId: 16, effectId: 'ef_magicpower'};		//Mystical Amplification
+	 SkillEffect[SK.HW_SOULDRAIN]                   = {effectIdOnCaster: 217};
 	 // Paladin
 	 SkillEffect[SK.PA_PRESSURE]                    = {beforeHitEffectId: 365};		//Gloria Domini
 	 SkillEffect[SK.PA_SACRIFICE]                   = {effectId: 366};		// Martyr's Reckoning
@@ -380,7 +381,7 @@
 	 SkillEffect[SK.CH_TIGERFIST]                   = {effectIdOnCaster: 263, effectId: [377, 'quake']};		//Glacier Fist
 	 SkillEffect[SK.CH_CHAINCRUSH]                  = {effectId: 512};		//Chain Crush Combo
 	 // Professor
-	 SkillEffect[SK.PF_HPCONVERSION]                = {effectId: 383};		//Indulge
+	 SkillEffect[SK.PF_HPCONVERSION]                = {effectId: 383, effectIdOnCaster: 378 /*, successEffectIdOnCaster: 379 */};		//Indulge
 	 SkillEffect[SK.PF_SOULCHANGE]                  = {effectId: 384, successEffectId: 385};		//Soul Exhale
 	 SkillEffect[SK.PF_SOULBURN]                    = {effectId: 406};		//Soul Siphon
 	 // Asassin Cross

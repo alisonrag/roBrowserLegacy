@@ -8,6 +8,8 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 
 	var blendMode = {};
 
+	var _soulStrikeFirstEffect = null;
+
 	function ThreeDEffect(effect, EF_Inst_Par, EF_Init_Par) {
 		var position = EF_Inst_Par.position;
 		var otherPosition = EF_Inst_Par.otherPosition;
@@ -146,6 +148,11 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 		this.yOffset = (!isNaN(effect.yOffset)) ? effect.yOffset : 0;
 		this.zOffset = (!isNaN(effect.zOffset)) ? effect.zOffset : 0;
 
+		this.zOffsetStart = (!isNaN(effect.zOffsetStart)) ? effect.zOffsetStart : 0;
+		this.zOffsetEnd   = (!isNaN(effect.zOffsetEnd)) ? effect.zOffsetEnd : 0;
+		this.arc          = (!isNaN(effect.arc)) ? effect.arc : 0;
+		this.retreat      = (!isNaN(effect.retreat)) ? effect.retreat : 0;
+
 		this.poszSmooth = effect.poszSmooth ? true : false;
 		if (effect.fromSrc) {
 			var randStart = [
@@ -163,8 +170,8 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 			this.posxEnd = (otherPosition[0] - position[0]) + this.xOffset + randEnd[0];
 			this.posyStart = 0 + this.yOffset + randStart[1];
 			this.posyEnd = (otherPosition[1] - position[1]) + this.yOffset + randEnd[1];
-			this.poszStart = 0 + this.zOffset + randStart[2];
-			this.poszEnd = (otherPosition[2] - position[2]) + this.zOffset + randEnd[2];
+			this.poszStart = 0 + this.zOffset + this.zOffsetStart + randStart[2];
+			this.poszEnd = (otherPosition[2] - position[2]) + this.zOffset + this.zOffsetEnd + randEnd[2];
 		}
 		if (effect.toSrc) {
 			var randStart = [
@@ -182,8 +189,8 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 			this.posxEnd = 0 + this.xOffset + randEnd[0];
 			this.posyStart = (otherPosition[1] - position[1]) + this.yOffset + randStart[1];
 			this.posyEnd = 0 + this.yOffset + randEnd[1];
-			this.poszStart = (otherPosition[2] - position[2]) + this.zOffset + randStart[2];
-			this.poszEnd = 0 + this.zOffset + randEnd[2];
+			this.poszStart = (otherPosition[2] - position[2]) + this.zOffset + this.zOffsetStart + randStart[2];  
+			this.poszEnd = 0 + this.zOffset + this.zOffsetEnd + randEnd[2];  
 
 		}
 
@@ -263,6 +270,44 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 		}
 
 		this.rotateWithCamera = effect.rotateWithCamera ? true : false;
+
+		if (effect.soulStrikePattern || effect.drainPattern) { 
+			if (!EF_Inst_Par.duplicateID || effect.drainPattern) {
+				var hitIndex = Math.floor((this.startTick / effect.duration) % 5);
+
+				if(effect.drainPattern)
+					hitIndex = EF_Inst_Par.duplicateID + 1;
+
+				var offsetAngle = (hitIndex * 72);  
+				var offsetRadius = 2;  
+          
+				var offsetX = Math.cos(offsetAngle * Math.PI / 180) * offsetRadius;  
+				var offsetY = Math.sin(offsetAngle * Math.PI / 180) * offsetRadius;  
+
+				this._soulOffsetX      = offsetX;  
+				this._soulOffsetY      = offsetY;  
+				this._soulRetreat      = (this.retreat || 0) * (1 + hitIndex * 0.2) + (effect.drainPattern? randBetween(0, 2) : 0);  
+				this._soulArc          = (this.arc || 0) * (1 + hitIndex * 0.1) + (effect.drainPattern? randBetween(0, 2) : 0);  
+				this._soulAngle        = offsetAngle;  
+				_soulStrikeFirstEffect = this;
+			} else {  
+				var firstEffect = _soulStrikeFirstEffect;  
+				if (firstEffect) {  
+					this._soulOffsetX = firstEffect._soulOffsetX;  
+					this._soulOffsetY = firstEffect._soulOffsetY;  
+					this._soulRetreat = firstEffect._soulRetreat;  
+					this._soulArc     = firstEffect._soulArc;  
+					this._soulAngle   = firstEffect._soulAngle;  
+				}  
+			}  
+
+			this.posxStart = (this.posxStart || 0) + this._soulOffsetX;  
+			this.posyStart = (this.posyStart || 0) + this._soulOffsetY;  
+			this.retreat   = this._soulRetreat;  
+			this.arc       = this._soulArc;  
+			this.angle     = (this.angle || 0) + this._soulAngle;  
+		}
+
 	}
 
 
@@ -394,6 +439,34 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 		SpriteRenderer.position[1] = this.position[1] + posDelta;
 		posDelta = 0;
 
+		if (this.retreat !== 0) {
+			var linearX, linearY;
+		
+			if (this.posxStart != this.posxEnd) 
+				linearX = steps * ((this.posxEnd - this.posxStart) / 100) + this.posxStart;
+			else
+				linearX = this.posxStart;
+
+			if (this.posyStart != this.posyEnd)
+				linearY = steps * ((this.posyEnd - this.posyStart) / 100) + this.posyStart;
+			else
+				linearY = this.posyStart;
+
+			var dx = this.posxEnd - this.posxStart;
+			var dy = this.posyEnd - this.posyStart;
+			var dist = Math.sqrt(dx*dx + dy*dy);
+
+			if (dist > 0.001) {
+				dx = dx / dist;
+				dy = dy / dist;
+				var retreatFactor = Math.sin(steps * Math.PI / 100) * this.retreat;
+				linearX = linearX - (dx * retreatFactor);
+				linearY = linearY - (dy * retreatFactor);
+			}
+			SpriteRenderer.position[0] = this.position[0] + linearX;
+			SpriteRenderer.position[1] = this.position[1] + linearY;
+		}
+
 		if (this.poszSmooth) {
 			if (this.poszStart != this.poszEnd) {
 				var csJ = steps * 0.09 + 1;
@@ -411,6 +484,11 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 				posDelta = csN;
 			} else posDelta = this.poszStart;
 		}
+
+		if (this.arc !== 0) {
+			posDelta += this.arc * Math.sin(steps * Math.PI / 100);
+		}
+
 		SpriteRenderer.position[2] = this.position[2] + posDelta;
 
 		if (this.shadowTexture) SpriteRenderer.position[2] = Altitude.getCellHeight(SpriteRenderer.position[0], SpriteRenderer.position[0]);
@@ -517,6 +595,12 @@ function (WebGL, Client, SpriteRenderer, EntityManager, Altitude, Camera) {
 
 					if (i == 0) renderer = SpriteRenderer;
 					else renderer = Object.assign({}, SpriteRenderer);
+
+					// Reset channels every layer
+					renderer.color[0] = 1.0;
+					renderer.color[1] = 1.0;
+					renderer.color[2] = 1.0;
+					renderer.color[3] = 1.0;
 
 					var layer = layers[i];
 					var ctE = new Int16Array(2);

@@ -11,11 +11,7 @@ define( ['Core/Preferences'], function( Preferences )
 {
 	'use strict';
 
-
-	/**
-	 * Export
-	 */
-	return Preferences.get( 'Graphics', {
+	var defaultGraphicsSettings = {  
 
 		/**
 		 * Game size
@@ -40,11 +36,6 @@ define( ['Core/Preferences'], function( Preferences )
 		 */
 		fpslimit:    60,
 
-		/**
-		 * Game Post-Processing
-		 */
-		bloom:    false,
-		bloomIntensity: 0.5,
 
 		/**
 		 * View Area Culling
@@ -63,7 +54,42 @@ define( ['Core/Preferences'], function( Preferences )
 		*/
 		damageMotion: 0,
 
-		pixelPerfectSprites: false
-	}, 1.1 );
+		pixelPerfectSprites: false,
 
+
+		/**
+		 * Game Post-Processing
+		 */
+		bloom:    false,
+		bloomIntensity: 0.5,
+
+		blur:    false,
+		blurArea: 14.0,
+		blurIntensity: 3.0,
+
+		fxaaEnabled: false,  
+		fxaaSubpix: 0.25, 
+		fxaaEdgeThreshold: 0.125,
+
+		vibranceEnabled: false,  
+		vibrance: 0.15,
+
+		cartoonEnabled: false,
+		cartoonPower: 1.5, 
+		cartoonEdgeSlope: 1.5,
+
+		casEnabled:    false,
+		casContrast: 0.0,
+		casSharpening: 1.0
+
+	};
+
+	/**
+	 * Export
+	 */
+	var cleanDefaults = JSON.parse(JSON.stringify(defaultGraphicsSettings));
+	var GraphicsSettings = Preferences.get('Graphics', defaultGraphicsSettings, 1.1);  
+	GraphicsSettings.defaults = cleanDefaults;
+
+	return GraphicsSettings;
 });

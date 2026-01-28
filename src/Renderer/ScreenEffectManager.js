@@ -18,8 +18,12 @@ define(function (require) {
 	var RainWeather         = require('Renderer/Effects/RainWeather');
 	var SakuraWeatherEffect = require('Renderer/Effects/SakuraWeatherEffect');
 	var PokJukWeatherEffect = require('Renderer/Effects/PokJukWeatherEffect');
-
-	var getModule = require;
+	var Poison              = require('Renderer/Effects/PoisonEffect');
+	var Blind               = require('Renderer/Effects/BlindEffect');
+	var VerticalFlip        = require('Renderer/Effects/Shaders/VerticalFlip');
+	var EFST                = require('DB/Status/StatusConst');
+	var Session             = require('Engine/SessionStorage');
+	var getModule           = require;
 	
 	var isMapflagEffect = false;
 
@@ -55,8 +59,8 @@ define(function (require) {
 		isMapflagEffect = false;
 		var Params = {  
 			Inst: {
-			startTick: Renderer.tick,  
-			endTick: -1
+				startTick: Renderer.tick,  
+				endTick: -1
 			},  
 			Init: {  
 				ownerAID: -1,  
@@ -87,6 +91,49 @@ define(function (require) {
 		}
 	}
 
+	ScreenEffectManager.renderStatusEffects = function renderStatusEffects(gl, modelView, projection, fog)
+	{
+		if(!Session.Entity) return;
+
+		if(Poison.isActive())
+			Poison.render(gl, modelView, projection, fog);
+		if(Blind.isActive())
+			Blind.render(gl, modelView, projection, fog);
+		//if(VerticalFlip.isActive())
+		//	VerticalFlip.render(gl, modelView, projection, fog);
+	}
+
+	ScreenEffectManager.parseStatus = function parseStatus( efstConst )
+	{
+		if(!Session.Entity) return;
+
+		if( efstConst == EFST.HEALTHSTATE_POISON )
+			Poison.setActive(true);
+		if( efstConst == EFST.HEALTHSTATE_BLIND )
+			Blind.setActive(true);
+		if( efstConst == EFST.ILLUSION )
+			VerticalFlip.setActive(true);
+	}
+
+	ScreenEffectManager.cleanStatusEffect = function cleanStatusEffect( efstConst )
+	{
+		if(!Session.Entity) return;
+
+		if( efstConst == EFST.HEALTHSTATE_POISON )
+			Poison.setActive(false);
+		if( efstConst == EFST.HEALTHSTATE_BLIND )
+			Blind.setActive(false);
+		if( efstConst == EFST.ILLUSION )
+			VerticalFlip.setActive(false);
+	}
+
+	ScreenEffectManager.clean = function clean()
+	{
+		Poison.setActive(false);
+		Blind.setActive(false);
+		VerticalFlip.setActive(false);
+	}
+
 	/**
 	 * Callback to execute once the ScreenEffectManager is loaded
 	 */
@@ -110,6 +157,9 @@ define(function (require) {
 		RainWeather.renderAll(gl, modelView, projection, fog, tick);
 		SakuraWeatherEffect.renderAll(gl, modelView, projection, fog, tick);
 		PokJukWeatherEffect.renderAll(gl, modelView, projection, fog, tick);
+
+		// Screen Efst status based
+		ScreenEffectManager.renderStatusEffects(gl, modelView, projection, fog);
 	}
 
 	/**

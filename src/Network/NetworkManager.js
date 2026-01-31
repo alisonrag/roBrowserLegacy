@@ -283,7 +283,7 @@ define(function( require )
 			offset = fp.tell();
 
 			// Not enough bytes...
-			if (offset + 2 >= fp.length) {
+			if (offset + 2 > fp.length) {
 				_save_buffer = new Uint8Array( buffer, offset, fp.length - offset);
 				return;
 			}
@@ -295,7 +295,7 @@ define(function( require )
 
 			if (packet_len < 0) {
 				// Not enough bytes...
-				if (offset + 4 >= fp.length) {
+				if (offset + 4 > fp.length) {
 					_save_buffer = new Uint8Array( buffer, offset, fp.length - offset );
 					return;
 				}
@@ -516,6 +516,7 @@ define(function( require )
 			read:                 read,
 			setSocketFactory:     setSocketFactory,
 			defaultSocketFactory: defaultSocketFactory,
+			registerPacket:       registerPacket,
 			utils: {
 				longToIP: utilsLongToIP
 			}

@@ -2509,6 +2509,7 @@ define(function( require )
 			size: 35,      // widthSize 3.5f
 			toSrc: true,   // PT3DTEX_CHKTARGETPOS
 			blendMode: 2,  // RF_EMISSIVE (Aprox. Additive)
+			overlay: true,
 			alphaMax: 0.66 // 170/255 on C++
 		},{
 			type: '3D',
@@ -2524,6 +2525,7 @@ define(function( require )
 			duration: 200,  // Aprox. 20 frames on C++
 			size: 45,       // widthSize 4.5f
 			toSrc: true,   // PT3DTEX_CHKTARGETPOS
+			overlay: true,
 			blendMode: 2  // RF_EMISSIVE (Aprox. Additive)
 		}],
 
@@ -2537,6 +2539,7 @@ define(function( require )
 			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
 			rotateToTarget: true, 
 			fadeOut: true,
+			overlay: true,
 			attachedEntity: true
 		},{
 			type: '3D',
@@ -2551,6 +2554,7 @@ define(function( require )
 			duration: 300, // duration 300 on C++ is equal to 3000ms on ROB but it's the total duration of all hits, ROB parse each
 			size: 75,       // widthSize 7.5f * 10
 			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
+			overlay: true,
 			attachedEntity: true
 		}],
 
@@ -6067,7 +6071,7 @@ define(function( require )
 			attachedEntity: false,
 			wav: '_blind',
 			func: function( Params ) {
-				var Blind = require('Renderer/Effects/BlindEffect');
+				var Blind = require('Renderer/Effects/Shaders/Blind');
 				Blind.setActive(true);
 			}
 			/*file: 'effect/fullb.tga',
@@ -6981,6 +6985,7 @@ define(function( require )
 			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
 			rotateToTarget: true, 
 			fadeOut: true,
+			overlay: true,
 			attachedEntity: true
 		},{
 			type: '3D',
@@ -6995,6 +7000,7 @@ define(function( require )
 			duration: 300, // duration 300 on C++ is equal to 3000ms on ROB but it's the total duration of all hits, ROB parse each
 			size: 75,       // widthSize 7.5f * 10
 			blendMode: 2,   // RF_EMISSIVE (Aprox. Additive)
+			overlay: true,
 			attachedEntity: true
 		}],
 

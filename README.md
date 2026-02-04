@@ -7,6 +7,10 @@ For info on how to setup the client read the contents of our [Getting Started do
 
 All credits to the original owners/creators and the new ones.
 
+#### Repo info:
+
+![GitHub](https://img.shields.io/github/license/MrAntares/roBrowserLegacy.svg) | ![commit activity](https://img.shields.io/github/commit-activity/w/MrAntares/roBrowserLegacy) | ![GitHub repo size](https://img.shields.io/github/repo-size/MrAntares/roBrowserLegacy.svg) | ![CodeQL](https://img.shields.io/github/actions/workflow/status/MrAntares/roBrowserLegacy/analysis_codeql.yml?label=CodeQL&logo=badge) 
+--------|--------|--------|--------|
 ## DEMO
 
 [![Start!](https://github.com/MrAntares/roBrowserLegacy/raw/master/src/UI/Components/Intro/images/play.png "Start Demo")](https://mrantares.github.io/roBrowserLegacy/applications/browser-examples/demo.html)
@@ -38,7 +42,7 @@ For available plugins and information on how to install them please visit the [r
 
 ## Contributing
 
-roBrowser was started by this [awesome team](https://github.com/vthibault/roBrowser/graphs/contributors) and [we](https://github.com/MrAntares/roBrowserLegacy/graphs/contributors) continue it. We also manually add content from other forks that didn't made it back to the original branch, huge shoutout to them! If you wish to contribute then check out the [documentation](http://www.robrowser.com/getting-started#API) or the code itself and submit a pull request!
+See [CONTRIBUTING](./doc/CONTRIBUTING.md)
 
 ## Contact
 

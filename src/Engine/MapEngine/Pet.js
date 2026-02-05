@@ -28,7 +28,6 @@ define(function( require )
 	var ItemSelection        = require('UI/Components/ItemSelection/ItemSelection');
 	var ChatBox              = require('UI/Components/ChatBox/ChatBox');
 	var PetInformations      = require('UI/Components/PetInformations/PetInformations');
-	var Inventory			= require('UI/Components/Inventory/Inventory');
 	var Emotions           	= require('DB/Emotions');
 	var PetMessageConst		= require('DB/Pets/PetMessageConst');
 
@@ -181,9 +180,7 @@ define(function( require )
 			case 0: // know what our pet is //PET_PRE_INIT
 				Session.petId = pkt.GID; // should we delete it later ?
 				Session.pet.GID =  pkt.GID;
-				if(entity){
-					Session.pet.job = entity._job;
-				}
+				Session.pet.job = entity._job;
 				break;
 
 			case 1: //

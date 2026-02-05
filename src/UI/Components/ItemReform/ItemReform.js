@@ -32,8 +32,6 @@ define(function(require)
 	var htmlText           = require('text!./ItemReform.html');
 	var cssText            = require('text!./ItemReform.css');
 	var PACKET        	   = require('Network/PacketStructure');
-	var PACKETVER   	   = require('Network/PacketVerManager');
-	var getModule     	   = require;
 
 
 	/**
@@ -699,9 +697,7 @@ define(function(require)
 			return false;
 		}
 
-		if (item) {
-			showItemPreview(item);
-		}
+		showItemPreview(item);
 
 		return false;
 	};

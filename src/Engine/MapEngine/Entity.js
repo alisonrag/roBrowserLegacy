@@ -102,7 +102,7 @@ define(function (require) {
 
 	const C_MULTIHIT_DELAY = 200; // PLUSATTACKED_MOTIONTIME
 	const AVG_ATTACK_SPEED = 432;
-	const AVG_ATTACKED_SPEED = 288;
+	//const AVG_ATTACKED_SPEED = 288; // UNUSED
 	const MAX_ATTACKMT = AVG_ATTACK_SPEED * 2;
 
 	/**
@@ -542,12 +542,12 @@ define(function (require) {
 				let delayTime = pkt.attackMT;
 
 				var WSnd = DB.getWeaponSound(srcWeapon);
-				var weaponSound = WSnd ? WSnd[0] : false;
-				var weaponSoundRelease = WSnd ? WSnd[1] : false;
+				/*var weaponSound = WSnd ? WSnd[0] : false;
+				var weaponSoundRelease = WSnd ? WSnd[1] : false;*/ // UNUSED
 
 				var WSndL = DB.getWeaponSound(srcWeaponLeft);
-				var weaponSoundLeft = WSndL ? WSndL[0] : false;
-				var weaponSoundReleaseLeft = WSndL ? WSndL[1] : false;
+				/*var weaponSoundLeft = WSndL ? WSndL[0] : false;
+				var weaponSoundReleaseLeft = WSndL ? WSndL[1] : false;*/ // UNUSED
 
 				if (srcEntity.objecttype === Entity.TYPE_PC) {
 					const factorOfmotionSpeed = pkt.attackMT / AVG_ATTACK_SPEED;
@@ -613,20 +613,19 @@ define(function (require) {
 					target = pkt.damage ? dstEntity : srcEntity;
 
 					// damage or miss display
-					if (target) {
-						if (dstEntity.objecttype === Entity.TYPE_MOB || dstEntity.objecttype === Entity.TYPE_NPC_ABR || dstEntity.objecttype === Entity.TYPE_NPC_BIONIC) {
-							if (pkt.damage > 0) {
-								var EF_Init_Par = {
-									effectId: EffectConst.EF_HIT1,
-									ownerAID: pkt.targetGID,
-									startTick: Renderer.tick + pkt.attackMT,
-								};
-								EffectManager.spam(EF_Init_Par);
-							}
+					if (dstEntity.objecttype === Entity.TYPE_MOB || dstEntity.objecttype === Entity.TYPE_NPC_ABR || dstEntity.objecttype === Entity.TYPE_NPC_BIONIC) {
+						if (pkt.damage > 0) {
+							var EF_Init_Par = {
+								effectId: EffectConst.EF_HIT1,
+								ownerAID: pkt.targetGID,
+								startTick: Renderer.tick + pkt.attackMT,
+							};
+							EffectManager.spam(EF_Init_Par);
 						}
+					}
 
-						var type = null;
-						switch (pkt.action) {
+					var type = null;
+					switch (pkt.action) {
 
 							// Single damage
 							case 10: // critical
@@ -683,7 +682,6 @@ define(function (require) {
 								});
 								break;
 
-						}
 					}
 				}
 
@@ -1618,7 +1616,7 @@ define(function (require) {
 		hideCastAura = (pkt.SKID in SkillEffect && SkillEffect[pkt.SKID].hideCastAura);
 
 		// Cast aura
-		if (srcEntity && pkt.delayTime && !hideCastAura) {
+		if (pkt.delayTime && !hideCastAura) {
 			var EF_Init_Par = {
 				effectId: EffectConst.EF_BEGINSPELL, // Default
 				ownerAID: srcEntity.GID,

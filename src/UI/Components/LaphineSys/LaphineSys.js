@@ -28,8 +28,6 @@ define(function(require)
 	var htmlText           = require('text!./LaphineSys.html');
 	var cssText            = require('text!./LaphineSys.css');
 	var PACKET        	   = require('Network/PacketStructure');
-	var PACKETVER   	   = require('Network/PacketVerManager');
-	var getModule     	   = require;
 
 
 	/**
@@ -395,9 +393,7 @@ define(function(require)
 			return false; // Exit the function early
 		}
 
-        if (item) {
-			onUpdateSubmitList(item);
-        }
+		onUpdateSubmitList(item);
 	};
 
 

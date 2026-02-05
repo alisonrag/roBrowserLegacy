@@ -20,7 +20,7 @@ define(function (require) {
 	const Commands      = require('Controls/ProcessCommand');
 	const Events        = require('Core/Events');
 	const Configs       = require('Core/Configs');
-	const Cylinder      = require('Renderer/Effects/Cylinder');
+	const Cylinder      = require('Renderer/Effects/Cylinder/Cylinder');
 	const StrEffect     = require('Renderer/Effects/StrEffect');
 	const RsmEffect     = require('Renderer/Effects/RsmEffect');
 	const TwoDEffect    = require('Renderer/Effects/TwoDEffect');
@@ -779,7 +779,7 @@ define(function (require) {
 	 * @param {number} skill unique id
 	 */
 	EffectManager.spamSkillZone = function spamUnit(unit_id, xPos, yPos, uid, creatorUid) {
-		let effectId, entity, isNewEntity = false, EF_Init_Par;
+		let effectId, entity, EF_Init_Par;
 
 		// No effect mode (/effect)
 		if (!Preferences.effect) {

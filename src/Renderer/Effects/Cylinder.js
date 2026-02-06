@@ -11,8 +11,8 @@ define([
 	'Core/Client',
 	'Renderer/Camera',
 	'Renderer/SpriteRenderer',
-	'text!./Cylinder.vert',
-	'text!./Cylinder.frag'
+	'text!./Shaders/GLSL/Cylinder.vs',
+	'text!./Shaders/GLSL/Cylinder.fs'
 ], function(
 	WebGL,
 	glMatrix,
@@ -337,7 +337,7 @@ define([
 		gl.uniform3fv(uniform.uPosition, currentPosition);
 
 		var self = this;
-		SpriteRenderer.setDepth(true, false, true, function(){
+		SpriteRenderer.runWithDepth(true, false, true, function () {
 			gl.drawArrays(gl.TRIANGLES, 0, self.verticeCount);
 		});
 

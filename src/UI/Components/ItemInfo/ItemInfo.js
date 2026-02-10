@@ -220,8 +220,8 @@ define(function (require) {
 				case 0xff00: // PET
 					hideslots = true;
 
-					name = '<font color="red" class="owner-' + GID + '">Unknown</font>';
 					var GID = (item.slot['card4'] << 16) + item.slot['card3'];
+					name = '<font color="red" class="owner-' + GID + '">Unknown</font>';
 
 					if (DB.CNameTable[GID] && DB.CNameTable[GID] !== 'Unknown') {
 						name = '<font color="blue" class="owner-' + GID + '">' + DB.CNameTable[GID] + '</font>';
@@ -514,7 +514,9 @@ define(function (require) {
 
 	function addEvent(item) {
 		var event = ItemInfo.ui.find('.event_view');
-		validateFieldsExist(event) ? '' : addEvent(item);
+		if (!validateFieldsExist(event)) {
+			addEvent(item);
+		}
 
 		event.find('.view').hide();
 		event.find('canvas').remove();
@@ -725,8 +727,8 @@ define(function (require) {
 				'</span>' +
 				'<span class="overlay_read" data-text="1295">' +
 				DB.getMessage(1295) +
-				'</span>';
-			('</div>');
+				'</span>' +
+				'</div>';
 			ItemInfo.ui.find('.collection').after(validExitElement);
 			return false;
 		}

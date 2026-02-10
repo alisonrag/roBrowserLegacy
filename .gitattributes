@@ -3,7 +3,7 @@
 [attr]lfslock lockable
 
 # Auto detect text files and perform LF normalization
-*					text=auto
+* text=auto eol=crlf
 
 # Source code
 *.bash				text eol=lf
@@ -21,8 +21,8 @@
 
 # Configs
 *.lock				text -diff
-package.json		text eol=lf
-package-lock.json	text eol=lf -diff
+package.json		text eol=crlf
+package-lock.json	text eol=crlf -diff
 
 # Graphics
 *.bmp				binary

@@ -126,12 +126,6 @@ define(function (require) {
 		if (!_preferences.show) {
 			this.ui.hide();
 		}
-	};
-
-	/**
-	 * Prepare - Add roulette button to MiniMap
-	 */
-	Roulette.prepare = function prepare() {
 		// Check if roulette is enabled in ROConfig
 		if (ROConfig.enableRoulette === false) {
 			return;
@@ -174,31 +168,21 @@ define(function (require) {
 				// Load roulette icon
 				var iconPath = 'basic_interface/roullette/RoulletteIcon.bmp';
 
-				Client.loadFile(
-					DB.INTERFACE_PATH + iconPath,
-					function (data) {
-						var btn = miniMapUI.find('.rouletteIcon');
-						btn.css({
-							backgroundImage: 'url(' + data + ')',
-							backgroundSize: 'contain',
-							backgroundRepeat: 'no-repeat',
-							backgroundPosition: 'center',
-							position: 'absolute',
-							top: '57px',
-							left: '-45px',
-							width: '43px',
-							height: '43px',
-							border: 'none'
-						});
-					},
-					function (error) {
-						// Try alternative path with lowercase
-						var altPath = 'basic_interface/roullette/roulletteicon.bmp';
-						Client.loadFile(DB.INTERFACE_PATH + altPath, function (data) {
-							miniMapUI.find('.rouletteIcon').css('backgroundImage', 'url(' + data + ')');
-						});
-					}
-				);
+				Client.loadFile(DB.INTERFACE_PATH + iconPath, function (data) {
+					var btn = miniMapUI.find('.rouletteIcon');
+					btn.css({
+						backgroundImage: 'url(' + data + ')',
+						backgroundSize: 'contain',
+						backgroundRepeat: 'no-repeat',
+						backgroundPosition: 'center',
+						position: 'absolute',
+						top: '57px',
+						left: '-45px',
+						width: '43px',
+						height: '43px',
+						border: 'none'
+					});
+				});
 			}
 		} catch (e) {
 			console.error('[Roulette] Failed to add button:', e);

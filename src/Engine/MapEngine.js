@@ -215,6 +215,7 @@ define(function (require) {
 			WinStats.selectUIVersion();
 			Inventory.selectUIVersion();
 			Storage.selectUIVersion();
+			PartyFriends.selectUIVersion();
 		}
 
 		// Do not hook multiple time
@@ -293,7 +294,7 @@ define(function (require) {
 			ChatRoomCreate.prepare();
 			Emoticons.prepare();
 			FPS.prepare();
-			PartyFriends.prepare();
+			PartyFriends.getUI().prepare();
 			StatusIcons.prepare();
 			ChatBox.prepare();
 			ChatBoxSettings.prepare();
@@ -380,6 +381,7 @@ define(function (require) {
 			Equipment.getUI().prepare();
 			Quest.getUI().prepare();
 			WinStats.getUI().prepare();
+			PartyFriends.selectUIVersion();
 
 			// Bind UIs
 			WinStats.getUI().onRequestUpdate = onRequestStatUpdate;
@@ -575,9 +577,8 @@ define(function (require) {
 	 * Changing map, loading new map
 	 *
 	 * @param {object} pkt - PACKET.ZC.NPCACK_MAPMOVE
-	 * @param {bool} force reload map renderer teleporting to same map
 	 */
-	function onMapChange(pkt, force = false) {
+	function onMapChange(pkt) {
 		jQuery(window).off('keydown.map');
 
 		MapRenderer.onLoad = function () {
@@ -595,8 +596,8 @@ define(function (require) {
 					objecttype: Session.Entity.falcon.constructor.TYPE_FALCON,
 					GID: Session.Entity.GID + '_FALCON',
 					PosDir: [Session.Entity.position[0], Session.Entity.position[1], 0],
-					job: Session.Entity.job + '_FALCON',
-					speed: 200,
+					job: Session.Entity._job + '_FALCON',
+					speed: Math.max(Session.Entity.walk.speed - 50, 1),
 					name: '',
 					hp: -1,
 					maxhp: -1,
@@ -613,8 +614,8 @@ define(function (require) {
 					objecttype: Session.Entity.wug.constructor.TYPE_WUG,
 					GID: Session.Entity.GID + '_WUG',
 					PosDir: [Session.Entity.position[0], Session.Entity.position[1], 0],
-					job: Session.Entity.job + '_WUG',
-					speed: Session.Entity.walk.speed,
+					job: Session.Entity._job + '_WUG',
+					speed: Math.max(Session.Entity.walk.speed - 50, 1),
 					name: '',
 					hp: -1,
 					maxhp: -1
@@ -665,7 +666,7 @@ define(function (require) {
 			Emoticons.append();
 			SkillList.getUI().append();
 			FPS.append();
-			PartyFriends.append();
+			PartyFriends.getUI().append();
 			Guild.append();
 			WorldMap.append();
 			SkillListMH.homunculus.append();
@@ -673,6 +674,11 @@ define(function (require) {
 			MobileUI.append();
 			JoystickUI.append();
 			Navigation.append();
+			Roulette.append();
+
+			if (Session.PCGoldTimer) {
+				PCGoldTimer.append();
+			}
 
 			if (PACKETVER.value >= 20090617 && PACKETVER.value < 20140521) {
 				WinStats.getUI().append(Equipment.getUI().ui.find('.status_component'));
@@ -709,7 +715,7 @@ define(function (require) {
 			}
 		};
 
-		MapRenderer.setMap(pkt.mapName, force);
+		MapRenderer.setMap(pkt.mapName);
 	}
 
 	/**
@@ -813,7 +819,7 @@ define(function (require) {
 			ChatBox.clean();
 			ShortCut.clean();
 			Quest.getUI().clean();
-			PartyFriends.clean();
+			PartyFriends.getUI().clean();
 			CashShop.clean();
 			MapRenderer.free();
 			Renderer.stop();
@@ -835,7 +841,7 @@ define(function (require) {
 				ChatBox.clean();
 				ShortCut.clean();
 				Quest.getUI().clean();
-				PartyFriends.clean();
+				PartyFriends.getUI().clean();
 				Renderer.stop();
 				onExitSuccess();
 				break;

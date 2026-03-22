@@ -78,11 +78,12 @@ define(function (require) {
 		Session.isRenewal = Configs.get('renewal', false);
 		console.log('%c[LOGIN] Game Mode: ', 'color:#007000', Session.isRenewal ? 'RENEWAL' : 'PRE-RENEWAL');
 
+		// Setup Default Charset based on LangType
 		charset = TextEncoding.detectEncodingByLangtype(Session.LangType, Configs.get('disableKorean'));
 
 		console.log('%c[LOGIN] Language Type: ', 'color:#007000', Session.LangType);
 		console.log('%c[LOGIN] Encoding: ', 'color:#007000', charset);
-		TextEncoding.setCharset(charset);
+
 		_server = server;
 
 		// Add support for "packetver" definition in Server listing

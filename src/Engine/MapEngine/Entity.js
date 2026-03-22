@@ -150,8 +150,8 @@ define(function (require) {
 				objecttype: entity.falcon.constructor.TYPE_FALCON,
 				GID: entity.GID + '_FALCON',
 				PosDir: [entity.position[0], entity.position[1], 0],
-				job: entity.job + '_FALCON',
-				speed: 200,
+				job: entity._job + '_FALCON',
+				speed: Math.max(entity.walk.speed - 50, 1),
 				name: '',
 				hp: -1,
 				maxhp: -1,
@@ -168,8 +168,8 @@ define(function (require) {
 				objecttype: entity.wug.constructor.TYPE_WUG,
 				GID: entity.GID + '_WUG',
 				PosDir: [entity.position[0], entity.position[1], 0],
-				job: entity.job + '_WUG',
-				speed: entity.walk.speed,
+				job: entity._job + '_WUG',
+				speed: Math.max(entity.walk.speed - 50, 1),
 				name: '',
 				hp: -1,
 				maxhp: -1
@@ -179,11 +179,12 @@ define(function (require) {
 
 		if (entity.GUID) {
 			Guild.requestGuildEmblem(entity.GUID, entity.GEmblemVer, function (image) {
-				entity.display.emblem = image;
 				entity.emblem.emblem = image;
 				entity.emblem.update();
-				entity.display.refresh(entity);
-
+				if (PACKETVER.value < 20170315) {
+					entity.display.emblem = image;
+					entity.display.refresh(entity);
+				}
 				if (Session.mapState.isSiege && entity.GUID !== Session.Entity.GUID) {
 					entity.emblem.display = true;
 				}
@@ -1032,7 +1033,9 @@ define(function (require) {
 
 			if (entity.GUID) {
 				Guild.requestGuildEmblem(entity.GUID, entity.GEmblemVer, function (image) {
-					entity.display.emblem = image;
+					if (PACKETVER.value < 20170315) {
+						entity.display.emblem = image;
+					}
 					entity.display.update(
 						entity.objecttype === Entity.TYPE_MOB
 							? entity.display.STYLE.MOB
@@ -1052,7 +1055,6 @@ define(function (require) {
 					);
 					entity.emblem.emblem = image;
 					entity.emblem.update();
-
 					if (Session.mapState.isSiege && entity.GUID !== Session.Entity.GUID) {
 						entity.emblem.display = true;
 					}
@@ -1266,7 +1268,12 @@ define(function (require) {
 						entity.creatorGID
 					);
 				} else {
-					entity.job = pkt.value;
+					// Don't override job visuals if transformation is active
+					if (entity._job_transform || entity._monster_transform || entity._active_monster_transform) {
+						entity._job = pkt.value;
+					} else {
+						entity.job = pkt.value;
+					}
 					if (entity === Session.Entity) {
 						// Apply the job change first
 						Session.Character.job = pkt.value;
@@ -1330,13 +1337,13 @@ define(function (require) {
 				if (entity.falcon) {
 					entity.falcon.set({
 						PosDir: [entity.position[0], entity.position[1], 0],
-						job: entity.job + '_FALCON'
+						job: entity._job + '_FALCON'
 					});
 				}
 				if (entity.wug) {
 					entity.wug.set({
 						PosDir: [entity.position[0], entity.position[1], 0],
-						job: entity.job + '_WUG'
+						job: entity._job + '_WUG'
 					});
 				}
 				break;
@@ -1595,7 +1602,7 @@ define(function (require) {
 			if (srcEntity.falcon) {
 				if (pkt.SKID == SkillId.HT_BLITZBEAT || pkt.SKID == SkillId.SN_FALCONASSAULT) {
 					srcEntity.falcon.action = srcEntity.action;
-					srcEntity.falcon.walk.speed = 25;
+					srcEntity.falcon.walk.speed = 35;
 
 					srcEntity.falcon.walkToNonWalkableGround(
 						srcEntity.falcon.position[0],
@@ -1766,7 +1773,7 @@ define(function (require) {
 		}
 
 		if (pkt.SKID == SkillId.HT_DETECTING && srcEntity.falcon) {
-			srcEntity.falcon.walk.speed = 25;
+			srcEntity.falcon.walk.speed = 35;
 			srcEntity.falcon.walkToNonWalkableGround(
 				srcEntity.falcon.position[0],
 				srcEntity.falcon.position[1],
@@ -1915,6 +1922,29 @@ define(function (require) {
 	function onEntityStatusChange(pkt) {
 		var entity = EntityManager.get(pkt.AID);
 
+		// Monster/Active monster transformations - special handling
+		if (pkt.index === StatusConst.MONSTER_TRANSFORM || pkt.index === StatusConst.ACTIVE_MONSTER_TRANSFORM) {
+			if (!entity) {
+				var isActive = pkt.state == 1 || (pkt.val && pkt.val[0] == 1);
+				var key =
+					pkt.index === StatusConst.MONSTER_TRANSFORM ? 'monster_transform' : 'active_monster_transform';
+				EntityManager.storePendingTransform(pkt.AID, key, isActive ? (pkt.val ? pkt.val[0] : 0) : null);
+				return;
+			}
+		}
+		// Job form transformations (WEREWOLF, WERERAPTOR)
+		else if (pkt.index === StatusConst.WEREWOLF || pkt.index === StatusConst.WERERAPTOR) {
+			if (!entity) {
+				var isActive = pkt.state == 1 || (pkt.val && pkt.val[0] == 1);
+				EntityManager.storePendingTransform(
+					pkt.AID,
+					'job_transform',
+					isActive ? (pkt.index === StatusConst.WEREWOLF ? JobId.WEREWOLF : JobId.WERERAPTOR) : null
+				);
+				return;
+			}
+		}
+
 		if (!entity) {
 			if (pkt.index >= StatusConst.SWORDCLAN && pkt.index <= StatusConst.CROSSBOWCLAN) {
 				// EFST CLAN - save it to when actor spawn, why server sometimes send this packet before entity spawn?
@@ -1967,8 +1997,8 @@ define(function (require) {
 						objecttype: entity.falcon.constructor.TYPE_FALCON,
 						GID: entity.GID + '_FALCON',
 						PosDir: [entity.position[0], entity.position[1], 0],
-						job: entity.job + '_FALCON',
-						speed: 200,
+						job: entity._job + '_FALCON',
+						speed: Math.max(entity.walk.speed - 50, 1),
 						name: '',
 						hp: -1,
 						maxhp: -1,
@@ -2203,6 +2233,47 @@ define(function (require) {
 				}
 				break;
 
+			// Monster transformations (generic)
+			case StatusConst.MONSTER_TRANSFORM:
+				if (pkt.state == 1 || (pkt.val && pkt.val[0] == 1)) {
+					// Transform into monster
+					var monsterId = pkt.val ? pkt.val[0] : 0;
+					entity.monster_transform = monsterId;
+				} else {
+					// Remove monster transformation
+					entity.monster_transform = null;
+				}
+				break;
+
+			// Active monster transformations (higher priority)
+			case StatusConst.ACTIVE_MONSTER_TRANSFORM:
+				if (pkt.state == 1 || (pkt.val && pkt.val[0] == 1)) {
+					// Active transform into monster
+					var monsterId = pkt.val ? pkt.val[0] : 0;
+					entity.active_monster_transform = monsterId;
+				} else {
+					// Remove active monster transformation
+					entity.active_monster_transform = null;
+				}
+				break;
+
+			// Job form transformations (WEREWOLF, WERERAPTOR)
+			case StatusConst.WEREWOLF: // Werewolf transformation
+				if (pkt.state == 1 || (pkt.val && pkt.val[0] == 1)) {
+					entity.job_transform = JobId.WEREWOLF;
+				} else {
+					entity.job_transform = null;
+				}
+				break;
+
+			case StatusConst.WERERAPTOR: // Wereraptor transformation
+				if (pkt.state == 1 || (pkt.val && pkt.val[0] == 1)) {
+					entity.job_transform = JobId.WERERAPTOR;
+				} else {
+					entity.job_transform = null;
+				}
+				break;
+
 			case StatusConst.ILLUSION:
 				if (pkt.state == 1) {
 					entity.isHallucinating = true;
@@ -2284,8 +2355,9 @@ define(function (require) {
 				break;
 
 			case StatusConst.ALL_RIDING:
-				entity.allRidingState = pkt.state || !pkt.hasOwnProperty('state');
-				if (pkt.val && (pkt.state || !pkt.hasOwnProperty('state'))) {
+				if (pkt.hasOwnProperty('state')) {
+					entity.allRidingState = pkt.state;
+				} else if (pkt.hasOwnProperty('val')) {
 					entity.allRidingState = pkt.val[0];
 				}
 				break;
@@ -2416,8 +2488,8 @@ define(function (require) {
 				objecttype: entity.falcon.constructor.TYPE_FALCON,
 				GID: entity.GID + '_FALCON',
 				PosDir: [entity.position[0], entity.position[1], 0],
-				job: entity.job + '_FALCON',
-				speed: 200,
+				job: entity._job + '_FALCON',
+				speed: Math.max(entity.walk.speed - 50, 1),
 				name: '',
 				hp: -1,
 				maxhp: -1,
@@ -2435,8 +2507,8 @@ define(function (require) {
 				objecttype: entity.wug.constructor.TYPE_WUG,
 				GID: entity.GID + '_WUG',
 				PosDir: [entity.position[0], entity.position[1], 0],
-				job: entity.job + '_WUG',
-				speed: entity.walk.speed,
+				job: entity._job + '_WUG',
+				speed: Math.max(entity.walk.speed - 50, 1),
 				name: '',
 				hp: -1,
 				maxhp: -1

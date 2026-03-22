@@ -117,9 +117,8 @@ define(function (require) {
 	 * Load a map
 	 *
 	 * @param {string} mapname to load
-	 * @param {bool} force reload map renderer
 	 */
-	MapRenderer.setMap = function loadMap(mapname, force = false) {
+	MapRenderer.setMap = function loadMap(mapname) {
 		// TODO: stop the map loading, and start to load the new map.
 		if (this.loading) {
 			return;
@@ -138,7 +137,7 @@ define(function (require) {
 		Cursor.setType(Cursor.ACTION.DEFAULT);
 
 		// Don't reload a map when it's just a local teleportation
-		if (this.currentMap !== mapname || force) {
+		if (this.currentMap !== mapname) {
 			this.loading = true;
 			BGM.stop();
 			this.currentMap = mapname;
@@ -176,31 +175,6 @@ define(function (require) {
 
 			Renderer.render(MapRenderer.onRender);
 		});
-	};
-
-	/**
-	 * Trick to reload sprite renderer
-	 * Same behavior to @refresh
-	 */
-	MapRenderer.forceReloadMap = function forceReloadMap() {
-		var gl = Renderer.getContext();
-		var sprFiles = MemoryManager.search(/\.spr$/i);
-		for (
-			var i = 0;
-			i < sprFiles.length;
-			i++ // reloads spr memory cache
-		) {
-			MemoryManager.remove(gl, sprFiles[i]);
-		}
-
-		getModule('Engine/MapEngine').onMapChange(
-			{
-				xPos: Session.Entity.position[0],
-				yPos: Session.Entity.position[1],
-				mapName: this.currentMap
-			},
-			true
-		);
 	};
 
 	/**
@@ -452,9 +426,6 @@ define(function (require) {
 		Models.render(gl, modelView, projection, normalMat, fog, light);
 		AnimatedModels.render(gl, modelView, projection, normalMat, fog, light, tick);
 
-		// Rendering water (before sprites due cloaks and cart can't overdraw them when looking front)
-		Water.render(gl, modelView, projection, fog, light, tick);
-
 		if (Mouse.intersect && Altitude.intersect(modelView, projection, _pos)) {
 			x = _pos[0];
 			y = _pos[1];
@@ -496,6 +467,9 @@ define(function (require) {
 
 		//Render Entities (no effects)
 		EntityManager.render(gl, modelView, projection, fog, false);
+
+		// Rendering water (after sprites, billboard projection pushes it to back)
+		Water.render(gl, modelView, projection, fog, light, tick);
 
 		// Rendering effects
 		Damage.render(gl, modelView, projection, fog, tick);

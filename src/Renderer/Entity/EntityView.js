@@ -18,6 +18,8 @@ define(function (require) {
 	var AllMountTable = require('DB/Jobs/AllMountTable');
 	var EntityAction = require('./EntityAction');
 	const PACKETVER = require('Network/PacketVerManager');
+	var JobConst = require('DB/Jobs/JobConst');
+	var Session = require('Engine/SessionStorage');
 
 	/**
 	 * Files to display a view
@@ -93,6 +95,85 @@ define(function (require) {
 	}
 
 	/**
+	 * Suppress head and accessory sprites (used for monster/transformation)
+	 */
+	function suppressHeadSprites() {
+		for (var i = 0, count = HeadParts.length; i < count; ++i) {
+			var part = HeadParts[i];
+			this.files[part].spr = null;
+			this.files[part].act = null;
+			if (part === 'head') {
+				this.files.head.pal = null;
+			}
+		}
+	}
+
+	/**
+	 * Restore head and accessories
+	 */
+	function restoreHeadSprites() {
+		if (this._head >= 0) {
+			UpdateHead.call(this, this._head);
+		}
+		if (this._headpalette > 0) {
+			UpdateHeadPalette.call(this, this._headpalette);
+		}
+		if (this._accessory > 0) {
+			this.accessory = this._accessory;
+		}
+		if (this._accessory2 > 0) {
+			this.accessory2 = this._accessory2;
+		}
+		if (this._accessory3 > 0) {
+			this.accessory3 = this._accessory3;
+		}
+	}
+
+	/**
+	 * Returns true if any transformation (monster or job form) is currently active
+	 */
+	function hasTransformation() {
+		return !!(this._active_monster_transform || this._monster_transform || this._job_transform);
+	}
+
+	/**
+	 * Returns the effective display job, considering all active transformations
+	 */
+	function getEffectiveJob() {
+		return (
+			this._active_monster_transform ||
+			this._monster_transform ||
+			this._job_transform ||
+			this.costume ||
+			this._job
+		);
+	}
+
+	/**
+	 * List of view parts that should be suppressed when transformed
+	 */
+	var HeadParts = ['head', 'accessory', 'accessory2', 'accessory3'];
+
+	/**
+	 * Returns true if head sprites should be suppressed for the current state
+	 */
+	function shouldSuppressHead() {
+		var job = getEffectiveJob.call(this);
+		return hasTransformation.call(this) || DB.isMonster(job) || job === 4356 || job === 4357;
+	}
+
+	/**
+	 * Refresh head state (suppress or restore based on current conditions)
+	 */
+	function refreshHeadState() {
+		if (shouldSuppressHead.call(this)) {
+			suppressHeadSprites.call(this);
+		} else if (!this.costume) {
+			restoreHeadSprites.call(this);
+		}
+	}
+
+	/**
 	 * Updating job
 	 *
 	 * @param {number} job id
@@ -100,10 +181,16 @@ define(function (require) {
 	function UpdateBody(job) {
 		var baseJob, path;
 		var Entity;
+		// Capture sequence number for stale callback detection
+		var transformationSeq = this._transformationSeq || 0;
 
 		if (job < 0) {
 			return;
 		}
+
+		// Check if this is a transformation job (monster or form)
+		// If so, don't update _job - it should preserve the original job
+		var isTransformation = hasTransformation.call(this);
 
 		// Avoid fuck*ng errors with mounts !
 		// Sometimes the server send us the job of the mount sprite instead
@@ -126,7 +213,14 @@ define(function (require) {
 
 		// Clothes keep the old job in memory
 		// and show the costum if used
-		this._job = job;
+		// BUT: if this is a transformation, we should NOT update _job
+		if (!isTransformation) {
+			this._job = job;
+		}
+
+		// Update effective job
+		this._effectiveJob = getEffectiveJob.call(this);
+
 		if (this.costume) {
 			job = this.costume;
 		}
@@ -217,15 +311,31 @@ define(function (require) {
 			}
 		}
 
+		// Determine if we should suppress head NOW (before async operations)
+		var suppress = shouldSuppressHead.call(this);
+
 		// Loading
 		Client.loadFile(path + '.act');
 		Client.loadFile(
 			path + '.spr',
 			function () {
-				this.files.body.spr = path + '.spr';
-				this.files.body.act = path + '.act';
+				// Check if callback is stale (transformation changed while callback was pending)
+				var isStaleCallback = this._transformationSeq && this._transformationSeq > transformationSeq;
 
-				// Update linked attachments
+				// Get current job considering transformations
+				var currentJob = getEffectiveJob.call(this);
+
+				// Only update if callback is valid
+				if (!isStaleCallback && job === currentJob) {
+					this.files.body.spr = path + '.spr';
+					this.files.body.act = path + '.act';
+
+					// Apply head suppression/restoration
+					// Apply head suppression/restoration
+					refreshHeadState.call(this);
+				}
+
+				// Update linked attachments (always update these)
 				this.bodypalette = this._bodypalette;
 				this.weapon = this._weapon;
 				this.shield = this._shield;
@@ -243,43 +353,185 @@ define(function (require) {
 	}
 
 	/**
+	 * Get body value
+	 * @returns {number} body value
+	 */
+	function getBodyVal() {
+		var job;
+		switch (this._job) {
+			case JobConst.DRAGON_KNIGHT:
+			case JobConst.DRAGON_KNIGHT_H:
+			case JobConst.DRAGON_KNIGHT_B:
+			case JobConst.RUNE_KNIGHT:
+			case JobConst.RUNE_KNIGHT_H:
+			case JobConst.RUNE_KNIGHT_B:
+				job = JobConst.RUNE_KNIGHT_2ND;
+				break;
+			case JobConst.MEISTER:
+			case JobConst.MEISTER_H:
+			case JobConst.MEISTER_B:
+			case JobConst.MECHANIC:
+			case JobConst.MECHANIC_H:
+			case JobConst.MECHANIC_B:
+				job = JobConst.MECHANIC_2ND;
+				break;
+			case JobConst.SHADOW_CROSS:
+			case JobConst.SHADOW_CROSS_H:
+			case JobConst.SHADOW_CROSS_B:
+			case JobConst.GUILLOTINE_CROSS:
+			case JobConst.GUILLOTINE_CROSS_H:
+			case JobConst.GUILLOTINE_CROSS_B:
+				job = JobConst.GUILLOTINE_CROSS_2ND;
+				break;
+			case JobConst.ARCH_MAGE:
+			case JobConst.ARCH_MAGE_H:
+			case JobConst.ARCH_MAGE_B:
+			case JobConst.WARLOCK:
+			case JobConst.WARLOCK_H:
+			case JobConst.WARLOCK_B:
+				job = JobConst.WARLOCK_2ND;
+				break;
+			case JobConst.CARDINAL:
+			case JobConst.CARDINAL_H:
+			case JobConst.CARDINAL_B:
+			case JobConst.ARCHBISHOP:
+			case JobConst.ARCHBISHOP_H:
+			case JobConst.ARCHBISHOP_B:
+				job = JobConst.ARCH_BISHOP_2ND;
+				break;
+			case JobConst.WINDHAWK:
+			case JobConst.WINDHAWK_H:
+			case JobConst.WINDHAWK_B:
+			case JobConst.RANGER:
+			case JobConst.RANGER_H:
+			case JobConst.RANGER_B:
+				job = JobConst.RANGER_2ND;
+				break;
+			case JobConst.IMPERIAL_GUARD:
+			case JobConst.IMPERIAL_GUARD_H:
+			case JobConst.IMPERIAL_GUARD_B:
+			case JobConst.ROYAL_GUARD:
+			case JobConst.ROYAL_GUARD_H:
+			case JobConst.ROYAL_GUARD_B:
+				job = JobConst.ROYAL_GUARD_2ND;
+				break;
+			case JobConst.BIOLO:
+			case JobConst.BIOLO_H:
+			case JobConst.BIOLO_B:
+			case JobConst.GENETIC:
+			case JobConst.GENETIC_H:
+			case JobConst.GENETIC_B:
+				job = JobConst.GENETIC_2ND;
+				break;
+			case JobConst.ABYSS_CHASER:
+			case JobConst.ABYSS_CHASER_H:
+			case JobConst.ABYSS_CHASER_B:
+			case JobConst.SHADOW_CHASER:
+			case JobConst.SHADOW_CHASER_H:
+			case JobConst.SHADOW_CHASER_B:
+				job = JobConst.SHADOW_CHASER_2ND;
+				break;
+			case JobConst.ELEMENTAL_MASTER:
+			case JobConst.ELEMENTAL_MASTER_H:
+			case JobConst.ELEMENTAL_MASTER_B:
+			case JobConst.SORCERER:
+			case JobConst.SORCERER_H:
+			case JobConst.SORCERER_B:
+				job = JobConst.SORCERER_2ND;
+				break;
+			case JobConst.INQUISITOR:
+			case JobConst.INQUISITOR_H:
+			case JobConst.INQUISITOR_B:
+			case JobConst.SURA:
+			case JobConst.SURA_H:
+			case JobConst.SURA_B:
+				job = JobConst.SURA_2ND;
+				break;
+			case JobConst.TROUBADOUR:
+			case JobConst.TROUBADOUR_H:
+			case JobConst.TROUBADOUR_B:
+			case JobConst.MINSTREL:
+			case JobConst.MINSTREL_H:
+			case JobConst.MINSTREL_B:
+				job = JobConst.MINSTREL_2ND;
+				break;
+			case JobConst.TROUVERE:
+			case JobConst.TROUVERE_H:
+			case JobConst.TROUVERE_B:
+			case JobConst.WANDERER:
+			case JobConst.WANDERER_H:
+			case JobConst.WANDERER_B:
+				job = JobConst.WANDERER_2ND;
+				break;
+		}
+		return job || this._job;
+	}
+
+	/**
 	 * Updating BodyStyle
 	 *
 	 * @param {number} Body2 id
 	 */
 	function UpdateBodyStyle(look) {
-		var baseJob, path;
+		var path;
 		var Entity;
 
 		if (look < 0) {
 			return;
 		}
-		this._body = look;
 
-		// Resize character
-		this.xSize = this.ySize = DB.isBaby(this.job) ? 4 : 5;
-
-		this.files.shadow.size = this.job in ShadowTable ? ShadowTable[this.job] : 1.0;
-		path = this.isAdmin ? DB.getAdminPath(this._sex) : DB.getBodyPath(this.job, this._sex, this._body);
-		Entity = this.constructor;
-
-		// Loading
-		Client.loadFile(path + '.act');
-		Client.loadFile(
-			path + '.spr',
+		setTimeout(
 			function () {
-				this.files.body.spr = path + '.spr';
-				this.files.body.act = path + '.act';
+				this._body = look;
+				var job = this._job;
+				var cashMountCostume = false;
+				if (PACKETVER.value <= 20231220) {
+					if (look > 0) {
+						look = getBodyVal();
+					}
+				}
 
-				// Update linked attachments
-				this.bodypalette = this._bodypalette;
-				this.weapon = this._weapon;
-				this.shield = this._shield;
+				if (this.costume) {
+					var mountValue = this._allRidingState ? AllMountTable[look] : MountTable[look];
+					if (
+						look > JobConst.COSTUME_SECOND_JOB_START &&
+						look < JobConst.COSTUME_SECOND_JOB_END &&
+						this._allRidingState
+					) {
+						// we don't have costume all_riding constants
+						job = mountValue;
+						cashMountCostume = true;
+					} else {
+						look = mountValue;
+						job = this.costume;
+					}
+				}
+
+				path = this.isAdmin
+					? DB.getAdminPath(this._sex)
+					: DB.getBodyPath(job, this._sex, look, cashMountCostume);
+				Entity = this.constructor;
+
+				// Loading
+				Client.loadFile(path + '.act');
+				Client.loadFile(
+					path + '.spr',
+					function () {
+						this.files.body.spr = path + '.spr';
+						this.files.body.act = path + '.act';
+
+						// Update linked attachments
+						this.bodypalette = this._bodypalette;
+						this.weapon = this._weapon;
+						this.shield = this._shield;
+					}.bind(this),
+					null,
+					{
+						to_rgba: this.objecttype !== Entity.TYPE_PC
+					}
+				);
 			}.bind(this),
-			null,
-			{
-				to_rgba: this.objecttype !== Entity.TYPE_PC
-			}
+			50
 		);
 	}
 
@@ -324,9 +576,12 @@ define(function (require) {
 		Client.loadFile(
 			path + '.spr',
 			function () {
-				this.files.head.spr = path + '.spr';
-				this.files.head.act = path + '.act';
-				this.files.head.pal = null;
+				// Don't apply the head sprite if it should be suppressed
+				if (!shouldSuppressHead.call(this)) {
+					this.files.head.spr = path + '.spr';
+					this.files.head.act = path + '.act';
+					this.files.head.pal = null;
+				}
 				this.headpalette = this._headpalette;
 			}.bind(this)
 		);
@@ -405,8 +660,14 @@ define(function (require) {
 					path + '.spr',
 					function () {
 						_this['_' + type] = _val;
-						_this.files[type].spr = path + '.spr';
-						_this.files[type].act = path + '.act';
+
+						// Head accessories should not be applied if they should be suppressed
+						var isAccessory = type === 'accessory' || type === 'accessory2' || type === 'accessory3';
+
+						if (!isAccessory || !shouldSuppressHead.call(_this)) {
+							_this.files[type].spr = path + '.spr';
+							_this.files[type].act = path + '.act';
+						}
 
 						// Load weapon sound
 						if (type === 'weapon') {
@@ -447,6 +708,25 @@ define(function (require) {
 	}
 
 	/**
+	 * Unified transformation handler - Optimized (Shared across entities)
+	 */
+	function onTransformationChange() {
+		this._transformationSeq++;
+
+		// Cache effective job
+		var oldEffectiveJob = this._effectiveJob;
+		this._effectiveJob = getEffectiveJob.call(this);
+
+		// Only trigger UpdateBody if job actually changed
+		if (this._effectiveJob && (this._effectiveJob !== oldEffectiveJob || !this.files.body.spr)) {
+			UpdateBody.call(this, this._effectiveJob);
+		}
+
+		// Immediate suppression/restoration for UI responsiveness
+		refreshHeadState.call(this);
+	}
+
+	/**
 	 * Hooking, export
 	 */
 	return function Init() {
@@ -461,10 +741,11 @@ define(function (require) {
 
 		Object.defineProperty(this, 'job', {
 			get: function () {
-				return this.costume || this._job;
+				return this._effectiveJob;
 			},
 			set: UpdateBody
 		});
+
 		this._body = this._job;
 		Object.defineProperty(this, 'body', {
 			get: function () {
@@ -535,5 +816,34 @@ define(function (require) {
 			},
 			set: UpdateGeneric('robe', 'getRobePath')
 		});
+
+		// Initialize transformation properties
+		this._monster_transform = null;
+		this._active_monster_transform = null;
+		this._job_transform = null;
+		this._transformationSeq = 0;
+		this._effectiveJob = this._job;
+
+		var _this = this;
+
+		// Transformation properties - consolidated setter logic
+		function createTransformationProperty(name) {
+			Object.defineProperty(_this, name, {
+				get: function () {
+					return _this['_' + name] || null;
+				},
+				set: function (value) {
+					var oldValue = _this['_' + name];
+					if (value !== oldValue) {
+						_this['_' + name] = value;
+						onTransformationChange.call(_this);
+					}
+				}
+			});
+		}
+
+		createTransformationProperty('monster_transform');
+		createTransformationProperty('active_monster_transform');
+		createTransformationProperty('job_transform');
 	};
 });

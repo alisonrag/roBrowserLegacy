@@ -4,7 +4,8 @@
 	left: 0px;
 	width: 280px;
 	height: 120px;
-	text-shadow: 1px 1px white;
+	font-size: 11px;
+	font-weight: bold;
 }
 #BasicInfoV0.small .large {
 	display: none;
@@ -49,6 +50,7 @@
 	position: absolute;
 	top: 2px;
 	left: 18px;
+	text-shadow: 1px 1px white;
 }
 #BasicInfoV0 .large .name {
 	position: absolute;
@@ -77,6 +79,7 @@
 	left: 110px;
 	width: 85px;
 	height: 8px;
+	font-weight: normal;
 }
 #BasicInfoV0 .large .sp_bar {
 	top: 43px;
@@ -131,9 +134,11 @@
 	position: absolute;
 	top: 105px;
 	left: 5px;
-}
-#BasicInfoV0 .large .extra {
-	padding-right: 10px;
+	padding-right: 20px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: right;
+	white-space: nowrap;
 }
 #BasicInfoV0 .buttons {
 	position: absolute;
@@ -182,4 +187,5 @@
 	position: absolute;
 	right: 2px;
 	bottom: 2px;
+	background-color: rgba(0, 0, 0, 0);
 }

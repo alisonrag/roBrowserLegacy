@@ -65,6 +65,8 @@ define(function (require) {
 	var PACKET = require('Network/PacketStructure');
 	var PACKETVER = require('Network/PacketVerManager');
 
+	var getModule = require;
+
 	/**
 	 * DB NameSpace
 	 */
@@ -74,6 +76,11 @@ define(function (require) {
 	 * @var {Object} lua instance
 	 */
 	var lua;
+	var HO_AI;
+	var MER_AI;
+	var default_HO_AI;
+	var default_MER_AI;
+
 	startLua();
 
 	/**
@@ -223,7 +230,12 @@ define(function (require) {
 	 */
 	var servers = Configs.get('servers', []);
 	var langType = servers[0] && servers[0].langtype ? parseInt(servers[0].langtype, 10) : 1;
-	var userCharpage = TextEncoding.detectEncodingByLangtype(langType, Configs.get('disableKorean'));
+
+	// setup default encoding
+	TextEncoding.detectEncodingByLangtype(langType, Configs.get('disableKorean'));
+
+	// create decoders
+	let userStringDecoder = TextEncoding;
 
 	/**
 	 * @var {Object} PetDBTable
@@ -254,6 +266,11 @@ define(function (require) {
 	 * @var {Array} CashShopBanner Table
 	 */
 	var CashShopBannerTable = [];
+
+	/**
+	 * @var {Object} Ez2streffect Table
+	 */
+	var Ez2streffect = {};
 
 	/**
 	 * Initialize DB
@@ -399,20 +416,54 @@ define(function (require) {
 				loadTitleTable(DB.LUA_PATH + 'datainfo/titletable.lub', null, onLoad());
 			}
 
-			// Skill
-			loadLuaTable(
-				[DB.LUA_PATH + 'skillinfoz/skillid.lub', DB.LUA_PATH + 'skillinfoz/skilldescript.lub'],
-				'SKILL_DESCRIPT',
-				function (json) {
-					SkillDescription = json;
-				},
-				function () {
-					// Calls after skillids and descs been populated
-					loadSkillInfoList(DB.LUA_PATH + 'skillinfoz/skillinfolist.lub', null, function () {
-						loadSkillTreeView(DB.LUA_PATH + 'skillinfoz/skilltreeview.lub', null, onLoad());
-					});
+			// Skill - load skillid.lub to populate SKID, then load description
+			const skillOnLoad = onLoad();
+			loadLuaValue(DB.LUA_PATH + 'skillinfoz/skillid.lub', 'SKID', function (json) {
+				if (json && typeof json === 'object') {
+					// Validate and merge entries into SKID
+					for (const k in json) {
+						if (Object.prototype.hasOwnProperty.call(json, k)) {
+							const value = json[k];
+							if (typeof value === 'number' && value > 0) {
+								SKID[k] = value;
+							}
+						}
+					}
 				}
-			);
+				// Load description - skillid.lub is re-executed harmlessly (Lua just repopulates globals)
+				loadLuaTable(
+					[DB.LUA_PATH + 'skillinfoz/skillid.lub', DB.LUA_PATH + 'skillinfoz/skilldescript.lub'],
+					'SKILL_DESCRIPT',
+					function (json) {
+						SkillDescription = json;
+					},
+					function () {
+						// Calls after skillids and descs been populated
+						loadSkillInfoList(DB.LUA_PATH + 'skillinfoz/skillinfolist.lub', null, function () {
+							loadSkillTreeView(DB.LUA_PATH + 'skillinfoz/skilltreeview.lub', null, function () {
+								// Load ez2streffect, PACKETVER unknown when the while has been added, tied to default PACKETVER of rathena for 4th job
+								if (PACKETVER.value >= 20211103) {
+									const bsonOnLoad = onLoad();
+									loadBSONFile(
+										'data/contentdata/effectdata/ez2streffect.bson',
+										Ez2streffect,
+										function () {
+											require(['DB/Effects/EffectTable', 'DB/Skills/SkillEffect'], function (
+												EffectTable,
+												SkillEffect
+											) {
+												mergeEz2Effects(EffectTable, SkillEffect);
+												bsonOnLoad();
+											});
+										}
+									);
+								}
+								skillOnLoad(); // Skill Lua finished
+							});
+						});
+					}
+				);
+			});
 
 			// Status
 			loadStateIconInfo(DB.LUA_PATH + 'stateicon/', null, onLoad());
@@ -729,10 +780,32 @@ define(function (require) {
 
 		Network.hookPacket(PACKET.ZC.ACK_REQNAME_BYGID, onUpdateOwnerName);
 		Network.hookPacket(PACKET.ZC.ACK_REQNAME_BYGID2, onUpdateOwnerName);
+
+		getModule('Core/AIDriver').initAI(onLoad());
+	};
+
+	DB.getHOAI_VM = function getHOAILua() {
+		return HO_AI;
+	};
+
+	DB.getMERAI_VM = function getMERAILua() {
+		return MER_AI;
+	};
+
+	DB.getDefaultHOAI_VM = function getHOAILua() {
+		return default_HO_AI;
+	};
+
+	DB.getDefaultMERAI_VM = function getMERAILua() {
+		return default_MER_AI;
 	};
 
 	async function startLua() {
 		lua = await CLua.Lua.create();
+		HO_AI = await CLua.Lua.create();
+		MER_AI = await CLua.Lua.create();
+		default_HO_AI = await CLua.Lua.create();
+		default_MER_AI = await CLua.Lua.create();
 	}
 
 	function loadFontFromClient(fontPath) {
@@ -750,48 +823,48 @@ define(function (require) {
 
 						const style = document.createElement('style');
 						style.textContent = `  
-				@font-face {  
-					font-family: 'SCDream';  
-					src: url('${fontUrl6}') format('opentype');  
-					font-weight: 100; /* Thin */  
-					font-style: normal;  
-				}  
-				  
-				@font-face {  
-					font-family: 'SCDream';  
-					src: url('${fontUrl6}') format('opentype');  
-					font-weight: 200; /* Extra Light */  
-					font-style: normal;  
-				}  
-				  
-				@font-face {  
-					font-family: 'SCDream';  
-					src: url('${fontUrl6}') format('opentype');  
-					font-weight: 300; /* Light */  
-					font-style: normal;  
-				}  
-				  
-				@font-face {  
-					font-family: 'SCDream';  
-					src: url('${fontUrl6}') format('opentype');  
-					font-weight: 400; /* Normal */  
-					font-style: normal;  
-				}  
-				  
-				@font-face {  
-					font-family: 'SCDream';  
-					src: url('${fontUrl4}') format('opentype');  
-					font-weight: 700; /* Bold */  
-					font-style: normal;  
-				}  
-				  
-				@font-face {  
-					font-family: 'SCDream';  
-					src: url('${fontUrl4}') format('opentype');  
-					font-weight: 900; /* Black/Bolder */  
-					font-style: normal;  
-				}  
-			`;
+							@font-face {  
+								font-family: 'SCDream';  
+								src: url('${fontUrl6}') format('opentype');  
+								font-weight: 100; /* Thin */  
+								font-style: normal;  
+							}  
+							
+							@font-face {  
+								font-family: 'SCDream';  
+								src: url('${fontUrl6}') format('opentype');  
+								font-weight: 200; /* Extra Light */  
+								font-style: normal;  
+							}  
+							
+							@font-face {  
+								font-family: 'SCDream';  
+								src: url('${fontUrl6}') format('opentype');  
+								font-weight: 300; /* Light */  
+								font-style: normal;  
+							}  
+							
+							@font-face {  
+								font-family: 'SCDream';  
+								src: url('${fontUrl6}') format('opentype');  
+								font-weight: 400; /* Normal */  
+								font-style: normal;  
+							}  
+							
+							@font-face {  
+								font-family: 'SCDream';  
+								src: url('${fontUrl4}') format('opentype');  
+								font-weight: 700; /* Bold */  
+								font-style: normal;  
+							}  
+							
+							@font-face {  
+								font-family: 'SCDream';  
+								src: url('${fontUrl4}') format('opentype');  
+								font-weight: 900; /* Black/Bolder */  
+								font-style: normal;  
+							}  
+						`;
 						document.head.appendChild(style);
 						document.body.style.fontFamily = 'Arial, Helvetica, sans-serif';
 					},
@@ -1103,6 +1176,203 @@ define(function (require) {
 	}
 
 	/**
+	 * Mapping of effect name suffixes to SkillEffect field names.
+	 * Default is 'effectId'.
+	 */
+	var SUFFIX_TO_FIELD = {
+		hit: 'hitEffectId',
+		hitsub: 'hitEffectId',
+		target: 'hitEffectId',
+		cast: 'effectId',
+		cast_bottom: 'effectId',
+		single: 'effectId',
+		bottom: 'effectId',
+		begin: 'effectId',
+		start: 'effectId',
+		end: 'effectId',
+		loop: 'effectId',
+		buff: 'effectId',
+		aura: 'effectId',
+		main: 'effectId',
+		sync: 'effectId'
+	};
+
+	/**
+	 * Hardcoded mapping for specific effect names that override suffix logic.
+	 */
+	var HARDCODED_FIELD_MAPPING = {
+		broken_limit_buff: 'effectId',
+		abyss_flame_target: 'hitEffectId'
+	};
+
+	/**
+	 * Merge Ez2STREffect from BSON into EffectTable and SkillEffect
+	 */
+	function mergeEz2Effects(EffectTable, SkillEffect) {
+		var count = 0;
+		var skillCount = 0;
+		var skillBaseToId = {};
+		var effectNameToId = {};
+		var effectMetadata = {};
+
+		// Pre-calculate SKID lookup maps for O(1) matching
+		var skidFuzzy = {};
+		for (var key in SKID) {
+			var upperKey = key.toUpperCase();
+			var val = SKID[key];
+			skidFuzzy[upperKey] = val;
+
+			var lastUnderscore = -1;
+			while ((lastUnderscore = upperKey.indexOf('_', lastUnderscore + 1)) !== -1) {
+				let suffix = upperKey.substring(lastUnderscore + 1);
+				if (suffix && !skidFuzzy[suffix]) {
+					skidFuzzy[suffix] = val;
+				}
+			}
+		}
+
+		// Optimized helper to find skill by name
+		function findFuzzySkillId(name) {
+			return skidFuzzy[name.toUpperCase()] || null;
+		}
+
+		// Phase 1: Pre-Analysis and Anchoring
+		for (let effectName in Ez2streffect) {
+			let entry = Ez2streffect[effectName];
+			let baseName = effectName;
+			let isSuffixed = false;
+
+			let targetField = entry.IsToGround || entry.IsFloor ? 'groundEffectId' : 'effectId';
+
+			for (let suffix in SUFFIX_TO_FIELD) {
+				if (effectName.endsWith('_' + suffix)) {
+					baseName = effectName.slice(0, -(suffix.length + 1));
+					isSuffixed = true;
+					targetField = SUFFIX_TO_FIELD[suffix];
+					break;
+				}
+			}
+
+			if (HARDCODED_FIELD_MAPPING[effectName]) {
+				targetField = HARDCODED_FIELD_MAPPING[effectName];
+			}
+
+			let filePath = entry.FilePath || '';
+			let soundPath = entry.SoundPath || '';
+			let pathParts = filePath ? filePath.split('\\') : [];
+			let lastSlashSound = soundPath.lastIndexOf('\\');
+			let soundFile = lastSlashSound !== -1 ? soundPath.substring(lastSlashSound + 1) : soundPath;
+			let soundBase = soundFile.replace(/\.wav$/i, '');
+
+			effectMetadata[effectName] = {
+				baseName: baseName,
+				isSuffixed: isSuffixed,
+				pathParts: pathParts,
+				soundBase: soundBase,
+				field: targetField
+			};
+
+			// Pass 1: Exact Name Match for Base
+			let skillId1 = findFuzzySkillId(baseName);
+			if (skillId1) {
+				effectNameToId[effectName] = skillId1;
+				continue;
+			}
+
+			// Pass 2: Base Anchoring from Path (Non-suffixed only)
+			if (!isSuffixed) {
+				for (let i = 0, len = pathParts.length; i < len; i++) {
+					let segment = pathParts[i];
+					if (segment) {
+						let skillId2 = skillBaseToId[segment] || findFuzzySkillId(segment);
+						if (skillId2) {
+							skillBaseToId[segment] = skillId2;
+							effectNameToId[effectName] = skillId2;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// Phase 2: Inheritance and Assignments
+		for (let effectName in Ez2streffect) {
+			let entry = Ez2streffect[effectName];
+			let meta = effectMetadata[effectName];
+			let skillId = effectNameToId[effectName];
+
+			// Pass 3: Path Fallback for unmapped
+			if (!skillId) {
+				for (let i = 0; i < meta.pathParts.length; i++) {
+					let segment = meta.pathParts[i] || '';
+					if (segment) {
+						skillId = skillBaseToId[segment] || findFuzzySkillId(segment);
+						if (skillId) {
+							break;
+						}
+					}
+				}
+			}
+
+			// Pass 4: Sound Fallback
+			if (!skillId && meta.soundBase) {
+				skillId = findFuzzySkillId(meta.soundBase);
+			}
+
+			if (skillId) {
+				effectNameToId[effectName] = skillId;
+			}
+
+			// Pass 5: Suffix Inheritance
+			// Run this after all anchoring passes to ensure variants inherit from anchored bases
+			if (!skillId && meta.isSuffixed && effectNameToId[meta.baseName]) {
+				skillId = effectNameToId[meta.baseName];
+				effectNameToId[effectName] = skillId;
+			}
+
+			// Pass 5: EffectTable Assignment
+			let lastSlash = (entry.FilePath || '').lastIndexOf('\\');
+			let texturePath = lastSlash !== -1 ? entry.FilePath.substring(0, lastSlash + 1) : '';
+
+			EffectTable[effectName] = [
+				{
+					type: 'STR',
+					file: (entry.FilePath || '').replace(/\\/g, '/').replace(/\.str$/i, ''),
+					texturePath: texturePath,
+					renderBeforeEntities: entry.IsFloor ? false : true,
+					xOffset: entry.PosX || 0,
+					yOffset: entry.PosY || 0,
+					wav: entry.SoundPath ? entry.SoundPath.replace(/\\/g, '/').replace(/\.wav$/i, '') : null,
+					delayLate: entry.StartDelayTime || 0,
+					repeat: !!entry.IsInfinite,
+					attachedEntity: true
+				}
+			];
+			count++;
+
+			// Pass 6: SkillEffect Mapping with differentiated fields
+			if (skillId) {
+				let skillEntry = SkillEffect[skillId] || (SkillEffect[skillId] = {});
+				let field = meta.field;
+
+				if (skillEntry[field]) {
+					if (!Array.isArray(skillEntry[field])) {
+						skillEntry[field] = [skillEntry[field]];
+					}
+					if (skillEntry[field].indexOf(effectName) === -1) {
+						skillEntry[field].push(effectName);
+					}
+				} else {
+					skillEntry[field] = effectName;
+				}
+				skillCount++;
+			}
+		}
+
+		console.log(`[DBManager] Loaded ${count} effects and mapped ${skillCount} skills.`);
+	}
+
+	/**
 	 * Load CheckAttendance file to object
 	 *
 	 * @param {string} filename to load
@@ -1189,7 +1459,6 @@ define(function (require) {
 		async function processWorldMapLua() {
 			try {
 				const ctx = lua.ctx;
-				const userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 				// Function to add a World Category (e.g., Midgard)
 				ctx.AddWorldMapCategory = (id, name, tableKey) => {
@@ -1350,7 +1619,6 @@ define(function (require) {
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 
 					const ctx = lua.ctx;
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					ctx.AddTitle = function (titleID, titleName) {
 						TitleTable[titleID] = userStringDecoder.decode(titleName);
@@ -1409,8 +1677,6 @@ define(function (require) {
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// create AddTownInfo required functions in context
 					ctx.AddTownInfo = function AddTownInfo(mapName, name, X, Y, TYPE) {
@@ -1454,9 +1720,6 @@ define(function (require) {
 				try {
 					// check if file is ArrayBuffer and convert to Uint8Array if necessary
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
-
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
@@ -1662,8 +1925,7 @@ define(function (require) {
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
+
 					// create itemInfo required functions in context
 					ctx.AddItem = (
 						ItemID,
@@ -1803,9 +2065,6 @@ define(function (require) {
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
 
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
-
 					// create required functions in context
 					ctx.AddLaphineSysItem = (
 						key,
@@ -1900,9 +2159,6 @@ define(function (require) {
 
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
-
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// create required functions in context
 					ctx.AddLaphineUpgradeItem = (
@@ -2003,9 +2259,6 @@ define(function (require) {
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
 
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
-
 					// create required functions in context
 					ctx.AddDBItemName = (baseItem, itemID) => {
 						let decoded_baseItem =
@@ -2065,9 +2318,6 @@ define(function (require) {
 
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
-
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// create required functions in context
 					ctx.AddReformInfo = (
@@ -2214,7 +2464,6 @@ define(function (require) {
 
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 					const ctx = lua.ctx;
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					EnchantListTable = {};
 
@@ -2561,8 +2810,6 @@ define(function (require) {
 				return 1;
 			};
 
-			const decoder = new TextEncoding.TextDecoder(userCharpage);
-
 			function decodeLuaString(v) {
 				if (v == null) {
 					return null;
@@ -2571,10 +2818,10 @@ define(function (require) {
 					return v;
 				}
 				if (v instanceof Uint8Array) {
-					return decoder.decode(v);
+					return userStringDecoder.decode(v);
 				}
 				if (v instanceof ArrayBuffer) {
-					return decoder.decode(new Uint8Array(v));
+					return userStringDecoder.decode(new Uint8Array(v));
 				}
 				return String(v);
 			}
@@ -2730,9 +2977,6 @@ define(function (require) {
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
 
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
-
 					// create required functions in context
 					ctx.AddSignBoardData = (key, translation) => {
 						let decoded_key = key && key.length > 1 ? userStringDecoder.decode(key) : null;
@@ -2796,9 +3040,6 @@ define(function (require) {
 
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
-
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// create required functions in context
 					ctx.AddSignBoard = (mapname, x, y, height, type, icon_location, description, color) => {
@@ -2907,9 +3148,6 @@ define(function (require) {
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
 
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
-
 					// create required functions in context
 					ctx.AddWeaponName = (weaponID, weaponName) => {
 						let decoded_weaponName =
@@ -3015,9 +3253,17 @@ define(function (require) {
 						jobIdWithJT[`JT_${key}`] = value;
 					}
 					ctx.JOBID = jobIdWithJT;
-
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
+					await lua.doString(`
+						if JOBID then
+							__JOBID_ORIGINAL = JOBID
+							JOBID = setmetatable({}, {
+								__index = function(t, k)
+									local id = __JOBID_ORIGINAL[k]
+									return id ~= nil and id or 0
+								end
+							})
+						end
+					`);
 
 					// create required functions in context
 					ctx.AddSkillInfo = (
@@ -3028,8 +3274,7 @@ define(function (require) {
 						spAmount,
 						bSeperateLv,
 						attackRange,
-						skillScale,
-						_NeedSkillListJson
+						skillScale
 					) => {
 						// Convert to format expected by SkillInfo.js
 						const toArray = v => {
@@ -3051,56 +3296,28 @@ define(function (require) {
 							SpAmount: toArray(spAmount),
 							bSeperateLv: bSeperateLv,
 							AttackRange: toArray(attackRange),
-							SkillScale: skillScale
+							SkillScale: skillScale,
+							NeedSkillList: {},
+							_NeedSkillList: []
 						};
-
-						// Add _NeedSkillList
-						if (_NeedSkillListJson) {
-							try {
-								const jsonString =
-									_NeedSkillListJson instanceof Uint8Array
-										? userStringDecoder.decode(_NeedSkillListJson)
-										: _NeedSkillListJson;
-
-								const arr = JSON.parse(jsonString);
-								if (Array.isArray(arr) && arr.length) {
-									SkillInfo[skillId]._NeedSkillList = arr;
-								}
-							} catch (e) {
-								console.error(e);
-							}
-						}
 
 						return 1;
 					};
+
+					ctx.AddSkillRequirement = (skillId, requiredSkillId, requiredLevel) => {
+						SkillInfo[skillId]._NeedSkillList.push([requiredSkillId, requiredLevel]);
+						return 1;
+					};
+
+					ctx.AddJobSkillRequirement = (skillId, jobId, requiredSkillId, requiredLevel) => {
+						if (!SkillInfo[skillId].NeedSkillList[jobId]) {
+							SkillInfo[skillId].NeedSkillList[jobId] = [];
+						}
+						SkillInfo[skillId].NeedSkillList[jobId].push([requiredSkillId, requiredLevel]);
+						return 1;
+					};
+
 					ctx.SKID = SKID;
-
-					if (!ctx.__HAS_CONVERT_TO_JSON__) {
-						await lua.doString(`
-					    function ConvertToJson(luaTable)
-						  if type(luaTable) ~= 'table' then return nil end
-
-						  local t = {}
-
-						  for _, v in ipairs(luaTable) do
-						    if type(v) == 'table' then
-						      local id = tonumber(v[1])
-						      local lv = tonumber(v[2])
-
-						      if id and lv then
-						        t[#t + 1] = "[" .. id .. "," .. lv .. "]"
-						      end
-						    end
-						  end
-
-						  if #t == 0 then return nil end
-						  return "[" .. table.concat(t, ",") .. "]"
-						end
-
-					  `);
-						ctx.__HAS_CONVERT_TO_JSON__ = true;
-					}
-
 					await lua.doString(`
 						if SKID then
 							__SKID_ORIGINAL = SKID 
@@ -3121,30 +3338,50 @@ define(function (require) {
 					await lua.doFile('skillinfolist.lub');
 
 					// create and execute our own main function
-					await lua.doString(`  
-					function main_skillInfoList()  
-						if not SKILL_INFO_LIST then  
-							return false, "Error: SKILL_INFO_LIST is nil or not a table"  
-						end  
-					
-						for skillId, skillData in pairs(SKILL_INFO_LIST) do 
-							local resName = skillData[1] or "" 
-							local skillName = skillData.SkillName or ""  
-							local maxLv = skillData.MaxLv or 1  
-							local spAmount = skillData.SpAmount or {}  
-							local bSeperateLv = skillData.bSeperateLv or false  
-							local attackRange = skillData.AttackRange or {}  
-							local skillScale = skillData.SkillScale or {}  
-							local _NeedSkillListJson = ConvertToJson(skillData._NeedSkillList)
-
-							result, msg = AddSkillInfo(skillId, resName, skillName, maxLv, spAmount, bSeperateLv, attackRange, skillScale, _NeedSkillListJson)  
-							if not result then  
-								return false, msg  
+					lua.doStringSync(`  
+						function main_skillInfoList()  
+							if not SKILL_INFO_LIST then  
+								return false, "Error: SKILL_INFO_LIST is nil or not a table"  
 							end  
-						end  
-						return true, "good"  
-						end
-					main_skillInfoList()  
+						
+							for skillId, skillData in pairs(SKILL_INFO_LIST) do 
+								local resName = skillData[1] or "" 
+								local skillName = skillData.SkillName or ""  
+								local maxLv = skillData.MaxLv or 1  
+								local spAmount = skillData.SpAmount or {}  
+								local bSeperateLv = skillData.bSeperateLv or false  
+								local attackRange = skillData.AttackRange or {}  
+								local skillScale = skillData.SkillScale or {}  
+
+								result, msg = AddSkillInfo(skillId, resName, skillName, maxLv, spAmount, bSeperateLv, attackRange, skillScale)  
+								if not result then  
+									return false, msg  
+								end
+								
+								if skillData._NeedSkillList then  
+									for _, req in ipairs(skillData._NeedSkillList) do  
+										if req[1] and req[2] then  
+											AddSkillRequirement(skillId, req[1], req[2])  
+										end  
+									end  
+								end  
+								
+								if skillData.NeedSkillList then  
+									for jobId, reqList in pairs(skillData.NeedSkillList) do  
+										if reqList then  
+											for _, req in ipairs(reqList) do  
+												if req[1] and req[2] then  
+													AddJobSkillRequirement(skillId, jobId, req[1], req[2])  
+												end  
+											end  
+										end  
+									end  
+								end 
+
+							end  
+							return true, "good"  
+							end
+						main_skillInfoList()  
 					`);
 				} catch (error) {
 					console.error('[loadSkillInfoList] Error: ', error);
@@ -3173,7 +3410,7 @@ define(function (require) {
 			DB.LUA_PATH + 'skillinfoz/jobinheritlist.lub',
 			async function (file) {
 				try {
-					console.log(`Loading file ${DB.LUA_PATH}skillinfoz/jobinheritlist.lub...`);
+					console.log(`Loading file "${DB.LUA_PATH}skillinfoz/jobinheritlist.lub"...`);
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 
 					// Mount and execute jobinheritlist.lub
@@ -3217,7 +3454,8 @@ define(function (require) {
 							jobId < JobId.KNIGHT ||
 							jobId === JobId.TAEKWON ||
 							(jobId >= JobId.SUPERNOVICE && jobId <= JobId.NINJA) ||
-							jobId == JobId.DO_SUMMONER
+							jobId == JobId.DO_SUMMONER ||
+							jobId == JobId.DRUID
 						) {
 							list = 1;
 						} else if (
@@ -3226,7 +3464,8 @@ define(function (require) {
 							jobId == JobId.LINKER ||
 							(jobId >= JobId.KAGEROU && jobId <= JobId.REBELLION) ||
 							jobId == JobId.SUPERNOVICE2 ||
-							jobId == JobId.SPIRIT_HANDLER
+							jobId == JobId.SPIRIT_HANDLER ||
+							jobId == JobId.KARNOS
 						) {
 							list = 2;
 						} else if (
@@ -3250,7 +3489,8 @@ define(function (require) {
 							jobId == JobId.SOUL_REAPER ||
 							(jobId >= JobId.RUNE_KNIGHT_B && jobId <= JobId.SHADOW_CHASER_B) ||
 							jobId === JobId.EMPEROR_B ||
-							jobId === JobId.REAPER_B
+							jobId === JobId.REAPER_B ||
+							jobId == JobId.ALITEA
 						) {
 							list = 3;
 						} else if (
@@ -3392,25 +3632,25 @@ define(function (require) {
 		async function processLuaData() {
 			try {
 				const ctx = lua.ctx;
-				const userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
-				ctx.SetStatusConstants = sourceTable => {
-					if (typeof sourceTable === 'object' && sourceTable !== null) {
-						// Populate SC with constants from the Lua table (e.g., EFST_PROVOKE -> SC.PROVOKE)
-						for (const key in sourceTable) {
-							if (key.startsWith('EFST_')) {
-								const jsKey = key.replace('EFST_', '');
-								SC[jsKey] = sourceTable[key];
-							}
-						}
-						// Add BLANK back if it was cleared and not defined in LUB
-						if (!SC.BLANK) {
-							SC.BLANK = -1;
-						}
-					} else {
-						console.error(
-							'[loadStateIconInfo]: EFST_IDs table not received from Lua. Cannot synchronize StatusConst.'
-						);
+				ctx.mergeSC = (key, value) => {
+					// Keys might be passed as Uint8Array from Lua by Wasmoon
+					let safeKey =
+						typeof key === 'string' ? key : key instanceof Uint8Array ? userStringDecoder.decode(key) : key;
+
+					if (
+						typeof safeKey === 'string' &&
+						typeof value === 'number' &&
+						value >= 0 &&
+						safeKey.startsWith('EFST_')
+					) {
+						const jsKey = safeKey.replace('EFST_', '');
+						SC[jsKey] = value;
+					}
+
+					// Add BLANK back if it was cleared and not defined in LUB
+					if (!SC.BLANK) {
+						SC.BLANK = -1;
 					}
 					return 1;
 				};
@@ -3475,7 +3715,20 @@ define(function (require) {
 					function extract_status_info()
 						-- Sync StatusConst (SC) with the full list of EFST_IDs from the original table
 						if type(__EFST_IDS_ORIGINAL) == "table" then
-							SetStatusConstants(__EFST_IDS_ORIGINAL)
+							for k, v in pairs(__EFST_IDS_ORIGINAL) do
+								if type(k) == "string" and type(v) == "number" then
+									mergeSC(k, v)
+								end
+							end
+							
+							local mt = getmetatable(__EFST_IDS_ORIGINAL)
+							if mt and type(mt.__index) == "table" then
+								for k, v in pairs(mt.__index) do
+									if type(k) == "string" and type(v) == "number" then
+										mergeSC(k, v)
+									end
+								end
+							end
 						end
 
 						-- Process Basic Info & Descriptions
@@ -3582,12 +3835,9 @@ define(function (require) {
 				// get context
 				const ctx = lua.ctx;
 
-				// create a decoder
-				let userDecoder = new TextEncoding.TextDecoder(userCharpage);
-
 				// create context function
 				ctx.addKeyAndValueToTable = (key, value) => {
-					table[key] = userDecoder.decode(value);
+					table[key] = userStringDecoder.decode(value);
 					return 1;
 				};
 
@@ -3596,7 +3846,7 @@ define(function (require) {
 					if (!table[key]) {
 						table[key] = '';
 					}
-					table[key] += userDecoder.decode(value) + '\n';
+					table[key] += userStringDecoder.decode(value) + '\n';
 					return 1;
 				};
 
@@ -3664,9 +3914,6 @@ define(function (require) {
 
 					// Get context
 					const ctx = lua.ctx;
-
-					// Create a decoder
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// Initialize result variable
 					let result = null;
@@ -3769,9 +4016,6 @@ define(function (require) {
 					// get context, a proxy. It will be used to interact with lua conveniently
 					const ctx = lua.ctx;
 
-					// create decoders
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
-
 					// create mapInfo required functions in context
 					ctx.AddMapDisplayName = (name, displayName, notify_enter) => {
 						let decoded_name = userStringDecoder.decode(name);
@@ -3849,9 +4093,6 @@ define(function (require) {
 					// check if file is ArrayBuffer and convert to Uint8Array if necessary
 					let buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 
-					// create decoders
-					let decoder = new TextEncoding.TextDecoder(userCharpage);
-
 					lua.mountFile(filename, buffer);
 					await lua.doFile(filename);
 
@@ -3861,8 +4102,8 @@ define(function (require) {
 						const ctx = lua.ctx;
 
 						ctx.__push_kv = (k, v) => {
-							const key = k instanceof Uint8Array ? decoder.decode(k) : k;
-							const val = v instanceof Uint8Array ? decoder.decode(v) : v;
+							const key = k instanceof Uint8Array ? userStringDecoder.decode(k) : k;
+							const val = v instanceof Uint8Array ? userStringDecoder.decode(v) : v;
 							result[key] = val;
 							return 1;
 						};
@@ -4094,7 +4335,7 @@ define(function (require) {
 	};
 
 	DB.isPlayer = function isPlayer(jobid) {
-		return (jobid >= 0 && jobid < 45) || (jobid >= 4001 && jobid <= 4350) || jobid == 4294967294;
+		return (jobid >= 0 && jobid < 45) || (jobid >= 4001 && jobid <= 4361) || jobid == 4294967294;
 	};
 
 	DB.isDoram = function isDoram(jobid) {
@@ -4150,7 +4391,7 @@ define(function (require) {
 	 * @param {number} alternative sprite
 	 * @return {string}
 	 */
-	DB.getBodyPath = function getBodyPath(id, sex, alternative = -1) {
+	DB.getBodyPath = function getBodyPath(id, sex, alternative = -1, cashMountCostume = false) {
 		// TODO: Warp STR file
 		if (id === 45) {
 			return null;
@@ -4169,30 +4410,22 @@ define(function (require) {
 				: 'data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/\xb8\xf6\xc5\xeb/';
 			result += SexTable[sex] + '/';
 
-			if (PACKETVER.value > 20141022) {
-				if (alternative > 0) {
-					if (
-						(PACKETVER.value > 20231220 &&
-							alternative > JobId.COSTUME_SECOND_JOB_START &&
-							alternative < JobId.COSTUME_SECOND_JOB_END) ||
-						alternative === 1
-					) {
-						result += 'costume_1/';
-					}
+			if (PACKETVER.value > 20141022 && alternative > 0 && id !== alternative) {
+				var use_costume =
+					alternative > JobId.COSTUME_SECOND_JOB_START && alternative < JobId.COSTUME_SECOND_JOB_END;
 
-					result += ClassTable[id] || ClassTable[0];
-					result += '_' + SexTable[sex];
-
-					if (
-						(PACKETVER.value > 20231220 &&
-							alternative > JobId.COSTUME_SECOND_JOB_START &&
-							alternative < JobId.COSTUME_SECOND_JOB_END) ||
-						alternative === 1
-					) {
-						result += '_1';
-					}
-					return result;
+				if (use_costume) {
+					result += 'costume_1/';
 				}
+
+				result += (cashMountCostume ? ClassTable[id] : ClassTable[alternative]) || ClassTable[0];
+
+				result += '_' + SexTable[sex];
+
+				if (use_costume) {
+					result += '_1';
+				}
+				return result;
 			}
 
 			result += ClassTable[id] || ClassTable[0];
@@ -4221,34 +4454,42 @@ define(function (require) {
 		//
 		// OTHER ACTORS
 		//
-		if (id == '11_FALCON' || id == '4034_FALCON') {
-			// 2nd
-			return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/\xb8\xc5';
-		}
-
-		if (id == '4012_FALCON') {
-			// rebirth
-			return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/\xb8\xc5\x32';
-		}
-
-		if (id == '4056_FALCON' || id == '4062_FALCON' || id == '4098_FALCON') {
-			// 3rd
-			return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/owl';
-		}
-
-		if (id == '4056_WUG' || id == '4062_WUG' || id == '4098_WUG') {
-			// 3rd
-			return 'data/sprite/\xb8\xf3\xbd\xba\xc5\xcd/\xbf\xf6\xb1\xd7';
-		}
-
-		if (id == '4257_FALCON' || id == '4270_FALCON' || id == '4278_FALCON') {
-			// 4th
-			return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/windhawk_hawk';
-		}
-
-		if (id == '4257_WUG') {
-			// 4th
-			return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/windhawk_wolf';
+		switch (id) {
+			case '11_FALCON':
+			case '4034_FALCON':
+				// 2nd
+				return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/\xb8\xc5';
+			case '4012_FALCON':
+				// rebirth
+				return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/\xb8\xc5\x32';
+			case '4056_FALCON':
+			case '4062_FALCON':
+			case '4098_FALCON':
+				// 3rd
+				return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/owl';
+			case '4257_FALCON':
+			case '4270_FALCON':
+			case '4278_FALCON':
+				// 4th
+				return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/windhawk_hawk';
+			case '4056_WUG':
+			case '4062_WUG':
+			case '4098_WUG':
+				// 3rd
+				return 'data/sprite/\xb8\xf3\xbd\xba\xc5\xcd/\xbf\xf6\xb1\xd7';
+			case '4257_WUG':
+				// 4th
+				return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/windhawk_wolf';
+			default:
+				if (typeof id === 'string') {
+					// default for gm or customs
+					if (id.includes('_FALCON')) {
+						return 'data/sprite/\xc0\xcc\xc6\xd1\xc6\xae/\xb8\xc5';
+					} else if (id.includes('_WUG')) {
+						return 'data/sprite/\xb8\xf3\xbd\xba\xc5\xcd/\xbf\xf6\xb1\xd7';
+					}
+				}
+				break;
 		}
 
 		// MONSTER
@@ -5267,10 +5508,6 @@ define(function (require) {
 			var item = ItemTable[itemid] || unknownItem;
 
 			if (!item._decoded) {
-				var servers = Configs.get('servers', []);
-				var langType = servers[0] && servers[0].langtype ? parseInt(servers[0].langtype, 10) : 1;
-				var autoEncoding = TextEncoding.detectEncodingByLangtype(langType, Configs.get('disableKorean'));
-				TextEncoding.setCharset(autoEncoding);
 				item.identifiedDescriptionName =
 					item.identifiedDescriptionName && item.identifiedDescriptionName instanceof Array
 						? TextEncoding.decodeString(item.identifiedDescriptionName.join('\n'))
@@ -6397,7 +6634,6 @@ define(function (require) {
 
 					// get context
 					const ctx = lua.ctx;
-					let userStringDecoder = new TextEncoding.TextDecoder(userCharpage);
 
 					// Define the function that Lua will call
 					// add_cashshop_banner( bitmap_name, url )

@@ -200,7 +200,14 @@ define(function (require) {
 	SkillList.setSkills = function setSkills(skills) {
 		SkillList.ui.find('.upgradable').removeClass('upgradable');
 
-		skillPosition = getSkillPosition(Session.Character.job);
+		// Use original job for skill access if the character is transformed
+		var skillJobId = Session.Character.job;
+		var originalJobId = Session.Entity._job;
+		if (originalJobId && originalJobId !== Session.Character.job) {
+			skillJobId = originalJobId;
+		}
+
+		skillPosition = getSkillPosition(skillJobId);
 		createSkillDependencyTree();
 
 		var i, count;
@@ -285,13 +292,11 @@ define(function (require) {
 			var element = '<div class="counterSkill">' + count + '</div>';
 			skillPosition.forEach(function (items, list) {
 				if (items[skillId] !== undefined) {
-					if (!_preferences.mini) {
-						var skillbox = SkillList.ui.find('#positionSkills' + list + ' .s' + items[skillId]);
-						if (skillbox.children().hasClass('disabled') || showAll) {
-							skillbox.addClass('needleSkill');
-							if (count !== null) {
-								skillbox.append(element);
-							}
+					var skillbox = SkillList.ui.find('#positionSkills' + list + ' .s' + items[skillId]);
+					if (skillbox.children().hasClass('disabled') || showAll) {
+						skillbox.addClass('needleSkill');
+						if (count !== null) {
+							skillbox.append(element);
 						}
 					}
 				}
@@ -503,6 +508,35 @@ define(function (require) {
 					// show preview skill
 					if (box.is(':empty')) {
 						box.append(element);
+					}
+					var miniBox = SkillList.ui.find('#minitab' + list);
+					if (miniBox.length && !miniBox.find('.skill.id' + key).length) {
+						var miniElement = jQuery(
+							'<tr class="skill id' +
+								key +
+								' disabled" data-index="' +
+								key +
+								'">' +
+								'<td class="icon"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" width="24" height="24" /></td>' +
+								'<td class="levelupcontainer"></td>' +
+								'<td class="selectable">' +
+								'<div class="name">' +
+								jQuery.escape(sk.SkillName) +
+								'<br/>' +
+								'<span class="level">Lv : <span class="current">0</span></span>' +
+								'</div>' +
+								'</td>' +
+								'<td class="selectable type">' +
+								'<div class="consume">Passive</div>' +
+								'</td>' +
+								'</tr>'
+						);
+
+						miniBox.append(miniElement);
+
+						Client.loadFile(DB.INTERFACE_PATH + 'item/' + sk.Name + '.bmp', function (data) {
+							miniElement.find('.icon img').attr('src', data);
+						});
 					}
 				}
 
@@ -764,7 +798,15 @@ define(function (require) {
 		var element;
 
 		if (!target) {
-			return;
+			if (this.ui.find('.skill.id' + skill.SKID).length) {
+				// Double Step ADD_SKILL packet due packet len overflow
+				_list.push(skill);
+				this.onUpdateSkill(skill.SKID, 0);
+				hasSkills[skill.SKID] = skill;
+				target = skill;
+			} else {
+				return;
+			}
 		}
 
 		// Update Memory
@@ -1041,21 +1083,19 @@ define(function (require) {
 	 */
 	function onResetChoice() {
 		rememberChoice.forEach(function (count, skillId) {
-			if (!_preferences.mini) {
-				var skillbox = SkillList.ui.find('.skillCol.s' + skillDependencyTree[skillId].position);
-				if (!hasSkills?.[skillId]?.level) {
-					skillbox.children().addClass('disabled');
-				}
-				skillbox.find('.selectable').show();
-				skillbox
-					.find('.current')
-					.empty()
-					.append(hasSkills?.[skillId]?.level ?? 0);
-				skillbox
-					.find('.max')
-					.empty()
-					.append(hasSkills?.[skillId]?.level ?? 0);
+			var skillbox = SkillList.ui.find('.skillCol.s' + skillDependencyTree[skillId].position);
+			if (!hasSkills?.[skillId]?.level) {
+				skillbox.children().addClass('disabled');
 			}
+			skillbox.find('.selectable').show();
+			skillbox
+				.find('.current')
+				.empty()
+				.append(hasSkills?.[skillId]?.level ?? 0);
+			skillbox
+				.find('.max')
+				.empty()
+				.append(hasSkills?.[skillId]?.level ?? 0);
 		});
 		totalCounter = 0;
 		SkillList.ui.find('.skpoints_count').text(_points);

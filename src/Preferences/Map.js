@@ -7,71 +7,70 @@
  *
  * @author Vincent Thibault
  */
-define(['Core/Preferences'], function (Preferences) {
-	'use strict';
 
-	/**
-	 * Export
-	 */
-	return Preferences.get(
-		'Map',
-		{
-			/**
-			 * Display the fog ?
-			 *
-			 * Toggle by using "/fog" in the chatbox
-			 */
-			fog: true,
+import Preferences from 'Core/Preferences.js';
 
-			/**
-			 * Display lightmap ?
-			 *
-			 * Toggle using "/lightmap" in the chatbox
-			 */
-			lightmap: true,
+/**
+ * Export
+ */
+export default Preferences.get(
+	'Map',
+	{
+		/**
+		 * Display the fog ?
+		 *
+		 * Toggle by using "/fog" in the chatbox
+		 */
+		fog: true,
 
-			/**
-			 * Posterize lightmap ?
-			 *
-			 * Toggle using "/smoothlight" in the chatbox
-			 */
-			smoothlight: 0,
+		/**
+		 * Display lightmap ?
+		 *
+		 * Toggle using "/lightmap" in the chatbox
+		 */
+		lightmap: true,
 
-			/**
-			 * Display effects ?
-			 *
-			 * Toggle using "/effect" in the chatbox
-			 */
-			effect: true,
+		/**
+		 * Posterize lightmap ?
+		 *
+		 * Toggle using "/smoothlight" in the chatbox
+		 */
+		smoothlight: 0,
 
-			/**
-			 * Display minify effects ?
-			 *
-			 * Toggle using "/mineeffect" in the chatbox
-			 */
-			mineffect: false,
+		/**
+		 * Display effects ?
+		 *
+		 * Toggle using "/effect" in the chatbox
+		 */
+		effect: true,
 
-			/**
-			 * Should we display "miss" when monster/player miss an attack ?
-			 *
-			 * Toggle using "/miss" in the chatbox
-			 */
-			miss: true,
+		/**
+		 * Display minify effects ?
+		 *
+		 * Toggle using "/mineeffect" in the chatbox
+		 */
+		mineffect: false,
 
-			/**
-			 * Display aura (2) or simplified aura (1) or disable entirely (0)
-			 *
-			 * Toggle using "/aura" or "/aura2" in the chatbox
-			 */
-			aura: 1,
+		/**
+		 * Should we display "miss" when monster/player miss an attack ?
+		 *
+		 * Toggle using "/miss" in the chatbox
+		 */
+		miss: true,
 
-			/**
-			 * Display different font style ?
-			 *
-			 * Toggle using "/showname" changes font styles.
-			 */
-			showname: true
-		},
-		1.1
-	);
-});
+		/**
+		 * Display aura (2) or simplified aura (1) or disable entirely (0)
+		 *
+		 * Toggle using "/aura" or "/aura2" in the chatbox
+		 */
+		aura: 1,
+
+		/**
+		 * Display different font style ?
+		 *
+		 * Toggle using "/showname" changes font styles.
+		 */
+		showname: true
+	},
+	1.1
+);

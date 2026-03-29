@@ -6,112 +6,91 @@
  *
  * @author AoShinHo
  */
-define(function (require) {
-	'use strict';
 
-	var GraphicsSettings = require('Preferences/Graphics');
-	var WebGL = require('Utils/WebGL');
-	var PostProcess = require('Renderer/Effects/PostProcess');
+import GraphicsSettings from 'Preferences/Graphics.js';
+import WebGL from 'Utils/WebGL.js';
+import PostProcess from 'Renderer/Effects/PostProcess.js';
+import commonVS from './GLSL/Common.vs?raw';
+import blurFS from './GLSL/GaussianBlur.fs?raw';
 
-	var _program, _buffer;
+let _program, _buffer;
+/**
+ * Fragment Shader: Single-Pass Gaussian Blur
+ */
+function GaussianBlur() {}
 
-	var commonVS = require('text!./GLSL/Common.vs');
+/**
+ * Renders the Blur effect
+ * @param {WebGLRenderingContext} gl
+ * @param {WebGLTexture} inputTexture - Texture from previous pass
+ * @param {WebGLFramebuffer} outputFbo - Target buffer
+ */
+GaussianBlur.render = function render(gl, inputTexture, outputFbo) {
+	if (!_buffer || !_program || !GaussianBlur.isActive()) {
+		return;
+	}
 
-	/**
-	 * Fragment Shader: Single-Pass Gaussian Blur
-	 */
-	var blurFS = require('text!./GLSL/GaussianBlur.fs');
+	PostProcess.beforeRenderPass(gl, outputFbo);
 
-	function GaussianBlur() {}
+	gl.useProgram(_program);
 
-	/**
-	 * Renders the Blur effect
-	 * @param {WebGLRenderingContext} gl
-	 * @param {WebGLTexture} inputTexture - Texture from previous pass
-	 * @param {WebGLFramebuffer} outputFramebuffer - Target buffer
-	 */
-	GaussianBlur.render = function render(gl, inputTexture, outputFramebuffer) {
-		if (!_buffer || !_program || !GaussianBlur.isActive()) {
-			return;
-		}
+	const focusRadius = GraphicsSettings.blurArea / 100;
+	const focusFalloff = 0.5;
 
-		gl.bindFramebuffer(gl.FRAMEBUFFER, outputFramebuffer);
+	gl.uniform1f(_program.uniform.uFocusRadius, focusRadius);
+	gl.uniform1f(_program.uniform.uFocusFalloff, focusFalloff);
 
-		// Viewport handling
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	const boxsampleFactor = GraphicsSettings.blurIntensity;
 
-		gl.useProgram(_program);
+	gl.uniform2f(
+		_program.uniform.uTexelSize,
+		(1.0 / gl.canvas.width) * boxsampleFactor,
+		(1.0 / gl.canvas.height) * boxsampleFactor
+	);
 
-		var focusRadius = GraphicsSettings.blurArea / 100;
-		var focusFalloff = 0.5;
+	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
+	const posLoc = _program.attribute.aPosition;
+	gl.enableVertexAttribArray(posLoc);
+	gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-		gl.uniform1f(_program.uniform.uFocusRadius, focusRadius);
-		gl.uniform1f(_program.uniform.uFocusFalloff, focusFalloff);
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, inputTexture);
+	gl.uniform1i(_program.uniform.uTexture, 0);
 
-		var boxsampleFactor = GraphicsSettings.blurIntensity;
+	gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-		gl.uniform2f(
-			_program.uniform.uTexelSize,
-			(1.0 / gl.canvas.width) * boxsampleFactor,
-			(1.0 / gl.canvas.height) * boxsampleFactor
-		);
+	PostProcess.afterRenderPass(gl);
+};
 
-		gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
-		var posLoc = _program.attribute.aPosition;
-		gl.enableVertexAttribArray(posLoc);
-		gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+GaussianBlur.init = function init(gl) {
+	if (!gl) {
+		return;
+	}
+	try {
+		_program = WebGL.createShaderProgram(gl, commonVS, blurFS);
+	} catch (e) {
+		console.error('Error compiling Lens Blur shader.', e);
+		return;
+	}
+	const quadVertices = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
+	_buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, quadVertices, gl.STATIC_DRAW);
+};
 
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-		gl.uniform1i(_program.uniform.uTexture, 0);
+GaussianBlur.isActive = function isActive() {
+	return GraphicsSettings.blur;
+};
 
-		gl.drawArrays(gl.TRIANGLES, 0, 6);
+GaussianBlur.program = function program() {
+	return _program;
+};
 
-		GaussianBlur.afterRender(gl);
-	};
-
-	GaussianBlur.afterRender = function (gl) {
-		if (!_buffer || !_program) {
-			return;
-		}
-		gl.useProgram(null);
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-		gl.bindTexture(gl.TEXTURE_2D, null);
-	};
-
-	GaussianBlur.init = function init(gl) {
-		if (!gl) {
-			return;
-		}
-		try {
-			_program = WebGL.createShaderProgram(gl, commonVS, blurFS);
-		} catch (e) {
-			console.error('Error compiling Lens Blur shader.', e);
-			return;
-		}
-		var quadVertices = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
-		_buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
-		gl.bufferData(gl.ARRAY_BUFFER, quadVertices, gl.STATIC_DRAW);
-	};
-
-	GaussianBlur.isActive = function isActive() {
-		return GraphicsSettings.blur;
-	};
-
-	GaussianBlur.program = function program() {
-		return _program;
-	};
-
-	// No internal FBO needed for this effect in this architecture
-	GaussianBlur.clean = function clean(gl) {
-		if (_buffer) {
-			gl.deleteBuffer(_buffer);
-		}
-		_program = _buffer = null;
-	};
-
-	return GaussianBlur;
-});
+// No internal FBO needed for this effect in this architecture
+GaussianBlur.clean = function clean(gl) {
+	if (_buffer) {
+		gl.deleteBuffer(_buffer);
+	}
+	_program = _buffer = null;
+};
+export default GaussianBlur;

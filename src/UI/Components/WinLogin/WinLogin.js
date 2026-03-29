@@ -6,26 +6,22 @@
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  */
-define(function (require) {
-	'use strict';
 
-	var publicName = 'WinLogin';
+import WinLogin from './WinLogin/WinLogin.js';
+import WinLoginV2 from './WinLoginV2/WinLoginV2.js';
+import UIVersionManager from 'UI/UIVersionManager.js';
 
-	var WinLogin = require('./WinLogin/WinLogin');
-	var WinLoginV2 = require('./WinLoginV2/WinLoginV2');
+const publicName = 'WinLogin';
 
-	var UIVersionManager = require('UI/UIVersionManager');
+const versionInfo = {
+	default: WinLogin,
+	common: {
+		20181114: WinLoginV2
+	},
+	re: {},
+	prere: {}
+};
 
-	var versionInfo = {
-		default: WinLogin,
-		common: {
-			20181114: WinLoginV2
-		},
-		re: {},
-		prere: {}
-	};
+const Controller = UIVersionManager.getUIController(publicName, versionInfo);
 
-	var Controller = UIVersionManager.getUIController(publicName, versionInfo);
-
-	return Controller;
-});
+export default Controller;

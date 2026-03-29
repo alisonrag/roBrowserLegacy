@@ -3,57 +3,61 @@
  *
  * Manage entity special animations
  *
+/**
+ * Renderer/EntityAnimations.js
+ *
+ * Manage entity special animations
+ *
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  * @author Vincent Thibault
  */
-define(['Renderer/Renderer'], function (Renderer) {
-	'use strict';
 
-	/**
-	 * @Constructor
-	 * @param {object} Entity
-	 */
-	function Animations(entity) {
-		this.entity = entity;
-		this.list = [];
-	}
+import Client from 'Core/Client.js';
+import Renderer from 'Renderer/Renderer.js';
 
-	/**
-	 * Add an animation to the list
-	 *
-	 * @param {function} callback
-	 */
-	Animations.prototype.add = function add(callback) {
-		this.list.push({
-			tick: Renderer.tick,
-			callback: callback
-		});
-	};
+/**
+ * @Constructor
+ * @param {object} Entity
+ */
+function Animations(entity) {
+	this.entity = entity;
+	this.list = [];
+}
 
-	/**
-	 * Process events
-	 */
-	Animations.prototype.process = function process() {
-		var i, count;
+/**
+ * Add an animation to the list
+ *
+ * @param {function} callback
+ */
+Animations.prototype.add = function add(callback) {
+	this.list.push({
+		tick: Renderer.tick,
+		callback: callback
+	});
+};
 
-		for (i = 0, count = this.list.length; i < count; ++i) {
-			if (this.list[i].callback(Renderer.tick - this.list[i].tick)) {
-				this.list.splice(i, 1);
-				i--;
-				count--;
-			}
+/**
+ * Process events
+ */
+Animations.prototype.process = function process() {
+	let i, count;
+
+	for (i = 0, count = this.list.length; i < count; ++i) {
+		if (this.list[i].callback(Renderer.tick - this.list[i].tick)) {
+			this.list.splice(i, 1);
+			i--;
+			count--;
 		}
-	};
+	}
+};
 
-	/**
-	 * Clean up events
-	 */
-	Animations.prototype.free = function free() {
-		this.list.length = 0;
-	};
-
-	return function init() {
-		this.animations = new Animations(this);
-	};
-});
+/**
+ * Clean up events
+ */
+Animations.prototype.free = function free() {
+	this.list.length = 0;
+};
+export default function init() {
+	this.animations = new Animations(this);
+}

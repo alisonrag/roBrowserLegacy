@@ -7,52 +7,50 @@
  *
  * @author AoShinHo
  */
-define(function (require) {
-	'use strict';
 
-	var Interaction = require('./JoystickInteractionService');
-	var ControlsSettings = require('Preferences/Controls');
+import Interaction from './JoystickInteractionService.js';
+import ControlsSettings from 'Preferences/Controls.js';
+import JoystickUIRenderer from './JoystickUIRenderer.js';
 
-	return {
-		update: function (axes) {
-			var active = false;
+export default {
+	update: function (axes) {
+		let active = false;
 
-			// Left stick = movement
-			var lx = axes[0];
-			var ly = axes[1];
+		// Left stick = movement
+		let lx = axes[0];
+		let ly = axes[1];
 
-			if (ControlsSettings.joyReverseStick && axes.length >= 4) {
-				lx = axes[2];
-				ly = axes[3];
+		if (ControlsSettings.joyReverseStick && axes.length >= 4) {
+			lx = axes[2];
+			ly = axes[3];
+		}
+
+		if (Math.abs(lx) > ControlsSettings.joyDeadline || Math.abs(ly) > ControlsSettings.joyDeadline) {
+			Interaction.moveCharacter(lx, -ly);
+			Interaction.cancelQuick = true;
+			active = true;
+		}
+
+		// Right stick = cursor
+		if (axes.length >= 4) {
+			let rx = axes[2];
+			let ry = axes[3];
+
+			if (ControlsSettings.joyReverseStick) {
+				rx = axes[0];
+				ry = axes[1];
 			}
 
-			if (Math.abs(lx) > ControlsSettings.joyDeadline || Math.abs(ly) > ControlsSettings.joyDeadline) {
-				Interaction.moveCharacter(lx, -ly);
-				Interaction.cancelQuick = true;
+			if (Math.abs(rx) > ControlsSettings.joyDeadline || Math.abs(ry) > ControlsSettings.joyDeadline) {
+				Interaction.moveCursor(rx, ry);
 				active = true;
 			}
-
-			// Right stick = cursor
-			if (axes.length >= 4) {
-				var rx = axes[2];
-				var ry = axes[3];
-
-				if (ControlsSettings.joyReverseStick) {
-					rx = axes[0];
-					ry = axes[1];
-				}
-
-				if (Math.abs(rx) > ControlsSettings.joyDeadline || Math.abs(ry) > ControlsSettings.joyDeadline) {
-					Interaction.moveCursor(rx, ry);
-					active = true;
-				}
-			}
-
-			if (active) {
-				require('./JoystickUIRenderer').show();
-			}
-
-			return active;
 		}
-	};
-});
+
+		if (active) {
+			JoystickUIRenderer.show();
+		}
+
+		return active;
+	}
+};

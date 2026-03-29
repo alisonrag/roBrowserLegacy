@@ -8,48 +8,42 @@
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  */
-define(function (require) {
-	'use strict';
 
-	var publicName = 'WinStats';
+import WinStats from './WinStats/WinStats.js';
+import WinStatsV1 from './WinStatsV1/WinStatsV1.js';
+import WinStatsV2 from './WinStatsV2/WinStatsV2.js';
+import WinStatsV3 from './WinStatsV3/WinStatsV3.js';
+import UIVersionManager from 'UI/UIVersionManager.js';
+import KEYS from 'Controls/KeyEventHandler.js';
 
-	var WinStats = require('./WinStats/WinStats');
-	var WinStatsV1 = require('./WinStatsV1/WinStatsV1');
-	var WinStatsV2 = require('./WinStatsV2/WinStatsV2');
-	var WinStatsV3 = require('./WinStatsV3/WinStatsV3');
+const publicName = 'WinStats';
+const versionInfo = {
+	default: WinStats,
+	common: {
+		20200520: WinStatsV3,
+		20140521: WinStatsV2,
+		20090617: WinStatsV1
+	},
+	re: {},
+	prere: {}
+};
 
-	var UIVersionManager = require('UI/UIVersionManager');
-	var KEYS = require('Controls/KeyEventHandler');
+const WinStatsController = UIVersionManager.getUIController(publicName, versionInfo);
+const _selectUIVersion = WinStatsController.selectUIVersion;
 
-	var versionInfo = {
-		default: WinStats,
-		common: {
-			20200520: WinStatsV3,
-			20140521: WinStatsV2,
-			20090617: WinStatsV1
-		},
-		re: {},
-		prere: {}
-	};
+// Extend default UI selector
+WinStatsController.selectUIVersion = function () {
+	_selectUIVersion();
 
-	var WinStatsController = UIVersionManager.getUIController(publicName, versionInfo);
-	var _selectUIVersion = WinStatsController.selectUIVersion;
+	const component = WinStatsController.getUI();
 
-	// Extend default UI selector
-	WinStatsController.selectUIVersion = function () {
-		_selectUIVersion();
-
-		var component = WinStatsController.getUI();
-
-		// Escape to close the UI
-		component.onKeyDown = function onKeyDown(e) {
-			if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
-				if (typeof component.toggle === 'function') {
-					component.toggle();
-				}
+	// Escape to close the UI
+	component.onKeyDown = function onKeyDown(e) {
+		if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
+			if (typeof component.toggle === 'function') {
+				component.toggle();
 			}
-		};
+		}
 	};
-
-	return WinStatsController;
-});
+};
+export default WinStatsController;

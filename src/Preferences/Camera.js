@@ -7,18 +7,17 @@
  *
  * @author Vincent Thibault
  */
-define(['Core/Preferences'], function (Preferences) {
-	'use strict';
 
-	/**
-	 * Export
-	 */
-	return Preferences.get(
-		'Camera',
-		{
-			smooth: true,
-			zoom: 125.0
-		},
-		1.1
-	);
-});
+import Preferences from 'Core/Preferences.js';
+
+/**
+ * Export
+ */
+export default Preferences.get(
+	'Camera',
+	{
+		smooth: true,
+		zoom: 125.0
+	},
+	1.1
+);

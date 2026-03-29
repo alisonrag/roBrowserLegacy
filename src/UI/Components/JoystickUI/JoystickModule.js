@@ -7,28 +7,25 @@
  *
  * @author AoShinHo
  */
-define(function (require) {
-	'use strict';
 
-	var Polling = require('./JoystickPollingLoop');
-	var InputService = require('./JoystickInputService');
-	var Interaction = require('./JoystickInteractionService');
-	var ShortcutMapper = require('./JoystickShortcutMapper');
-	var JoystickUIRenderer = require('./JoystickUIRenderer');
+import Polling from './JoystickPollingLoop.js';
+import InputService from './JoystickInputService.js';
+import Interaction from './JoystickInteractionService.js';
+import ShortcutMapper from './JoystickShortcutMapper.js';
+import JoystickUIRenderer from './JoystickUIRenderer.js';
 
-	return {
-		prepare: function () {
-			ShortcutMapper.prepare();
-			InputService.prepare();
-			Interaction.prepare();
-			Polling.start();
-			JoystickUIRenderer.hide();
-		},
-		dispose: function () {
-			Polling.stop();
-			Interaction.dispose();
-			InputService.dispose();
-			JoystickUIRenderer.dispose();
-		}
-	};
-});
+export default {
+	prepare: function () {
+		ShortcutMapper.prepare();
+		InputService.prepare();
+		Interaction.prepare();
+		Polling.start();
+		JoystickUIRenderer.hide();
+	},
+	dispose: function () {
+		Polling.stop();
+		Interaction.dispose();
+		InputService.dispose();
+		JoystickUIRenderer.dispose();
+	}
+};

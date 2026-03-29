@@ -8,34 +8,12 @@
  * @author Vincent Thibault
  */
 
-// Errors Handler (hack)
-require.onError = function (err) {
-	'use strict';
+import Configs from 'Core/Configs.js';
+import Thread from 'Core/Thread.js';
+import Client from 'Core/Client.js';
+import StrViewer from 'UI/Components/StrViewer/StrViewer.js';
 
-	if (require.defined('UI/Components/Error/Error')) {
-		require('UI/Components/Error/Error').addTrace(err);
-		return;
-	}
-
-	require(['UI/Components/Error/Error'], function (Errors) {
-		Errors.addTrace(err);
-	});
-};
-
-require({
-	baseUrl: '../../src/',
-	paths: {
-		text: 'Vendors/text.require',
-		jquery: 'Vendors/jquery-1.9.1'
-	}
-}, ['Core/Configs', 'Core/Thread', 'Core/Client', 'UI/Components/StrViewer/StrViewer'], function (
-	Configs,
-	Thread,
-	Client,
-	StrViewer
-) {
-	'use strict';
-
+export default function init() {
 	function onAPIMessage(event) {
 		if (typeof event.data !== 'object') {
 			return;
@@ -74,4 +52,4 @@ require({
 		Client.init([]);
 	});
 	Thread.init();
-});
+}

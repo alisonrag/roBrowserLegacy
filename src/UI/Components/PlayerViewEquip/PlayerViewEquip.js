@@ -8,50 +8,47 @@
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  */
-define(function (require) {
-	'use strict';
 
-	var publicName = 'PlayerViewEquip';
+import PlayerViewEquipV0 from './PlayerViewEquipV0/PlayerViewEquipV0.js'; // equip
+import PlayerViewEquipV1 from './PlayerViewEquipV1/PlayerViewEquipV1.js'; // equip + costume (headgears + robe)
+import PlayerViewEquipV2 from './PlayerViewEquipV2/PlayerViewEquipV2.js'; // equip + costume (full)
 
-	var PlayerViewEquipV0 = require('./PlayerViewEquipV0/PlayerViewEquipV0'); // equip
-	var PlayerViewEquipV1 = require('./PlayerViewEquipV1/PlayerViewEquipV1'); // equip + costume (headgears + robe)
-	var PlayerViewEquipV2 = require('./PlayerViewEquipV2/PlayerViewEquipV2'); // equip + costume (full)
+import UIVersionManager from 'UI/UIVersionManager.js';
+import DB from 'DB/DBManager.js';
+import KEYS from 'Controls/KeyEventHandler.js';
 
-	var UIVersionManager = require('UI/UIVersionManager');
-	var DB = require('DB/DBManager');
-	var KEYS = require('Controls/KeyEventHandler');
+const publicName = 'PlayerViewEquip';
 
-	var versionInfo = {
-		default: PlayerViewEquipV0,
-		common: {
-			20150225: PlayerViewEquipV2,
-			20101124: PlayerViewEquipV1
-		},
-		re: {},
-		prere: {}
-	};
+const versionInfo = {
+	default: PlayerViewEquipV0,
+	common: {
+		20150225: PlayerViewEquipV2,
+		20101124: PlayerViewEquipV1
+	},
+	re: {},
+	prere: {}
+};
 
-	var PlayerViewEquipController = UIVersionManager.getUIController(publicName, versionInfo);
+const PlayerViewEquipController = UIVersionManager.getUIController(publicName, versionInfo);
 
-	var _selectUIVersion = PlayerViewEquipController.selectUIVersion;
+const _selectUIVersion = PlayerViewEquipController.selectUIVersion;
 
-	// Extend default UI selector
-	PlayerViewEquipController.selectUIVersion = function () {
-		_selectUIVersion();
+// Extend default UI selector
+PlayerViewEquipController.selectUIVersion = function () {
+	_selectUIVersion();
 
-		//Add selected UI to item owner name update queue
-		var component = PlayerViewEquipController.getUI();
-		DB.UpdateOwnerName.PlayerViewEquip = component.onUpdateOwnerName;
+	//Add selected UI to item owner name update queue
+	const component = PlayerViewEquipController.getUI();
+	DB.UpdateOwnerName.PlayerViewEquip = component.onUpdateOwnerName;
 
-		// Escape to close the UI
-		component.onKeyDown = function onKeyDown(e) {
-			if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
-				if (typeof component.remove === 'function') {
-					component.remove();
-				}
+	// Escape to close the UI
+	component.onKeyDown = function onKeyDown(e) {
+		if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
+			if (typeof component.remove === 'function') {
+				component.remove();
 			}
-		};
+		}
 	};
+};
 
-	return PlayerViewEquipController;
-});
+export default PlayerViewEquipController;

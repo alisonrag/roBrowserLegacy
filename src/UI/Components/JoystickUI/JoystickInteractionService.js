@@ -7,160 +7,158 @@
  *
  * @author AoShinHo
  */
-define(function (require) {
-	'use strict';
 
-	var ShortCut = require('UI/Components/ShortCut/ShortCut');
-	var InventoryUI = require('UI/Components/Inventory/Inventory');
-	var ItemType = require('DB/Items/ItemType');
-	var Character = require('./JoystickCharacterControl');
-	var Target = require('./JoystickTargetService');
-	var Cursor = require('./JoystickMouseCursorAdapter');
-	var jQuery = require('Utils/jquery');
-	var ControlsSettings = require('Preferences/Controls');
-	var SelectionUI = require('./JoystickSelectionUI');
+import ShortCut from 'UI/Components/ShortCut/ShortCut.js';
+import InventoryUI from 'UI/Components/Inventory/Inventory.js';
+import ItemType from 'DB/Items/ItemType.js';
+import Character from './JoystickCharacterControl.js';
+import Target from './JoystickTargetService.js';
+import Cursor from './JoystickMouseCursorAdapter.js';
+import jQuery from 'Utils/jquery.js';
+import ControlsSettings from 'Preferences/Controls.js';
+import SelectionUI from './JoystickSelectionUI.js';
+import Input from './JoystickInputService.js';
+import DB from 'DB/DBManager.js';
+import SkillInfo from 'DB/Skills/SkillInfo.js';
+import ShortcutMapper from './JoystickShortcutMapper.js';
 
-	return {
-		prepare: function () {},
+export default {
+	prepare: function () {},
 
-		dispose: function () {},
-		cancelQuick: false,
-		executeShortcut: function (index, group) {
-			var shortcut = ShortCut.getList()[index];
-			if (!shortcut) {
+	dispose: function () {},
+	cancelQuick: false,
+	executeShortcut: function (index, group) {
+		const shortcut = ShortCut.getList()[index];
+		if (!shortcut) {
+			return;
+		}
+
+		if (!shortcut.isSkill) {
+			const item = InventoryUI.getUI().getItemById(shortcut.ID);
+			if (!item || item.count === 0) {
 				return;
 			}
-
-			if (!shortcut.isSkill) {
-				var item = InventoryUI.getUI().getItemById(shortcut.ID);
-				if (!item || item.count === 0) {
-					return;
-				}
-			} // Move mouse to target entity position
-			else if (ControlsSettings.attackTargetMode) {
-				var targetEntity = Target.getEntity();
-				if (targetEntity) {
-					Cursor.moveMouseToEntity(targetEntity);
-				}
+		} // Move mouse to target entity position
+		else if (ControlsSettings.attackTargetMode) {
+			const targetEntity = Target.getEntity();
+			if (targetEntity) {
+				Cursor.moveMouseToEntity(targetEntity);
 			}
-
-			ShortCut.onShortCut({
-				cmd: 'EXECUTE' + index
-			});
-
-			if (ControlsSettings.joyQuick === 2) {
-				Cursor.quickCastClick();
-			} else if (ControlsSettings.joyQuick === 1) {
-				this.cancelQuick = false;
-
-				function waitforRelease() {
-					setTimeout(function () {
-						var Input = require('./JoystickInputService');
-						var ShortcutMapper = require('./JoystickShortcutMapper');
-
-						var buttons = Input.buttonStates;
-						if (ShortcutMapper.getGroup(buttons) !== group) {
-							Cursor.quickCastClick();
-						} else if (!this.cancelQuick) {
-							waitforRelease();
-						}
-					}, 50);
-				}
-				waitforRelease();
-			}
-		},
-
-		openSelectionWindow: function (draggableElement) {
-			var index = parseInt(draggableElement.getAttribute('data-index'), 10);
-			var isSkill = draggableElement.closest('.skill');
-			var itemData;
-
-			if (!isSkill) {
-				var item = InventoryUI.getUI().getItemByIndex(index);
-				if (item) {
-					if (
-						item.type === ItemType.UNKNOWN ||
-						item.type === ItemType.ETC ||
-						item.type === ItemType.CARD ||
-						item.type === ItemType.PETEGG ||
-						item.type === ItemType.PETARMOR
-					) {
-						return false;
-					}
-
-					itemData = {
-						isSkill: false,
-						ID: item.ITID,
-						value: item.count,
-						name: require('DB/DBManager').getItemName(item)
-					};
-				}
-			} else {
-				var skill = ShortCut.getSkillById(index);
-				if (skill) {
-					itemData = {
-						isSkill: true,
-						ID: skill.SKID,
-						value: skill.selectedLevel ? skill.selectedLevel : skill.level,
-						name: require('DB/Skills/SkillInfo')[skill.SKID].SkillName
-					};
-				}
-			}
-
-			if (itemData) {
-				SelectionUI.showSelection(itemData);
-				return true;
-			}
-
-			return false;
-		},
-
-		leftClick: function (click) {
-			Cursor.leftClick(click);
-		},
-
-		rightClick: function (holding) {
-			Cursor.rightClick(holding);
-		},
-
-		pickUpItem: function () {
-			Character.pickUp();
-		},
-
-		attackTargeted: function () {
-			Character.attack();
-		},
-
-		moveCursor: function (dx, dy) {
-			Cursor.move(dx, dy);
-		},
-
-		cameraZoom: function (zoom) {
-			Cursor.changeCameraZoom(zoom);
-		},
-
-		cameraAngle: function (angle) {
-			Cursor.changeCameraAngle(angle);
-		},
-
-		escape: function () {
-			Cursor.esc();
-		},
-
-		enter: function () {
-			Cursor.enter();
-		},
-
-		showinfo: function () {
-			return Cursor.contextMenu();
-		},
-
-		navigateDpad: function (direction) {
-			return Cursor.navigateDraggableItems(direction);
-		},
-
-		moveCharacter: function (x, y) {
-			Character.move(x, y);
 		}
-	};
-});
+
+		ShortCut.onShortCut({
+			cmd: 'EXECUTE' + index
+		});
+
+		if (ControlsSettings.joyQuick === 2) {
+			Cursor.quickCastClick();
+		} else if (ControlsSettings.joyQuick === 1) {
+			this.cancelQuick = false;
+
+			function waitforRelease() {
+				setTimeout(function () {
+					const buttons = Input.buttonStates;
+					if (ShortcutMapper.getGroup(buttons) !== group) {
+						Cursor.quickCastClick();
+					} else if (!this.cancelQuick) {
+						waitforRelease();
+					}
+				}, 50);
+			}
+			waitforRelease();
+		}
+	},
+
+	openSelectionWindow: function (draggableElement) {
+		const index = parseInt(draggableElement.getAttribute('data-index'), 10);
+		const isSkill = draggableElement.closest('.skill');
+		let itemData;
+
+		if (!isSkill) {
+			const item = InventoryUI.getUI().getItemByIndex(index);
+			if (item) {
+				if (
+					item.type === ItemType.UNKNOWN ||
+					item.type === ItemType.ETC ||
+					item.type === ItemType.CARD ||
+					item.type === ItemType.PETEGG ||
+					item.type === ItemType.PETARMOR
+				) {
+					return false;
+				}
+
+				itemData = {
+					isSkill: false,
+					ID: item.ITID,
+					value: item.count,
+					name: DB.getItemName(item)
+				};
+			}
+		} else {
+			const skill = ShortCut.getSkillById(index);
+			if (skill) {
+				itemData = {
+					isSkill: true,
+					ID: skill.SKID,
+					value: skill.selectedLevel ? skill.selectedLevel : skill.level,
+					name: SkillInfo[skill.SKID].SkillName
+				};
+			}
+		}
+
+		if (itemData) {
+			SelectionUI.showSelection(itemData);
+			return true;
+		}
+
+		return false;
+	},
+
+	leftClick: function (click) {
+		Cursor.leftClick(click);
+	},
+
+	rightClick: function (holding) {
+		Cursor.rightClick(holding);
+	},
+
+	pickUpItem: function () {
+		Character.pickUp();
+	},
+
+	attackTargeted: function () {
+		Character.attack();
+	},
+
+	moveCursor: function (dx, dy) {
+		Cursor.move(dx, dy);
+	},
+
+	cameraZoom: function (zoom) {
+		Cursor.changeCameraZoom(zoom);
+	},
+
+	cameraAngle: function (angle) {
+		Cursor.changeCameraAngle(angle);
+	},
+
+	escape: function () {
+		Cursor.esc();
+	},
+
+	enter: function () {
+		Cursor.enter();
+	},
+
+	showinfo: function () {
+		return Cursor.contextMenu();
+	},
+
+	navigateDpad: function (direction) {
+		return Cursor.navigateDraggableItems(direction);
+	},
+
+	moveCharacter: function (x, y) {
+		Character.move(x, y);
+	}
+};

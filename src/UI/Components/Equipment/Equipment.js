@@ -8,54 +8,50 @@
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  */
-define(function (require) {
-	'use strict';
 
-	var publicName = 'Equipment';
+import EquipmentV0 from './EquipmentV0/EquipmentV0.js';
+import EquipmentV1 from './EquipmentV1/EquipmentV1.js';
+import EquipmentV2 from './EquipmentV2/EquipmentV2.js';
+import EquipmentV3 from './EquipmentV3/EquipmentV3.js';
+import EquipmentV4 from './EquipmentV4/EquipmentV4.js';
 
-	var EquipmentV0 = require('./EquipmentV0/EquipmentV0'); // equip
-	var EquipmentV1 = require('./EquipmentV1/EquipmentV1'); // equip + costume
-	var EquipmentV2 = require('./EquipmentV2/EquipmentV2'); // equip + costume + title (not implemented)
-	var EquipmentV3 = require('./EquipmentV3/EquipmentV3'); // EquipmentV2 + Switch Equip
-	var EquipmentV4 = require('./EquipmentV4/EquipmentV4'); // EquipmentV3 + Switch Damage Skin
+import UIVersionManager from 'UI/UIVersionManager.js';
+import DB from 'DB/DBManager.js';
+import KEYS from 'Controls/KeyEventHandler.js';
 
-	var UIVersionManager = require('UI/UIVersionManager');
-	var DB = require('DB/DBManager');
-	var KEYS = require('Controls/KeyEventHandler');
+const publicName = 'Equipment';
+const versionInfo = {
+	default: EquipmentV0,
+	common: {
+		20220831: EquipmentV4,
+		20170208: EquipmentV3,
+		20150225: EquipmentV2,
+		20101124: EquipmentV1
+	},
+	re: {},
+	prere: {}
+};
 
-	var versionInfo = {
-		default: EquipmentV0,
-		common: {
-			20220831: EquipmentV4,
-			20170208: EquipmentV3,
-			20150225: EquipmentV2,
-			20101124: EquipmentV1
-		},
-		re: {},
-		prere: {}
-	};
+const EquipmentController = UIVersionManager.getUIController(publicName, versionInfo);
 
-	var EquipmentController = UIVersionManager.getUIController(publicName, versionInfo);
+const _selectUIVersion = EquipmentController.selectUIVersion;
 
-	var _selectUIVersion = EquipmentController.selectUIVersion;
+// Extend default UI selector
+EquipmentController.selectUIVersion = function () {
+	_selectUIVersion();
 
-	// Extend default UI selector
-	EquipmentController.selectUIVersion = function () {
-		_selectUIVersion();
+	//Add selected UI to item owner name update queue
+	const component = EquipmentController.getUI();
+	DB.UpdateOwnerName.Equipment = component.onUpdateOwnerName;
 
-		//Add selected UI to item owner name update queue
-		var component = EquipmentController.getUI();
-		DB.UpdateOwnerName.Equipment = component.onUpdateOwnerName;
-
-		// Escape to close the UI
-		component.onKeyDown = function onKeyDown(e) {
-			if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
-				if (typeof component.toggle === 'function') {
-					component.toggle();
-				}
+	// Escape to close the UI
+	component.onKeyDown = function onKeyDown(e) {
+		if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
+			if (typeof component.toggle === 'function') {
+				component.toggle();
 			}
-		};
+		}
 	};
+};
 
-	return EquipmentController;
-});
+export default EquipmentController;

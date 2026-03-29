@@ -6,34 +6,28 @@
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  */
-define(function (require) {
-	'use strict';
 
-	var publicName = 'MiniMap';
+import MiniMap from './MiniMap/MiniMap.js';
+import MiniMapV2 from './MiniMapV2/MiniMapV2.js';
+import UIVersionManager from 'UI/UIVersionManager.js';
 
-	var MiniMap = require('./MiniMap/MiniMap');
-	var MiniMapV2 = require('./MiniMapV2/MiniMapV2');
+const publicName = 'MiniMap';
+const versionInfo = {
+	default: MiniMap,
+	common: {
+		20180124: MiniMapV2
+	},
+	re: {},
+	prere: {}
+};
 
-	var UIVersionManager = require('UI/UIVersionManager');
+const Controller = UIVersionManager.getUIController(publicName, versionInfo);
 
-	var versionInfo = {
-		default: MiniMap,
-		common: {
-			20180124: MiniMapV2
-		},
-		re: {},
-		prere: {}
-	};
-
-	var Controller = UIVersionManager.getUIController(publicName, versionInfo);
-
-	/**
-	 * Proxy for getMemberColor
-	 */
-	Controller.getMemberColor = function getMemberColor(key) {
-		var ui = Controller.getUI();
-		return ui && ui.getMemberColor ? ui.getMemberColor(key) : 'white';
-	};
-
-	return Controller;
-});
+/**
+ * Proxy for getMemberColor
+ */
+Controller.getMemberColor = function getMemberColor(key) {
+	const ui = Controller.getUI();
+	return ui && ui.getMemberColor ? ui.getMemberColor(key) : 'white';
+};
+export default Controller;

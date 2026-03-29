@@ -8,415 +8,479 @@
  * @author Vincent Thibault
  */
 
-define(function (require) {
-	'use strict';
+import GameFile from 'Loaders/GameFile.js';
+import World from 'Loaders/World.js';
+import Ground from 'Loaders/Ground.js';
+import Altitude from 'Loaders/Altitude.js';
+import Model from 'Loaders/Model.js';
+import Sprite from 'Loaders/Sprite.js';
+import Action from 'Loaders/Action.js';
+import Str from 'Loaders/Str.js';
+import FileSystem from 'Core/FileSystem.js';
+import TextEncoding from 'Utils/CodepageManager.js';
 
-	// Load dependencies
-	var GameFile = require('Loaders/GameFile');
-	var World = require('Loaders/World');
-	var Ground = require('Loaders/Ground');
-	var Altitude = require('Loaders/Altitude');
-	var Model = require('Loaders/Model');
-	var Sprite = require('Loaders/Sprite');
-	var Action = require('Loaders/Action');
-	var Str = require('Loaders/Str');
-	var FileSystem = require('Core/FileSystem');
-	var fs = self.requireNode && self.requireNode('fs');
+// Load dependencies
+const fs = self.requireNode && self.requireNode('fs');
 
-	/**
-	 * FileManager namespace
-	 */
-	var FileManager = {};
+/**
+ * FileManager namespace
+ */
+const FileManager = {};
 
-	/**
-	 * Where is the remote client located ?
-	 * @var {string} http
-	 */
-	FileManager.remoteClient = '';
+/**
+ * Where is the remote client located ?
+ * @var {string} http
+ */
+FileManager.remoteClient = '';
 
-	/**
-	 * List of Game Archives loads
-	 * @var {array} GameFile[]
-	 */
-	FileManager.gameFiles = [];
+/**
+ * List of Game Archives loads
+ * @var {array} GameFile[]
+ */
+FileManager.gameFiles = [];
 
-	/**
-	 * Files alias
-	 * @var {object}
-	 */
-	FileManager.filesAlias = {};
+/**
+ * Files alias
+ * @var {object}
+ */
+FileManager.filesAlias = {};
 
-	/**
-	 * Initialize file manager with a list of files
-	 *
-	 * @param {mixed} grf list
-	 */
-	FileManager.init = function Init(grfList) {
-		var content, files, result, regex;
-		var i,
-			count,
-			sortBySize = true;
-		var list = [];
+/**
+ * Initialize file manager with a list of files
+ *
+ * @param {mixed} grf list
+ */
+FileManager.init = function Init(grfList) {
+	let content, files, result, regex;
+	let i,
+		count,
+		sortBySize = true;
+	let list = [];
 
-		// load GRFs from a file (DATA.INI)
-		if (typeof grfList === 'string') {
-			if (fs) {
-				content = fs.readFileSync(grfList);
-			} else if ((files = FileSystem.search(grfList)).length) {
-				content = new FileReaderSync().readAsText(files[0]);
-			} else {
-				grfList = /\.grf$/i;
-			}
-
-			if (content) {
-				regex = /(\d+)=([^\s]+)/g;
-
-				// Get a list of GRF
-				while ((result = regex.exec(content))) {
-					list[parseInt(result[1])] = result[2];
-				}
-
-				// Remove empty slot from list
-				for (i = 0, count = list.length; i < count; ) {
-					if (list[i] === undefined) {
-						list.splice(i, 1);
-						count--;
-						continue;
-					}
-					i++;
-				}
-
-				grfList = list;
-				sortBySize = false;
-			}
+	// load GRFs from a file (DATA.INI)
+	if (typeof grfList === 'string') {
+		if (fs) {
+			content = fs.readFileSync(grfList);
+		} else if ((files = FileSystem.search(grfList)).length) {
+			content = new FileReaderSync().readAsText(files[0]);
+		} else {
+			grfList = /\.grf$/i;
 		}
 
-		// Load grfs from a list defined by the user
-		if (grfList instanceof Array) {
-			list = grfList;
-			for (i = 0, count = list.length; i < count; ++i) {
-				if (fs && fs.existsSync(list[i])) {
-					list[i] = {
-						name: list[i],
-						size: fs.statSync(list[i]).size,
-						fd: fs.openSync(list[i], 'r')
-					};
+		if (content) {
+			regex = /(\d+)=([^\s]+)/g;
+
+			// Get a list of GRF
+			while ((result = regex.exec(content))) {
+				list[parseInt(result[1])] = result[2];
+			}
+
+			// Remove empty slot from list
+			for (i = 0, count = list.length; i < count; ) {
+				if (list[i] === undefined) {
+					list.splice(i, 1);
+					count--;
 					continue;
 				}
-				list[i] = FileSystem.getFileSync(list[i]);
+				i++;
 			}
-		}
 
-		// Search GRF from a regex
-		if (grfList instanceof RegExp) {
-			list = FileSystem.search(grfList);
+			grfList = list;
+			sortBySize = false;
 		}
+	}
 
-		if (sortBySize) {
-			list.sort(function (a, b) {
-				return a.size - b.size;
-			});
-		}
-
-		// Load Game files
+	// Load grfs from a list defined by the user
+	if (grfList instanceof Array) {
+		list = grfList;
 		for (i = 0, count = list.length; i < count; ++i) {
-			FileManager.addGameFile(list[i]);
-		}
-	};
-
-	/**
-	 * Add a game archive to the list
-	 *
-	 * @param {File} file to load
-	 */
-	FileManager.addGameFile = function AddGameFile(file) {
-		try {
-			var grf = new GameFile();
-			grf.load(file);
-
-			this.gameFiles.push(grf);
-
-			if (this.onGameFileLoaded) {
-				this.onGameFileLoaded(file.name);
-			}
-		} catch (e) {
-			if (this.onGameFileError) {
-				this.onGameFileError(file.name, e.message);
-			}
-		}
-	};
-
-	/**
-	 * Clean up Game files
-	 */
-	FileManager.clean = function Clean() {
-		this.gameFiles.length = 0;
-	};
-
-	/**
-	 * Search a file in each GameFile
-	 *
-	 * @param {RegExp} regex
-	 * @return {Array} filename list
-	 */
-	FileManager.search = function Search(regex) {
-		// Use hosted client (only one to be async ?)
-		if (!this.gameFiles.length && this.remoteClient) {
-			var req = new XMLHttpRequest();
-			req.open('POST', this.remoteClient, false);
-			req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-			req.overrideMimeType('text/plain; charset=ISO-8859-1');
-			req.send('filter=' + encodeURIComponent(regex.source));
-			return req.responseText.split('\n');
-		}
-
-		var i, count, j, size;
-		var fileList, out, matches;
-
-		fileList = this.gameFiles;
-		count = fileList.length;
-		out = {};
-
-		for (i = 0; i < count; ++i) {
-			matches = fileList[i].table.data.match(regex);
-
-			if (matches !== null) {
-				// Remove duplicates
-				for (j = 0, size = matches.length; j < size; ++j) {
-					out[matches[j]] = 1;
-				}
-			}
-		}
-
-		return Object.keys(out);
-	};
-
-	/**
-	 * Get a file
-	 *
-	 * @param {string} filename
-	 * @param {function} callback
-	 */
-	FileManager.get = function Get(filename, callback) {
-		// Trim the path
-		filename = filename.replace(/^\s+|\s+$/g, '');
-
-		if (fs && fs.existsSync(filename)) {
-			callback(fs.readFileSync(filename));
-			return;
-		}
-
-		// Search in filesystem
-		FileSystem.getFile(
-			filename,
-
-			// Found in file system, youhou !
-			function onFound(file) {
-				var reader = new FileReader();
-				reader.onloadend = function onLoad(event) {
-					callback(event.target.result);
+			if (fs && fs.existsSync(list[i])) {
+				list[i] = {
+					name: list[i],
+					size: fs.statSync(list[i]).size,
+					fd: fs.openSync(list[i], 'r')
 				};
-				reader.readAsArrayBuffer(file);
-			},
+				continue;
+			}
+			list[i] = FileSystem.getFileSync(list[i]);
+		}
+	}
 
-			// Not found, fetching files
-			function onNotFound() {
-				var i, count;
-				var fileList;
-				var path;
+	// Search GRF from a regex
+	if (grfList instanceof RegExp) {
+		list = FileSystem.search(grfList);
+	}
 
-				path = filename.replace(/\//g, '\\');
-				fileList = FileManager.gameFiles;
-				count = fileList.length;
+	if (sortBySize) {
+		list.sort(function (a, b) {
+			return a.size - b.size;
+		});
+	}
 
-				for (i = 0; i < count; ++i) {
-					if (fileList[i].getFile(path, callback)) {
-						return;
-					}
+	// Load Game files
+	for (i = 0, count = list.length; i < count; ++i) {
+		FileManager.addGameFile(list[i]);
+	}
+};
+
+/**
+ * Add a game archive to the list
+ *
+ * @param {File} file to load
+ */
+FileManager.addGameFile = function AddGameFile(file) {
+	try {
+		const grf = new GameFile();
+		grf.load(file);
+
+		this.gameFiles.push(grf);
+
+		if (this.onGameFileLoaded) {
+			this.onGameFileLoaded(file.name);
+		}
+	} catch (e) {
+		if (this.onGameFileError) {
+			this.onGameFileError(file.name, e.message);
+		}
+	}
+};
+
+/**
+ * Clean up Game files
+ */
+FileManager.clean = function Clean() {
+	this.gameFiles.length = 0;
+};
+
+/**
+ * Search a file in each GameFile
+ *
+ * @param {RegExp} regex
+ * @return {Array} filename list
+ */
+FileManager.search = function Search(regex) {
+	// Use hosted client (only one to be async ?)
+	if (!this.gameFiles.length && this.remoteClient) {
+		const req = new XMLHttpRequest();
+		req.open('POST', this.remoteClient, false);
+		req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		req.overrideMimeType('text/plain; charset=ISO-8859-1');
+		req.send('filter=' + encodeURIComponent(regex.source));
+		return req.responseText.split('\n');
+	}
+
+	return Array.from(new Set(this.gameFiles.flatMap(file => file.table.data.match(regex) || [])));
+};
+
+/**
+ * Get a file
+ *
+ * @param {string} filename
+ * @param {function} callback
+ */
+FileManager.get = function Get(filename, callback) {
+	// Trim the path
+	filename = filename.replace(/^\s+|\s+$/g, '');
+
+	if (fs && fs.existsSync(filename)) {
+		callback(fs.readFileSync(filename));
+		return;
+	}
+
+	// Search in filesystem
+	FileSystem.getFile(
+		filename,
+
+		// Found in file system, youhou !
+		function onFound(file) {
+			const reader = new FileReader();
+			reader.onloadend = function onLoad(event) {
+				callback(event.target.result);
+			};
+			reader.readAsArrayBuffer(file);
+		},
+
+		// Not found, fetching files
+		function onNotFound() {
+			let i, count;
+			let fileList;
+			let path;
+
+			path = filename.replace(/\//g, '\\');
+			fileList = FileManager.gameFiles;
+			count = fileList.length;
+
+			for (i = 0; i < count; ++i) {
+				if (fileList[i].getFile(path, callback)) {
+					return;
+				}
+			}
+
+			// Not in GRFs ? Try to load it from
+			// remote client host
+			FileManager.getHTTP(filename, callback);
+		}
+	);
+};
+
+/**
+ * Trying to load a file from the remote host
+ *
+ * @param {string} filename
+ * @param {function} callback
+ */
+FileManager.getHTTP = function GetHTTP(filename, callback) {
+	filename = filename.replace(/\\/g, '/');
+	let url = filename.replace(/[^/]+/g, function (a) {
+		return encodeURIComponent(a);
+	});
+
+	// Use http request here
+	if (!this.remoteClient) {
+		url = '/client/' + url;
+	} else {
+		url = this.remoteClient + url;
+	}
+
+	// Don't load mp3 sounds to avoid blocking the queue
+	// They can be load by the HTML5 Audio
+	if (filename.match(/\.(mp3|wav)$/)) {
+		callback(url);
+		return;
+	}
+
+	// Use Fetch API for better performance and HTTP/2 multiplexing support
+	if (typeof fetch !== 'undefined') {
+		fetch(url)
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error('HTTP ' + response.status);
 				}
 
-				// Not in GRFs ? Try to load it from
-				// remote client host
-				FileManager.getHTTP(filename, callback);
-			}
-		);
-	};
+				// Detect HTML error pages returned with 200 status
+				const contentType = response.headers.get('content-type') || '';
+				if (contentType.indexOf('text/html') !== -1) {
+					throw new Error('Received HTML instead of binary data (likely 404 page)');
+				}
 
-	/**
-	 * Trying to load a file from the remote host
-	 *
-	 * @param {string} filename
-	 * @param {function} callback
-	 */
-	FileManager.getHTTP = function GetHTTP(filename, callback) {
-		filename = filename.replace(/\\/g, '/');
-		var url = filename.replace(/[^/]+/g, function (a) {
-			return encodeURIComponent(a);
-		});
-
-		// Use http request here (ajax)
-		if (!this.remoteClient) {
-			url = '/client/' + url;
-		} else {
-			url = this.remoteClient + url;
-		}
-
-		// Don't load mp3 sounds to avoid blocking the queue
-		// They can be load by the HTML5 Audio
-		if (filename.match(/\.(mp3|wav)$/)) {
-			callback(url);
-			return;
-		}
-
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', url, true);
-		xhr.responseType = 'arraybuffer';
-		xhr.onload = function () {
-			if (xhr.status == 200) {
-				callback(xhr.response);
-				FileSystem.saveFile(filename, xhr.response);
-			} else {
+				return response.arrayBuffer();
+			})
+			.then(function (buffer) {
+				callback(buffer);
+				FileSystem.saveFile(filename, buffer);
+			})
+			.catch(function () {
 				callback(null, "Can't get file");
-			}
-		};
-		xhr.onerror = function () {
-			callback(null, "Can't get file");
-		};
+			});
+		return;
+	}
 
-		// Can throw an error if not connected to internet
-		try {
-			xhr.send(null);
-		} catch (e) {
+	// Fallback to XMLHttpRequest for older environments
+	const xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.responseType = 'arraybuffer';
+	xhr.onload = function () {
+		if (xhr.status == 200) {
+			callback(xhr.response);
+			FileSystem.saveFile(filename, xhr.response);
+		} else {
 			callback(null, "Can't get file");
 		}
 	};
+	xhr.onerror = function () {
+		callback(null, "Can't get file");
+	};
 
-	/**
-	 * Load a file
-	 *
-	 * @param {string} filename
-	 * @param {function} callback
-	 * @return {string|object}
-	 */
-	FileManager.load = function Load(filename, callback, args) {
-		if (!filename) {
-			callback(null, 'undefined ?');
-			return;
-		}
+	// Can throw an error if not connected to internet
+	try {
+		xhr.send(null);
+	} catch (e) {
+		callback(null, "Can't get file");
+	}
+};
 
-		filename = filename.replace(/^\s+|\s+$/g, '');
+/**
+ * Batch file loading - groups requests within a frame and sends them as one
+ * Falls back to individual requests if batch endpoint is unavailable
+ */
+const _batchQueue = [];
+let _batchTimer = null;
 
-		this.get(filename, function (buffer, error) {
-			var ext = filename
-				.match(/.[^.]+$/)
-				.toString()
-				.substr(1)
-				.toLowerCase();
-			var result = null;
+FileManager.getBatchHTTP = function GetBatchHTTP(filename, callback) {
+	// Only batch when using remote client
+	if (!this.remoteClient) {
+		this.getHTTP(filename, callback);
+		return;
+	}
 
-			if (!buffer || buffer.byteLength === 0) {
-				callback(null, error);
+	_batchQueue.push({ filename: filename, callback: callback });
+
+	if (!_batchTimer) {
+		const self = this;
+		_batchTimer = setTimeout(function () {
+			const queue = _batchQueue.splice(0);
+			_batchTimer = null;
+
+			// Single file - no need to batch
+			if (queue.length === 1) {
+				self.getHTTP(queue[0].filename, queue[0].callback);
 				return;
 			}
 
-			error = null;
+			const files = queue.map(function (q) {
+				return q.filename.replace(/\\/g, '/');
+			});
 
-			try {
-				switch (ext) {
-					// Regular images files
-					case 'jpg':
-					case 'jpeg':
-					case 'bmp':
-					case 'gif':
-					case 'png':
-						result = URL.createObjectURL(new Blob([buffer], { type: 'image/' + ext }));
-						break;
-
-					// Audio
-					case 'wav':
-					case 'mp3':
-					case 'ogg':
-						// From GRF : change the data to an URI
-						if (buffer instanceof ArrayBuffer) {
-							result = URL.createObjectURL(new Blob([buffer], { type: 'audio/' + ext }));
-							break;
-						}
-						result = buffer;
-						break;
-
-					case 'tga':
-						result = buffer;
-						break;
-
-					// Texts
-					case 'txt':
-					case 'xml':
-					case 'lua':
-						var i, count, str, uint8;
-						uint8 = new Uint8Array(buffer);
-						count = uint8.length;
-						str = '';
-
-						for (i = 0; i < count; ++i) {
-							if (uint8[i] === 0) {
-								break;
+			fetch(self.remoteClient + 'batch', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ files: files })
+			})
+				.then(function (r) {
+					return r.json();
+				})
+				.then(function (results) {
+					queue.forEach(function (q) {
+						const key = q.filename.replace(/\\/g, '/');
+						if (results[key]) {
+							const binary = atob(results[key]);
+							const buffer = new ArrayBuffer(binary.length);
+							const view = new Uint8Array(buffer);
+							for (let i = 0; i < binary.length; i++) {
+								view[i] = binary.charCodeAt(i);
 							}
-							str += String.fromCharCode(uint8[i]);
+							q.callback(buffer);
+							FileSystem.saveFile(q.filename, buffer);
+						} else {
+							q.callback(null, "Can't get file");
 						}
+					});
+				})
+				.catch(function () {
+					// Fallback: load individually
+					queue.forEach(function (q) {
+						self.getHTTP(q.filename, q.callback);
+					});
+				});
+		}, 16); // Wait 1 frame (~16ms) to group requests
+	}
+};
 
-						result = str;
+/**
+ * Load a file
+ *
+ * @param {string} filename
+ * @param {function} callback
+ * @return {string|object}
+ */
+FileManager.load = function Load(filename, callback, args) {
+	if (!filename) {
+		callback(null, 'undefined ?');
+		return;
+	}
+
+	filename = filename.replace(/^\s+|\s+$/g, '');
+
+	this.get(filename, function (buffer, error) {
+		const ext = filename
+			.match(/.[^.]+$/)
+			.toString()
+			.substr(1)
+			.toLowerCase();
+		let result = null;
+
+		if (!buffer || buffer.byteLength === 0) {
+			callback(null, error);
+			return;
+		}
+
+		error = null;
+
+		try {
+			switch (ext) {
+				// Regular images files
+				case 'jpg':
+				case 'jpeg':
+				case 'bmp':
+				case 'gif':
+				case 'png':
+					result = URL.createObjectURL(new Blob([buffer], { type: 'image/' + ext }));
+					break;
+
+				// Audio
+				case 'wav':
+				case 'mp3':
+				case 'ogg':
+					// From GRF : change the data to an URI
+					if (buffer instanceof ArrayBuffer) {
+						result = URL.createObjectURL(new Blob([buffer], { type: 'audio/' + ext }));
 						break;
+					}
+					result = buffer;
+					break;
 
-					// Sprite
-					case 'spr':
-						var spr = new Sprite(buffer);
-						if (args && args.to_rgba) {
-							spr.switchToRGBA();
-						}
+				case 'tga':
+					result = buffer;
+					break;
 
-						result = spr.compile();
-						break;
+				// Texts
+				case 'xml':
+				case 'txt':
+				case 'lua':
+				case 'lub':
+				case 'csv':
+					result = new Uint8Array(buffer);
+					break;
 
-					// Binary
-					case 'rsw':
-						result = new World(buffer);
-						break;
+				// Sprite
+				case 'spr':
+					const spr = new Sprite(buffer);
+					if (args && args.to_rgba) {
+						spr.switchToRGBA();
+					}
 
-					case 'gnd':
-						result = new Ground(buffer);
-						break;
+					result = spr.compile();
+					break;
 
-					case 'gat':
-						result = new Altitude(buffer);
-						break;
+				// Binary
+				case 'rsw':
+					result = new World(buffer);
+					break;
 
-					case 'rsm':
-					case 'rsm2':
-						result = new Model(buffer);
-						break;
+				case 'gnd':
+					result = new Ground(buffer);
+					break;
 
-					case 'act':
-						result = new Action(buffer).compile();
-						break;
+				case 'gat':
+					result = new Altitude(buffer);
+					break;
 
-					case 'str':
-						result = new Str(buffer, args?.texturePath ?? '');
-						break;
+				case 'rsm':
+				case 'rsm2':
+					result = new Model(buffer);
+					break;
 
-					default:
-						result = buffer;
-						break;
-				}
-			} catch (e) {
-				error = e.message;
+				case 'act':
+					result = new Action(buffer).compile();
+					break;
+
+				case 'str':
+					result = new Str(buffer, args?.texturePath ?? '');
+					break;
+
+				default:
+					result = buffer;
+					break;
 			}
+		} catch (e) {
+			error = e.message;
+		}
 
-			callback(result, error);
-		});
-	};
+		callback(result, error);
+	});
+};
 
-	/**
-	 * Export
-	 */
-	return FileManager;
-});
+/**
+ * Export
+ */
+export default FileManager;

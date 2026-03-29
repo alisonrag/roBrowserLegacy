@@ -7,72 +7,66 @@
  *
  * @author Vincent Thibault
  */
-define(function (require) {
-	'use strict';
 
-	/**
-	 * Dependencies
-	 */
-	var UIManager = require('UI/UIManager');
-	var UIComponent = require('UI/UIComponent');
-	var htmlText = require('text!./EntityRoom.html');
-	var cssText = require('text!./EntityRoom.css');
+import UIManager from 'UI/UIManager.js';
+import UIComponent from 'UI/UIComponent.js';
+import htmlText from './EntityRoom.html?raw';
+import cssText from './EntityRoom.css?raw';
 
-	/**
-	 * Createcomponent
-	 */
-	var EntityRoom = new UIComponent('EntityRoom', htmlText, cssText);
+/**
+ * Createcomponent
+ */
+const EntityRoom = new UIComponent('EntityRoom', htmlText, cssText);
 
-	/**
-	 * @var {boolean} do not focus this UI
-	 */
-	EntityRoom.needFocus = false;
+/**
+ * @var {boolean} do not focus this UI
+ */
+EntityRoom.needFocus = false;
 
-	/**
-	 * Once in HTML, focus the input
-	 */
-	EntityRoom.onAppend = function onAppend() {
-		this.ui.find('button').dblclick(
-			function () {
-				if (this.onEnter) {
-					this.onEnter();
-				}
-			}.bind(this)
-		);
+/**
+ * Once in HTML, focus the input
+ */
+EntityRoom.onAppend = function onAppend() {
+	this.ui.find('button').dblclick(
+		function () {
+			if (this.onEnter) {
+				this.onEnter();
+			}
+		}.bind(this)
+	);
 
-		// Avoid player to move to the cell
-		this.ui.mousedown(function () {
-			return false;
-		});
+	// Avoid player to move to the cell
+	this.ui.mousedown(function () {
+		return false;
+	});
 
-		this.ui.css('zIndex', 45);
-	};
+	this.ui.css('zIndex', 45);
+};
 
-	/**
-	 * Remove data from UI
-	 */
-	EntityRoom.onRemove = function onRemove() {
-		this.ui.find('button').unbind();
-	};
+/**
+ * Remove data from UI
+ */
+EntityRoom.onRemove = function onRemove() {
+	this.ui.find('button').unbind();
+};
 
-	/**
-	 * Define title and icons
-	 *
-	 * @param {string} title
-	 * @param {string} url - icon url
-	 */
-	EntityRoom.setTitle = function setTitle(title, url) {
-		this.ui.find('button img').attr('src', url);
-		this.ui.find('.title, .overlay').text(title);
-	};
+/**
+ * Define title and icons
+ *
+ * @param {string} title
+ * @param {string} url - icon url
+ */
+EntityRoom.setTitle = function setTitle(title, url) {
+	this.ui.find('button img').attr('src', url);
+	this.ui.find('.title, .overlay').text(title);
+};
 
-	/**
-	 * function to define
-	 */
-	EntityRoom.onEnter = function onEnter() {};
+/**
+ * function to define
+ */
+EntityRoom.onEnter = function onEnter() {};
 
-	/**
-	 * Stored component and return it
-	 */
-	return UIManager.addComponent(EntityRoom);
-});
+/**
+ * Stored component and return it
+ */
+export default UIManager.addComponent(EntityRoom);

@@ -7,39 +7,36 @@
  *
  * @author AoShinHo
  */
-define(function (require) {
-	'use strict';
 
-	var UIManager = require('UI/UIManager');
-	var UIComponent = require('UI/UIComponent');
-	var JoystickModule = require('./JoystickModule');
-	var JoystickSelectionUI = require('./JoystickSelectionUI');
-	var htmlText = require('text!./JoystickUI.html');
-	var cssText = require('text!./JoystickUI.css');
+import UIManager from 'UI/UIManager.js';
+import UIComponent from 'UI/UIComponent.js';
+import JoystickModule from './JoystickModule.js';
+import JoystickSelectionUI from './JoystickSelectionUI.js';
+import htmlText from './JoystickUI.html?raw';
+import cssText from './JoystickUI.css?raw';
+import JoystickUIRenderer from './JoystickUIRenderer.js';
 
-	var JoystickUI = new UIComponent('JoystickUI', htmlText, cssText);
+const JoystickUI = new UIComponent('JoystickUI', htmlText, cssText);
 
-	JoystickUI.onAppend = function () {
-		require('./JoystickUIRenderer').attach(this.ui);
-		this.ui.hide();
-		JoystickSelectionUI.append();
-	};
+JoystickUI.onAppend = function () {
+	JoystickUIRenderer.attach(this.ui);
+	this.ui.hide();
+	JoystickSelectionUI.append();
+};
 
-	JoystickUI.onRemove = function () {
-		JoystickModule.dispose();
-	};
+JoystickUI.onRemove = function () {
+	JoystickModule.dispose();
+};
 
-	JoystickUI.onRestore = function () {
-		JoystickModule.prepare();
-	};
+JoystickUI.onRestore = function () {
+	JoystickModule.prepare();
+};
 
-	JoystickUI.show = function () {
-		this.ui.show();
-	};
+JoystickUI.show = function () {
+	this.ui.show();
+};
 
-	JoystickUI.hide = function () {
-		this.ui.hide();
-	};
-
-	return UIManager.addComponent(JoystickUI);
-});
+JoystickUI.hide = function () {
+	this.ui.hide();
+};
+export default UIManager.addComponent(JoystickUI);

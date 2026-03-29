@@ -8,52 +8,48 @@
  * This file is part of ROBrowser, (http://www.robrowser.com/).
  *
  */
-define(function (require) {
-	'use strict';
 
-	var publicName = 'Inventory';
+import InventoryV0 from './InventoryV0/InventoryV0.js';
+import InventoryV1 from './InventoryV1/InventoryV1.js';
+import InventoryV2 from './InventoryV2/InventoryV2.js';
+import InventoryV3 from './InventoryV3/InventoryV3.js';
 
-	var InventoryV0 = require('./InventoryV0/InventoryV0'); // Basic Inventory
-	var InventoryV1 = require('./InventoryV1/InventoryV1'); // Favorite Tab
-	var InventoryV2 = require('./InventoryV2/InventoryV2'); // Equipment Switch
-	var InventoryV3 = require('./InventoryV3/InventoryV3'); // Inventory Expansion
+import UIVersionManager from 'UI/UIVersionManager.js';
+import DB from 'DB/DBManager.js';
+import KEYS from 'Controls/KeyEventHandler.js';
 
-	var UIVersionManager = require('UI/UIVersionManager');
-	var DB = require('DB/DBManager');
-	var KEYS = require('Controls/KeyEventHandler');
+const publicName = 'Inventory';
+const versionInfo = {
+	default: InventoryV0, // Basic Inventory
+	common: {
+		20181219: InventoryV3, // Inventory Expansion
+		20170208: InventoryV2, // Equipment Switch
+		20111207: InventoryV1 // Favorite Tab
+	},
+	re: {},
+	prere: {}
+};
 
-	var versionInfo = {
-		default: InventoryV0, // Basic Inventory
-		common: {
-			20181219: InventoryV3, // Inventory Expansion
-			20170208: InventoryV2, // Equipment Switch
-			20111207: InventoryV1 // Favorite Tab
-		},
-		re: {},
-		prere: {}
-	};
+const InventoryController = UIVersionManager.getUIController(publicName, versionInfo);
 
-	var InventoryController = UIVersionManager.getUIController(publicName, versionInfo);
+const _selectUIVersion = InventoryController.selectUIVersion;
 
-	var _selectUIVersion = InventoryController.selectUIVersion;
+// Extend default UI selector
+InventoryController.selectUIVersion = function () {
+	_selectUIVersion();
 
-	// Extend default UI selector
-	InventoryController.selectUIVersion = function () {
-		_selectUIVersion();
+	//Add selected UI to item owner name update queue
+	const component = InventoryController.getUI();
+	DB.UpdateOwnerName.Inventory = component.onUpdateOwnerName;
 
-		//Add selected UI to item owner name update queue
-		var component = InventoryController.getUI();
-		DB.UpdateOwnerName.Inventory = component.onUpdateOwnerName;
-
-		// Escape to close the UI
-		component.onKeyDown = function onKeyDown(e) {
-			if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
-				if (typeof component.toggle === 'function') {
-					component.toggle();
-				}
+	// Escape to close the UI
+	component.onKeyDown = function onKeyDown(e) {
+		if ((e.which === KEYS.ESCAPE || e.key === 'Escape') && component.ui.is(':visible')) {
+			if (typeof component.toggle === 'function') {
+				component.toggle();
 			}
-		};
+		}
 	};
+};
 
-	return InventoryController;
-});
+export default InventoryController;

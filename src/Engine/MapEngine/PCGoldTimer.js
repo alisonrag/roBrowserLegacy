@@ -6,40 +6,36 @@
  * @author Alisonrag
  */
 
-define(function (require) {
-	'use strict';
+import Network from 'Network/NetworkManager.js';
+import PACKET from 'Network/PacketStructure.js';
+import PCGoldTimer from 'UI/Components/PCGoldTimer/PCGoldTimer.js';
 
-	/**
-	 * Load dependencies
-	 */
-	var Network = require('Network/NetworkManager');
-	var PACKET = require('Network/PacketStructure');
-	var PCGoldTimer = require('UI/Components/PCGoldTimer/PCGoldTimer');
+/**
+ * Load dependencies
+ */
+/**
+ * Send Packets
+ */
 
-	/**
-	 * Send Packets
-	 */
+// nothing yet
 
-	// nothing yet
+/**
+ * Receive Packets
+ */
 
-	/**
-	 * Receive Packets
-	 */
+/**
+ * Server sent request about PCGoldTimer Point
+ *
+ * @param {object} pkt - PACKET.ZC.GOLDPCCAFE_POINT
+ */
+function onPCGoldTimerPoint(pkt) {
+	PCGoldTimer.setData(pkt);
+	PCGoldTimer.append();
+}
 
-	/**
-	 * Server sent request about PCGoldTimer Point
-	 *
-	 * @param {object} pkt - PACKET.ZC.GOLDPCCAFE_POINT
-	 */
-	function onPCGoldTimerPoint(pkt) {
-		PCGoldTimer.setData(pkt);
-		PCGoldTimer.append();
-	}
-
-	/**
-	 * Initialize
-	 */
-	return function MainEngine() {
-		Network.hookPacket(PACKET.ZC.GOLDPCCAFE_POINT, onPCGoldTimerPoint);
-	};
-});
+/**
+ * Initialize
+ */
+export default function MainEngine() {
+	Network.hookPacket(PACKET.ZC.GOLDPCCAFE_POINT, onPCGoldTimerPoint);
+}

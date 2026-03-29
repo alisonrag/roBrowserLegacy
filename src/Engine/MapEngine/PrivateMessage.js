@@ -8,66 +8,123 @@
  * @author Vincent Thibault
  */
 
-define(function (require) {
-	'use strict';
+import DB from 'DB/DBManager.js';
+import Friends from 'Engine/MapEngine/Friends.js';
+import Network from 'Network/NetworkManager.js';
+import PACKET from 'Network/PacketStructure.js';
+import ChatBox from 'UI/Components/ChatBox/ChatBox.js';
+import WhisperBox from 'UI/Components/WhisperBox/WhisperBox.js';
+import Session from 'Engine/SessionStorage.js';
+import Preferences from 'Core/Preferences.js';
+import PACKETVER from 'Network/PacketVerManager.js';
 
-	/**
-	 * Load dependencies
-	 */
-	var DB = require('DB/DBManager');
-	var Friends = require('Engine/MapEngine/Friends');
-	var Network = require('Network/NetworkManager');
-	var PACKET = require('Network/PacketStructure');
-	var ChatBox = require('UI/Components/ChatBox/ChatBox');
+/**
+ * Check if WhisperBox should be used for a specific nickname
+ *
+ * @param {string} nickname
+ * @returns {boolean}
+ */
+function getShouldOpenWhisperBox(nickname) {
+	if (PACKETVER.value < 20090617) {
+		return false;
+	}
 
-	/**
-	 * Main Player received PM
-	 *
-	 * @param {object} pkt - PACKET.ZC.WHISPER
-	 */
-	function onPrivateMessage(pkt) {
-		var prefix = Friends.isFriend(pkt.sender) ? DB.getMessage(102) : 'From';
-		ChatBox.addText(
-			'[ ' + prefix + ' ' + pkt.sender + ' ] : ' + pkt.msg.replace(/\|\d{2}/, ''),
-			ChatBox.TYPE.PRIVATE,
-			ChatBox.FILTER.WHISPER
-		);
+	if (WhisperBox.instances[nickname]) {
+		return true;
+	}
+
+	const prefs = WhisperBox.preferences;
+
+	const isFriend = Friends.isFriend(nickname);
+	return (isFriend && prefs.open1to1Friend) || (!isFriend && prefs.open1to1Stranger);
+}
+
+/**
+ * Main Player received PM
+ *
+ * @param {object} pkt - PACKET.ZC.WHISPER
+ */
+function onPrivateMessage(pkt) {
+	const isFriend = Friends.isFriend(pkt.sender);
+	const prefix = isFriend ? DB.getMessage(102) : 'From';
+	const msg = pkt.msg.replace(/\|\d{2}/, '');
+
+	// Use WhisperBox if open or allowed by settings (version dependent)
+	if (getShouldOpenWhisperBox(pkt.sender)) {
+		WhisperBox.addText(pkt.sender, pkt.sender + ' : ' + msg, '#b5deef');
 		ChatBox.saveNickName(pkt.sender);
+		return;
 	}
 
-	/**
-	 * Received data from a sent private message
-	 *
-	 * @param {object} pkt - PACKET.ZC.ACK_WHISPER
-	 */
-	function onPrivateMessageSent(pkt) {
-		// Official buggy feature
-		var user = ChatBox.PrivateMessageStorage.nick;
-		var msg = ChatBox.PrivateMessageStorage.msg;
+	// Fallback to main ChatBox
+	ChatBox.addText(
+		'[ ' +
+			prefix +
+			' <span class="nickname-link" data-nickname="' +
+			pkt.sender +
+			'" style="cursor:pointer; text-decoration:underline;">' +
+			pkt.sender +
+			'</span> ] : ' +
+			msg,
+		ChatBox.TYPE.PRIVATE,
+		ChatBox.FILTER.WHISPER
+	);
+	ChatBox.saveNickName(pkt.sender);
+}
 
-		if (pkt.result === 0) {
-			if (user && msg) {
-				ChatBox.addText('[ To ' + user + ' ] : ' + msg, ChatBox.TYPE.PRIVATE, ChatBox.FILTER.WHISPER);
+/**
+ * Received data from a sent private message
+ *
+ * @param {object} pkt - PACKET.ZC.ACK_WHISPER
+ */
+function onPrivateMessageSent(pkt) {
+	const user = ChatBox.PrivateMessageStorage.nick;
+	const msg = ChatBox.PrivateMessageStorage.msg;
+
+	if (pkt.result === 0) {
+		if (user && msg) {
+			if (getShouldOpenWhisperBox(user)) {
+				WhisperBox.addText(user, Session.Character.name + ' : ' + msg, '#ffff00');
+			} else {
+				ChatBox.addText(
+					'[ To <span class="nickname-link" data-nickname="' +
+						user +
+						'" style="cursor:pointer; text-decoration:underline;">' +
+						user +
+						'</span> ] : ' +
+						msg,
+					ChatBox.TYPE.PRIVATE,
+					ChatBox.FILTER.WHISPER
+				);
 			}
-		} else {
-			ChatBox.addText(
-				'(' + user + ') : ' + DB.getMessage(147 + pkt.result),
-				ChatBox.TYPE.PRIVATE,
-				ChatBox.FILTER.WHISPER
-			);
 		}
-
-		ChatBox.PrivateMessageStorage.nick = '';
-		ChatBox.PrivateMessageStorage.msg = '';
+	} else {
+		const errorMsg = '(' + user + ') : ' + DB.getMessage(147 + pkt.result);
+		ChatBox.addText(errorMsg, ChatBox.TYPE.PRIVATE, ChatBox.FILTER.WHISPER);
 	}
 
-	/**
-	 * Initialize
-	 */
-	return function PrivateMessageEngine() {
-		Network.hookPacket(PACKET.ZC.WHISPER, onPrivateMessage);
-		Network.hookPacket(PACKET.ZC.WHISPER2, onPrivateMessage);
-		Network.hookPacket(PACKET.ZC.ACK_WHISPER, onPrivateMessageSent);
-		Network.hookPacket(PACKET.ZC.ACK_WHISPER2, onPrivateMessageSent);
+	ChatBox.PrivateMessageStorage.nick = '';
+	ChatBox.PrivateMessageStorage.msg = '';
+}
+
+/**
+ * Initialize
+ */
+export default function PrivateMessageEngine() {
+	Network.hookPacket(PACKET.ZC.WHISPER, onPrivateMessage);
+	Network.hookPacket(PACKET.ZC.WHISPER2, onPrivateMessage);
+	Network.hookPacket(PACKET.ZC.ACK_WHISPER, onPrivateMessageSent);
+	Network.hookPacket(PACKET.ZC.ACK_WHISPER2, onPrivateMessageSent);
+
+	// Hook WhisperBox outbound messages
+	WhisperBox.onRequestTalk = function (nickname, text) {
+		const pkt = new PACKET.CZ.WHISPER();
+		pkt.receiver = nickname;
+		pkt.msg = text;
+		Network.sendPacket(pkt);
+
+		// Save temporarily to handle ACK
+		ChatBox.PrivateMessageStorage.nick = nickname;
+		ChatBox.PrivateMessageStorage.msg = text;
 	};
-});
+}

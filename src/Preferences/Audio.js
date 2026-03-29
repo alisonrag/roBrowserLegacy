@@ -7,25 +7,24 @@
  *
  * @author Vincent Thibault
  */
-define(['Core/Preferences'], function (Preferences) {
-	'use strict';
 
-	/**
-	 * Export
-	 */
-	return Preferences.get(
-		'Audio',
-		{
-			BGM: {
-				play: true,
-				volume: 0.5
-			},
+import Preferences from 'Core/Preferences.js';
 
-			Sound: {
-				play: true,
-				volume: 0.5
-			}
+/**
+ * Export
+ */
+export default Preferences.get(
+	'Audio',
+	{
+		BGM: {
+			play: true,
+			volume: 0.5
 		},
-		1.0
-	);
-});
+
+		Sound: {
+			play: true,
+			volume: 0.5
+		}
+	},
+	1.0
+);

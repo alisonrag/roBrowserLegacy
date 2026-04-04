@@ -444,7 +444,7 @@ function updateEffectState(value) {
 			this._effectStateColor[2] = 0.0;
 		} else {
 			this._effectStateColor[3] = 0.1;
-			Sound.play('effect/assasin_cloaking.wav', this.position);
+			Sound.play('effect/assasin_cloaking.wav');
 		}
 	}
 
@@ -470,6 +470,8 @@ function updateEffectState(value) {
 	} else {
 		this.isOrcish = false;
 	}
+	// it triggers the setter defined via Object.defineProperty to re-evaluate the head sprite (e.g., when orcish state changes).
+	// eslint-disable-next-line no-self-assign
 	this.head = this.head;
 
 	// ------------------------

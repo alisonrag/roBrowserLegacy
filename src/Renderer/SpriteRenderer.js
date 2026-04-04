@@ -20,282 +20,6 @@ import _fragmentShader from './SpriteRenderer.fs?raw';
 const mat4 = glMatrix.mat4;
 
 /**
- * Sprite Renderer NameSpace
- */
-const SpriteRenderer = {};
-
-/**
- * @var {function} functions to use to render
- */
-SpriteRenderer.render = null;
-
-/**
- * @var {number} sprite shadow (mult * color)
- */
-SpriteRenderer.shadow = 1.0;
-
-/**
- * @var {number} sprite angle rotation
- */
-SpriteRenderer.angle = 0;
-
-/**
- * @var {number} depth
- */
-SpriteRenderer.depth = 0.0;
-
-/**
- * @var {Float32Array[3]} sprite position in 3D world
- */
-SpriteRenderer.position = new Float32Array(3);
-
-/**
- * @var {Float32Array[4]} sprite color (color * color)
- */
-SpriteRenderer.color = new Float32Array(4);
-
-/**
- * @var {Float32Array[2]} sprite size
- */
-SpriteRenderer.size = new Float32Array(2);
-
-/**
- * @var {Float32Array[2]} sprite offset position
- */
-SpriteRenderer.offset = new Float32Array(2);
-
-/**
- * @var {object} sprite image information
- */
-SpriteRenderer.image = {
-	texture: null,
-	palette: null,
-	size: new Float32Array(2)
-};
-
-/**
- * @var {object} sprite imageData (for 2D context)
- */
-SpriteRenderer.sprite = null;
-
-/**
- * @var {object} sprite palette (for 2D context)
- */
-SpriteRenderer.palette = null;
-
-/**
- * @var {number} groupid used (avoid draw call)
- */
-SpriteRenderer.groupId = 0;
-
-/**
- * @var {boolean} disable depth correction (ray-plane) for current draw
- */
-SpriteRenderer.disableDepthCorrection = false;
-
-/**
- * @var {number} width unity
- */
-SpriteRenderer.xSize = 5;
-
-/**
- * @var {number} height unity
- */
-SpriteRenderer.ySize = 5;
-
-/**
- * @var {WebGLProgram}
- */
-let _program = null;
-
-/**
- * @var {WebGLBuffer}
- */
-let _buffer = null;
-
-/**
- * @var {CanvasRenderingContext2D} canvas context
- */
-let _ctx = null;
-
-/**
- * @var {WebGLRenderingContext} 3d context
- */
-let _gl = null;
-
-/**
- * @var {number} group id
- * Used to know if we have to bind texture again
- */
-let _groupId = 0;
-
-/**
- * @var {number} last group id
- */
-let _lastGroupId = 0;
-
-/**
- * @var {number} last shadow used
- */
-let _shadow = null;
-
-/**
- * @var {number} last rotation angle used
- */
-let _angle = null;
-
-/**
- * @var {number} last depth operation
- */
-let _depth = null;
-
-/**
- * @var {boolean} cached disable depth correction state
- */
-let _disableDepthCorrection = false;
-
-/**
- * @var {boolean} cached depth mask state
- */
-let _depthMask = true;
-
-/**
- * @var {boolean} cached depth test state
- */
-let _depthTest = true;
-
-/**
- * @var {object} last texture used
- */
-let _texture = null;
-
-/**
- * @var {boolean} do we use palette ?
- */
-let _usepal = null;
-
-/**
- * @var {Uint16Array} position in 2D canvas
- */
-const _pos = new Int16Array(2);
-
-/**
- * @var {mat4} last generated matrix (used for rotation)
- */
-const _matrix = new Float32Array(4 * 4);
-
-/**
- * @var {Float32Array[2]} sprite size
- */
-const _size = new Float32Array(2);
-
-/**
- * @var {Float32Array[2]} sprite offset position
- */
-const _offset = new Float32Array(2);
-
-/**
- * Initialize SpriteRenderer Renderer
- *
- * @param {object} gl context
- */
-SpriteRenderer.init = function init(gl) {
-	if (!_buffer) {
-		_buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			new Float32Array([-0.5, +0.5, 0.0, 0.0, +0.5, +0.5, 1.0, 0.0, -0.5, -0.5, 0.0, 1.0, +0.5, -0.5, 1.0, 1.0]),
-			gl.STATIC_DRAW
-		);
-	}
-
-	if (!_program) {
-		_program = WebGL.createShaderProgram(gl, _vertexShader, _fragmentShader);
-	}
-};
-
-/**
- * Initialize 3D Context
- *
- * @param {object} gl context
- * @param {mat4} modelView
- * @param {mat4} projection
- * @param {object} fog structure
- */
-SpriteRenderer.bind3DContext = function Bind3dContext(gl, modelView, projection, fog) {
-	const attribute = _program.attribute;
-	const uniform = _program.uniform;
-
-	gl.useProgram(_program);
-	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
-	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
-	gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4.invert(_matrix, modelView));
-
-	// Fog settings
-	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
-	gl.uniform1f(uniform.uFogNear, fog.near);
-	gl.uniform1f(uniform.uFogFar, fog.far);
-	gl.uniform3fv(uniform.uFogColor, fog.color);
-
-	// Textures
-	gl.uniform1i(uniform.uDiffuse, 0);
-	gl.uniform1i(uniform.uPalette, 1);
-
-	// Camera position for billboarding
-	gl.uniform1f(uniform.uCameraZoom, Camera.zoom);
-	gl.uniform1f(uniform.uCameraLatitude, Camera.getLatitude());
-	gl.uniform1i(uniform.uDisableDepthCorrection, (_disableDepthCorrection = false));
-
-	// Enable all attributes
-	gl.enableVertexAttribArray(attribute.aPosition);
-	gl.enableVertexAttribArray(attribute.aTextureCoord);
-	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
-
-	// Link attribute
-	gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 4 * 4, 0);
-	gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
-
-	// Binding 3D context
-	this.render = RenderCanvas3D;
-	this.xSize = 5;
-	this.ySize = 5;
-
-	_gl = gl;
-	_depthMask = true;
-	_groupId++;
-};
-
-/**
- * Unbind 3D Context
- *
- * @param {object} gl context
- */
-SpriteRenderer.unbind = function unBind(gl) {
-	const attribute = _program.attribute;
-
-	gl.disableVertexAttribArray(attribute.aPosition);
-	gl.disableVertexAttribArray(attribute.aTextureCoord);
-};
-
-/**
- * Prepare to render on 2D context.
- *
- * @param {object} ctx canvas context
- * @param {number} x position
- * @param {number} y position
- */
-SpriteRenderer.bind2DContext = function Bind2DContext(ctx, x, y) {
-	_ctx = ctx;
-	_pos[0] = x;
-	_pos[1] = y;
-
-	this.render = RenderCanvas2D;
-	this.xSize = 5;
-	this.ySize = 5;
-};
-
-/**
  * Render in 3D mode
  */
 function RenderCanvas3D(isBlendModeOne) {
@@ -376,102 +100,35 @@ function RenderCanvas3D(isBlendModeOne) {
 }
 
 /**
- * Executes a render block with an isolated depth state.
- *
- * Temporarily overrides depth test, depth write mask, and depth correction
- * flags, executes the given function, then restores the previous GL state.
- *
- * This prevents depth state leakage between render passes and ensures
- * deterministic layered rendering.
- *
- * @param {boolean} use depthTest enable.
- * @param {boolean} use depthMask enable.
- * @param {boolean} use disableDepthCorrection enable.
- * @param {function} execute function with this parameters before restore gl state.
- */
-SpriteRenderer.runWithDepth = function runWithDepth(depthTest, depthMask, depthCorrection, fn) {
-	if (!_gl) {
-		fn();
-		return;
-	}
-
-	const prevDepthTest = _depthTest;
-	const prevDepthMask = _depthMask;
-	const prevDepthCorrection = this.disableDepthCorrection;
-
-	if (_depthTest !== depthTest) {
-		_depthTest = depthTest;
-
-		if (depthTest) {
-			_gl.enable(_gl.DEPTH_TEST);
-		} else {
-			_gl.disable(_gl.DEPTH_TEST);
-		}
-	}
-
-	if (_depthMask !== depthMask) {
-		_depthMask = depthMask;
-		_gl.depthMask(depthMask);
-	}
-
-	if (this.disableDepthCorrection !== depthCorrection) {
-		this.disableDepthCorrection = depthCorrection;
-	}
-
-	fn();
-
-	if (_depthTest !== prevDepthTest) {
-		_depthTest = prevDepthTest;
-
-		if (prevDepthTest) {
-			_gl.enable(_gl.DEPTH_TEST);
-		} else {
-			_gl.disable(_gl.DEPTH_TEST);
-		}
-	}
-
-	if (_depthMask !== prevDepthMask) {
-		_depthMask = prevDepthMask;
-		_gl.depthMask(prevDepthMask);
-	}
-
-	if (this.disableDepthCorrection !== prevDepthCorrection) {
-		this.disableDepthCorrection = prevDepthCorrection;
-	}
-};
-
-/**
  * Render in 2D
  */
 const RenderCanvas2D = (function RenderCanvas2DClosure() {
-	let canvas, ctx, imageData;
+	let imageData;
 
-	canvas = document.createElement('canvas');
-	ctx = canvas.getContext('2d');
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d');
 	canvas.width = 20;
 	canvas.height = 20;
 	imageData = ctx.createImageData(canvas.width, canvas.height);
 
-	return function RenderCanvas2D() {
+	return function () {
 		// Nothing to render
 		if (this.sprite.width <= 0 || this.sprite.height <= 0) {
 			return;
 		}
 
 		let scale_x, scale_y;
-		let x, y, _x, _y, width, height, outputWidth;
-		let pal, frame, color;
-		let input, output32;
+		let x, y;
 		let r, g, b, a, inRow, outRow;
 
 		scale_x = 1.0;
 		scale_y = 1.0;
-		_x = _pos[0] + this.offset[0];
-		_y = _pos[1] + this.offset[1] - 0.5 * 35; // middle of cell
-		pal = this.palette;
-		frame = this.sprite;
-		width = frame.width;
-		height = frame.height;
+		const _x = _pos[0] + this.offset[0];
+		const _y = _pos[1] + this.offset[1] - 0.5 * 35; // middle of cell
+		const pal = this.palette;
+		const frame = this.sprite;
+		const width = frame.width;
+		const height = frame.height;
 
 		_size.set(this.size);
 
@@ -493,13 +150,13 @@ const RenderCanvas2D = (function RenderCanvas2DClosure() {
 			imageData = ctx.createImageData(width, height);
 		}
 
-		input = frame.data;
-		color = this.color; // [r, g, b, a] as floats 0..1
-		outputWidth = canvas.width;
+		const input = frame.data;
+		const color = this.color; // [r, g, b, a] as floats 0..1
+		const outputWidth = canvas.width;
 
 		// Use 32-bit view for the output buffer (ImageData)
 		// WHY: Writing a single 32-bit value per pixel is faster than 4 separate byte writes.
-		output32 = new Uint32Array(imageData.data.buffer);
+		const output32 = new Uint32Array(imageData.data.buffer);
 
 		// Pre-calculate color multipliers for 32-bit assembly
 		// Avoid repeated array lookups inside the inner loop.
@@ -597,6 +254,349 @@ const RenderCanvas2D = (function RenderCanvas2DClosure() {
 		_ctx.restore();
 	};
 })();
+
+/**
+ * @var {WebGLProgram}
+ */
+let _program = null;
+
+/**
+ * @var {WebGLBuffer}
+ */
+let _buffer = null;
+
+/**
+ * @var {CanvasRenderingContext2D} canvas context
+ */
+let _ctx = null;
+
+/**
+ * @var {WebGLRenderingContext} 3d context
+ */
+let _gl = null;
+
+/**
+ * @var {number} group id
+ * Used to know if we have to bind texture again
+ */
+let _groupId = 0;
+
+/**
+ * @var {number} last group id
+ */
+let _lastGroupId = 0;
+
+/**
+ * @var {number} last shadow used
+ */
+let _shadow = null;
+
+/**
+ * @var {number} last rotation angle used
+ */
+let _angle = null;
+
+/**
+ * @var {number} last depth operation
+ */
+let _depth = null;
+
+/**
+ * @var {boolean} cached disable depth correction state
+ */
+let _disableDepthCorrection = false;
+
+/**
+ * @var {boolean} cached depth mask state
+ */
+let _depthMask = true;
+
+/**
+ * @var {boolean} cached depth test state
+ */
+let _depthTest = true;
+
+/**
+ * @var {object} last texture used
+ */
+let _texture = null;
+
+/**
+ * @var {boolean} do we use palette ?
+ */
+let _usepal = null;
+
+/**
+ * @var {Uint16Array} position in 2D canvas
+ */
+const _pos = new Int16Array(2);
+
+/**
+ * @var {mat4} last generated matrix (used for rotation)
+ */
+const _matrix = new Float32Array(4 * 4);
+
+/**
+ * @var {Float32Array[2]} sprite size
+ */
+const _size = new Float32Array(2);
+
+/**
+ * @var {Float32Array[2]} sprite offset position
+ */
+const _offset = new Float32Array(2);
+
+/**
+ * Sprite Renderer NameSpace
+ */
+class SpriteRenderer {
+	/**
+	 * @var {function} functions to use to render
+	 */
+	static render = null;
+
+	/**
+	 * @var {number} sprite shadow (mult * color)
+	 */
+	static shadow = 1.0;
+
+	/**
+	 * @var {number} sprite angle rotation
+	 */
+	static angle = 0;
+
+	/**
+	 * @var {number} depth
+	 */
+	static depth = 0.0;
+
+	/**
+	 * @var {Float32Array[3]} sprite position in 3D world
+	 */
+	static position = new Float32Array(3);
+
+	/**
+	 * @var {Float32Array[4]} sprite color (color * color)
+	 */
+	static color = new Float32Array(4);
+
+	/**
+	 * @var {Float32Array[2]} sprite size
+	 */
+	static size = new Float32Array(2);
+
+	/**
+	 * @var {Float32Array[2]} sprite offset position
+	 */
+	static offset = new Float32Array(2);
+
+	/**
+	 * @var {object} sprite image information
+	 */
+	static image = {
+		texture: null,
+		palette: null,
+		size: new Float32Array(2)
+	};
+
+	/**
+	 * @var {object} sprite imageData (for 2D context)
+	 */
+	static sprite = null;
+
+	/**
+	 * @var {object} sprite palette (for 2D context)
+	 */
+	static palette = null;
+
+	/**
+	 * @var {number} groupid used (avoid draw call)
+	 */
+	static groupId = 0;
+
+	/**
+	 * @var {boolean} disable depth correction (ray-plane) for current draw
+	 */
+	static disableDepthCorrection = false;
+
+	/**
+	 * @var {number} width unity
+	 */
+	static xSize = 5;
+
+	/**
+	 * @var {number} height unity
+	 */
+	static ySize = 5;
+
+	/**
+	 * Initialize SpriteRenderer Renderer
+	 *
+	 * @param {object} gl context
+	 */
+	static init(gl) {
+		if (!_buffer) {
+			_buffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
+			gl.bufferData(
+				gl.ARRAY_BUFFER,
+				new Float32Array([
+					-0.5, +0.5, 0.0, 0.0, +0.5, +0.5, 1.0, 0.0, -0.5, -0.5, 0.0, 1.0, +0.5, -0.5, 1.0, 1.0
+				]),
+				gl.STATIC_DRAW
+			);
+		}
+
+		if (!_program) {
+			_program = WebGL.createShaderProgram(gl, _vertexShader, _fragmentShader);
+		}
+	}
+
+	/**
+	 * Initialize 3D Context
+	 *
+	 * @param {object} gl context
+	 * @param {mat4} modelView
+	 * @param {mat4} projection
+	 * @param {object} fog structure
+	 */
+	static bind3DContext(gl, modelView, projection, fog) {
+		const attribute = _program.attribute;
+		const uniform = _program.uniform;
+
+		gl.useProgram(_program);
+		gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+		gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+		gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4.invert(_matrix, modelView));
+
+		// Fog settings
+		gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+		gl.uniform1f(uniform.uFogNear, fog.near);
+		gl.uniform1f(uniform.uFogFar, fog.far);
+		gl.uniform3fv(uniform.uFogColor, fog.color);
+
+		// Textures
+		gl.uniform1i(uniform.uDiffuse, 0);
+		gl.uniform1i(uniform.uPalette, 1);
+
+		// Camera position for billboarding
+		gl.uniform1f(uniform.uCameraZoom, Camera.zoom);
+		gl.uniform1f(uniform.uCameraLatitude, Camera.getLatitude());
+		gl.uniform1i(uniform.uDisableDepthCorrection, (_disableDepthCorrection = false));
+
+		// Enable all attributes
+		gl.enableVertexAttribArray(attribute.aPosition);
+		gl.enableVertexAttribArray(attribute.aTextureCoord);
+		gl.bindBuffer(gl.ARRAY_BUFFER, _buffer);
+
+		// Link attribute
+		gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 4 * 4, 0);
+		gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+
+		// Binding 3D context
+		this.render = RenderCanvas3D;
+		this.xSize = 5;
+		this.ySize = 5;
+
+		_gl = gl;
+		_depthMask = true;
+		_groupId++;
+	}
+
+	/**
+	 * Unbind 3D Context
+	 *
+	 * @param {object} gl context
+	 */
+	static unbind(gl) {
+		const attribute = _program.attribute;
+
+		gl.disableVertexAttribArray(attribute.aPosition);
+		gl.disableVertexAttribArray(attribute.aTextureCoord);
+	}
+
+	/**
+	 * Prepare to render on 2D context.
+	 *
+	 * @param {object} ctx canvas context
+	 * @param {number} x position
+	 * @param {number} y position
+	 */
+	static bind2DContext(ctx, x, y) {
+		_ctx = ctx;
+		_pos[0] = x;
+		_pos[1] = y;
+
+		this.render = RenderCanvas2D;
+		this.xSize = 5;
+		this.ySize = 5;
+	}
+
+	/**
+	 * Executes a render block with an isolated depth state.
+	 *
+	 * Temporarily overrides depth test, depth write mask, and depth correction
+	 * flags, executes the given function, then restores the previous GL state.
+	 *
+	 * This prevents depth state leakage between render passes and ensures
+	 * deterministic layered rendering.
+	 *
+	 * @param {boolean} use depthTest enable.
+	 * @param {boolean} use depthMask enable.
+	 * @param {boolean} use disableDepthCorrection enable.
+	 * @param {function} execute function with this parameters before restore gl state.
+	 */
+	static runWithDepth(depthTest, depthMask, depthCorrection, fn) {
+		if (!_gl) {
+			fn();
+			return;
+		}
+
+		const prevDepthTest = _depthTest;
+		const prevDepthMask = _depthMask;
+		const prevDepthCorrection = this.disableDepthCorrection;
+
+		if (_depthTest !== depthTest) {
+			_depthTest = depthTest;
+
+			if (depthTest) {
+				_gl.enable(_gl.DEPTH_TEST);
+			} else {
+				_gl.disable(_gl.DEPTH_TEST);
+			}
+		}
+
+		if (_depthMask !== depthMask) {
+			_depthMask = depthMask;
+			_gl.depthMask(depthMask);
+		}
+
+		if (this.disableDepthCorrection !== depthCorrection) {
+			this.disableDepthCorrection = depthCorrection;
+		}
+
+		fn();
+
+		if (_depthTest !== prevDepthTest) {
+			_depthTest = prevDepthTest;
+
+			if (prevDepthTest) {
+				_gl.enable(_gl.DEPTH_TEST);
+			} else {
+				_gl.disable(_gl.DEPTH_TEST);
+			}
+		}
+
+		if (_depthMask !== prevDepthMask) {
+			_depthMask = prevDepthMask;
+			_gl.depthMask(prevDepthMask);
+		}
+
+		if (this.disableDepthCorrection !== prevDepthCorrection) {
+			this.disableDepthCorrection = prevDepthCorrection;
+		}
+	}
+}
 
 /**
  * Export

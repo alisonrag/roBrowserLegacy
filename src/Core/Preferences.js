@@ -27,78 +27,72 @@ const Storage = {
 		}
 	}
 };
+class Preferences {
+	/**
+	 * Get back values
+	 *
+	 * @param {string} key
+	 * @param {mixed} default value
+	 * @param {number} optional version
+	 */
+	static get(key, def, version) {
+		Storage.get(key, function (value) {
+			version = version || 0.0;
 
-/**
- * Get back values
- *
- * @param {string} key
- * @param {mixed} default value
- * @param {number} optional version
- */
-function get(key, def, version) {
-	Storage.get(key, function (value) {
-		let data, keys;
-		let i, count;
+			// Not existing, storing it
+			if (!value[key] || JSON.parse(value[key])._version !== version) {
+				Preferences.save(def);
+				return;
+			}
 
-		version = version || 0.0;
+			const data = JSON.parse(value[key]);
+			data._key = key;
+			data._version = version;
+			data.save = selfSave;
 
-		// Not existing, storing it
-		if (!value[key] || JSON.parse(value[key])._version !== version) {
-			save(def);
-			return;
-		}
+			const keys = Object.keys(data);
+			const count = keys.length;
 
-		data = JSON.parse(value[key]);
+			for (let i = 0; i < count; ++i) {
+				def[keys[i]] = data[keys[i]];
+			}
+		});
+
+		def._key = key;
+		def._version = version;
+		def.save = selfSave;
+
+		return def;
+	}
+
+	/**
+	 * Save value in storage
+	 *
+	 * @param {string} key
+	 * @param {object} value to store
+	 */
+	static save(data) {
+		const key = data._key;
+		delete data._key;
+		delete data.save;
+
+		const store = {};
+		store[key] = JSON.stringify(data);
+
+		Storage.set(store);
+
 		data._key = key;
-		data._version = version;
 		data.save = selfSave;
-
-		keys = Object.keys(data);
-		count = keys.length;
-
-		for (i = 0; i < count; ++i) {
-			def[keys[i]] = data[keys[i]];
-		}
-	});
-
-	def._key = key;
-	def._version = version;
-	def.save = selfSave;
-
-	return def;
+	}
 }
-
-/**
- * Save value in storage
- *
- * @param {string} key
- * @param {object} value to store
- */
-function save(data) {
-	const key = data._key;
-	delete data._key;
-	delete data.save;
-
-	const store = {};
-	store[key] = JSON.stringify(data);
-
-	Storage.set(store);
-
-	data._key = key;
-	data.save = selfSave;
-}
-
 /**
  * Save from object
  */
 function selfSave() {
-	save(this);
+	Preferences.save(this);
 }
 
 /**
  * Export
  */
-export default {
-	get: get,
-	save: save
-};
+export default Preferences;

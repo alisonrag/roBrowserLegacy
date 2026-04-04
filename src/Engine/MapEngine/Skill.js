@@ -6,7 +6,11 @@
  * @author Vincent Thibault
  */
 
+/**
+ * Load dependencies
+ */
 import DB from 'DB/DBManager.js';
+import UIManager from 'UI/UIManager.js';
 import SkillId from 'DB/Skills/SkillConst.js';
 import SkillInfo from 'DB/Skills/SkillInfo.js';
 import EffectConst from 'DB/Effects/EffectConst.js';
@@ -39,10 +43,6 @@ import PokJukWeatherEffect from 'Renderer/Effects/PokJukWeatherEffect.js';
 import SakuraWeatherEffect from 'Renderer/Effects/SakuraWeatherEffect.js';
 import CloudWeatherEffect from 'Renderer/Effects/CloudWeatherEffect.js';
 
-/**
- * Load dependencies
- */
-// Version Dependent UIs
 /**
  * Spam an effect
  *
@@ -305,9 +305,9 @@ function onIdentifyList(pkt) {
 	ItemSelection.setTitle(DB.getMessage(521));
 	ItemSelection.onIndexSelected = function (index) {
 		if (index >= -1) {
-			const pkt = new PACKET.CZ.REQ_ITEMIDENTIFY();
-			pkt.index = index;
-			Network.sendPacket(pkt);
+			const _pkt = new PACKET.CZ.REQ_ITEMIDENTIFY();
+			_pkt.index = index;
+			Network.sendPacket(_pkt);
 		}
 	};
 }
@@ -324,7 +324,8 @@ function onIdentifyResult(pkt) {
 	}
 
 	switch (pkt.result) {
-		case 0: // success
+		case 0: {
+			// success
 			ChatBox.addText(DB.getMessage(491), ChatBox.TYPE.BLUE, ChatBox.FILTER.ITEM);
 
 			// Remove old item
@@ -336,7 +337,7 @@ function onIdentifyResult(pkt) {
 				Inventory.getUI().addItem(item);
 			}
 			break;
-
+		}
 		case 1: // Fail
 			ChatBox.addText(DB.getMessage(492), ChatBox.TYPE.ERROR, ChatBox.FILTER.ITEM);
 			break;
@@ -358,9 +359,9 @@ function onAutoSpellList(pkt) {
 	ItemSelection.setTitle(DB.getMessage(697));
 	ItemSelection.onIndexSelected = function (index) {
 		if (index >= -1) {
-			const pkt = new PACKET.CZ.SELECTAUTOSPELL();
-			pkt.SKID = index;
-			Network.sendPacket(pkt);
+			const _pkt = new PACKET.CZ.SELECTAUTOSPELL();
+			_pkt.SKID = index;
+			Network.sendPacket(_pkt);
 		}
 	};
 }
@@ -400,12 +401,12 @@ function onSelectSkillList(pkt) {
 	ItemSelection.append();
 	ItemSelection.setList(pkt.SKID, true);
 	ItemSelection.setTitle(DB.getMessage(697));
-	ItemSelection.onIndexSelected = function (index) {
+	ItemSelection.onIndexSelected = index => {
 		if (index >= -1) {
-			const pkt = new PACKET.CZ.SKILL_SELECT_RESPONSE();
-			pkt.SKID = index;
-			pkt.why = 0; // Currently unused on server side (clif_parse_SkillSelectMenu)
-			Network.sendPacket(pkt);
+			const _pkt = new PACKET.CZ.SKILL_SELECT_RESPONSE();
+			_pkt.SKID = index;
+			_pkt.why = 0; // Currently unused on server side (clif_parse_SkillSelectMenu)
+			Network.sendPacket(_pkt);
 		}
 	};
 }
@@ -417,7 +418,7 @@ function onSelectSkillList(pkt) {
  */
 function onTeleportList(pkt) {
 	// Once selected
-	NpcMenu.onSelectMenu = function (skillid, index) {
+	NpcMenu.onSelectMenu = (skillid, index) => {
 		NpcMenu.remove();
 
 		const _pkt = new PACKET.CZ.SELECT_WARPPOINT();
@@ -426,11 +427,10 @@ function onTeleportList(pkt) {
 		Network.sendPacket(_pkt);
 	};
 
-	NpcMenu.onAppend = function () {
-		let i, count;
+	NpcMenu.onAppend = () => {
 		const mapNames = [];
 
-		for (i = 0, count = pkt.mapName.length; i < count; ++i) {
+		for (let i = 0, count = pkt.mapName.length; i < count; ++i) {
 			mapNames[i] = DB.getMapName(pkt.mapName[i], pkt.mapName[i]);
 		}
 
@@ -495,9 +495,9 @@ function onMakingarrowList(pkt) {
 	MakeArrowSelection.setTitle('LIST');
 	MakeArrowSelection.onIndexSelected = function (index) {
 		if (index >= -1) {
-			const pkt = new PACKET.CZ.REQ_MAKINGARROW();
-			pkt.id = index;
-			Network.sendPacket(pkt);
+			const _pkt = new PACKET.CZ.REQ_MAKINGARROW();
+			_pkt.id = index;
+			Network.sendPacket(_pkt);
 		}
 	};
 }
@@ -515,11 +515,11 @@ function onRefineList(pkt) {
 	RefineWeaponSelection.append();
 	RefineWeaponSelection.setList(pkt.itemList);
 	RefineWeaponSelection.setTitle(DB.getMessage(910));
-	RefineWeaponSelection.onIndexSelected = function (index) {
+	RefineWeaponSelection.onIndexSelected = index => {
 		if (index >= -1) {
-			const pkt = new PACKET.CZ.REQ_WEAPONREFINE();
-			pkt.Index = index;
-			Network.sendPacket(pkt);
+			const _pkt = new PACKET.CZ.REQ_WEAPONREFINE();
+			_pkt.Index = index;
+			Network.sendPacket(_pkt);
 		}
 	};
 }
@@ -537,16 +537,16 @@ function onRepairList(pkt) {
 	RefineWeaponSelection.append();
 	RefineWeaponSelection.setList(pkt.itemList);
 	RefineWeaponSelection.setTitle(DB.getMessage(812));
-	RefineWeaponSelection.onIndexSelected = function (index) {
+	RefineWeaponSelection.onIndexSelected = index => {
 		if (index >= -1) {
 			const item = RefineWeaponSelection.getItemByIndex(index);
 
-			const pkt = new PACKET.CZ.REQ_ITEMREPAIR();
-			pkt.index = index;
-			pkt.itemId = item.ITID;
-			pkt.RefiningLevel = item.RefiningLevel;
-			pkt.slots = item.slot;
-			Network.sendPacket(pkt);
+			const _pkt = new PACKET.CZ.REQ_ITEMREPAIR();
+			_pkt.index = index;
+			_pkt.itemId = item.ITID;
+			_pkt.RefiningLevel = item.RefiningLevel;
+			_pkt.slots = item.slot;
+			Network.sendPacket(_pkt);
 		}
 	};
 }
@@ -603,8 +603,8 @@ Guild.onIncreaseSkill =
  * @param {optional|number} target game id
  */
 function onUseSkill(id, level, targetID) {
-	let entity, skill, target, pkt, out;
-	let count, range;
+	let entity;
+	let range;
 
 	const isHomun = id > SkillId.HOMUN_BEGIN && id < SkillId.HOMUN_LAST;
 	const isMerc = id > SkillId.MERCENARY_BEGIN && id < SkillId.MERCENARY_LAST;
@@ -631,9 +631,9 @@ function onUseSkill(id, level, targetID) {
 		return;
 	}
 
-	target = EntityManager.get(targetID) || entity;
-	skill = SkillWindow.getUI().getSkillById(id);
-	out = [];
+	const target = EntityManager.get(targetID) || entity;
+	const skill = SkillWindow.getUI().getSkillById(id);
+	const out = [];
 
 	if (skill) {
 		range = skill.attackRange + 1;
@@ -643,7 +643,7 @@ function onUseSkill(id, level, targetID) {
 		range = entity.attack_range;
 	}
 
-	count = PathFinding.search(
+	const count = PathFinding.search(
 		entity.position[0] | 0,
 		entity.position[1] | 0,
 		target.position[0] | 0,
@@ -663,7 +663,7 @@ function onUseSkill(id, level, targetID) {
 			UIManager.getComponent('ChangeCart').onChangeCartSkill();
 		}
 	}
-
+	let pkt;
 	if (PACKETVER.value >= 20180307) {
 		pkt = new PACKET.CZ.USE_SKILL2();
 	} else {
@@ -715,8 +715,8 @@ Guild.onUseSkill =
  * @param {number} position y
  */
 SkillTargetSelection.onUseSkillToPos = function onUseSkillToPos(id, level, x, y) {
-	let pos, entity, pkt, out, skill;
-	let count, range;
+	let entity;
+	let range;
 
 	const isHomun = id > 8000 && id < 8044;
 
@@ -736,9 +736,9 @@ SkillTargetSelection.onUseSkillToPos = function onUseSkillToPos(id, level, x, y)
 		return;
 	}
 
-	pos = entity.position;
-	skill = SkillWindow.getUI().getSkillById(id);
-	out = [];
+	const pos = entity.position;
+	const skill = SkillWindow.getUI().getSkillById(id);
+	const out = [];
 
 	if (skill) {
 		range = skill.attackRange + 1;
@@ -748,13 +748,13 @@ SkillTargetSelection.onUseSkillToPos = function onUseSkillToPos(id, level, x, y)
 		range = entity.attack_range;
 	}
 
-	count = PathFinding.search(pos[0] | 0, pos[1] | 0, x | 0, y | 0, range, out, Altitude.TYPE.WALKABLE);
+	const count = PathFinding.search(pos[0] | 0, pos[1] | 0, x | 0, y | 0, range, out, Altitude.TYPE.WALKABLE);
 
 	// Can't attack to this point
 	if (!count) {
 		return;
 	}
-
+	let pkt;
 	if (PACKETVER.value >= 20190904) {
 		pkt = new PACKET.CZ.USE_SKILL_TOGROUND3();
 	} else if (PACKETVER.value >= 20180307) {

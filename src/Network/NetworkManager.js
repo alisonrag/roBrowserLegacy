@@ -22,13 +22,13 @@ import NodeSocket from './SocketHelpers/NodeSocket.js';
 
 /**
  * Sockets list
- * @var Socket[]
+ * @const {Socket[]}
  */
 const _sockets = [];
 
 /**
  * Custom socket factory for plugins
- * @var function|null
+ * @type {function}
  */
 let _socketFactory = null;
 
@@ -51,19 +51,19 @@ function defaultSocketFactory(host, port) {
 
 /**
  * Current Socket
- * @var Socket
+ * @type {Socket}
  */
 let _socket = null;
 
 /**
  * Buffer to use to read packets
- * @var buffer
+ * @type {Uint8Array}
  */
 let _save_buffer = null;
 
 /**
  * Defines if dump packets as hex string
- * @var packetDump
+ * @const {boolean}
  */
 const packetDump = Configs.get('packetDump', false);
 
@@ -83,7 +83,7 @@ function Packets(name, Struct, size) {
 
 /**
  * List of supported packets
- * @var Packets[]
+ * @type {Packets[]}
  */
 Packets.list = [];
 
@@ -210,7 +210,7 @@ function read(callback) {
 
 /**
  * Callback used for reading the data for the next buffer received from server
- * @var callback
+ * @type {function}
  */
 read.callback = null;
 

@@ -25,7 +25,8 @@
 	 */
 	ROBrowser.TYPE = {
 		POPUP: 1,
-		FRAME: 2
+		FRAME: 2,
+		INLINE: 3
 	};
 
 	/**
@@ -382,36 +383,71 @@
 
 				this._APP = frame.contentWindow;
 				break;
-		}
 
-		// Get back application name
-		switch (this.config.application) {
-			case ROBrowser.APP.ONLINE:
-				this.config.application = 'Online';
-				break;
+			// Append roBrowser inline locally
+			case ROBrowser.TYPE.INLINE:
+				this.config.width = this.config.width || '100%';
+				this.config.height = this.config.height || '100%';
 
-			case ROBrowser.APP.MAPVIEWER:
-				this.config.application = 'MapViewer';
-				break;
+				if (this.config.target) {
+					while (this.config.target.firstChild) {
+						this.config.target.removeChild(this.config.target.firstChild);
+					}
+					var container = document.createElement('div');
+					container.style.width =
+						typeof this.config.width === 'number' ? this.config.width + 'px' : this.config.width;
+					container.style.height =
+						typeof this.config.height === 'number' ? this.config.height + 'px' : this.config.height;
+					container.style.position = 'relative';
+					this.config.target.appendChild(container);
+					// redefine target to the inner container
+					this.config.target = container;
+				}
 
-			case ROBrowser.APP.GRFVIEWER:
-				this.config.application = 'GrfViewer';
-				break;
+				window.ROConfig = this.config;
 
-			case ROBrowser.APP.MODELVIEWER:
-				this.config.application = 'ModelViewer';
-				break;
+				var url = new URL(this.baseUrl);
+				var path = url.pathname;
+				var projectRoot = path.split('/applications/')[0] + '/';
 
-			case ROBrowser.APP.STRVIEWER:
-				this.config.application = 'StrViewer';
-				break;
+				if (!document.querySelector('script[type="importmap"]')) {
+					var sharedScript = document.createElement('script');
+					sharedScript.src = projectRoot + 'applications/shared/importmap.js';
+					sharedScript.dataset.projectRoot = projectRoot;
+					sharedScript.onload = function () {
+						if (!document.querySelector('script[data-api="robrowser-main"]')) {
+							var s2 = document.createElement('script');
+							s2.type = 'module';
+							s2.dataset.api = 'robrowser-main';
+							s2.textContent = "import '" + projectRoot + "src/main.js';";
+							document.head.appendChild(s2);
+						}
+					};
+					sharedScript.onerror = function () {
+						console.error('Failed to load roBrowser import map from: ' + sharedScript.src);
+					};
+					document.head.appendChild(sharedScript);
+				} else if (!document.querySelector('script[data-api="robrowser-main"]')) {
+					var s2 = document.createElement('script');
+					s2.type = 'module';
+					s2.dataset.api = 'robrowser-main';
+					s2.textContent = "import '" + projectRoot + "src/main.js';";
+					document.head.appendChild(s2);
+				}
 
-			case ROBrowser.APP.GRANNYMODELVIEWER:
-				this.config.application = 'GrannyModelViewer';
-				break;
+				var self = this;
+				window.addEventListener(
+					'robrowser-ready',
+					function onAppReady() {
+						window.removeEventListener('robrowser-ready', onAppReady, false);
+						if (self.onReady) {
+							self.onReady();
+						}
+					},
+					false
+				);
 
-			case ROBrowser.APP.EFFECTVIEWER:
-				this.config.application = 'EffectViewer';
+				this._APP = window;
 				break;
 		}
 
@@ -429,8 +465,10 @@
 		}
 
 		// Start waiting for robrowser
-		this._Interval = setInterval(WaitForInitialization.bind(this), 100);
-		window.addEventListener('message', OnMessage, false);
+		if (this.config.type !== ROBrowser.TYPE.INLINE) {
+			this._Interval = setInterval(WaitForInitialization.bind(this), 100);
+			window.addEventListener('message', OnMessage, false);
+		}
 	};
 
 	/**

@@ -214,8 +214,6 @@ BasicInfoV4.onShortCut = function onShortCut(key) {
  * Switch window size
  */
 BasicInfoV4.toggleMode = function toggleMode() {
-	let type;
-
 	this.ui.toggleClass('small large');
 
 	if (_preferences.buttons) {
@@ -233,7 +231,6 @@ BasicInfoV4.toggleMode = function toggleMode() {
  * Toggle the list of buttons
  */
 BasicInfoV4.toggleButtons = function toggleButtons(event) {
-	let type;
 	const $buttons = this.ui.find('.buttons');
 
 	_preferences.buttons = !$buttons.is(':visible');

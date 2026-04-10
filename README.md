@@ -6,8 +6,6 @@ If you wish to discuss anything related to this project, or you want to join, co
 
 For info on how to setup the client read the contents of our [Getting Started doc](https://github.com/MrAntares/roBrowserLegacy/blob/master/doc/README.md). For the original branche's docs please visit the https://www.robrowser.com/ site.
 
-All credits to the original owners/creators and the new ones.
-
 ## DEMO
 
 [![Start!](https://github.com/MrAntares/roBrowserLegacy/raw/master/src/UI/Components/Intro/images/play.png 'Start Demo')](https://mrantares.github.io/roBrowserLegacy/)
@@ -73,7 +71,16 @@ For available plugins and information on how to install them please visit the [r
 
 See [CONTRIBUTING](./doc/CONTRIBUTING.md)
 
+All credits to the original owners/creators and the new ones.
+<a href="https://github.com/MrAntares/roBrowserLegacy/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=MrAntares/roBrowserLegacy" />
+</a>
+
 ## Contact
 
 - Join us on [Discord](https://discord.gg/8JdHwM4Kqm)
 - Or in the [GIT Discussions](https://github.com/MrAntares/roBrowserLegacy/discussions)
+
+## Star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MrAntares/roBrowserLegacy&type=Date)](https://star-history.com/#MrAntares/roBrowserLegacy&Date)

@@ -13,7 +13,6 @@ import jQuery from 'Utils/jquery.js';
 import Cursor from './CursorManager.js';
 import DB from 'DB/DBManager.js';
 import Client from 'Core/Client.js';
-import Events from 'Core/Events.js';
 import Mouse from 'Controls/MouseEventHandler.js';
 import UIPreferences from 'Preferences/UI.js';
 import Session from 'Engine/SessionStorage.js';
@@ -49,6 +48,18 @@ if (!_style.length) {
 	_style = jQuery('<style type="text/css"></style>').appendTo('head');
 }
 _style.append(CommonCSS);
+
+function getComponentZIndex(comp) {
+	if (comp._host) return comp._host.style.zIndex; // GUIComponent
+	if (comp.ui) return comp.ui.css('zIndex'); // UIComponent
+	return '50';
+}
+
+function setComponentZIndex(comp, value) {
+	if (comp._host)
+		comp._host.style.zIndex = value; // GUIComponent
+	else if (comp.ui) comp.ui.css('zIndex', value); // UIComponent
+}
 
 /**
  * @var {enum} Mouse mode
@@ -389,7 +400,7 @@ UIComponent.prototype.focus = function focus() {
 	// Store components zIndex in a list
 	for (name in components) {
 		if (this !== components[name] && components[name].__active && components[name].needFocus) {
-			zIndex = parseInt(components[name].ui.css('zIndex'), 10);
+			zIndex = parseInt(getComponentZIndex(components[name]), 10);
 			list[zIndex - 50] = zIndex;
 		}
 	}
@@ -406,13 +417,13 @@ UIComponent.prototype.focus = function focus() {
 	// Apply new zIndex to list
 	for (name in components) {
 		if (this !== components[name] && components[name].__active && components[name].needFocus) {
-			zIndex = parseInt(components[name].ui.css('zIndex'), 10);
-			components[name].ui.css('zIndex', list[zIndex - 50]);
+			zIndex = parseInt(getComponentZIndex(components[name]), 10);
+			setComponentZIndex(components[name], list[zIndex - 50]);
 		}
 	}
 
 	// Push our zIndex at top
-	this.ui.css('zIndex', list.length + 50 - j);
+	setComponentZIndex(this, list.length + 50 - j);
 };
 
 /**
@@ -430,12 +441,12 @@ UIComponent.prototype.placeOnTop = function placeOnTop() {
 	// Store components zIndex in a list
 	for (name in components) {
 		if (this !== components[name] && components[name].__active) {
-			zIndex = parseInt(components[name].ui.css('zIndex'), 10);
+			zIndex = parseInt(getComponentZIndex(components[name]), 10);
 			list.push(zIndex);
 		}
 	}
 	const lastZIndex = Math.max(...list);
-	this.ui.css('zIndex', lastZIndex + 1);
+	setComponentZIndex(this, lastZIndex + 1);
 };
 
 /**
@@ -498,6 +509,7 @@ UIComponent.prototype.draggable = function draggable(element) {
 	});
 
 	const component = this;
+	const SNAP_DISTANCE = 10;
 
 	// Global variable
 	if (!element) {
@@ -531,6 +543,10 @@ UIComponent.prototype.draggable = function draggable(element) {
 		const width = container.width();
 		const height = container.height();
 
+		let lastMx = Mouse.screen.x;
+		let lastMy = Mouse.screen.y;
+		let currentOpacity = parseFloat(container.css('opacity') || 1);
+
 		_snapCache = [];
 		if (UIPreferences.windowmagnet && component.manager) {
 			const containerParent = container.offsetParent();
@@ -539,7 +555,15 @@ UIComponent.prototype.draggable = function draggable(element) {
 			for (const name in components) {
 				const other = components[name];
 
-				if (!other || other === component || !other.__active || !other.ui || !other.ui.length) {
+				if (
+					!other ||
+					other === component ||
+					!other.__active ||
+					!other.needFocus ||
+					!other.ui ||
+					!other.ui.length ||
+					!other.ui.is(':visible')
+				) {
 					continue;
 				}
 
@@ -561,11 +585,31 @@ UIComponent.prototype.draggable = function draggable(element) {
 			}
 		}
 
+		let snapX, snapY, snapXD, snapYD, currentX, currentY;
+
+		function checkX(val) {
+			const d = Math.abs(val - currentX);
+			if (d < snapXD) {
+				snapXD = d;
+				snapX = val;
+			}
+		}
+		function checkY(val) {
+			const d = Math.abs(val - currentY);
+			if (d < snapYD) {
+				snapYD = d;
+				snapY = val;
+			}
+		}
+		function isNear(startA, endA, startB, endB) {
+			return !(endA + SNAP_DISTANCE < startB || endB + SNAP_DISTANCE < startA);
+		}
+
 		// Start the loop
 		container.stop();
-		drag = Events.setTimeout(dragging, 15);
+		drag = requestAnimationFrame(dragging);
 
-		// Stop the drag (need to focus on window to avoid possible errors...)
+		// Stop the drag
 		jQuery(window).on('mouseup.dragdrop touchend.dragdrop', function (ev) {
 			if (ev.type === 'touchend' || ev.which === 1 || ev.isTrigger) {
 				if (component.gridSnap) {
@@ -606,7 +650,7 @@ UIComponent.prototype.draggable = function draggable(element) {
 					});
 				}
 
-				Events.clearTimeout(drag);
+				cancelAnimationFrame(drag);
 				jQuery(window).off('mouseup.dragdrop touchend.dragdrop');
 				_snapCache = [];
 			}
@@ -614,70 +658,52 @@ UIComponent.prototype.draggable = function draggable(element) {
 
 		// Process dragging
 		function dragging() {
-			let x_ = Mouse.screen.x + x;
-			let y_ = Mouse.screen.y + y;
-			const opacity = parseFloat(container.css('opacity') || 1) - 0.02;
-			const snapDistance = 10;
+			const mx = Mouse.screen.x;
+			const my = Mouse.screen.y;
+
+			// Skip frame if mouse hasn't moved
+			if (mx === lastMx && my === lastMy) {
+				drag = requestAnimationFrame(dragging);
+				return;
+			}
+			lastMx = mx;
+			lastMy = my;
+
+			let x_ = mx + x;
+			let y_ = my + y;
+			currentOpacity = Math.max(currentOpacity - 0.02, 0.7);
 
 			if (component.magnet) {
 				component.magnet.TOP = component.magnet.BOTTOM = component.magnet.LEFT = component.magnet.RIGHT = false;
 			}
 
 			// Magnet on border
-			if (Math.abs(x_) < snapDistance) {
+			if (Math.abs(x_) < SNAP_DISTANCE) {
 				x_ = 0;
-				if (component.magnet) {
-					component.magnet.LEFT = true;
-				}
+				if (component.magnet) component.magnet.LEFT = true;
 			}
-			if (Math.abs(y_) < snapDistance) {
+			if (Math.abs(y_) < SNAP_DISTANCE) {
 				y_ = 0;
-				if (component.magnet) {
-					component.magnet.TOP = true;
-				}
+				if (component.magnet) component.magnet.TOP = true;
 			}
-
-			if (Math.abs(x_ + width - Mouse.screen.width) < snapDistance) {
+			if (Math.abs(x_ + width - Mouse.screen.width) < SNAP_DISTANCE) {
 				x_ = Mouse.screen.width - width;
-				if (component.magnet) {
-					component.magnet.RIGHT = true;
-				}
+				if (component.magnet) component.magnet.RIGHT = true;
 			}
-
-			if (Math.abs(y_ + height - Mouse.screen.height) < snapDistance) {
+			if (Math.abs(y_ + height - Mouse.screen.height) < SNAP_DISTANCE) {
 				y_ = Mouse.screen.height - height;
-				if (component.magnet) {
-					component.magnet.BOTTOM = true;
-				}
+				if (component.magnet) component.magnet.BOTTOM = true;
 			}
 
 			if (UIPreferences.windowmagnet && component.manager) {
 				const lockX = component.magnet && (component.magnet.LEFT || component.magnet.RIGHT);
 				const lockY = component.magnet && (component.magnet.TOP || component.magnet.BOTTOM);
-				let snapX = null;
-				let snapY = null;
-				let snapXD = snapDistance + 1;
-				let snapYD = snapDistance + 1;
-
-				function checkX(val) {
-					const d = Math.abs(val - x_);
-					if (d < snapXD) {
-						snapXD = d;
-						snapX = val;
-					}
-				}
-
-				function checkY(val) {
-					const d = Math.abs(val - y_);
-					if (d < snapYD) {
-						snapYD = d;
-						snapY = val;
-					}
-				}
-
-				function isNear(startA, endA, startB, endB) {
-					return !(endA + snapDistance < startB || endB + snapDistance < startA);
-				}
+				snapX = null;
+				snapY = null;
+				snapXD = SNAP_DISTANCE + 1;
+				snapYD = SNAP_DISTANCE + 1;
+				currentX = x_;
+				currentY = y_;
 
 				const len = _snapCache.length;
 				for (let i = 0; i < len; i++) {
@@ -698,17 +724,13 @@ UIComponent.prototype.draggable = function draggable(element) {
 					}
 				}
 
-				if (!lockX && snapX !== null) {
-					x_ = snapX;
-				}
-				if (!lockY && snapY !== null) {
-					y_ = snapY;
-				}
+				if (!lockX && snapX !== null) x_ = snapX;
+				if (!lockY && snapY !== null) y_ = snapY;
 			}
 
 			container.offset({ top: y_, left: x_ });
-			container.css('opacity', Math.max(opacity, 0.7));
-			drag = Events.setTimeout(dragging, 15);
+			container.css('opacity', Math.max(currentOpacity, 0.7));
+			drag = requestAnimationFrame(dragging);
 		}
 	});
 

@@ -36,9 +36,11 @@ class Particle {
 	/**
 	 * Initialize particles
 	 *
-	 * @param {number} particles count
+	 * @param {number} count - particles count
+	 * @param {HTMLCanvasElement} canvas
+	 * @param {function} [onReady] - callback when background image is loaded
 	 */
-	static init(count, canvas) {
+	static init(count, canvas, onReady) {
 		this.list = new Array(count);
 
 		this.width = canvas.width;
@@ -52,6 +54,10 @@ class Particle {
 		this.bg.src = new URL('./images/background.jpg', import.meta.url).href;
 		this.bg.onload = function () {
 			this.ready = true;
+			if (onReady) onReady();
+		};
+		this.bg.onerror = function () {
+			if (onReady) onReady();
 		};
 
 		for (let i = 0; i < count; ++i) {
@@ -75,6 +81,15 @@ class Particle {
 	 */
 	static render() {
 		const now = Date.now();
+		// Throttle to ~60 FPS
+		const interval = 1000 / 60;
+		if (this._lastRenderTime && now - this._lastRenderTime < interval) {
+			if (this.process) {
+				this.requestRender.call(window, this.render.bind(this), this.canvas);
+			}
+			return;
+		}
+
 		let i, count;
 
 		this.ctx.clearRect(0, 0, this.width, this.height);
@@ -90,10 +105,10 @@ class Particle {
 		}
 
 		this.tick = now;
-
 		if (this.process) {
 			this.requestRender.call(window, this.render.bind(this), this.canvas);
 		}
+		this._lastRenderTime = now;
 	}
 
 	/**

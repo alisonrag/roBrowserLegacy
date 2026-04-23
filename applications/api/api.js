@@ -7,7 +7,7 @@
  *
  * @author Vincent Thibault
  */
-
+/* eslint-disable */
 (function ROAPI() {
 	'use strict';
 
@@ -162,7 +162,7 @@
 		socketProxy: null,
 
 		/**
-		 * @type {string} web-server api: '<protocol>://<yourserverip>:<port>/'
+		 * @type {string} web-server api: 'http://<yourserverip>:<port>/' (used only to electron build)
 		 */
 		webserverAddress: null,
 
@@ -380,6 +380,10 @@
 					}
 					this.config.target.appendChild(frame);
 				}
+
+				// Remove parent page preloader — the iframe handles its own loading
+				var parentPreloader = document.getElementById('ro-preloader');
+				if (parentPreloader) parentPreloader.remove();
 
 				this._APP = frame.contentWindow;
 				break;

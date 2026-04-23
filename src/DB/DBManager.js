@@ -53,6 +53,7 @@ import MapInfo from './Map/MapTable.js';
 import Network from 'Network/NetworkManager.js';
 import PACKET from 'Network/PacketStructure.js';
 import PACKETVER from 'Network/PacketVerManager.js';
+import wasmUrl from 'Vendors/liblua5.1.wasm?url';
 
 //Pet
 //MapName
@@ -2043,12 +2044,10 @@ class DB {
 				item.unidentifiedDescriptionName instanceof Array
 					? item.unidentifiedDescriptionName.join('\n')
 					: item.unidentifiedDescriptionName;
-			item.prefixName = TextEncoding.decodeString(item.prefixName || '');
+			item.prefixName = item.prefixName || '';
 			item.isPostfix = item.isPostfix || false;
 			item.processitemlist =
-				item.processitemlist && item.processitemlist instanceof Array
-					? TextEncoding.decodeString(item.processitemlist.join('\n'))
-					: '';
+				item.processitemlist && item.processitemlist instanceof Array ? item.processitemlist.join('\n') : '';
 			item._decoded = true;
 		}
 
@@ -3718,11 +3717,11 @@ class DB {
 }
 
 async function startLua() {
-	lua = await CLua.Lua.create();
-	HO_AI = await CLua.Lua.create();
-	MER_AI = await CLua.Lua.create();
-	default_HO_AI = await CLua.Lua.create();
-	default_MER_AI = await CLua.Lua.create();
+	lua = await CLua.Lua.create({ customWasmUri: wasmUrl });
+	HO_AI = await CLua.Lua.create({ customWasmUri: wasmUrl });
+	MER_AI = await CLua.Lua.create({ customWasmUri: wasmUrl });
+	default_HO_AI = await CLua.Lua.create({ customWasmUri: wasmUrl });
+	default_MER_AI = await CLua.Lua.create({ customWasmUri: wasmUrl });
 }
 
 function loadFontFromClient(fontPath) {

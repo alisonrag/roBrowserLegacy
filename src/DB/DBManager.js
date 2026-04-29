@@ -54,6 +54,7 @@ import Network from 'Network/NetworkManager.js';
 import PACKET from 'Network/PacketStructure.js';
 import PACKETVER from 'Network/PacketVerManager.js';
 import wasmUrl from 'Vendors/liblua5.1.wasm?url';
+import MemoryManager from 'Core/MemoryManager.js';
 
 //Pet
 //MapName
@@ -374,6 +375,9 @@ class DB {
 
 				if (DB.index === DB.count) {
 					DB.isLoaded = true;
+					// Force cleanup of DB file data (lua, txt, csv, bson blobs) that are no longer needed
+					// gl is null here because we may not have a WebGL context yet during lazy loading
+					MemoryManager.forceClean(null, /\.(lub|lua|txt|csv|bson)$/i);
 				}
 			};
 		}
@@ -3772,12 +3776,13 @@ async function startLua() {
 }
 
 function loadFontFromClient(fontPath) {
+	console.log('Loading file "' + fontPath + 'SCDream4.otf"...');
 	Client.loadFile(
 		fontPath + 'SCDream4.otf',
 		function (fontData4) {
 			const base64_4 = arrayBufferToBase64(fontData4);
 			const fontUrl4 = 'data:font/opentype;base64,' + base64_4;
-
+			console.log('Loading file "' + fontPath + 'SCDream6.otf"...');
 			Client.loadFile(
 				fontPath + 'SCDream6.otf',
 				function (fontData6) {
@@ -3829,7 +3834,6 @@ function loadFontFromClient(fontPath) {
 							}  
 						`;
 					document.head.appendChild(style);
-					document.body.style.fontFamily = 'Arial, Helvetica, sans-serif';
 				},
 				function (error) {
 					console.warn('[loadFontFromClient] - Failed loading client font:', fontPath, '- Using Arial');

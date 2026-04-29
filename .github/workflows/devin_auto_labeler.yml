@@ -4,6 +4,7 @@ on:
         types: [submitted]
     pull_request_review_comment:
         types: [created, edited]
+    workflow_dispatch:
 permissions:
     contents: read
 jobs:
@@ -58,7 +59,7 @@ jobs:
                         const allFlags = unresolved.every(t =>
                           (t.comments.nodes[0]?.body || '').includes('🚩'));
                         labelToAdd = allFlags
-                          ? 'Devin Check Failed - WONTFIX'
+                          ? 'Devin Check - FLAG'
                           : 'Devin Check Failed - TOFIX';
                       }
                       core.info(`total=${total} resolved=${resolved} label=${labelToAdd}`);

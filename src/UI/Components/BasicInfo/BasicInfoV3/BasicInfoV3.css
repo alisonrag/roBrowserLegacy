@@ -10,7 +10,7 @@
 	width: 220px;
 	height: 135px;
 	font-size: 11px;
-	letter-spacing: 0.03em;
+	font-weight: bold;
 }
 #BasicInfoV3.small .large {
 	display: none;

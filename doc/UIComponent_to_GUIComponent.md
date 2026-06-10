@@ -1,1595 +1,233 @@
-# Migration Guide: UIComponent → GUIComponent
+# UIComponent → GUIComponent Autonomous Agent Operational Memory
 
-## Architecture Overview
+# L1 Primary Operational Memory
 
-### UIComponent (legacy) — `src/UI/UIComponent.js`
+Consult order:
 
-- jQuery-based: DOM manipulation, events, CSS, animations all use jQuery
-- CSS injected into a global `<style>` tag in `<head>` via `jQuery('style:first').append(...)`
-- HTML parsed via `jQuery(htmlText)`, interactive attributes handled by `parseHTML()` using `data-background`, `data-hover`, `data-down`, `data-active`, `data-text`, `data-preload`
-- Lives in the Light DOM (direct child of `document.body`)
-- `this.ui` is a jQuery object wrapping the root element
+1. L1 (Primary Brain)
+2. L2 (Reflex Compression / Recovery Layer)
+3. L0 (Historical Archive if unresolved)
 
-### GUIComponent (new) — `src/UI/GUIComponent.js`
+L0 is archival and should only be opened when:
 
-- Native DOM + Shadow DOM (`attachShadow({ mode: 'open' })`)
-- CSS injected inside the Shadow DOM via a `<style>` element (Common.css + component CSS)
-- HTML returned by `render()` method as a string, inserted into `this._container.innerHTML`
-- Uses Custom Elements (`<ui-button>`, `<ui-text>`, `<ui-image>`) instead of `data-*` attributes (see doc/CustomElements.md) [OPTIONAL]
-- `this.ui` is a jQuery-compatible proxy that exists **only** for interoperability with `UIManager` and legacy `UIComponent` instances — **new code inside a GUIComponent should always use native DOM and Shadow DOM APIs directly**
+- L1 cannot answer.
+- An edge case appears.
+- Historical reasoning is required.
 
-### DOM Structure
+Memory Layers
 
-```
-document.body
-└── div#ComponentName          ← this._host (position: absolute, z-index: 50)
-    └── #shadow-root (open)    ← this._shadow
-        ├── <style>            ← Common.css + component CSS
-        └── div.ui-component-root  ← this._container
-            └── <div id="ComponentName">  ← component HTML from render()
-                └── ...content...
-```
+├── L1 = doc/UIComponent_to_GUIComponent.md
+├── L2 = doc/UIComponent_to_GUIComponent_Firmware.md
+└── L0 = doc/UIComponent_to_GUIComponent_Scars.md
 
-> **Note**: `this._host` receives `position: absolute` and `z-index: 50` via JavaScript during `prepare()`. You do **not** need to declare these in your `:host` CSS.
+## Mission
+
+Migrate legacy jQuery `UIComponent` modules to Shadow DOM `GUIComponent` with minimum errors; preserve behavior, layout, input semantics, and engine integration.
 
 ---
 
-## Lifecycle Hooks
+## 1. Hard Invariants
 
-GUIComponent has three lifecycle hooks. Understanding when each runs is critical to avoid bugs like duplicate event bindings.
-
-```
-prepare()
-  ├── build Shadow DOM, inject CSS, render HTML
-  ├── _processAllDataAttrs()
-  ├── _createUIProxy()
-  ├── appendChild(host) to document.body   ← host IS in the DOM
-  ├── init()                               ← runs ONCE
-  ├── _setupMouseMode()
-  └── host.remove()                        ← host removed from DOM
-
-append()
-  ├── appendChild(host) to target          ← host IS in the DOM
-  ├── onAppend()                           ← runs EVERY TIME append() is called
-  ├── _setupScrollbars()
-  ├── _fixPositionOverflow()
-  └── focus()
-
-remove()
-  ├── onRemove()                           ← runs EVERY TIME remove() is called
-  ├── unbind keydown
-  ├── dispatch 'x_remove' event
-  └── host.remove()                        ← host removed from DOM
-```
-
-| Hook         | When it runs                                              | Use for                                                                                  |
-| ------------ | --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `init()`     | Once, during `prepare()`. Host is temporarily in the DOM. | One-time setup: `draggable()`, event binding, initial hide (toggle-style only — see §19) |
-| `onAppend()` | Every time `append()` is called. Host is in the DOM.      | Position restore, anything that must run each time the component appears                 |
-| `onRemove()` | Every time `remove()` is called, before detach.           | Save preferences, cleanup                                                                |
-
-**RULE**: Bind events in `init()` (runs once). Restore position/state in `onAppend()` (runs every time). Save state in `onRemove()`.
+| Invariant                    | Rule                                                                                                             | Violation                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Native DOM Ownership         | New component code uses native DOM only; `this.ui` is interop-only.                                              | Hidden legacy coupling and inconsistent behavior.           |
+| Shadow Isolation             | Query inside `this._shadow` or `_getRoot()`; never query `document` for internal nodes.                          | Lookups fail silently.                                      |
+| Host Geometry Authority      | `:host` owns `top`, `left`, `width`, `height`.                                                                   | Dragging, snapping, overflow, and viewport alignment break. |
+| Inner Layout Authority       | Inner root owns internal layout and anchoring.                                                                   | Children escape or collapse.                                |
+| Lifecycle Separation         | Bind in `init()`, restore in `onAppend()`, save/cleanup in `onRemove()`.                                         | Duplicate handlers, lost state, repeated setup.             |
+| Shadow Boundary Awareness    | Revalidate global CSS, traversal, event, focus, and inheritance assumptions after migration.                     | Legacy behavior regresses silently.                         |
+| Runtime Visibility Ownership | Use explicit inline `display` management for toggled elements.                                                   | Elements stay hidden or show with the wrong display mode.   |
+| Visibility Detection         | When inline state is insufficient, use `getComputedStyle(el).display`.                                           | False visibility checks.                                    |
+| Explicit Event Semantics     | Replace jQuery implicit behavior with explicit propagation/default control.                                      | Browser actions leak through.                               |
+| Shadow-Safe Events           | Element-aware listeners must live inside the shadow tree/container.                                              | Retargeting hides the real source.                          |
+| Priority Events              | Use capture-phase listeners for handlers that must run first.                                                    | Priority-sensitive logic fires too late.                    |
+| Text Formatting Preservation | RO/game text must use `DB.formatMsgToHtml()` + `innerHTML`; plain text uses `textContent`.                       | Color codes, markup, and line breaks render literally.      |
+| Host Property Leakage        | If host disables pointer events, re-enable them on interactive children.                                         | UI becomes non-interactive.                                 |
+| Input Protection             | Components with `<input>`, `<select>`, or `<textarea>` must capture keys and inspect `shadowRoot.activeElement`. | Typing is stolen by global handlers.                        |
+| Dynamic DOM Safety           | Null-guard async/server selectors and multi-match updates.                                                       | Packet mismatch crashes or partial updates.                 |
+| Programmatic Event Dispatch  | Use `CustomEvent(detail)` for synthetic events.                                                                  | Legacy trigger semantics do not survive.                    |
+| Touch / Mobile Safety        | Host touch behavior must be explicit; account for `visualViewport` when positioning.                             | Mobile sizing and hit testing drift.                        |
+| Snap Cache Compatibility     | Legacy snap/offset logic may require jQuery-compatible `offsetParent` behavior.                                  | Snap cache skips or misreads GUIComponent instances.        |
+| Asset Path Canonicality      | Use `DBManager.INTERFACE_PATH` for interface assets.                                                             | Path drift and duplicated constants.                        |
 
 ---
 
-## Mouse Modes
+## 2. Canonical Skeleton
 
-Each GUIComponent has a `mouseMode` property that controls how mouse events interact with the 3D scene behind the UI:
-
-```javascript
-const MouseMode = Object.freeze({
-	CROSS: 0, // Mouse crosses the UI and still intersects with the scene
-	STOP: 1, // Blocks scene intersection when mouse is over the UI
-	FREEZE: 2 // Blocks scene intersection while the UI is alive (modal)
-});
-```
-
-| Mode     | Use case                                 | Example                         |
-| -------- | ---------------------------------------- | ------------------------------- |
-| `CROSS`  | Transparent overlays, HUD elements       | Minimap, chat bubbles           |
-| `STOP`   | Standard windows (default)               | Clan, Inventory, Equipment      |
-| `FREEZE` | Modal dialogs that block all interaction | NPC dialog, confirmation popups |
-
-Set it on the component instance:
-
-```javascript
-Clan.mouseMode = GUIComponent.MouseMode.STOP;
-```
+| Step            | Rule                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------ |
+| Constructor     | `new GUIComponent(name, cssText)`                                                    |
+| HTML            | `render()` returns the HTML string                                                   |
+| Minimal DOM     | If legacy HTML was `null`, `render()` still returns a minimal root wrapper           |
+| Custom Elements | Import `UI/Elements/Elements.js` when using `<ui-button>`, `<ui-text>`, `<ui-image>` |
+| Registration    | Register with `UIManager.addComponent(component)`                                    |
+| Interop         | `this.ui` exists only for legacy/UIManager interop; new code uses native DOM         |
 
 ---
 
-## Step-by-Step Migration Checklist
-
-### 1. Create the component files
-
-Each GUIComponent needs three files:
-
-- `ComponentName.js` — Logic
-- `ComponentName.html` — Template (raw HTML string)
-- `ComponentName.css` — Styles
-
-### 2. Convert the JS file
-
-**Before (UIComponent):**
-
-```javascript
-import UIComponent from 'UI/UIComponent.js';
-import UIManager from 'UI/UIManager.js';
-import htmlText from './Clan.html?raw';
-import cssText from './Clan.css?raw';
-
-const Clan = new UIComponent('Clan', htmlText, cssText);
-```
-
-**After (GUIComponent):**
-
-```javascript
-import GUIComponent from 'UI/GUIComponent.js';
-import UIManager from 'UI/UIManager.js';
-import 'UI/Elements/Elements.js'; // ← REQUIRED: registers <ui-button>, <ui-text>, <ui-image>
-import htmlText from './Clan.html?raw';
-import cssText from './Clan.css?raw';
-
-const Clan = new GUIComponent('Clan', cssText); // ← only CSS, not HTML
-
-Clan.render = () => htmlText; // ← HTML goes here
-```
-
-Key differences:
-
-- `GUIComponent` constructor takes `(name, cssText)` — no HTML argument
-- HTML is returned by `render()` method
-- Must `import 'UI/Elements/Elements.js'` to register custom elements [OPTIONAL]
-
-#### Components with `null` HTML (dynamic DOM)
-
-Some legacy UIComponents pass `null` for HTML and build their root element dynamically in `init()`:
-
-```javascript
-// Before (UIComponent) — no HTML template, root created at runtime
-const StatusIcons = new UIComponent('StatusIcons', null, cssText);
-
-StatusIcons.init = function init() {
-	this.ui = jQuery('<div/>').attr('id', 'StatusIcons');
-	// ... dynamically create child elements later
-};
-```
-
-For GUIComponent, you still need a minimal HTML template — the `render()` method must return something. Create a `.html` file with a minimal container:
-
-```html
-<!-- StatusIcons.html -->
-<div id="StatusIcons"></div>
-```
-
-```javascript
-// After (GUIComponent)
-const StatusIcons = new GUIComponent('StatusIcons', cssText);
-StatusIcons.render = () => htmlText; // ← returns the minimal <div> wrapper
-// Dynamic child elements are appended to this container at runtime
-```
-
-### 3. Convert the HTML file [OPTIONAL]
-
-Replace `data-*` attributes with Custom Elements:
-
-| UIComponent (data-\*)                                                                      | GUIComponent (Custom Element)                                          |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `<button data-background="btn_ok.bmp" data-hover="btn_ok_a.bmp" data-down="btn_ok_b.bmp">` | `<ui-button bg="btn_ok.bmp" hover="btn_ok_a.bmp" down="btn_ok_b.bmp">` |
-| `<span data-text="2355">Fallback</span>`                                                   | `<ui-text msg="2355">Fallback</ui-text>`                               |
-| `<div data-background="image.bmp">`                                                        | `<ui-image src="image.bmp">`                                           |
-
-Elements that still use `data-background`, `data-hover`, `data-down`, `data-active`, `data-text`, or `data-preload` will be processed by `GUIComponent._processAllDataAttrs()` during `prepare()`. Both approaches work; Custom Elements are preferred for new code but is optional. Create new custom elements if conversion demands it (see doc/CustomElements.md).
-
-### 4. Convert the CSS file — CRITICAL
-
-This is where most bugs occur. The CSS must be restructured for Shadow DOM.
-
-#### 4a. Move dimensions and position to `:host`
-
-The host element (`this._host`) is what the outside world sees. Its dimensions determine:
-
-- `getBoundingClientRect()` used by magnetic snap
-- `_fixPositionOverflow()` used by screen boundary checks
-- `UIManager.fixResizeOverflow()` used by window resize
-
-**RULE**: The `:host` selector MUST define `width`, `height`, `top`, and `left`. The inner root element (`#ComponentName`) MUST NOT have `top` or `left` (set them to 0 or omit them).
-
-**Before:**
-
-```css
-#Clan {
-	position: absolute;
-	top: 150px;
-	left: 150px;
-	width: 400px;
-	height: 317px;
-}
-```
-
-**After:**
-
-```css
-:host {
-	width: 400px;
-	height: 317px;
-	top: 150px;
-	left: 150px;
-}
-
-#Clan {
-	position: absolute;
-	width: 400px;
-	height: 317px;
-}
-```
-
-> **Note**: You do NOT need `position: absolute` or `z-index` on `:host` — these are set via JavaScript in `prepare()`.
-
-**WHY**: If `top`/`left` remain on the inner element, it offsets the content inside the host. The host's `getBoundingClientRect()` returns the host's position, not the inner element's visual position. This causes magnetic snap to align to wrong edges (especially bottom/right).
-
-**WHY `position: absolute` on inner element**: The inner `#Clan` div needs `position: absolute` (or `relative`) to serve as a containing block for its children that use `position: absolute`. Without it, absolutely-positioned children would escape to the next positioned ancestor.
-
-#### 4b. Dynamic-size components (no fixed width/height)
-
-Some components (e.g., StatusIcons) have no fixed dimensions — they grow dynamically as children are added. In the original UIComponent, the single `#ComponentName` div was both the positioned element AND the container. In GUIComponent, `_host` is the positioned element and the inner `#ComponentName` div from `render()` is a separate element inside the shadow DOM.
-
-**RULE for dynamic-size components**: Do NOT add `position: absolute` to the inner `#ComponentName` div. This creates an extra 0×0 containing block inside the shadow DOM that breaks layout for absolutely-positioned children. Let `.state` (or similar child) elements use `_host` as their containing block instead.
-
-**Fixed-size components** (Clan, Inventory, etc.):
-
-```css
-:host {
-	width: 400px;
-	height: 317px;
-	top: 150px;
-	left: 150px;
-}
-
-#Clan {
-	position: absolute; /* ← NEEDED: serves as containing block for children */
-	width: 400px;
-	height: 317px;
-}
-```
-
-**Dynamic-size components** (StatusIcons, etc.):
-
-```css
-:host {
-	top: 166px;
-	right: 20px;
-	overflow: visible; /* ← ensures children aren't clipped beyond 0×0 host bounds */
-}
-
-#StatusIcons {
-	display: block; /* ← NO position: absolute — children position relative to _host */
-}
-```
-
-**WHY**: In the original UIComponent, `position: absolute` on the root div was necessary because it was the top-level element appended to `document.body`. In GUIComponent, `_host` already has `position: absolute` (set by `prepare()`). Adding it again on the inner div creates a redundant 0×0 positioned container inside the shadow DOM. For fixed-size components this is harmless (both have the same explicit dimensions), but for dynamic-size components it breaks the containing block chain — absolutely-positioned children end up positioned relative to a 0×0 box instead of the properly-positioned `_host`.
-
-### 5. Convert DOM queries
-
-**Before (jQuery):**
-
-```javascript
-this.ui.find('.content.info .name .value').text(clan.name);
-this.ui.find('.close').click(function() { ... });
-```
-
-**After (native DOM):**
-
-```javascript
-const root = this._shadow || this._host;
-root.querySelector('.content.info .name .value').textContent = clan.name;
-
-const closeBtn = root.querySelector('.close');
-closeBtn.addEventListener('click', () => { ... });
-```
-
-**RULE**: Always query from `this._shadow` (or `this._host`), never from `document`. Elements inside Shadow DOM are invisible to `document.querySelector()`.
-
-#### Helper: `_getRoot()` for module-level components
-
-For components defined as module-level singletons (not using `this` inside methods), create a `_getRoot()` helper to avoid repeating the shadow root lookup:
-
-```javascript
-function _getRoot() {
-	return StatusIcons._shadow || StatusIcons._host;
-}
-
-// Usage in any function:
-function resetPositions() {
-	const root = _getRoot();
-	const elements = root.querySelectorAll('.state');
-	// ...
-}
-```
-
-This is preferred over `this._shadow || this._host` when the component's methods are plain functions (not on `this`), which is common for overlay/HUD components like StatusIcons, MiniMap, etc.
-
-### 6. Convert event handlers
-
-**Before:**
-
-```javascript
-Guild.init = function init() {
-	this.ui.find('.close').mousedown(stopPropagation).click(Guild.toggle.bind(this));
-	this.draggable(this.ui.find('.titlebar'));
-	this.ui.hide();
-};
-```
-
-**After:**
-
-```javascript
-Clan.init = function init() {
-	this.draggable('.titlebar');
-	const root = this._shadow || this._host;
-	const closeBtn = root.querySelector('.close');
-	if (closeBtn) {
-		closeBtn.addEventListener('mousedown', e => e.stopImmediatePropagation());
-		closeBtn.addEventListener('click', () => Clan.toggle());
-	}
-	this._host.style.display = 'none';
-};
-```
-
-Key changes:
-
-- `draggable()` accepts a CSS selector string (resolved inside shadow)
-- Position restore goes in `onAppend()`
-- Uses native DOM `addEventListener` instead of jQuery `.click()`/`.mousedown()`
-
-### 7. The `this.ui` proxy — interop only
-
-`this.ui` is a jQuery-compatible proxy that exists so `UIManager` and legacy `UIComponent` code can interact with GUIComponents without changes. **New code inside a GUIComponent should always use native DOM and Shadow DOM APIs.**
-
-| Proxy method                           | Native DOM equivalent (preferred)                                                |
-| -------------------------------------- | -------------------------------------------------------------------------------- |
-| `this.ui.css('top', '100px')`          | `this._host.style.top = '100px'`                                                 |
-| `this.ui.css({ top: 100, left: 200 })` | `Object.assign(this._host.style, { top: '100px', left: '200px' })`               |
-| `this.ui.show()`                       | `this._host.style.display = ''` (+ call `this._fixPositionOverflow()` if needed) |
-| `this.ui.hide()`                       | `this._host.style.display = 'none'`                                              |
-| `this.ui.is(':visible')`               | `this._host.style.display !== 'none'`                                            |
-| `this.ui.find('.foo')`                 | `this._shadow.querySelector('.foo')` or `this._shadow.querySelectorAll('.foo')`  |
-| `this.ui.width()`                      | `this._host.getBoundingClientRect().width`                                       |
-| `this.ui.height()`                     | `this._host.getBoundingClientRect().height`                                      |
-| `this.ui.offset()`                     | `this._host.getBoundingClientRect()`                                             |
-| `this.ui.position()`                   | `{ left: this._host.offsetLeft, top: this._host.offsetTop }`                     |
-| `this.ui.parent()`                     | `this._host.parentNode`                                                          |
-| `this.ui.trigger('event')`             | `this._host.dispatchEvent(new CustomEvent('event', { bubbles: true }))`          |
-| `this.ui.detach()`                     | `this._host.remove()`                                                            |
-| `this.ui.appendTo(target)`             | `target.appendChild(this._host)`                                                 |
-
-> **Caveat**: `this.ui.show()` automatically calls `this._fixPositionOverflow()` to ensure the component stays within screen bounds. When using native DOM `this._host.style.display = ''`, call `this._fixPositionOverflow()` manually if the component may be near screen edges.
-
-**When to use `this.ui`**: Only when passing the component to external code that expects a jQuery-like interface (e.g., `UIManager` internals, legacy components calling methods on other components).
-
-**When to use native DOM**: Always, inside the component's own code (`init`, `onAppend`, `onRemove`, event handlers, etc.).
-
-### 8. Convert preferences (save/restore position)
-
-**Before:**
-
-```javascript
-Guild.onRemove = function onRemove() {
-	_preferences.x = parseInt(this.ui.css('left'), 10);
-	_preferences.y = parseInt(this.ui.css('top'), 10);
-	_preferences.save();
-};
-```
-
-**After:**
-
-```javascript
-Guild.onRemove = function onRemove() {
-	_preferences.x = parseInt(this._host.style.left, 10);
-	_preferences.y = parseInt(this._host.style.top, 10);
-	_preferences.save();
-};
-```
-
-**NEVER use for preferences saving:**
-
-```javascript
-// BAD — returns 0,0 when hidden
-const rect = this._host.getBoundingClientRect();
-_preferences.x = Math.round(rect.left);
-```
-
-```javascript
-// BAD — position 0 becomes 100
-_preferences.x = parseInt(this._host.style.left, 10) || 100;
-```
-
-```javascript
-// BAD — proxy
-_preferences.x = parseInt(this.ui.css('left'), 10);
-```
-
-### 9. Register with UIManager
-
-Same as before:
-
-```javascript
-export default UIManager.addComponent(Clan);
-```
-
-`UIManager.addComponent()` accepts both `UIComponent` and `GUIComponent` instances.
+## 3. Geometry / CSS / Viewport Rules
+
+| Case                                        | Rule                                                                                                                             | Consequence                                            |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Fixed-size component                        | Put external size/position on `:host`; inner root fills or anchors inside it.                                                    | Host and content stay aligned.                         |
+| Auto-size component                         | Do not force inner root to `position:absolute`; use `position:relative` when it must size the host and anchor absolute children. | Host can derive size from content.                     |
+| Viewport component                          | `:host { width:100%; height:100%; top:0; left:0; }` and inner root fills host.                                                   | Full-screen overlays render correctly.                 |
+| Full-viewport CROSS overlay                 | `:host { pointer-events:none; }` and interactive children restore `pointer-events:auto`.                                         | Transparent overlay still allows targeted interaction. |
+| FREEZE modal                                | Do not disable host hit testing with `pointer-events:none`.                                                                      | Modal blocking remains effective.                      |
+| Host overflow with bottom-anchored children | Add `height:100%` to inner root.                                                                                                 | Bottom/right anchored children do not vanish.          |
+| Duplicate host/inner dimensions             | Do not mirror identical sizing on both host and inner root unless intentionally required.                                        | Unexpected scrollbars are avoided.                     |
+| Body/global selectors in component CSS      | `body`, `html`, and other outside-tree selectors belong in global CSS or `onAppend()`.                                           | Shadow CSS does not dead-end.                          |
+| Digit-start selectors                       | Escape native selectors that start with digits.                                                                                  | `querySelector`/`closest` do not throw.                |
+| Mobile-facing components                    | Prefer `vmin` for sizes and `%` for positions.                                                                                   | Responsive sizing stays stable.                        |
+| Tiling backgrounds                          | Do not force `background-repeat:no-repeat` on tiling frame textures.                                                             | Window-frame textures tile correctly.                  |
+| Toggleable backgrounds                      | Do not use `<ui-button>` for runtime-swapped `backgroundImage` states. Use `<button>` or `<div>`.                                | Visual state does not reset unexpectedly.              |
+| Cursor-recognized clickables                | Use recognized elements/classes (`button`, `a`, `input`, `label`, `.item-link`, `.draggable`, or `<ui-button>` where stable).    | Hand cursor appears correctly.                         |
+| Inline styles before move                   | If a node is moved outside shadow scope, apply required inline styles before removing it.                                        | Scoped styles are not lost.                            |
+| Touch handling                              | Set `touch-action` on `:host`; account for `visualViewport` when position/size depends on mobile viewport.                       | Touch interactions remain predictable.                 |
+| Snap cache                                  | If legacy drag/snap logic compares `offsetParent`, preserve jQuery-compatible resolution.                                        | GUIComponent participates in snap caches.              |
 
 ---
 
-## Additional Features
+## 4. Event / Input / DOM Rules
 
-### Clone
-
-Deep-clone a GUIComponent instance:
-
-```javascript
-const clone = Clan.clone();
-```
+| Trigger                     | Action                                                                               | Notes                                                                     |                  |                                 |
+| --------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ---------------- | ------------------------------- |
+| Internal DOM access         | Use `this._shadow.querySelector()` / `querySelectorAll()` or `_getRoot()`.           | Never use `document.querySelector()` for shadow content.                  |                  |                                 |
+| Singleton module access     | Use `\_getRoot() { return comp.\_shadow                                              |                                                                           | comp.\_host; }`. | Centralizes shadow-root lookup. |
+| jQuery events               | Replace with `addEventListener()`.                                                   | No jQuery return-value semantics.                                         |                  |                                 |
+| `return false`              | Replace with `preventDefault()` + `stopImmediatePropagation()`.                      | Native return values are ignored.                                         |                  |                                 |
+| Priority-sensitive handlers | Register with capture phase (`{ capture:true }`).                                    | Replaces jQuery queue hacks.                                              |                  |                                 |
+| Right-click logic           | Add `contextmenu` listener and block default.                                        | Browser menu is suppressed.                                               |                  |                                 |
+| Programmatic events         | Dispatch `new CustomEvent(name, { detail, bubbles:true })`.                          | Synthetic events carry payload explicitly.                                |                  |                                 |
+| Text with RO formatting     | Use `DB.formatMsgToHtml()` then `innerHTML`.                                         | Preserves color codes and markup.                                         |                  |                                 |
+| Plain text                  | Use `textContent`.                                                                   | No formatter overhead.                                                    |                  |                                 |
+| Visibility toggle           | Use explicit inline `display` values.                                                | Do not rely on `.show()` defaults.                                        |                  |                                 |
+| Visibility check            | Use `getComputedStyle(el).display !== 'none'` when inline state is insufficient.     | Visibility detection matches rendered state.                              |                  |                                 |
+| DOM presence check          | Use `element.isConnected`.                                                           | Shadow-safe replacement for `closest('body')` / `contains(document, el)`. |                  |                                 |
+| Async/server selector       | Null-guard before writing.                                                           | Missing nodes do not crash.                                               |                  |                                 |
+| Repeated matches            | Use `querySelectorAll(...).forEach(...)`.                                            | All matching nodes update.                                                |                  |                                 |
+| Overlay/tooltip positioning | Compute offsets from `getBoundingClientRect()` deltas.                               | Coordinates stay relative to the host/root.                               |                  |                                 |
+| Programmatic scroll changes | Call `_roScrollbarRestart()` if present.                                             | Custom scrollbar state resyncs immediately.                               |                  |                                 |
+| Dynamic `this` callbacks    | Keep `function()` when the caller uses `.call()` / `.apply()` / dynamic `this`.      | Arrow functions break canvas/asset callbacks.                             |                  |                                 |
+| Inputs inside shadow        | Set `captureKeyEvents = true` and guard `onKeyDown` with `shadowRoot.activeElement`. | Typing is not stolen by global key handlers.                              |                  |                                 |
+| Native style writes         | Use `Object.assign(el.style, {...})` or direct style properties.                     | Avoid jQuery `.css()` assumptions.                                        |                  |                                 |
 
 ---
 
-## Known Shadow DOM Pitfalls (already fixed)
-
-These issues were encountered during the first migration (Clan) and are documented here to explain the fixes and prevent regressions.
-
-### 1. jQuery `.show()` sets `display: block`, breaking flex/grid layouts
-
-**Bug**: jQuery's `.show()` sets `element.style.display = 'block'` regardless of the element's CSS `display` value. For elements that use `display: flex` (like the scrollbar), this breaks the layout.
-
-**Fix applied in `src/UI/Scrollbar.js`** (commit `7ce87bf9`):
-
-```javascript
-// WRONG
-$scrollbar.hide();
-$scrollbar.show();
-
-// CORRECT
-$scrollbar[0].style.display = 'none';
-$scrollbar[0].style.display = ''; // ← resets to CSS value (flex)
-```
-
-**RULE**: Never use jQuery `.show()`/`.hide()` on elements that may have non-block display. Use `element.style.display = ''` (empty string resets to the CSS-declared value) and `element.style.display = 'none'`.
-
-### 2. Global CSS does not penetrate Shadow DOM
-
-**Bug**: CSS rules in the global `<style>` tag (e.g., `.custom-cursor * { cursor: none !important; }` from CursorManager) do not affect elements inside Shadow DOM.
-
-**Fix applied in `src/UI/Common.css`** (commit `f4183351`):
-
-```css
-:host-context(.custom-cursor) * {
-	cursor: none !important;
-}
-```
-
-This rule is inside `Common.css` which is injected into every Shadow DOM. `:host-context(.custom-cursor)` checks if any ancestor of the shadow host has the class `custom-cursor` (set on `document.body` by CursorManager).
-
-**RULE**: Any global CSS that needs to affect Shadow DOM content must be added to `Common.css`.
-
-### 3. Scrollbar CSS injection into Shadow DOM
-
-**Bug**: The scrollbar CSS (`.ro-custom-scrollbar` styles) is injected into the global `<style>` tag by `Scrollbar.js setupStyles()`. These styles don't reach elements inside Shadow DOM.
-
-**Fix applied in `src/UI/Scrollbar.js`** (commit `b9d21673`):
-
-```javascript
-const shadowRoot = element.getRootNode();
-if (shadowRoot instanceof ShadowRoot && !shadowRoot.querySelector('style[data-scrollbar]')) {
-	const scrollbarStyle = document.createElement('style');
-	scrollbarStyle.setAttribute('data-scrollbar', '');
-	scrollbarStyle.textContent = ScrollBar._cssText;
-	shadowRoot.appendChild(scrollbarStyle);
-}
-```
-
-`ScrollBar.applyDOMScrollbar()` now auto-detects if the target element is inside a Shadow DOM and injects the scrollbar CSS into that shadow root. No action needed from the component author.
-
-### 4. `$element.closest('body')` fails inside Shadow DOM
-
-**Bug**: jQuery's `.closest('body')` traverses up the DOM tree but stops at the shadow boundary. For elements inside Shadow DOM, it always returns an empty set, causing the scrollbar update poller to stop immediately.
-
-**Fix applied in `src/UI/Scrollbar.js`** (commit `7ce87bf9`):
-
-```javascript
-// WRONG
-if (!$element.closest('body').length) { ... }
-
-// CORRECT
-if (!$element[0].isConnected) { ... }
-```
-
-`Element.isConnected` is a native property that returns `true` if the element is connected to the document, including through Shadow DOM.
-
-**RULE**: Never use jQuery `.closest('body')` or `jQuery.contains(document, element)` to check if an element is in the DOM. Use `element.isConnected` instead.
-
-### 5. Mouse events are retargeted across Shadow DOM boundaries
-
-**Bug**: When a `mouseover` event fires on an element inside Shadow DOM and bubbles to `document.body`, `e.target` is retargeted to the shadow host element. The CursorManager's `findClickableTarget(e.target)` never finds clickable elements (like `.ui-custom-scrollbar`, `ui-button`) inside the shadow.
-
-**Fix applied in `src/UI/GUIComponent.js`** (commit `f4183351`):
-
-```javascript
-_setupShadowCursorEvents() {
-    const container = this._container;
-    // Register mouseover/mouseout/mousedown/mouseup directly on the container
-    // INSIDE the shadow DOM, where e.target is the real element (no retargeting)
-    container.addEventListener('mouseover', e => {
-        if (e.target.closest && e.target.closest(CLICKABLE_SELECTOR)) {
-            // Change cursor to hand
-        }
-    });
-    // ... mouseout, mousedown, mouseup handlers
-}
-```
-
-This method is called automatically by `_setupMouseMode()`. No action needed from the component author.
-
-**RULE**: Event listeners that need to identify specific elements inside Shadow DOM must be registered INSIDE the shadow tree (on `this._container` or `this._shadow`), not on `document.body`.
-
-### 6. `offsetParent()` mismatch between jQuery and native DOM
-
-**Bug**: Legacy UIComponent's `draggable()` builds a snap cache and skips components whose `offsetParent` differs from the dragged component's `offsetParent`. jQuery's `.offsetParent()` walks up the tree and returns `document.documentElement` for elements whose parent chain is all `position: static`. Native `element.offsetParent` returns `document.body`. This mismatch causes legacy UIs to skip GUIComponent instances when building the snap cache.
-
-**Fix applied in `src/UI/GUIComponent.js`** (commit `1813e446`):
-
-```javascript
-offsetParent() {
-    let el = host.offsetParent || document.documentElement;
-    while (el && el !== document.documentElement && window.getComputedStyle(el).position === 'static') {
-        el = el.offsetParent;
-    }
-    el = el || document.documentElement;
-    return { length: el ? 1 : 0, 0: el };
-},
-```
-
-This mimics jQuery's `.offsetParent()` behavior. No action needed from the component author.
-
-### ~~7. `this.ui.css()` object syntax~~ (FIXED)
-
-Previously broken, now fixed. Both proxy syntaxes work:
-
-```javascript
-this.ui.css({ top: 100, left: 200 });
-this.ui.css('top', 100);
-```
-
-Prefer native DOM:
-
-```javascript
-this._host.style.top = '100px';
-this._host.style.left = '200px';
-```
-
-### ~~8. Keyboard input stolen from `<input>` / `<textarea>` inside Shadow DOM~~ (FIXED)
-
-**Bug**: When a GUIComponent contains `<input>`, `<select>`, or `<textarea>` elements inside its Shadow DOM, users cannot type in them — keystrokes are intercepted by other global `keydown` handlers (ChatBox battle mode, shortcut system, etc.).
-
-**Root cause**: Shadow DOM encapsulates focus. When an `<input>` inside a shadow root is focused:
-
-- `document.activeElement` returns the **shadow host** (`<div>`) — not the actual `<input>`
-- `event.target` on bubbled events is **retargeted** to the shadow host
-
-Other global handlers (e.g., ChatBox line 816–826, line 928–941) check `document.activeElement.tagName` or `event.target.tagName` to detect focused inputs. They see `DIV` instead of `INPUT`, so they consume the keystroke instead of letting it through.
-
-```
-document.activeElement          → <div#ChatRoomCreate>  (host)
-shadowRoot.activeElement        → <input name="title">  (real element)
-event.target                    → <div#ChatRoomCreate>  (retargeted)
-event.composedPath()[0]         → <input name="title">  (real element)
-```
-
-**Fix — two parts:**
-
-**Part 1: Register `onKeyDown` in the capture phase**
-
-The component's `onKeyDown` handler must run **before** all other `window.keydown` handlers. Set `captureKeyEvents = true` on the component instance. This makes `_bindKeyDown()` register the handler with `useCapture = true`, so it fires during the capture phase (before the bubble phase where other handlers listen).
-
-```javascript
-// In _bindKeyDown() — GUIComponent.js
-_bindKeyDown() {
-    if (!this.onKeyDown) return;
-    this._unbindKeyDown();
-    const handler = this.onKeyDown.bind(this);
-    this._keyHandler = event => {
-        if (handler(event) === false) {
-            event.preventDefault();
-        }
-    };
-    var useCapture = !!this.captureKeyEvents;
-    window.addEventListener('keydown', this._keyHandler, useCapture);
-}
-```
-
-**Part 2: Guard the `onKeyDown` handler**
-
-Inside the component's `onKeyDown`, check if an input element inside the shadow is focused. If so, call `stopImmediatePropagation()` to block all other handlers, and return `true` (NOT `false`) so the wrapper does not call `preventDefault()` — the browser must execute the default action (typing the character).
-
-Use `shadowRoot.activeElement` (not `document.activeElement`) to get the real focused element inside the shadow.
-
-```javascript
-ChatRoomCreate.onKeyDown = function onKeyDown(event) {
-	var shadow = this._shadow || this._host;
-	var focused = shadow.activeElement;
-
-	// If an input inside the shadow is focused, let the browser handle the keystroke
-	if (focused && focused.tagName && focused.tagName.match(/input|select|textarea/i)) {
-		// Still handle Enter/Escape for form submission/close
-		if (event.which === KEYS.ENTER) {
-			submitForm.call(this);
-			event.stopImmediatePropagation();
-			return false;
-		}
-		if (event.which === KEYS.ESCAPE || event.key === 'Escape') {
-			this.hide();
-			event.stopImmediatePropagation();
-			return false;
-		}
-		// Block other handlers from consuming the keystroke, but let the browser type it
-		event.stopImmediatePropagation();
-		return true; // ← CRITICAL: true, not false
-	}
-
-	// Normal key handling when no input is focused
-	// ...
-	return true;
-};
-```
-
-**Component setup:**
-
-```javascript
-ChatRoomCreate.captureKeyEvents = true; // ← capture phase
-```
-
-**Why `return true` is critical**: The `_bindKeyDown` wrapper calls `event.preventDefault()` when the handler returns `false`. For text inputs, `preventDefault()` on `keydown` blocks the character from being inserted. Returning `true` (or any non-`false` value) skips `preventDefault()`, allowing normal typing.
-
-**Why only some keys worked without the fix**: Keys like `z`, `x`, `c`, `v`, `b`, `n`, `m` are not mapped to any shortcut in the default `ShortCutControls.js`. All other keys (`a`–`y`, `0`–`9`, `F1`–`F12`) are consumed by the ChatBox battle mode handler (line 928–941) or the shortcut system before reaching the input.
-
-**RULE**: Any GUIComponent with `<input>`, `<select>`, or `<textarea>` inside its Shadow DOM **must** set `captureKeyEvents = true` and guard its `onKeyDown` with a `shadowRoot.activeElement` check. Without this, users will not be able to type in those fields.
-
-**Affected components**: ChatRoomCreate, ChatRoom, and any future GUIComponent with text input fields.
-
-And also update `_unbindKeyDown()` in `src/UI/GUIComponent.js` (line 424-430) — it already removes both normal and capture listeners, which is correct. But `_bindKeyDown()` (line 412-422) needs to be updated to check `this.captureKeyEvents`:
-
-```javascript
-_bindKeyDown() {
-    if (!this.onKeyDown) return;
-    this._unbindKeyDown();
-    const handler = this.onKeyDown.bind(this);
-    this._keyHandler = event => {
-        if (handler(event) === false) {
-            event.preventDefault();
-        }
-    };
-    var useCapture = !!this.captureKeyEvents;
-    window.addEventListener('keydown', this._keyHandler, useCapture);
-}
-```
-
-### 9. Arrow functions break `this`-dependent callbacks (e.g., `Texture.load`)
-
-When converting callbacks from `function()` to arrow functions, check whether the callback relies on dynamic `this` binding via `.call()` or `.apply()`.
-
-**Example**: `Texture.load()` in `src/Utils/Texture.js` calls `oncomplete.apply(canvas, args)`, setting `this` to the loaded canvas element. If you convert the callback to an arrow function, `this` captures the outer lexical scope instead of the canvas.
-
-```javascript
-// WRONG — arrow function ignores .apply(canvas), `this` is outer scope
-Client.loadFile(path, data => {
-	Texture.load(data, () => {
-		addResizedStatusIcon(this, index); // `this` is NOT the canvas!
-	});
-});
-
-// CORRECT — regular function receives `this` = canvas from .apply()
-Client.loadFile(path, data => {
-	Texture.load(data, function () {
-		addResizedStatusIcon(this, index); // `this` is the canvas ✓
-	});
-});
-```
-
-**RULE**: Keep callbacks as regular `function()` when the caller uses `.call()`, `.apply()`, or sets `this` dynamically. This pattern appears in `Texture.load`, `Client.loadFile` completions, and some event handlers. The outer callback (e.g., `Client.loadFile`'s callback) can safely be an arrow function if it doesn't use `this`.
-
-### 10. CSS `display: none` fallback trap when toggling visibility
-
-**Bug**: Elements inside Shadow DOM styled with `display: none` in CSS cannot be shown by setting `element.style.display = ''`. The empty string removes the inline style, causing the element to fall back to the CSS-declared `display: none` — so it stays hidden.
-
-This is different from Light DOM components where jQuery's `.show()` / `.hide()` set explicit inline values. In Shadow DOM with scoped CSS, the CSS `display: none` always wins when the inline style is cleared.
-
-```css
-/* WRONG — CSS declares display: none, inline '' just removes the override */
-.skill-level {
-	position: fixed;
-	display: none; /* ← elements start hidden */
-}
-```
-
-```javascript
-// WRONG — '' removes inline style, falls back to CSS display: none
-element.style.display = ''; // Still hidden!
-
-// CORRECT — use explicit 'block' to override CSS
-element.style.display = 'block'; // Visible ✓
-element.style.display = 'none'; // Hidden ✓
-```
-
-**Better approach**: Don't use CSS `display: none` for elements whose visibility is toggled at runtime. Set the initial `display: none` via inline style in `init()`, then toggle with explicit values:
-
-```css
-/* CORRECT — no display in CSS */
-.skill-level {
-	position: fixed;
-}
-```
-
-```javascript
-// init() — hide initially via inline style
-element.style.display = 'none';
-
-// onAppend() — show
-element.style.display = 'block';
-
-// onRemove() — hide
-element.style.display = 'none';
-```
-
-**RULE**: For elements toggled at runtime, manage `display` entirely through inline styles. Either use explicit values (`'block'`/`'none'`) or remove `display: none` from CSS and set the initial state in `init()`.
-
-### 11. `pointer-events: none` on `:host` is inherited by Shadow DOM children
-
-**Bug**: When `:host` has `pointer-events: none` (common for overlay/HUD components in CROSS mouse mode), all children inside the Shadow DOM inherit `pointer-events: none`. Unlike most CSS encapsulation in Shadow DOM, **inheritable CSS properties DO cross the shadow boundary** from host to children.
-
-This means children (e.g., canvas elements, interactive overlays) silently become invisible to mouse events. They won't receive `click`, `mousedown`, `mouseover`, etc.
-
-```css
-/* Host is transparent to mouse — correct for overlays */
-:host {
-	pointer-events: none;
-}
-
-/* WRONG — canvas inherits pointer-events: none from :host */
-.skill-level {
-	position: fixed;
-	/* no pointer-events override → inherits none → invisible to mouse */
-}
-
-/* CORRECT — explicitly opt children back in */
-.skill-level {
-	position: fixed;
-	pointer-events: auto; /* ← overrides inherited none */
-}
-```
-
-**When to use `pointer-events: auto`**: Add it to any child element that needs to participate in mouse event hit testing. For purely visual elements (like the skill level number following the cursor), `pointer-events: auto` is optional since event listeners on `window` still fire regardless. But if any system relies on `document.elementFromPoint()` or if the element itself has event listeners, it needs `pointer-events: auto`.
-
-**Other inheritable properties that cross Shadow DOM**: `color`, `font-*`, `visibility`, `cursor`, `direction`, `text-align`, `line-height`, `letter-spacing`, `word-spacing`, `white-space`, `user-select`. Check for unintended inheritance when the host sets any of these.
-
-**RULE**: When `:host` sets `pointer-events: none`, add `pointer-events: auto` to any child that needs mouse interaction. Review other inheritable properties that might leak from host to shadow children.
-
-### 12. jQuery event priority (`events.unshift`) → capture phase + explicit propagation control
-
-**Bug**: Some legacy UIComponents manipulate jQuery's internal event queue to ensure their handlers fire first:
-
-```javascript
-// BEFORE (UIComponent) — move handler to front of jQuery's internal queue
-jQuery(window).one('mousedown.targetselection', intersectEntities);
-events = jQuery._data(window, 'events').mousedown;
-events.unshift(events.pop());
-```
-
-This pattern has no native DOM equivalent. `addEventListener` order is determined by registration order, and you cannot reorder handlers.
-
-**Fix**: Use the **capture phase** (`addEventListener(event, handler, true)`) to guarantee the handler fires before all bubble-phase handlers. Capture phase runs top-down (window → document → ... → target) before the bubble phase runs bottom-up (target → ... → window). A capture handler on `window` fires before ANY other handler anywhere in the document.
-
-```javascript
-// AFTER (GUIComponent) — capture phase fires before all bubble handlers
-_mousedownHandler = event => {
-	intersectEntities(event);
-};
-window.addEventListener('mousedown', _mousedownHandler, true);
-
-// Cleanup must also specify capture: true
-window.removeEventListener('mousedown', _mousedownHandler, true);
-```
-
-**Also convert jQuery's `return false`**: In jQuery, returning `false` from an event handler calls both `event.stopPropagation()` and `event.preventDefault()`. In native DOM, the return value of an `addEventListener` callback is **ignored**. You must call these methods explicitly:
-
-```javascript
-// BEFORE (jQuery handler) — return false = stopPropagation + preventDefault
-function intersectEntities(event) {
-	event.stopImmediatePropagation();
-	// ... process ...
-	return false; // ← jQuery calls stopPropagation + preventDefault
-}
-
-// AFTER (native handler) — must be explicit
-function intersectEntities(event) {
-	event.stopImmediatePropagation();
-	event.preventDefault(); // ← must call explicitly, return value is ignored
-	// ... process ...
-}
-```
-
-**RULE**: Replace jQuery event queue manipulation (`events.unshift(events.pop())`) with capture-phase listeners. Replace `return false` with explicit `stopImmediatePropagation()` + `preventDefault()` calls.
-
-### 13. jQuery `.text()` override is lost — RO-style `^rrggbb` color codes rendered as literal text
-
-**Bug**: The legacy codebase overrides jQuery's `.text()` method in `Utils/jquery.js` to add RO-specific text processing. When a UIComponent calls `this.ui.find('.content').text(value)`, it is NOT using standard jQuery `.text()` — the override:
-
-1. **Sanitizes HTML** (whitelist: `<font>`, `<i>`, `<b>` — all other tags stripped)
-2. **Converts `^rrggbb` color codes** to `<span style="color:#rrggbb">`
-3. **Substitutes `^nItemID^NNN`** with the item's display name from DB
-4. **Converts `\n` to `<br/>`**
-5. Sets the result via `.html()` (innerHTML), not `.textContent`
-
-When migrating to GUIComponent, the natural replacement for `.text()` is `.textContent`. This strips ALL processing — color codes appear as literal `^FF0000` text, newlines are ignored, and HTML tags are escaped.
-
-**Affected components**: Any component that displays user-facing game text with `^rrggbb` color codes. Common examples: SkillDescription, NpcBox, Quest, ItemInfo, and any component using `DB.getSkillDescription()`, `DB.getMessage()`, or similar DB text that may contain color codes.
-
-**Fix**: Replicate the jQuery `.text()` override logic natively. Create a local `_formatROText()` helper:
-
-```javascript
-const _allowedTags = new Set(['font', 'i', 'b']);
-
-function _formatROText(value) {
-	const tmp = document.createElement('div');
-	tmp.innerHTML = String(value);
-
-	tmp.querySelectorAll('*').forEach(el => {
-		if (!_allowedTags.has(el.tagName.toLowerCase())) {
-			el.replaceWith(...el.childNodes);
-		}
-	});
-
-	let txt = tmp.innerHTML;
-
-	let result;
-	const colorReg = /\^([a-fA-F0-9]{6})/;
-	while ((result = colorReg.exec(txt))) {
-		txt = txt.replace(result[0], `<span style="color:#${result[1]}">`) + '</span>';
-	}
-
-	const itemReg = /\^nItemID\^(\d+)/g;
-	while ((result = itemReg.exec(txt))) {
-		txt = txt.replace(result[0], DB.getItemInfo(result[1]).identifiedDisplayName);
-	}
-
-	txt = txt.replace(/\n/g, '<br/>');
-
-	return txt;
-}
-```
-
-Then use `.innerHTML` instead of `.textContent`:
-
-```javascript
-// WRONG — loses color codes, newlines, item substitution
-content.textContent = DB.getSkillDescription(id);
-
-// CORRECT — preserves RO text formatting
-content.innerHTML = _formatROText(DB.getSkillDescription(id));
-```
-
-**How to detect**: Search for `.text(` calls in the legacy component. If the argument could contain `^rrggbb` codes (skill descriptions, NPC dialog, item info, quest text), you need `_formatROText()` + `.innerHTML`. If the argument is always plain text (e.g., a numeric value or a simple label), `.textContent` is fine.
-
-**RULE**: When replacing jQuery `.text(value)` with native DOM, check whether the value may contain RO-style formatting (`^rrggbb`, `^nItemID`, newlines). If it does, use `_formatROText()` + `.innerHTML`. If it's plain text, use `.textContent`.
-
-### 14. CSS selectors starting with a digit are invalid
-
-**Bug**: `element.closest('.3d')` throws `SyntaxError: '.3d' is not a valid selector`. CSS selectors cannot begin with a digit — this is a CSS specification rule, not specific to Shadow DOM, but it surfaces during migration when converting jQuery selectors (which are more lenient) to native `querySelector`/`closest`.
-
-**Fix**: Use the CSS Unicode escape sequence. The digit `3` is Unicode code point `U+0033`, so `.3d` becomes `.\33 d` (hex escape followed by a mandatory space delimiter):
-
-```javascript
-// WRONG — invalid CSS selector, throws SyntaxError
-el.closest('.3d');
-
-// CORRECT — CSS escape sequence for '3'
-el.closest('.\\33 d');
-```
-
-In source code, the backslash must be doubled (`\\33`) because JavaScript string literals consume one level of escaping. The space after `33` is part of the CSS escape syntax (it terminates the hex sequence) and is NOT part of the class name.
-
-**RULE**: When converting jQuery selectors to native `querySelector`/`closest`, check for class names starting with a digit. Use `\\xx ` (escaped hex code + space) to make them valid CSS selectors. Common in this codebase: `.3d` → `.\\33 d`.
-
-### 15. Body styles in component CSS are ignored inside Shadow DOM
-
-**Bug**: UIComponent injects CSS into a global `<style>` tag in `<head>`, so rules targeting `body` work:
-
-```css
-/* UIComponent CSS — works because it's in the global stylesheet */
-body {
-	background-color: #45484d;
-	margin: 0;
-	overflow: hidden;
-}
-```
-
-In GUIComponent, CSS is scoped inside the shadow root. A `body` rule inside Shadow DOM has no effect on `document.body` — it is silently ignored.
-
-**Fix**: Apply body styles programmatically in `onAppend()`:
-
-```javascript
-Viewer.onAppend = function onAppend() {
-	document.body.style.backgroundColor = '#45484d';
-	document.body.style.margin = '0';
-	document.body.style.overflow = 'hidden';
-};
-```
-
-Remove the `body { ... }` block from the component's CSS file — it does nothing inside Shadow DOM and is misleading.
-
-**RULE**: Any CSS rule targeting elements outside the shadow tree (`body`, `html`, or global classes) must be applied via JavaScript in `onAppend()` or moved to a global stylesheet. Shadow DOM CSS can only style elements within the shadow root.
-
-### 16. `:host` sizing for full-viewport components (viewers)
-
-**Bug**: The migration guide documents fixed-size components (`:host { width: 400px; height: 317px; }`). Full-viewport components like viewers need percentage-based sizing. Without `:host` dimensions, the shadow host is 0×0 — content renders but may not be visible or interactive.
-
-**Fix**: Use percentage dimensions with explicit positioning:
-
-```css
-:host {
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-}
-```
-
-The inner container should also fill the host:
-
-```css
-#ViewerName {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-}
-```
-
-**RULE**: Full-viewport components must set `:host { width: 100%; height: 100%; top: 0; left: 0; }`. Do not assume the host will auto-expand to fit its content — Shadow DOM hosts have no intrinsic size.
-
-### 17. Don't duplicate asset path constants across component base classes
-
-**Bug**: During the GUIComponent implementation, `INTERFACE_PATH` (the Korean-encoded texture path prefix) was copied from `UIComponent.js` into `GUIComponent.js` as a local constant. This creates a maintenance risk — if the path changes, both copies must be updated.
-
-**Fix**: Use `DBManager.INTERFACE_PATH` (the canonical source) instead of a local constant:
-
-```javascript
-// WRONG — duplicated constant in component base class
-const INTERFACE_PATH = 'data/texture/\xc0\xaf\xc0\xfa\xc0\xce\xc5\xcd\xc6\xe4\xc0\xcc\xbd\xba/';
-_Client?.loadFile(INTERFACE_PATH + background, ...);
-
-// CORRECT — reference the single source of truth in DBManager
-_Client?.loadFile(_DB.INTERFACE_PATH + background, ...);
-```
-
-**RULE**: Asset-related path constants belong in `DBManager`. When porting functionality that uses asset paths, import from `DBManager` rather than copying constants.
-
-### 18. jQuery `.show()` → native DOM for queried child elements
-
-**Bug**: UIComponent code like `Viewer.ui.find('.head').show()` uses jQuery's `.show()` to make child elements visible. When migrating, it's easy to miss these and leave dead jQuery calls or incorrectly replace them.
-
-**Fix**: Use `querySelector` on the shadow root and set `style.display` directly:
-
-```javascript
-// BEFORE (UIComponent — jQuery)
-Viewer.ui.find('.head').show();
-
-// AFTER (GUIComponent — native DOM)
-const root = _getRoot();
-root.querySelector('.head').style.display = 'block';
-```
-
-Use `'block'` (or the appropriate display value) to override CSS `display: none`. Use `''` (empty string) only if the element's CSS does NOT declare `display: none` (see pitfall #10).
-
-**RULE**: When converting jQuery `.show()`/`.hide()` on child elements found via `.find()`, replace with `querySelector` + explicit `style.display` assignment. Review what the element's CSS `display` value is to choose the correct override.
+## 5. Old → New Migration Patterns
+
+| Old Pattern                                         | New Pattern                                           | Rule                                         |
+| --------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------- |
+| `new UIComponent(name, html, css)`                  | `new GUIComponent(name, css)` + `render()`            | HTML belongs in `render()`.                  |
+| `this.ui.find(sel)`                                 | `this._shadow.querySelector(sel)`                     | Query inside shadow root.                    |
+| `this.ui.find(sel)[0]`                              | `this._shadow.querySelector(sel)`                     | Native DOM over jQuery proxy.                |
+| `document.querySelector(sel)`                       | `this._shadow.querySelector(sel)`                     | Shadow DOM isolation.                        |
+| `jQuery.click/mousedown/on`                         | `addEventListener()`                                  | Native events only.                          |
+| `return false`                                      | `e.preventDefault(); e.stopImmediatePropagation();`   | Behavior must be explicit.                   |
+| `jQuery.show()`                                     | `el.style.display = 'block'` or exact desired display | Do not assume block semantics.               |
+| `jQuery.hide()`                                     | `el.style.display = 'none'`                           | Runtime visibility is explicit.              |
+| `jQuery.text(v)` for RO text                        | `el.innerHTML = DB.formatMsgToHtml(v)`                | Preserve engine formatting.                  |
+| `jQuery.text(v)` for plain text                     | `el.textContent = v`                                  | Plain text only.                             |
+| `closest('body')` / `jQuery.contains(document, el)` | `el.isConnected`                                      | Shadow-safe DOM presence.                    |
+| jQuery event priority hacks                         | capture-phase listener                                | Use `{ capture:true }`.                      |
+| `jQuery.position()` / `offsetTop` overlay math      | `getBoundingClientRect()` diff                        | Correct coordinates.                         |
+| dynamic `.css({...})`                               | `Object.assign(el.style, {...})`                      | Native style mutation.                       |
+| `body { ... }` in component CSS                     | global CSS or `onAppend()`                            | Shadow CSS cannot style document body.       |
+| `querySelector()` for repeated targets              | `querySelectorAll().forEach(...)`                     | Multi-match updates.                         |
+| callback converted to arrow function                | keep `function()` when `this` is dynamic              | Preserve caller-controlled `this`.           |
+| selector/class starts with digit                    | CSS escape sequence                                   | Native selectors must be valid.              |
+| full-screen viewport overlay                        | `:host` sized to viewport; inner root fills host      | Host must be explicitly sized.               |
+| auto-size root with absolute children               | inner root `position:relative`                        | Host can size from content.                  |
+| runtime-swapped backgrounds                         | use `<button>` / `<div>`                              | `<ui-button>` overrides background behavior. |
+| legacy embedded component                           | migrate the child or use shadow-safe access           | UIComponent cannot query into shadow DOM.    |
+| programmatic event trigger                          | `CustomEvent(detail)`                                 | Payload is explicit.                         |
+| asset path constant                                 | `DBManager.INTERFACE_PATH`                            | Use canonical engine path.                   |
+| mobile touch handling                               | `touch-action` on `:host` + viewport-aware placement  | Touch remains stable.                        |
+| snap cache / offset parent                          | jQuery-compatible `offsetParent` behavior             | Legacy drag/snap code keeps working.         |
 
 ---
 
-## Reference: Clan Component (first GUIComponent migration)
+## 6. Failure Pattern Matrix
 
-### Files
-
-- `src/UI/Components/Clan/Clan.js` — Component logic
-- `src/UI/Components/Clan/Clan.html` — HTML template using `<ui-button>`, `<ui-text>`
-- `src/UI/Components/Clan/Clan.css` — Styles with `:host` for dimensions/position
-
-> **Note**: The Clan component was the first GUIComponent migration and still uses some `this.ui` proxy calls (`this.ui.hide()`, `this.ui.show()`, `this.ui.is(':visible')`). New components should use native DOM equivalents as described in this guide. But use proxy on `this.ui.hide()`, `this.ui.show()` because it calls fix overflow.
-
-### CSS Pattern
-
-```css
-:host {
-	width: 400px;
-	height: 317px;
-	top: 150px;
-	left: 150px;
-}
-
-#Clan {
-	position: absolute;
-	width: 400px;
-	height: 317px;
-}
-```
-
----
-
-## Reference: StatusIcons Component (dynamic-size, no fixed dimensions)
-
-### Files
-
-- `src/UI/Components/StatusIcons/StatusIcons.js` — Component logic (module-level singleton with `_getRoot()` helper)
-- `src/UI/Components/StatusIcons/StatusIcons.html` — Minimal template (`<div id="StatusIcons"></div>`)
-- `src/UI/Components/StatusIcons/StatusIcons.css` — Dynamic-size CSS pattern (no `position: absolute` on inner div)
-
-### Key Patterns
-
-- **No fixed dimensions on `:host`**: The host has no `width`/`height` — children are absolutely positioned and extend outward. `overflow: visible` on `:host` prevents clipping.
-- **No `position: absolute` on inner div**: The inner `#StatusIcons` is `display: block` only. `.state` children use `_host` as their containing block.
-- **`_getRoot()` helper**: Module-level functions use `_getRoot()` instead of `this._shadow` since they're not methods on the component instance.
-- **Mixed arrow/regular callbacks**: `Client.loadFile` callback is an arrow function, but `Texture.load` callback is a regular `function()` because it relies on `.apply(canvas)` for `this` binding.
-- **`null` HTML original**: The original UIComponent used `null` HTML and created its root in `init()`. The GUIComponent version uses a minimal `.html` template instead.
-
-### CSS Pattern
-
-```css
-:host {
-	top: 166px;
-	right: 20px;
-	overflow: visible;
-}
-
-#StatusIcons {
-	display: block;
-}
-```
+| Symptom                                 | Cause                                                                | Solution                                                                     | Rule                                             |
+| --------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------ |
+| Component renders but appears empty     | Query executed from `document`                                       | Query from shadow root                                                       | Shadow content is isolated.                      |
+| Element never becomes visible           | CSS `display:none` overrides runtime state                           | Use explicit inline display or remove the CSS-hidden default                 | Visibility is runtime-owned.                     |
+| Layout breaks after `.show()` migration | jQuery forced `block` display                                        | Restore the correct display mode                                             | Visible state is not always `block`.             |
+| Clicks never reach a control            | `pointer-events` inherited from host or listener scope is wrong      | Restore `pointer-events:auto` on interactive children and bind inside shadow | Host inheritance must be audited.                |
+| Browser context menu appears            | Missing `contextmenu` prevention                                     | Prevent default explicitly                                                   | Right-click handling is manual.                  |
+| Overlay misalignment                    | Offset calculations reference the wrong ancestor                     | Use bounding rectangles                                                      | Overlay math must be viewport-based.             |
+| Text formatting disappears              | Formatter pipeline was replaced by `textContent`                     | Use `DB.formatMsgToHtml()`                                                   | Preserve engine text semantics.                  |
+| Typing fails in inputs                  | Global keyboard handlers consume events                              | Capture key events + focus guard                                             | Input components require protection.             |
+| Scrollbar thumb desyncs                 | Programmatic scroll bypasses sync loop                               | Restart scrollbar sync                                                       | Scroll mutations require resync.                 |
+| Dragging stops working                  | Geometry stored on inner root instead of host                        | Move geometry to host                                                        | Host owns external positioning.                  |
+| Unexpected scrollbars                   | Host and inner dimensions conflict                                   | Remove duplicate sizing                                                      | Single geometry authority.                       |
+| Async DOM crash                         | Selector returned `null`                                             | Null-guard before mutation                                                   | Server data is untrusted.                        |
+| Only first duplicate updates            | `querySelector` used on repeated elements                            | Use `querySelectorAll`                                                       | Multi-match updates must be explicit.            |
+| Styles disappear after moving element   | Scoped CSS remained in shadow root                                   | Inline critical styles before move                                           | Shadow CSS is location-bound.                    |
+| Full-screen overlay ignores clicks      | FREEZE/CROSS handling conflicts with `pointer-events:none` placement | Allow host hit-testing where required                                        | Modal overlays must block interaction correctly. |
+| Auto-sized component collapses          | Inner root was removed from layout flow                              | Use relative positioning                                                     | Auto-sizing requires layout participation.       |
+| DOM presence false-negative             | `closest('body')` or similar body checks inside shadow               | Use `isConnected`                                                            | Shadow-safe presence checks are required.        |
+| Shadow click target undetected          | Listener ran outside the shadow tree                                 | Register listener inside the shadow/container                                | Retargeting hides the true target.               |
+| Dynamic `this` breaks                   | Arrow function captured lexical `this`                               | Use regular `function()`                                                     | Caller-controlled `this` must survive.           |
+| RO markup visible literally             | Formatter was skipped                                                | Use `DB.formatMsgToHtml()`                                                   | Preserve formatter pipeline.                     |
+| Global body styles vanish               | Styling was placed inside shadow CSS                                 | Apply in `onAppend()` or global stylesheet                                   | Shadow CSS cannot reach document body.           |
+| On-demand component never appears       | Hidden in `init()` and never explicitly shown                        | Do not hide on-demand components in `init()`                                 | Toggle-style and on-demand lifecycles differ.    |
+| Modal leaks world interaction           | Host hit testing disabled                                            | Keep host interactive for modal blocking                                     | FREEZE mode must trap interaction.               |
+| Legacy child unreachable                | Embedded UIComponent cannot see inside shadow                        | Migrate child or expose shadow-safe access                                   | UIComponent cannot query shadow DOM.             |
 
 ---
 
-## Reference: SkillTargetSelection Component (overlay, CROSS mouse mode, capture-phase events)
+## 7. Critical Failure Memories
 
-### Files
-
-- `src/UI/Components/SkillTargetSelection/SkillTargetSelection.js` — Component logic (module-level singleton with `_getRoot()` helper)
-- `src/UI/Components/SkillTargetSelection/SkillTargetSelection.html` — Minimal template (3 canvas elements)
-- `src/UI/Components/SkillTargetSelection/SkillTargetSelection.css` — Overlay CSS pattern (`:host` with `pointer-events: none`, children with `position: fixed`)
-
-### Key Patterns
-
-- **CROSS mouse mode**: The host has `pointer-events: none` and `overflow: visible`. Mouse events pass through to the 3D scene behind the UI.
-- **`pointer-events: auto` on children**: Canvas elements override inherited `pointer-events: none` from `:host` (see §11).
-- **`position: fixed` inside Shadow DOM**: Canvas elements use `position: fixed` for viewport-relative positioning, independent of the host's `position: absolute`. Works correctly as long as no ancestor has `transform`, `perspective`, or `filter`.
-- **Capture-phase mousedown**: Replaces jQuery queue reordering (`events.unshift(events.pop())`) with `addEventListener('mousedown', handler, true)` (see §12). Ensures skill targeting handler fires before MapControl.
-- **Inline visibility management**: Canvas visibility toggled via `style.display = 'block'` / `'none'` in JS, not via CSS `display: none` (see §10).
-- **`captureKeyEvents = true`**: Ensures ESCAPE key handler fires in capture phase, before other keydown handlers.
-- **`needFocus = false`**: Overlay does not steal focus from other components.
-- **Original appended canvases to `document.body`**: The legacy UIComponent created canvas elements dynamically and appended them directly to `document.body`. The GUIComponent version keeps them inside the Shadow DOM with `position: fixed` instead.
-
-### CSS Pattern
-
-```css
-:host {
-	top: 0;
-	left: 0;
-	overflow: visible;
-	pointer-events: none;
-}
-
-#SkillTargetSelection {
-	display: block;
-}
-
-.skill-level {
-	position: fixed;
-	left: 0;
-	top: 0;
-	z-index: 100;
-	pointer-events: auto;
-}
-```
+| Failure ID | Trigger                                    | Observed Damage                             | Preventive Rule                                                                 |
+| ---------- | ------------------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------- |
+| FM-001     | jQuery show/hide migration                 | Flex/grid layouts destroyed                 | Preserve original display mode.                                                 |
+| FM-002     | Global CSS assumption                      | Cursor, styling, or interaction regressions | Shadow-visible styles must live inside shadow/Common.css or global CSS.         |
+| FM-003     | `closest('body')` checks                   | Detached-state false negatives              | Use `isConnected`.                                                              |
+| FM-004     | Shadow event retargeting                   | Clickable elements become undetectable      | Register element-aware listeners inside shadow.                                 |
+| FM-005     | Arrowifying dynamic-`this` callbacks       | Asset loading and texture callbacks fail    | Keep `function()` where caller controls `this`.                                 |
+| FM-006     | CSS-hidden runtime elements                | Element never becomes visible               | Visibility must be inline-controlled.                                           |
+| FM-007     | Host `pointer-events:none`                 | Entire UI loses interaction                 | Restore interaction on children or avoid disabling host hit testing when modal. |
+| FM-008     | jQuery priority hacks removed              | Selection logic runs too late               | Use capture phase.                                                              |
+| FM-009     | jQuery text override removed               | RO markup exposed literally                 | Use `DB.formatMsgToHtml()`.                                                     |
+| FM-010     | Body CSS moved into shadow                 | Viewer/global layouts stop working          | Apply global styles outside shadow.                                             |
+| FM-011     | On-demand component hidden in `init()`     | Component never appears                     | Do not hide on-demand components in `init()`.                                   |
+| FM-012     | Missing `contextmenu` suppression          | Browser menu overrides game UI              | Block `contextmenu`.                                                            |
+| FM-013     | Server packet index mismatch               | Runtime exceptions                          | Null-guard dynamic selectors.                                                   |
+| FM-014     | `<ui-button>` used for mutable backgrounds | Visual state resets unexpectedly            | Use `<button>` or `<div>` for stateful visuals.                                 |
+| FM-015     | FREEZE overlay with `pointer-events:none`  | World interaction leaks through modal       | Modal hosts must receive events.                                                |
+| FM-016     | Legacy UIComponent embedded in shadow      | Child component cannot locate DOM           | Migrate child or use shadow-safe access.                                        |
 
 ---
 
-## Reference: SkillDescription Component (tooltip, dynamic position, RO text formatting)
+## 8. Lifecycle Rules
 
-### Files
-
-- `src/UI/Components/SkillDescription/SkillDescription.js` — Component logic (module-level singleton with `_getRoot()` helper)
-- `src/UI/Components/SkillDescription/SkillDescription.html` — Minimal template (close button + content div, uses `data-background`/`data-hover`)
-- `src/UI/Components/SkillDescription/SkillDescription.css` — Tooltip CSS pattern (no fixed width/height on `:host`)
-
-### Key Patterns
-
-- **No fixed dimensions on `:host`**: The component sizes to its content. Only `top`/`left` are set on `:host` as defaults — actual position is set dynamically in `setSkill()` relative to the mouse cursor.
-- **`_formatROText()` for RO text**: Skill descriptions contain `^rrggbb` color codes. Uses a local helper to sanitize HTML, convert color codes to `<span>` tags, substitute item IDs, and convert newlines (see §13).
-- **`data-background`/`data-hover` on HTML**: The close button uses legacy `data-*` attributes which are processed by `GUIComponent._processAllDataAttrs()` — no Custom Element conversion needed.
-- **Dynamic positioning via `getBoundingClientRect()`**: `setSkill()` measures the host's rendered size and positions it near the mouse, clamped to screen bounds.
-- **Removed `onAppend` jQuery event reordering**: The original used `jQuery._data(window, 'events').keydown.unshift()` — unnecessary with GUIComponent's built-in key handling.
-
-### CSS Pattern
-
-```css
-:host {
-	top: 0px;
-	left: 0px;
-}
-
-#SkillDescription {
-	position: absolute;
-	border-radius: 5px;
-	padding: 1px;
-	border: 1px solid #c5c5c5;
-}
-```
+| Phase          | Required Actions                                                                                                                                                                        | Forbidden Actions                                                                          |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Analysis       | Determine mouse mode, visibility strategy, keyboard requirements, overlay behavior, dynamic sizing, right-click usage, mobile touch behavior, snap-cache dependence, asset path source. | Starting migration before classification.                                                  |
+| Creation       | Create JS/CSS/HTML, implement `render()`, establish host ownership, import custom elements when needed.                                                                                 | Reusing `UIComponent` constructor patterns.                                                |
+| JS Migration   | Replace jQuery queries/events, add guards, preserve formatter behavior, audit callbacks using dynamic `this`, dispatch `CustomEvent` where needed.                                      | Using `document` queries, relying on `return false`, arrowifying dynamic-`this` callbacks. |
+| HTML Migration | Convert interactive patterns, validate cursor-recognized controls, preserve dynamic-state elements, keep legacy data-attrs only if framework processing supports them.                  | Using `<ui-button>` for runtime-swapped backgrounds.                                       |
+| CSS Migration  | Move external geometry to `:host`, verify sizing strategy, audit inheritance, define overlay behavior, use valid selectors, keep mobile sizing sane.                                    | Duplicating geometry across host and inner root.                                           |
+| `init()`       | Bind events once, initialize visibility, register drag behavior, establish one-time refs.                                                                                               | State restoration, repeated bindings.                                                      |
+| `onAppend()`   | Restore position/state, apply global side effects, sync runtime layout, manually fix overflow if native show logic is used.                                                             | Rebinding events.                                                                          |
+| `onRemove()`   | Save preferences, cleanup listeners, remove side effects.                                                                                                                               | Initial setup logic.                                                                       |
+| Verification   | Test visibility, drag, resize, overlays, keyboard, right-click, async updates, scrollbars, touch behavior, and snap behavior.                                                           | Trusting compile success as behavioral validation.                                         |
 
 ---
 
-## Quick Reference: What NOT to do
-
-| Don't                                                                    | Do instead                                                        | Why                                                                                                                 |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `jQuery(element).show()` inside shadow                                   | `element.style.display = ''`                                      | jQuery sets `display:block`, kills flex/grid                                                                        |
-| `$el.closest('body').length`                                             | `el.isConnected`                                                  | `.closest()` can't cross shadow boundary                                                                            |
-| `document.querySelector('.my-shadow-element')`                           | `this._shadow.querySelector(...)`                                 | Global queries can't see shadow content                                                                             |
-| `this.ui.find('.foo')`                                                   | `this._shadow.querySelector('.foo')`                              | Proxy is for interop only                                                                                           |
-| `this.ui.css('top', '100px')`                                            | `this._host.style.top = '100px'`                                  | Proxy is for interop only                                                                                           |
-| `this.ui.show()` / `this.ui.hide()`                                      | `this._host.style.display = ''` / `= 'none'`                      | Proxy is for interop only                                                                                           |
-| `this.ui.is(':visible')`                                                 | `this._host.style.display !== 'none'`                             | Proxy is for interop only                                                                                           |
-| Put `top`/`left` on inner element                                        | Put on `:host`                                                    | Breaks magnetic snap positioning                                                                                    |
-| Omit `:host { width; height }`                                           | Always declare dimensions on `:host`                              | Host collapses to 0×0, snap/overflow broken                                                                         |
-| Register click handlers on `document.body` expecting shadow targets      | Register inside `this._container`                                 | Event retargeting hides real target                                                                                 |
-| Bind events in `onAppend()`                                              | Bind in `init()`, restore state in `onAppend()`                   | `onAppend()` runs every time — duplicates bindings                                                                  |
-| Set `position`/`z-index` on `:host` in CSS                               | Omit — set automatically by JS                                    | Redundant, may conflict                                                                                             |
-| `onKeyDown` without `shadowRoot.activeElement` guard                     | Check `(this._shadow \|\| this._host).activeElement.tagName`      | `document.activeElement` returns host, not the real input inside shadow                                             |
-| `position: absolute` on inner div of dynamic-size component              | `display: block` (no positioning)                                 | Creates 0×0 containing block that breaks child positioning (see §4b)                                                |
-| `content.textContent = DB.getSkillDescription(id)`                       | `content.innerHTML = _formatROText(...)`                          | jQuery `.text()` is overridden to process `^rrggbb` colors, `^nItemID`, newlines (see §13)                          |
-| Convert all callbacks to arrow functions blindly                         | Keep `function()` when caller uses `.call()`/`.apply()`           | Arrow functions ignore dynamic `this` binding (see §9)                                                              |
-| CSS `display: none` + `element.style.display = ''` to show               | Use explicit `'block'`/`'none'`, or omit CSS `display: none`      | Empty string removes inline style, falls back to CSS `none` (see §10)                                               |
-| Assume children inherit only scoped styles from `:host`                  | Add `pointer-events: auto` on children if `:host` is `none`       | Inheritable CSS crosses shadow boundary: `pointer-events`, `color`, `cursor`, etc. (see §11)                        |
-| `jQuery._data(window,'events').unshift(events.pop())`                    | `addEventListener(event, handler, true)` (capture phase)          | Native DOM has no queue reordering; capture phase guarantees priority (see §12)                                     |
-| `return false` from native event handler                                 | Explicit `stopImmediatePropagation()` + `preventDefault()`        | Native handler return values are ignored; only jQuery interprets `return false` (see §12)                           |
-| Move element to `document.body` without inline styles                    | Apply inline styles before `element.remove()` (see §24)           | Elements outside shadow root lose all scoped CSS                                                                    |
-| Duplicate `width`/`height` on both `:host` and inner element             | Put dimensions on inner element only when content overflows (§15) | Conflicting size constraints create scrollbars in components with complex content                                   |
-| Check `event.isTrigger` in migrated handler                              | Remove the check entirely (see §21)                               | `isTrigger` is jQuery-only; native DOM events never set this property                                               |
-| Inner element without explicit height when host uses `overflow: hidden`  | Add `height: 100%` to inner element                               | `bottom`-anchored children (resize handles, footers) position relative to inner element, not clipped host (see §23) |
-| `this._host.style.display = 'none'` in `init()` for on-demand components | Do not hide — hide only in toggle-style components                | `append()` does not reset `display`; host stays permanently hidden (see §24)                                        |
-| `element.style.display` to find visible element                          | Also check `getComputedStyle(element).display` (see §22)          | Inline style may be empty while CSS sets `display: none`                                                            |
-
----
-
-### 19. Elements moved outside Shadow DOM lose all scoped CSS
-
-**Bug**: Some components remove an element from the shadow root and append it to `document.body` (e.g., a "level up" notification button that must float above all other UI). Once outside the shadow root, the element loses access to all scoped CSS defined in the component's `<style>` tag.
-
-**Example**: The SkillList level up button (`#lvlup_job`) is styled inside the Shadow DOM with `z-index`, `position`, `width`, `height`, `border`, `background-color`, `background-repeat`. When removed from the shadow root and appended to `document.body`, all these styles vanish — the button becomes an unstyled, invisible element.
-
-**Fix**: Apply all required CSS properties as inline styles BEFORE calling `element.remove()`:
-
-```javascript
-// In init(), before detaching the button from shadow root:
-const lvlupBtn = root.querySelector('#lvlup_job');
-if (lvlupBtn) {
-	_btnLevelUp = lvlupBtn;
-	// Copy scoped CSS properties to inline styles BEFORE removing
-	_btnLevelUp.style.zIndex = '51';
-	_btnLevelUp.style.position = 'absolute';
-	_btnLevelUp.style.right = '0px';
-	_btnLevelUp.style.bottom = '0px';
-	_btnLevelUp.style.width = '43px';
-	_btnLevelUp.style.height = '43px';
-	_btnLevelUp.style.border = 'none';
-	_btnLevelUp.style.backgroundColor = 'transparent';
-	_btnLevelUp.style.backgroundRepeat = 'no-repeat';
-	_btnLevelUp.remove(); // Now safe — inline styles travel with the element
-}
-```
-
-**How to detect**: Search for patterns where an element is queried inside the shadow root and later appended to `document.body`, `document.documentElement`, or any element outside the shadow tree. Common indicators:
-
-- `element.remove()` followed by `document.body.appendChild(element)`
-- Elements that need to float above all UI (notification buttons, modal overlays, tooltips anchored to screen position)
-
-**RULE**: When moving an element from inside Shadow DOM to outside (e.g., `document.body`), copy ALL required CSS properties to inline styles before calling `remove()`. Inline styles travel with the element; scoped CSS does not.
-
-### 20. `:host` dimension conflicts causing scrollbars
-
-**Bug**: When both `:host` and the inner element (e.g., `#Guild`) declare the same `width` and `height`, the dual constraint can cause scrollbars. This happens when the inner element's content (including borders, padding, or child elements) extends even slightly beyond the host bounds.
-
-**Example**: Guild component had:
-
-```css
-/* CAUSED SCROLLBAR */
-:host {
-	top: 100px;
-	left: 100px;
-	width: 400px;
-	height: 317px;
-}
-
-#Guild {
-	position: absolute;
-	width: 400px;
-	height: 317px;
-}
-```
-
-The inner `#Guild` with its borders and tab content slightly exceeded the host's 400×317 bounds, creating a scrollbar on the host element.
-
-**Fix**: For components where the inner element's content can vary (tab systems, dynamic forms, etc.), omit `width`/`height` from `:host` and let only the inner element define them:
-
-```css
-/* FIXED — no scrollbar */
-:host {
-	top: 100px;
-	left: 100px;
-}
-
-#Guild {
-	position: absolute;
-	width: 400px;
-	height: 317px;
-}
-```
-
-**When to apply this vs §4a**: §4a says `:host` MUST define `width`/`height` for `getBoundingClientRect()`, magnetic snap, and overflow checks. This is correct for most components. However, if you observe scrollbars after migration:
-
-1. Check if both `:host` and the inner element have identical dimensions
-2. If so, try removing dimensions from `:host` and test magnetic snap / overflow
-3. If snap/overflow still works correctly (the inner `position: absolute` element sizes the host implicitly), keep dimensions off `:host`
-4. If snap/overflow breaks, add `overflow: hidden` to `:host` instead
-
-**Affected components**: Guild (6 tabs with varying content), and potentially any component with borders, padding, or dynamic content that can slightly exceed nominal dimensions.
-
-**RULE**: After migrating, visually test the component. If scrollbars appear inside the window, check for duplicate dimensions between `:host` and the inner element. Remove `:host` dimensions or add `overflow: hidden` as needed.
-
-### 21. jQuery `event.isTrigger` has no native DOM equivalent
-
-**Bug**: Some legacy UIComponent event handlers check `event.isTrigger` to distinguish between real user events and programmatically triggered events (via jQuery's `.trigger()`). In native DOM, `event.isTrigger` is always `undefined`, so guards like `if (!event.isTrigger)` always evaluate to `true`.
-
-```javascript
-// BEFORE (UIComponent) — jQuery sets isTrigger on programmatic events
-tabButton.addEventListener('click', function (event) {
-	if (!event.isTrigger) {
-		// Only run for real clicks, not .trigger('click')
-		requestTabData();
-	}
-});
-
-// AFTER (GUIComponent) — isTrigger is always undefined, guard always passes
-// Remove the guard entirely:
-tabButton.addEventListener('click', event => {
-	requestTabData();
-});
-```
-
-**How to detect**: Search for `isTrigger` in the legacy component code. If found, evaluate whether the guard is needed:
-
-- If the code uses `jQuery.trigger()` to programmatically fire events, consider whether the native equivalent (`dispatchEvent`) needs similar discrimination. If so, use a custom property on the event: `new CustomEvent('click', { detail: { programmatic: true } })`.
-- If the guard was just defensive and the handler works fine without it, remove it.
-
-**RULE**: Remove `event.isTrigger` checks during migration. If programmatic vs real event distinction is genuinely needed, use `CustomEvent` with a `detail` property instead.
-
-### 22. Finding visible elements requires `getComputedStyle()`, not just inline style checks
-
-**Bug**: When using §10's pattern (explicit `display: 'block'` / `'none'` for toggling), code that searches for the "currently visible" element by checking `element.style.display` may miss elements whose visibility is controlled by CSS rules rather than inline styles.
-
-**Example**: Guild's `onValidate()` needs to find which tab content is currently visible. After tab switching sets `style.display = 'block'` on the active tab and `style.display = 'none'` on others, the first tab (shown on initial load) may not have an inline `display` style at all — its visibility comes from CSS.
-
-```javascript
-// WRONG — misses elements visible via CSS (no inline style set)
-const visible = Array.from(root.querySelectorAll('.content')).find(el => el.style.display !== 'none');
-
-// CORRECT — check both inline style AND computed style
-const visible = Array.from(root.querySelectorAll('.content')).find(el => {
-	const d = el.style.display;
-	return d !== 'none' && getComputedStyle(el).display !== 'none';
-});
-```
-
-**RULE**: When searching for visible/hidden elements in Shadow DOM, use `getComputedStyle(element).display` as a fallback. Inline `style.display` only reflects explicitly set values, not CSS-declared ones.
-
-### 23. Inner element without `height: 100%` breaks `bottom`-anchored children when host clips with `overflow: hidden`
-
-**Bug**: In UIComponent, the root element (e.g., `#ShortCut`) had its height set directly via `this.ui.css('height', ...)`. Children using `position: absolute; bottom: 1px` were positioned relative to that same element's bottom. In GUIComponent, the host controls height via `this._host.style.height`, and `overflow: hidden` on `:host` clips content. But the inner element (e.g., `#ShortCut`) has no height constraint — it expands to fit all its children. A child anchored with `bottom: 1px` is positioned relative to the inner element's full height, not the host's clipped height, so it appears only when all content is visible.
-
-**Example**: ShortCut's resize handle uses `position: absolute; bottom: 1px; right: 1px` inside `#ShortCut`. The host height is set dynamically (e.g., `34px` for 1 row, `136px` for all 4). Without a height constraint on `#ShortCut`, the resize handle sits at the bottom of all 4 rows (~136px), invisible when the host clips to 1–3 rows.
-
-```css
-/* BROKEN — resize button invisible when fewer than 4 rows shown */
-:host {
-	width: 280px;
-	overflow: hidden; /* clips to host height */
-}
-#ShortCut {
-	position: absolute;
-	width: 280px;
-	/* no height — expands to all 4 rows */
-}
-
-/* FIXED — inner element tracks host height */
-:host {
-	width: 280px;
-	overflow: hidden;
-}
-#ShortCut {
-	position: absolute;
-	width: 280px;
-	height: 100%; /* matches host height, bottom-anchored children stay visible */
-}
-```
-
-**How to detect**: Search for children with `bottom: Npx` (resize handles, footers, status bars) inside the inner element. If the host uses `overflow: hidden` for dynamic height clipping, the inner element needs `height: 100%` to keep those children in view.
-
-**RULE**: When `:host` uses `overflow: hidden` to clip content and the inner element contains `bottom`-anchored children, add `height: 100%` to the inner element so it tracks the host's dynamic height.
-
----
-
-### 24. `init()` hiding breaks on-demand components
-
-**Bug**: Components that are appended on demand (e.g., Announce — appended only when a server announcement arrives) should NOT set `this._host.style.display = 'none'` in `init()`. GUIComponent's `append()` method does `parent.appendChild(this._host)` but does **not** reset `display`. The host stays permanently hidden even after `append()` is called.
-
-This differs from toggle-style components (e.g., Clan, Inventory) that start hidden and are shown via `toggle()` or `this.ui.show()`. Those components correctly hide in `init()` because `toggle()`/`show()` explicitly sets `display = ''`.
-
-```javascript
-// WRONG — on-demand component hidden permanently
-Announce.init = function init() {
-	const root = _getRoot();
-	this.canvas = root.querySelector('canvas');
-	this.ctx = this.canvas.getContext('2d');
-	this._host.style.display = 'none'; // ← BUG: append() won't undo this
-};
-
-// CORRECT — no hiding for on-demand components
-Announce.init = function init() {
-	const root = _getRoot();
-	this.canvas = root.querySelector('canvas');
-	this.ctx = this.canvas.getContext('2d');
-};
-```
-
-**How to detect**: Check how the component is used in the engine code. If the pattern is `Component.append()` → `Component.set(data)` (the component is added to the DOM only when needed), it is on-demand. Do not hide it in `init()`. If the pattern is `Component.append()` at startup and then `Component.toggle()` / `Component.show()` / `Component.hide()` to control visibility, it is toggle-style and hiding in `init()` is correct.
-
-**Also watch for the inner div**: If the inner `#ComponentName` div has `position: absolute` in CSS but the component has no fixed dimensions on `:host`, the host element collapses to 0×0 (since the absolutely-positioned inner content is out of flow). For on-demand overlay components without fixed dimensions, remove `position: absolute` from the inner div and let the shadow content size the host naturally.
-
-**RULE**: Only hide in `init()` for toggle-style components whose `show()`/`toggle()` explicitly sets `display`. On-demand components (appended only when needed, never toggled) must NOT hide in `init()`.
-
----
-
-## Reference: Guild Component (tabbed window, 6 content sections)
-
-### Files
-
-- `src/UI/Components/Guild/Guild.js` — Component logic (~1375 lines, 6 tabs: Info, Members, Positions, Skills, History, Notice)
-- `src/UI/Components/Guild/Guild.html` — HTML template with tab buttons and content sections
-- `src/UI/Components/Guild/Guild.css` — Styles with `:host` for position only (no dimensions — see §15)
-
-### Key Patterns
-
-- **Tab switching with `display: 'block'`/`'none'`**: CSS sets `display: none` on non-default content sections. Tab switching uses explicit `display = 'block'` to override CSS (see §10). Default visible tab has no inline style.
-- **`onValidate()` uses `getComputedStyle()`**: Finds the visible content section using both inline and computed display checks (see §22).
-- **No `event.isTrigger`**: Removed jQuery-only guard from tab click handler (see §21).
-- **No dimensions on `:host`**: Removed to fix scrollbar caused by dual-constraint with inner `#Guild` element (see §20).
-- **Entity rendering in member list**: Uses `Renderer.render()` callback to draw member face sprites on canvas.
-- **Access control via bitfield**: Guild tab access controlled by `_guildAccess & AccessTypeBit[tab]`.
-
-### CSS Pattern
-
-```css
-:host {
-	top: 100px;
-	left: 100px;
-}
-
-#Guild {
-	position: absolute;
-	width: 400px;
-	height: 317px;
-}
-```
-
----
-
-## Reference: SkillList / SkillListV0 Components (dual-view skill window)
-
-### Files
-
-- `src/UI/Components/SkillList/SkillList.js` — Version router (wraps SkillList + SkillListV0 via UIVersionManager)
-- `src/UI/Components/SkillList/SkillList/SkillList.js` — Main skill window (~1293 lines, post-2009 version)
-- `src/UI/Components/SkillList/SkillList/SkillList.html` — HTML template with mini/big view containers
-- `src/UI/Components/SkillList/SkillList/SkillList.css` — Styles (no dimensions on `:host`)
-- `src/UI/Components/SkillList/SkillListV0/SkillListV0.js` — Pre-2009 variant (~995 lines)
-- `src/UI/Components/SkillList/SkillListV0/SkillListV0.html` — HTML template
-- `src/UI/Components/SkillList/SkillListV0/SkillListV0.css` — Styles
-
-### Key Patterns
-
-- **Level up button moved outside Shadow DOM**: `_btnLevelUp` is styled inside shadow CSS, but removed from shadow root and appended to `document.body` for global visibility. All CSS properties are applied as inline styles before `remove()` (see §24).
-- **Dual-view system**: Mini view (table-based) and big/grid view (positional grid). The `resize()` function toggles between them and must use `display = 'block'` for footer buttons (see §10).
-- **Remember-choice allocation**: Players allocate multiple skill points before applying. Footer Apply/Reset buttons shown with explicit `display = 'block'`.
-- **Skill dependency tree**: Recursive dependency calculation for job-based skill progression.
-- **No dimensions on `:host`**: Both SkillList and SkillListV0 dynamically resize based on skill count; dimensions set on inner element only.
-- **Version routing**: `SkillList.js` wrapper uses `UIVersionManager` to select between SkillList (≥2009-06-01) and SkillListV0 (older).
-
-### CSS Pattern
-
-```css
-:host {
-	top: 100px;
-	left: 100px;
-}
-
-#SkillList {
-	position: absolute;
-	border-radius: 5px;
-	background: white;
-}
-```
-
----
-
-## Reference: SkillListMH Component (factory pattern, dual instances)
-
-### Files
-
-- `src/UI/Components/SkillListMH/SkillListMH.js` — Factory-based component (~575 lines, creates Homunculus + Mercenary instances)
-- `src/UI/Components/SkillListMH/SkillListMH.html` — Shared HTML template
-- `src/UI/Components/SkillListMH/SkillListMH.css` — Shared styles
-
-### Key Patterns
-
-- **Factory pattern**: A `createSkillListMH(type)` function creates separate GUIComponent instances (`SkillListHOM` and `SkillListMER`) from the same template/CSS. Each has its own preferences, state, and lifecycle.
-- **Shared CSS via class selector**: Uses `.SkillListMH` instead of `#SkillListMH` since two instances share the same CSS — IDs would conflict.
-- **Resize via mouse tracking**: Extend button uses `Mouse.screen.x/y` relative to host position. The resize loop runs on `Renderer.render()` callbacks.
-- **Drag-to-shortcut**: Skills can be dragged to the shortcut bar. The drag data uses `from: 'SkillListMH'` identifier that `ShortCut.js` recognizes.
-- **No dimensions on `:host`**: The window is dynamically resizable; only position is set on `:host`.
-
-### CSS Pattern
-
-```css
-:host {
-	top: 100px;
-	left: 100px;
-}
-
-.SkillListMH {
-	position: absolute;
-	border-radius: 5px;
-	background: white;
-}
-```
-
----
-
-## Reference: ShortCut / ShortCuts Components (hotkey bar + macro panel)
-
-### Files
-
-- `src/UI/Components/ShortCut/ShortCut.js` — Hotkey bar component (~680 lines, 4×9 slots for skills/items)
-- `src/UI/Components/ShortCut/ShortCut.html` — 4 rows of 9 slot containers with `data-background` styling
-- `src/UI/Components/ShortCut/ShortCut.css` — `:host` with `overflow: hidden` for dynamic row clipping, `#ShortCut` with `height: 100%`
-- `src/UI/Components/ShortCuts/ShortCuts.js` — Macro panel component (~460 lines, 10 text inputs + emoticons)
-- `src/UI/Components/ShortCuts/ShortCuts.html` — Titlebar, macro inputs, emoticons button with `data-background`/`data-hover`
-- `src/UI/Components/ShortCuts/ShortCuts.css` — `:host` with position only (no dimensions — see §15)
-
-### Key Patterns
-
-- **Dynamic height clipping with `overflow: hidden`**: ShortCut shows 1–4 rows controlled by `this._host.style.height`. The `:host` uses `overflow: hidden` to clip rows; inner `#ShortCut` uses `height: 100%` to keep the resize handle visible (see §23).
-- **Event delegation in Shadow DOM**: Delegated handlers use `e.target.closest('.icon')` and `e.target.closest('.container')` instead of jQuery's `.on(selector, handler)` pattern.
-- **Native drag-and-drop**: Uses `event.dataTransfer` directly (not `event.originalEvent.dataTransfer` as in jQuery). `dragover` must call `preventDefault()` to allow drops.
-- **`captureKeyEvents` for text inputs**: ShortCuts sets `captureKeyEvents = true` and implements `onKeyDown` to guard against global shortcut handlers stealing keystrokes from macro text inputs (see §8).
-- **Tooltip inside Shadow DOM**: ShortCut's tooltip uses `position: fixed` inside the shadow tree. Since `position: fixed` positions relative to the viewport (not the `overflow: hidden` host), the tooltip is not clipped.
-- **No dimensions on `:host` for ShortCuts**: Macro panel has static dimensions on `#ShortCuts` only, avoiding scrollbar conflicts (see §20).
-
-### CSS Patterns
-
-```css
-/* ShortCut — dynamic-height with overflow clipping */
-:host {
-	width: 280px;
-	top: 0px;
-	left: 480px;
-	overflow: hidden;
-}
-#ShortCut {
-	position: absolute;
-	width: 280px;
-	height: 100%;
-}
-
-/* ShortCuts — position only on :host */
-:host {
-	top: 172px;
-	left: 0px;
-}
-#ShortCuts {
-	position: absolute;
-	width: 380px;
-	height: 270px;
-}
-```
-
----
-
-## Reference: Announce Component (canvas-based, on-demand overlay)
-
-### Files
-
-- `src/UI/Components/Announce/Announce.js` — Component logic (canvas-based text overlay)
-- `src/UI/Components/Announce/Announce.html` — Minimal template (`<div id="Announce"><canvas></canvas></div>`)
-- `src/UI/Components/Announce/Announce.css` — Overlay CSS (no fixed dimensions on `:host`)
-
-### Key Patterns
-
-- **On-demand append**: Engine code calls `Announce.append()` then `Announce.set(text, color, options)`. The component is NOT permanently in the DOM — it is appended only when an announcement arrives and removed after a timer expires. Do NOT hide in `init()` (see §24).
-- **Canvas-based rendering**: Text is drawn on a `<canvas>` element via `CanvasRenderingContext2D`. The canvas dimensions are set dynamically in `set()` based on text content.
-- **CROSS mouse mode**: The overlay is transparent to mouse events (`mouseMode = GUIComponent.MouseMode.CROSS`). Players can click through the announcement.
-- **`needFocus = false`**: The announcement does not steal focus from other UI components.
-- **No fixed dimensions on `:host`**: The host auto-sizes from the canvas content. Only `top` and `left` are set on `:host`. The inner `#Announce` div has no `position: absolute` — it is in normal flow so the host sizes correctly.
-- **Dynamic host positioning**: `set()` updates `this._host.style.left` to center the announcement horizontally based on canvas width and renderer width.
-- **Original had no HTML template**: The legacy UIComponent created its canvas via `document.createElement('canvas')` and set `this.ui = jQuery(this.canvas)`. The GUIComponent version uses a minimal `.html` template with the canvas pre-declared.
-
-### CSS Pattern
-
-```css
-:host {
-	top: 40px;
-	left: 0px;
-}
-
-#Announce canvas {
-	display: block;
-}
-```
-
----
-
-## Reference: BasicInfo Component (UIVersionManager multi-variant)
-
-### Files
-
-- `src/UI/Components/BasicInfo/BasicInfo.js` — Version router (wraps 5 variants via UIVersionManager)
-- `src/UI/Components/BasicInfo/BasicInfo/` — Default post-2009 variant (220×135)
-- `src/UI/Components/BasicInfo/BasicInfoV0/` — Pre-2009 variant (280×120)
-- `src/UI/Components/BasicInfo/BasicInfoV3/` — 2016+ variant with Achievement, Bank, Navigation, Rodex
-- `src/UI/Components/BasicInfo/BasicInfoV4/` — 2018+ variant with CheckAttendance
-- `src/UI/Components/BasicInfo/BasicInfoV5/` — 2020+/4th job variant with AP bar (220×150)
-
-### Key Patterns
-
-- **UIVersionManager routing**: The wrapper `BasicInfo.js` uses `UIVersionManager.getUIController()` with date ranges and job-class overrides. It requires NO changes during migration — only the individual variant JS/CSS files need conversion.
-- **Consistent variant structure**: All 5 variants follow the same migration pattern: `GUIComponent` constructor, `render()` method, `_getRoot()` helper, `init()` for event binding, `onAppend()` for position restore, `onRemove()` for preferences save.
-- **Small/large toggle**: All variants support a compact "small" mode and expanded "large" mode via CSS classes. `toggleMode()` uses `classList.toggle('small')` / `classList.toggle('large')` on the inner div.
-- **Button panel toggle**: A collapsible button toolbar below the main info window. Visibility tracked in preferences.
-- **HP/SP/AP bar rendering**: Bars are built from three `data-background` images (left cap, middle fill, right cap). The middle section's width and right cap's position are calculated from the percentage. V5 adds an AP bar for 4th job classes.
-- **Version-specific button sets**: Each variant binds different UI toggles depending on available features (e.g., V3+ adds Rodex, Achievement, Navigation; V4+ adds CheckAttendance with PACKETVER check).
-- **Hidden buttons**: Some button IDs (battle, replay, tipbox, shortcut, agency) are hidden in `onAppend()` as they are not implemented in the web client.
-
-### CSS Pattern
-
-```css
-/* Fixed-size variant (BasicInfo, V0, V3, V4) */
-:host {
-	width: 220px;
-	height: 135px;
-	top: 0px;
-	left: 0px;
-}
-
-#basicinfo {
-	position: absolute;
-	width: 220px;
-	height: 135px;
-}
-
-/* Small mode reduces height */
-#basicinfo.small {
-	height: 53px;
-}
-```
+## 9. Pre-Commit Validation
+
+- shadow root renders
+- no `document.querySelector(...)` for internal nodes
+- no jQuery `.show()/.hide()/.text()/.closest('body')` assumptions remain
+- host sizing strategy matches component type
+- overlay coordinates verified visually
+- keyboard input verified if form fields exist
+- right-click verified if component handles mouse button 2/3
+- async callbacks use null-guard / multi-match guard where needed
+- moved-outside-shadow nodes restyled explicitly
+- custom scrollbar resync verified after programmatic scroll
+- mobile touch behavior verified on host
+- snap/drag behavior verified against legacy offset rules

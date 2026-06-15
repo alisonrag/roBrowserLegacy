@@ -54,6 +54,11 @@ let _rowCount = 0;
 let _lastServerHotkeys = null;
 
 /**
+ * Cache for active animation frames
+ */
+const _activeAnimations = new Map();
+
+/**
  * @var {Preference} structure to save informations about shortcut
  */
 const _preferences = Preferences.get(
@@ -71,17 +76,10 @@ const _preferences = Preferences.get(
 );
 
 /**
- * Helper to get the shadow root
- */
-function _getRoot() {
-	return ShortCut._shadow || ShortCut._host;
-}
-
-/**
  * Initialize UI
  */
 ShortCut.init = function init() {
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 
 	const resizeBtn = root.querySelector('.resize');
 	if (resizeBtn) {
@@ -183,11 +181,17 @@ ShortCut.onAppend = function onAppend() {
  */
 ShortCut.onRemove = function onRemove() {
 	// Hide tooltip
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 	const tooltip = root.querySelector('.shortcut-tooltip');
 	if (tooltip) {
 		tooltip.classList.remove('show');
 	}
+
+	// Cancels all active animation loops defensively to prevent leaks in unattached elements
+	for (const [index, animationId] of _activeAnimations.entries()) {
+		cancelAnimationFrame(animationId);
+	}
+	_activeAnimations.clear();
 
 	// Save preferences
 	_preferences.y = parseInt(this._host.style.top, 10);
@@ -205,8 +209,14 @@ ShortCut.onRemove = function onRemove() {
  * Used only from MapEngine when exiting the game
  */
 ShortCut.clean = function clean() {
+	// Cancels all active animation loops immediately to prevent post-logout TypeError
+	for (const [index, animationId] of _activeAnimations.entries()) {
+		cancelAnimationFrame(animationId);
+	}
+	_activeAnimations.clear();
+
 	_list.length = 0;
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 	root.querySelectorAll('.container').forEach(el => {
 		el.innerHTML = '';
 	});
@@ -267,7 +277,7 @@ ShortCut.getSkillById = function getSkillById(id) {
  */
 ShortCut.setList = function setList(list) {
 	let skill;
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 
 	root.querySelectorAll('.container').forEach(el => {
 		el.innerHTML = '';
@@ -300,7 +310,7 @@ ShortCut.setList = function setList(list) {
  * Update tooltip for empty slots with hotkey only
  */
 function updateEmptySlotTooltips() {
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 	const containers = root.querySelectorAll('.container');
 
 	for (let i = 0; i < containers.length; ++i) {
@@ -319,7 +329,7 @@ function updateEmptySlotTooltips() {
  * Called when hotkey settings change
  */
 ShortCut.updateAllTooltips = function updateAllTooltips() {
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 
 	for (let i = 0, size = _list.length; i < size; ++i) {
 		const container = root.querySelector(`.container[data-index="${i}"]`);
@@ -444,7 +454,7 @@ function onContainerMouseEnter(event) {
 	const tooltipText = container.getAttribute('data-tooltip');
 
 	if (tooltipText) {
-		const root = _getRoot();
+		const root = ShortCut.getRoot();
 		const tooltip = root.querySelector('.shortcut-tooltip');
 		const host = ShortCut._host;
 		const hostRect = host.getBoundingClientRect();
@@ -479,7 +489,7 @@ function onContainerMouseEnter(event) {
  * Hide fixed tooltip on container leave
  */
 function onContainerMouseLeave() {
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 	const tooltip = root.querySelector('.shortcut-tooltip');
 	if (tooltip) {
 		tooltip.classList.remove('show');
@@ -548,7 +558,7 @@ function onResize(event) {
  */
 ShortCut.addElement = function addElement(index, isSkill, ID, count) {
 	let file, name;
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 	const ui = root.querySelector(`.container[data-index="${index}"]`);
 	if (!ui) return;
 	ui.innerHTML = '';
@@ -617,13 +627,18 @@ ShortCut.addElement = function addElement(index, isSkill, ID, count) {
  * @param {number} delay in ms
  */
 function setDelayOnIndex(index, delay) {
+	// Safety validation to ensure the index exists in the list
+	if (!_list[index]) {
+		return;
+	}
+
 	// do nothing, the new delay would end sooner.
 	if (_list[index].Delay && _list[index].Delay >= Renderer.tick + delay) {
 		return;
 	}
 
 	_list[index].Delay = Renderer.tick + delay;
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 	const ui = root.querySelector(`.container[data-index="${index}"]`);
 	if (!ui) return;
 	const existing = ui.querySelector('.cooldown-overlay');
@@ -642,17 +657,32 @@ function setDelayOnIndex(index, delay) {
 		}
 	}
 
-	let animationId;
+	// Cancel any previous animation frame scheduled for the same index
+	if (_activeAnimations.has(index)) {
+		cancelAnimationFrame(_activeAnimations.get(index));
+		_activeAnimations.delete(index);
+	}
 
 	function updateCooldown() {
+		// Safety check against post-destruction or logout leaks
+		if (!_list || !_list[index]) {
+			overlay.remove();
+			if (_activeAnimations.has(index)) {
+				cancelAnimationFrame(_activeAnimations.get(index));
+				_activeAnimations.delete(index);
+			}
+			return;
+		}
+
 		const now = Renderer.tick;
 		const remaining = _list[index].Delay - now;
 
 		if (remaining <= 0 || !_list[index].Delay) {
 			overlay.remove();
 			_list[index].Delay = 0;
-			if (animationId) {
-				cancelAnimationFrame(animationId);
+			if (_activeAnimations.has(index)) {
+				cancelAnimationFrame(_activeAnimations.get(index));
+				_activeAnimations.delete(index);
 			}
 			return;
 		}
@@ -661,10 +691,12 @@ function setDelayOnIndex(index, delay) {
 		const degrees = (1 - percentage) * 360;
 		overlay.style.background = `conic-gradient(transparent 0deg, transparent ${degrees}deg, rgba(0,0,0,0.75) ${degrees}deg)`;
 
-		animationId = requestAnimationFrame(updateCooldown);
+		const animationId = requestAnimationFrame(updateCooldown);
+		_activeAnimations.set(index, animationId);
 	}
 
-	animationId = requestAnimationFrame(updateCooldown);
+	const animationId = requestAnimationFrame(updateCooldown);
+	_activeAnimations.set(index, animationId);
 }
 
 /**
@@ -708,7 +740,7 @@ ShortCut.removeElement = function removeElement(isSkill, ID, row, amount) {
 		return;
 	}
 
-	const root = _getRoot();
+	const root = ShortCut.getRoot();
 
 	for (let i = row * 9, count = Math.min(_list.length, row * 9 + 9); i < count; ++i) {
 		if (_list[i] && _list[i].isSkill == isSkill && _list[i].ID === ID && (!isSkill || _list[i].count == amount)) {

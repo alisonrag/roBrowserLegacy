@@ -11,10 +11,14 @@ import 'UI/Elements/Elements.js';
 import Preferences from 'Core/Preferences.js';
 import KEYS from 'Controls/KeyEventHandler.js';
 import Renderer from 'Renderer/Renderer.js';
+import ChatBox from 'UI/Components/ChatBox/ChatBox.js';
 import History from '../ChatBox/History.js';
 import Sound from 'Audio/SoundManager.js';
 import htmlText from './WhisperBox.html?raw';
 import cssText from './WhisperBox.css?raw';
+import NpcBox from 'UI/Components/NpcBox/NpcBox.js';
+import NpcMenu from 'UI/Components/NpcMenu/NpcMenu.js';
+import InputBox from 'UI/Components/InputBox/InputBox.js';
 
 /**
  * @var {GUIComponent} WhisperBox
@@ -55,8 +59,14 @@ WhisperBox.captureKeyEvents = true;
 /**
  * Initialize component
  */
+WhisperBox._chatBoxNickHandlerAttached = false;
+
 WhisperBox.init = function init() {
 	this.clearAll();
+	if (!this._chatBoxNickHandlerAttached) {
+		setupNicknameLinkHandler(ChatBox);
+		this._chatBoxNickHandlerAttached = true;
+	}
 };
 
 /**
@@ -94,12 +104,26 @@ WhisperBox.show = function show(nickname, bHasMessage) {
 	instance.captureKeyEvents = true;
 
 	instance.onKeyDown = function onKeyDown(event) {
-		const shadow = this._shadow || this._host;
-		const focused = shadow.activeElement;
+		if (InputBox._host && InputBox._host.style.display !== 'none' && InputBox.__active) {
+			return true;
+		}
 
-		if (focused && focused.tagName) {
-			const isInput = focused.tagName.match(/input|select|textarea/i);
-			const isContentEditable = focused.getAttribute('contenteditable') === 'true';
+		if (NpcMenu._host && NpcMenu._host.style.display !== 'none' && NpcMenu.__active) {
+			return true;
+		}
+
+		if (NpcBox._host && NpcBox._host.style.display !== 'none' && NpcBox.__active) {
+			return true;
+		}
+
+		if (this.isEditableFocused()) {
+			const focused = this.getRoot().activeElement;
+			const isInput = !!(focused && focused.tagName && focused.tagName.match(/input|select|textarea/i));
+			const isContentEditable = !!(
+				focused &&
+				focused.getAttribute &&
+				focused.getAttribute('contenteditable') === 'true'
+			);
 
 			if (isInput || isContentEditable) {
 				switch (event.which) {
@@ -150,7 +174,7 @@ WhisperBox.show = function show(nickname, bHasMessage) {
 	instance.prepare();
 	instance.append();
 
-	const root = instance._shadow || instance._host;
+	const root = instance.getRoot();
 	instance._contentEl = root.querySelector('.content');
 	instance._inputEl = root.querySelector('.input-whisper');
 
@@ -209,7 +233,6 @@ WhisperBox.show = function show(nickname, bHasMessage) {
 	});
 
 	setupItemLinkHandler(instance);
-	setupNicknameLinkHandler(instance);
 	initResizable(instance);
 
 	const offset = (this._spawnCounter % 10) * 20;
@@ -296,7 +319,7 @@ function extractChatMessage(inputEl) {
  * @param {GUIComponent} instance
  */
 function setupItemLinkHandler(instance) {
-	const root = instance._shadow || instance._host;
+	const root = instance.getRoot();
 	root.addEventListener('click', event => {
 		const link = event.target.closest('.item-link');
 		if (!link) {
@@ -320,7 +343,12 @@ function setupItemLinkHandler(instance) {
  * @param {GUIComponent} instance
  */
 function setupNicknameLinkHandler(instance) {
-	const root = instance._shadow || instance._host;
+	const root = instance.getRoot();
+	root.addEventListener('mousedown', event => {
+		if (event.target.closest('.nickname-link')) {
+			event.stopPropagation();
+		}
+	});
 	root.addEventListener('click', event => {
 		const link = event.target.closest('.nickname-link');
 		if (!link) {
@@ -344,7 +372,7 @@ WhisperBox.onRequestTalk = function onRequestTalk(_nickname, _text) {};
  * @param {GUIComponent} instance
  */
 function initResizable(instance) {
-	const root = instance._shadow || instance._host;
+	const root = instance.getRoot();
 	const resizer = root.querySelector('.resizer');
 	if (!resizer) {
 		return;

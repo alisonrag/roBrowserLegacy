@@ -47,17 +47,10 @@ const _chargen = {
 };
 
 /**
- * Helper to get shadow root
- */
-function _getRoot() {
-	return CharCreate._shadow || CharCreate._host;
-}
-
-/**
  * Initialize UI
  */
 CharCreate.init = function init() {
-	const root = _getRoot();
+	const root = this.getRoot();
 	_graph = root.querySelector('.graph canvas').getContext('2d');
 	_chargen.ctx = root.querySelector('.chargen canvas').getContext('2d');
 
@@ -68,7 +61,7 @@ CharCreate.init = function init() {
 	root.querySelector('.chargen .right').addEventListener('mousedown', updateCharacterGeneric('head', +1));
 	root.querySelector('.chargen .up').addEventListener('mousedown', updateCharacterGeneric('headpalette', +1));
 
-	root.querySelectorAll('.graph button').forEach(btn => {
+	root.querySelectorAll('.graph ui-button').forEach(btn => {
 		btn.addEventListener('mousedown', function (event) {
 			updateStats.call(this, event);
 		});
@@ -108,7 +101,7 @@ CharCreate.onAppend = function onAppend() {
 		action: 0
 	});
 
-	const root = _getRoot();
+	const root = this.getRoot();
 	const input = root.querySelector('input');
 	input.value = '';
 	input.focus();
@@ -159,7 +152,7 @@ function updateCharacterGeneric(type, value) {
  * Send back informations to send the packet
  */
 function create() {
-	const root = _getRoot();
+	const root = CharCreate.getRoot();
 
 	CharCreate.onCharCreationRequest(
 		root.querySelector('input').value,
@@ -217,7 +210,7 @@ function updateCharacter(type, increment) {
  * Update the stats and polygon
  */
 function updateStats() {
-	const root = _getRoot();
+	const root = CharCreate.getRoot();
 
 	// Can't be upper than 9
 	if (root.querySelector(`.info .${this.className}`).textContent === '9') {
@@ -245,7 +238,7 @@ function updateStats() {
  * Update the polygon
  */
 function updateGraphic() {
-	const root = _getRoot();
+	const root = CharCreate.getRoot();
 
 	// Update graphique.
 	const ctx = _graph;

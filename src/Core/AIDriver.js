@@ -216,7 +216,21 @@ class AIDriver {
 			function distance(x1, y1, x2, y2) {
 				const dx = x2 - x1;
 				const dy = y2 - y1;
-				return dx * dx + dy * dy;
+				return Math.sqrt(dx * dx + dy * dy);
+			}
+
+			function canUseAISkill(entity) {
+				if (!entity || entity.action === entity.ACTION.DIE || entity.action === entity.ACTION.HURT) {
+					return false;
+				}
+
+				return [
+					entity.ACTION.IDLE,
+					entity.ACTION.WALK,
+					entity.ACTION.ATTACK,
+					entity.ACTION.ATTACK2,
+					entity.ACTION.ATTACK3
+				].some(action => action >= 0 && action === entity.action);
 			}
 
 			ctx.GetActors = function () {
@@ -229,7 +243,7 @@ class AIDriver {
 				if (res.length > 3) {
 					if (isHoAI ? AIDriver.HOM_AGGRESSIVE : AIDriver.MER_AGGRESSIVE) {
 						let closest = 0;
-						let lastDist = 1000;
+						let lastDist = 32;
 						const thisentity = EntityManager.get(isHoAI ? Session.homunId : Session.mercId);
 						for (const item of res) {
 							if (
@@ -316,7 +330,7 @@ class AIDriver {
 						);
 						if (range >= dist) {
 							// check if homun is in a valid state to cast skill
-							if (homun && [0, 1, 4].includes(homun.action)) {
+							if (canUseAISkill(homun)) {
 								let pkt;
 								if (PACKETVER.value >= 20180307) {
 									pkt = new PACKET.CZ.USE_SKILL2();

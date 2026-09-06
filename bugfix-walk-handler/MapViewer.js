@@ -299918,7 +299918,7 @@ function setAction(option) {
 		const wasWalking = this.action === this.ACTION.WALK;
 		const newAction = option.action === -1 || typeof option.action === "undefined" ? this.ACTION.IDLE : option.action;
 		const willWalk = newAction === this.ACTION.WALK;
-		if (wasWalking && !willWalk && this.walk && this.walk.total > 0 && this.objecttype !== this.constructor.TYPE_FALCON && this.objecttype !== this.constructor.TYPE_WUG) this.resetRoute();
+		if (wasWalking && !willWalk && !this.isFastMoving && this.walk && this.walk.total > 0 && this.objecttype !== this.constructor.TYPE_FALCON && this.objecttype !== this.constructor.TYPE_WUG) this.resetRoute();
 		this.action = newAction;
 		anim.tick = Date.now() + 0;
 		anim.delay = 0;
@@ -302142,13 +302142,22 @@ function walkTo(from_x, from_y, to_x, to_y, range, moveStartTime, moveEndTime, i
 	}
 	const path = this.walk.path;
 	let total = 0;
+	let usedFallback = false;
 	if (distFromStart <= 16 && hasCurrentPos) total = PathFinding_default.search(curCellX, curCellY, to_x | 0, to_y | 0, range || 0, path);
-	if (!total) total = PathFinding_default.search(from_x | 0, from_y | 0, to_x | 0, to_y | 0, range || 0, path);
+	if (!total) {
+		total = PathFinding_default.search(from_x | 0, from_y | 0, to_x | 0, to_y | 0, range || 0, path);
+		if (total) usedFallback = true;
+	}
+	if (usedFallback) {
+		this.position[0] = from_x;
+		this.position[1] = from_y;
+		this.position[2] = Altitude.getCellHeight(from_x, from_y);
+	}
 	this.walk.index = 2;
 	this.walk.total = total * 2;
 	if (total) {
 		this.walk.pos.set(this.position);
-		if (!hadRoute) this.walk.dist = 0;
+		if (!hadRoute || usedFallback) this.walk.dist = 0;
 		this.walk.lastPos.set(this.position);
 		const numSegments = total - 1;
 		let clientDuration = 0;
@@ -302238,6 +302247,12 @@ function fastMoveTo(to_x, to_y, speed = 15, onEnd) {
 		if (onEnd) onEnd();
 		return;
 	}
+	if (this.objecttype === this.constructor.TYPE_PC) this.setAction({
+		action: this.ACTION.ATTACK,
+		frame: 0,
+		repeat: false,
+		play: false
+	});
 	this.walk.index = 2;
 	this.walk.total = total * 2;
 	this.walk.pos.set(this.position);
@@ -302264,12 +302279,6 @@ function fastMoveTo(to_x, to_y, speed = 15, onEnd) {
 	}
 	this.headDir = 0;
 	if (onEnd) this.walk.onEnd = onEnd;
-	if (this.objecttype === this.constructor.TYPE_PC) this.setAction({
-		action: this.ACTION.ATTACK,
-		frame: 0,
-		repeat: false,
-		play: false
-	});
 }
 /**
 * Process walking
@@ -318969,7 +318978,15 @@ function onEntityActionPosition(pkt) {
 		const targetEntity = EntityManager.get(pkt.targetGID);
 		if (targetEntity) targetEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20);
 	}
-	onEntityAction(pkt);
+	const srcEntity = EntityManager.get(pkt.GID);
+	const attackSpeed = srcEntity && typeof srcEntity.attack_speed === "number" && srcEntity.attack_speed > 0 ? srcEntity.attack_speed : AVG_ATTACK_SPEED;
+	onEntityAction({
+		...pkt,
+		attackMT: typeof pkt.attackMT === "number" && pkt.attackMT > 0 ? pkt.attackMT : attackSpeed,
+		attackedMT: typeof pkt.attackedMT === "number" && pkt.attackedMT > 0 ? pkt.attackedMT : AVG_ATTACKED_SPEED,
+		leftDamage: typeof pkt.leftDamage === "number" ? pkt.leftDamage : 0,
+		count: typeof pkt.count === "number" && pkt.count > 0 ? pkt.count : 1
+	});
 }
 /**
 * Display entity's emotion
@@ -319029,7 +319046,11 @@ function onEntityAction(pkt) {
 		case 10:
 		case 11:
 		case 13: {
-			if (pkt.attackMT > MAX_ATTACKMT) pkt.attackMT = MAX_ATTACKMT;
+			const attackMT = typeof pkt.attackMT === "number" && pkt.attackMT > 0 ? pkt.attackMT : srcEntity && srcEntity.attack_speed || AVG_ATTACK_SPEED;
+			pkt.attackMT = Math.min(attackMT, MAX_ATTACKMT);
+			pkt.attackedMT = typeof pkt.attackedMT === "number" && pkt.attackedMT > 0 ? pkt.attackedMT : AVG_ATTACKED_SPEED;
+			pkt.leftDamage = typeof pkt.leftDamage === "number" ? pkt.leftDamage : 0;
+			pkt.count = typeof pkt.count === "number" && pkt.count > 0 ? pkt.count : 1;
 			srcEntity.attack_speed = pkt.attackMT;
 			let animSpeed = 0;
 			let delayTime = pkt.attackMT;
@@ -319167,7 +319188,7 @@ function onEntityAction(pkt) {
 					next: false
 				}
 			});
-			if (srcEntity.GID === SessionStorage_default.Entity.GID && SessionStorage_default.pet.friendly > 900 && (SessionStorage_default.pet.lastTalk || 0) + 1e4 < Date.now()) {
+			if (SessionStorage_default.Entity && srcEntity.GID === SessionStorage_default.Entity.GID && SessionStorage_default.pet && SessionStorage_default.pet.friendly > 900 && (SessionStorage_default.pet.lastTalk || 0) + 1e4 < Date.now()) {
 				if (parseInt(Math.random() * 10) < 3) {
 					const hunger = DB.getPetHungryState(SessionStorage_default.pet.oldHungry);
 					const talk = DB.getPetTalkNumber(SessionStorage_default.pet.job, PetMessageConst_default.PM_HUNTING, hunger);
@@ -319211,12 +319232,12 @@ function onEntityAction(pkt) {
 		});
 	}
 	if (pkt?.damage > 0) {
-		if (srcEntity.GID === SessionStorage_default.Entity.GID) ChatBox_default.addText(DB.getMessage(1607).replace("%s", dstEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.BATTLE);
-		else if (dstEntity.GID === SessionStorage_default.Entity.GID) ChatBox_default.addText(DB.getMessage(1605).replace("%s", srcEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.BATTLE);
+		if (SessionStorage_default.Entity && srcEntity.GID === SessionStorage_default.Entity.GID) ChatBox_default.addText(DB.getMessage(1607).replace("%s", dstEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.BATTLE);
+		else if (SessionStorage_default.Entity && dstEntity.GID === SessionStorage_default.Entity.GID) ChatBox_default.addText(DB.getMessage(1605).replace("%s", srcEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.BATTLE);
 		else if (srcEntity.GID === SessionStorage_default.homunId || srcEntity.GID === SessionStorage_default.merId || srcEntity.GID === SessionStorage_default.petId || srcEntity.GID === SessionStorage_default.elemId) ChatBox_default.addText(DB.getMessage(1608).replace("%s", srcEntity.display.name).replace("%s", dstEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.BATTLE);
 		else if (dstEntity.GID === SessionStorage_default.homunId || dstEntity.GID === SessionStorage_default.merId || dstEntity.GID === SessionStorage_default.petId || dstEntity.GID === SessionStorage_default.elemId) ChatBox_default.addText(DB.getMessage(1606).replace("%s", dstEntity.display.name).replace("%s", srcEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.BATTLE);
-		else if (controller.isGroupMember(srcEntity.display.name)) ChatBox_default.addText(DB.getMessage(1608).replace("%s", srcEntity.display.name).replace("%s", dstEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.PARTY_BATTLE);
-		else if (controller.isGroupMember(dstEntity.display.name)) ChatBox_default.addText(DB.getMessage(1606).replace("%s", dstEntity.display.name).replace("%s", srcEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.PARTY_BATTLE);
+		else if (controller.isGroupMember(srcEntity.display?.name)) ChatBox_default.addText(DB.getMessage(1608).replace("%s", srcEntity.display.name).replace("%s", dstEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.PARTY_BATTLE);
+		else if (controller.isGroupMember(dstEntity.display?.name)) ChatBox_default.addText(DB.getMessage(1606).replace("%s", dstEntity.display.name).replace("%s", srcEntity.display.name).replace("%d", pkt.damage), ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.PARTY_BATTLE);
 	}
 }
 /**
@@ -320581,7 +320602,7 @@ function EntityEngine() {
 	Network.hookPacket(PACKET.ZC.ACK_CHANGE_TITLE, onTitleChangeAck);
 	Network.hookPacket(PACKET.ZC.HAT_EFFECT, onHatEffects);
 }
-var SkillNameDisplayExclude, SkillBlueCombo, C_MULTIHIT_DELAY, C_DEATH_SYNC_OFFSET, AVG_ATTACK_SPEED, MAX_ATTACKMT, clanEmblems;
+var SkillNameDisplayExclude, SkillBlueCombo, C_MULTIHIT_DELAY, C_DEATH_SYNC_OFFSET, AVG_ATTACK_SPEED, AVG_ATTACKED_SPEED, MAX_ATTACKMT, clanEmblems;
 var init_Entity = __esmMin((() => {
 	init_DBManager();
 	init_SkillConst();
@@ -320660,6 +320681,7 @@ var init_Entity = __esmMin((() => {
 	C_MULTIHIT_DELAY = 200;
 	C_DEATH_SYNC_OFFSET = 200;
 	AVG_ATTACK_SPEED = 432;
+	AVG_ATTACKED_SPEED = 288;
 	MAX_ATTACKMT = AVG_ATTACK_SPEED * 2;
 	clanEmblems = {};
 }));

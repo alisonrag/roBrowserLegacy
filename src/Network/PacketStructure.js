@@ -14,13 +14,24 @@ import PACKETVER from './PacketVerManager.js';
 import Struct from 'Utils/Struct.js';
 import Configs from 'Core/Configs.js';
 
-const NAME_LENGTH = 24; // Must be equal to same name var in mmo.h
+const NAME_LENGTH = 24; // Must be equal to same name var in mmo.h, -1 reads the rest of the packet
 const MAP_NAME_LENGTH = 11 + 1;
 const MAP_NAME_LENGTH_EXT = MAP_NAME_LENGTH + 4;
 const PACKET = {};
 const RENEWAL = Configs.get('renewal') || false;
 const CLASSIC = !RENEWAL; // For ease of reading checks
 const UNUSED_PACKET = PACKET;
+
+/**
+ * Reads the trailing name field of a variable length packet, honoring NAME_LENGTH.
+ *
+ * @param {object} fp - BinaryReader
+ * @param {number} end - packet end offset
+ * @returns {string}
+ */
+function readTrailingName(fp, end) {
+	return fp.readString(NAME_LENGTH === -1 ? end - fp.tell() : NAME_LENGTH);
+}
 
 PACKET.CA = {};
 PACKET.AC = {}; // Login
@@ -1335,6 +1346,22 @@ PACKET.CZ.REQ_JOIN_GUILD.prototype.build = function () {
 	pkt_buf.writeULong(this.AID);
 	pkt_buf.writeULong(this.MyAID);
 	pkt_buf.writeULong(this.MyGID);
+	return pkt_buf;
+};
+
+// 0x916
+// Requires PACKETVER >= 20120131 (length table defines 0x916 only from that
+// date). Sent by /guildinvite via Guild.requestPlayerInvitationByName, which
+// guards the version and reports an error on older clients.
+PACKET.CZ.REQ_JOIN_GUILD2 = function PACKET_CZ_REQ_JOIN_GUILD2() {
+	this.name = '';
+};
+PACKET.CZ.REQ_JOIN_GUILD2.prototype.build = function () {
+	const pkt_len = 2 + 24;
+	const pkt_buf = new BinaryWriter(pkt_len);
+
+	pkt_buf.writeShort(0x916);
+	pkt_buf.writeString(this.name, 24);
 	return pkt_buf;
 };
 
@@ -10170,6 +10197,9 @@ PACKET.ZC.NOTIFY_MOVEENTRY6 = function PACKET_ZC_NOTIFY_MOVEENTRY6(fp, end) {
 	this.job = fp.readShort();
 	this.head = fp.readShort();
 	this.weapon = fp.readLong();
+	if (PACKETVER.value >= 20181121) {
+		this.shield = fp.readLong();
+	}
 	this.accessory = fp.readShort();
 	this.moveStartTime = fp.readULong();
 	this.accessory2 = fp.readShort();
@@ -10189,7 +10219,7 @@ PACKET.ZC.NOTIFY_MOVEENTRY6 = function PACKET_ZC_NOTIFY_MOVEENTRY6(fp, end) {
 	this.ySize = fp.readUChar();
 	this.clevel = fp.readShort();
 	this.font = fp.readShort();
-	this.name = fp.readString(NAME_LENGTH);
+	this.name = readTrailingName(fp, end);
 };
 PACKET.ZC.NOTIFY_MOVEENTRY6.size = -1;
 
@@ -10204,6 +10234,9 @@ PACKET.ZC.NOTIFY_STANDENTRY6 = function PACKET_ZC_NOTIFY_STANDENTRY6(fp, end) {
 	this.job = fp.readShort();
 	this.head = fp.readShort();
 	this.weapon = fp.readLong();
+	if (PACKETVER.value >= 20181121) {
+		this.shield = fp.readLong();
+	}
 	this.accessory = fp.readShort();
 	this.accessory2 = fp.readShort();
 	this.accessory3 = fp.readShort();
@@ -10237,6 +10270,9 @@ PACKET.ZC.NOTIFY_NEWENTRY6 = function PACKET_ZC_NOTIFY_NEWENTRY6(fp, end) {
 	this.job = fp.readShort();
 	this.head = fp.readShort();
 	this.weapon = fp.readLong();
+	if (PACKETVER.value >= 20181121) {
+		this.shield = fp.readLong();
+	}
 	this.accessory = fp.readShort();
 	this.accessory2 = fp.readShort();
 	this.accessory3 = fp.readShort();

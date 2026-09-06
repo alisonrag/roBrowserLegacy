@@ -4,7 +4,7 @@ This is a continuation of [roBrowser](https://www.robrowser.com/) expanded with 
 
 If you wish to discuss anything related to this project, or you want to join, contact us on [Discord](https://discord.gg/8JdHwM4Kqm) or in the [GIT Discussions](https://github.com/MrAntares/roBrowserLegacy/discussions)
 
-For info on how to setup the client read the contents of our [Getting Started doc](https://github.com/MrAntares/roBrowserLegacy/blob/master/doc/README.md). For the original branche's docs please visit the https://www.robrowser.com/ site.
+For info on how to setup the client read the contents of our [Getting Started doc](https://github.com/MrAntares/roBrowserLegacy/blob/master/docs/README.md). For the original branche's docs please visit the https://www.robrowser.com/ site.
 
 ## DEMO
 
@@ -34,7 +34,7 @@ npm run build:all     # Build all applications to dist/Web/
 
 ## Guide
 
-Checkout the [getting started guide](doc/README.md)
+Checkout the [getting started guide](docs/README.md)
 
 ## Wiki
 
@@ -58,6 +58,7 @@ Remote Client serves game assets to roBrowser via http by extracting them from t
 Other implementations may arise and when they do we will list them here:
 
 - [roBrowserLegacy-RemoteClient-JS](https://github.com/FranciscoWallison/roBrowserLegacy-RemoteClient-JS)
+- [roBrowserLegacy-RemoteClient-Rust](https://github.com/Flux159/roBrowserLegacy-RemoteClient-Rust)
 
 ## WebSocket Proxy
 
@@ -69,7 +70,7 @@ For available plugins and information on how to install them please visit the [r
 
 ## Contributing
 
-See [CONTRIBUTING](./doc/CONTRIBUTING.md)
+See [CONTRIBUTING](./docs/CONTRIBUTING.md)
 
 All credits to the original owners/creators and the new ones.
 <a href="https://github.com/MrAntares/roBrowserLegacy/graphs/contributors">

@@ -73,7 +73,26 @@ class MapControl {
 
 		window.addEventListener('mousedown', onMouseDown.bind(this));
 		window.addEventListener('mouseup', onMouseUp.bind(this));
+
+		// A mouseup released over a UI element can be swallowed by the element's
+		// own handler (e.g. scrollbars call stopPropagation), so the bubbling
+		// 'mouseup' above never fires and the camera would keep rotating.
+		// Listen in the capture phase to always catch the release.
+		window.addEventListener('mouseup', onMouseUpCapture, true);
 	}
+}
+
+/**
+ * Stop the camera rotation when the right button is released, even if the
+ * release happens over a UI element that swallows the bubbling mouseup event.
+ */
+function onMouseUpCapture(event) {
+	if (event.which !== 3 || !Camera.action.active) {
+		return;
+	}
+
+	Cursor.setType(Cursor.ACTION.DEFAULT);
+	Camera.rotate(false);
 }
 
 /**
@@ -81,6 +100,11 @@ class MapControl {
  */
 function onMouseDown(event) {
 	const action = (event && event.which) || 1;
+
+	// Skill target selection handles the click itself (right click just cancels it)
+	if (Mouse.state === Mouse.MOUSE_STATE.USESKILL && SkillTargetSelection.onMapMouseDown(event)) {
+		return;
+	}
 
 	if (!Mouse.intersect) {
 		return;
@@ -171,13 +195,9 @@ function onMouseDown(event) {
 						Session.autoFollow = true;
 						onAutoFollow();
 					}
-
-					// Right click on a NPC/Mob/Unit
-					entityOver.onMouseDown();
-					entityOver.onFocus();
-					EntityManager.setFocusEntity(entityOver);
 				}
 
+				// Right click only rotates the camera here.
 				Cursor.setType(Cursor.ACTION.ROTATE);
 				Camera.rotate(true);
 			}

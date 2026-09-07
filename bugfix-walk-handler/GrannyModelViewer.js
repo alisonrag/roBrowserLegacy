@@ -302195,6 +302195,7 @@ function walkTo(from_x, from_y, to_x, to_y, range, moveStartTime, moveEndTime, i
 * @param {number} [speed=15] Speed in ms per cell
 * @param {function} [onEnd] Callback when relocation finishes
 * @param {boolean} [keepDirection=false] Whether to preserve current facing direction (e.g. knockback/backslide)
+* @returns {boolean} True if fast movement started, false if already at destination (no-op)
 */
 function fastMoveTo(to_x, to_y, speed = 15, onEnd, keepDirection = false) {
 	const curX = this.position[0];
@@ -302203,12 +302204,22 @@ function fastMoveTo(to_x, to_y, speed = 15, onEnd, keepDirection = false) {
 	const curCellX = hasCurrentPos ? Math.round(curX) : to_x | 0;
 	const curCellY = hasCurrentPos ? Math.round(curY) : to_y | 0;
 	if (curCellX === (to_x | 0) && curCellY === (to_y | 0)) {
+		this.isFastMoving = false;
+		this._enableTrail = false;
+		this._preserveDirection = false;
+		if (this.action !== this.ACTION.DIE && !this.animation.play) this.setAction({
+			action: this.ACTION.IDLE,
+			frame: 0,
+			play: true,
+			repeat: true
+		});
 		if (onEnd) onEnd();
-		return;
+		return false;
 	}
 	this.resetRoute();
 	if (!this.isFastMoving) this._normalSpeed = this.walk.speed;
 	this.isFastMoving = true;
+	this._preserveDirection = !!keepDirection;
 	this.walk.speed = speed || 15;
 	if (this.action === this.ACTION.WALK) this.setAction({ action: this.ACTION.IDLE });
 	const path = this.walk.path;
@@ -302226,12 +302237,13 @@ function fastMoveTo(to_x, to_y, speed = 15, onEnd, keepDirection = false) {
 	this.walk.segmentDurations[0] = Math.max(1, Math.hypot(firstDx, firstDy) * this.walk.speed);
 	const nowTick = Date.now();
 	this.walk.tick = this.walk.prevTick = nowTick;
-	if (!keepDirection) {
+	if (!this._preserveDirection) {
 		const initDir = offsetToFloatDir(firstDx, firstDy);
 		this.direction = quantizeDir(initDir);
 		this.headDir = 0;
 	}
 	if (onEnd) this.walk.onEnd = onEnd;
+	return true;
 }
 /**
 * Process walking
@@ -302279,6 +302291,7 @@ function walkProcess() {
 			if (this.isFastMoving) {
 				this.isFastMoving = false;
 				this._enableTrail = false;
+				this._preserveDirection = false;
 				if (typeof this._normalSpeed === "number") {
 					this.walk.speed = this._normalSpeed;
 					delete this._normalSpeed;
@@ -302358,7 +302371,7 @@ function walkProcess() {
 		pos[0] = newX;
 		pos[1] = newY;
 		pos[2] = cellHeight;
-		if (index < total) {
+		if (!this._preserveDirection && index < total) {
 			if (index === 2) {
 				const remDx = nextX - newX;
 				const remDy = nextY - newY;
@@ -302427,6 +302440,7 @@ function resetRoute(keepDistance) {
 			delete this._normalSpeed;
 		}
 	}
+	this._preserveDirection = false;
 	this.walk.tick = 0;
 	this.walk.prevTick = 0;
 	if (!keepDistance) this.walk.dist = 0;
@@ -302482,6 +302496,7 @@ function distance(entity1, entity2) {
 */
 function Init$4() {
 	this.onWalkEnd = function onWalkEnd() {};
+	this._preserveDirection = false;
 	this.walk = new WalkStructure();
 	this.walkTo = walkTo;
 	this.fastMoveTo = fastMoveTo;
@@ -318956,7 +318971,7 @@ function onEntityJump(pkt) {
 */
 function onEntityFastMove(pkt) {
 	const entity = EntityManager.get(pkt.AID);
-	if (entity) {
+	if (entity && entity.fastMoveTo(pkt.targetXpos, pkt.targetYpos, 15, null, false)) {
 		if (entity.objecttype === entity.constructor.TYPE_PC) {
 			if (DB.isMonk(entity.job)) {
 				entity._enableTrail = true;
@@ -318976,7 +318991,6 @@ function onEntityFastMove(pkt) {
 				});
 			}
 		}
-		entity.fastMoveTo(pkt.targetXpos, pkt.targetYpos, 15, null, false);
 	}
 }
 /**
@@ -324001,7 +324015,7 @@ function onSkillToGround(pkt) {
 	switch (pkt.SKID) {
 		case SkillConst_default.MO_BODYRELOCATION: {
 			const entity = EntityManager.get(pkt.AID);
-			if (entity) {
+			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) {
 				entity._enableTrail = true;
 				if (entity.objecttype === entity.constructor.TYPE_PC) entity.setAction({
 					action: entity.ACTION.ATTACK,
@@ -324009,13 +324023,12 @@ function onSkillToGround(pkt) {
 					repeat: false,
 					play: false
 				});
-				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
 			}
 			break;
 		}
 		case SkillConst_default.NJ_SHADOWJUMP: {
 			const entity = EntityManager.get(pkt.AID);
-			if (entity) {
+			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) {
 				entity._enableTrail = true;
 				entity.setAction({
 					action: entity.ACTION.SKILL,
@@ -324023,13 +324036,12 @@ function onSkillToGround(pkt) {
 					repeat: false,
 					play: false
 				});
-				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
 			}
 			break;
 		}
 		case SkillConst_default.RL_FALLEN_ANGEL: {
 			const entity = EntityManager.get(pkt.AID);
-			if (entity) {
+			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) {
 				entity._enableTrail = true;
 				entity.setAction({
 					action: entity.ACTION.SKILL,
@@ -324037,21 +324049,17 @@ function onSkillToGround(pkt) {
 					repeat: false,
 					play: false
 				});
-				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
 			}
 			break;
 		}
 		case SkillConst_default.SU_LOPE: {
 			const entity = EntityManager.get(pkt.AID);
-			if (entity) {
-				entity.setAction({
-					action: entity.ACTION.SKILL,
-					frame: 0,
-					repeat: false,
-					play: true
-				});
-				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
-			}
+			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) entity.setAction({
+				action: entity.ACTION.SKILL,
+				frame: 0,
+				repeat: false,
+				play: true
+			});
 			break;
 		}
 	}

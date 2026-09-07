@@ -301897,7 +301897,7 @@ function walkTo(from_x, from_y, to_x, to_y, range, moveStartTime, moveEndTime, i
 	if (isFastMove) {
 		if (!this.isFastMoving) this._normalSpeed = this.walk.speed;
 		this.isFastMoving = true;
-		this._enableTrail = true;
+		this._fastMoveTrail = true;
 		if (fastSpeed) this.walk.speed = fastSpeed;
 	}
 	const path = this.walk.path;
@@ -302074,7 +302074,7 @@ function walkProcess() {
 			walk.lastPos.set(pos);
 			if (this.isFastMoving) {
 				this.isFastMoving = false;
-				this._enableTrail = false;
+				this._fastMoveTrail = false;
 				this._preserveDirection = false;
 				if (typeof this._normalSpeed === "number") {
 					this.walk.speed = this._normalSpeed;
@@ -302223,7 +302223,7 @@ function resetRoute(keepDistance) {
 		}
 	}
 	this.isFastMoving = false;
-	this._enableTrail = false;
+	this._fastMoveTrail = false;
 	this._preserveDirection = false;
 	this.walk.tick = 0;
 	this.walk.prevTick = 0;
@@ -302281,6 +302281,9 @@ function distance(entity1, entity2) {
 function Init$4() {
 	this.onWalkEnd = function onWalkEnd() {};
 	this._preserveDirection = false;
+	this.isFastMoving = false;
+	this._fastMoveTrail = false;
+	this._enableTrail = false;
 	this.walk = new WalkStructure();
 	this.walkTo = walkTo;
 	this.fastMoveTo = fastMoveTo;
@@ -302928,7 +302931,7 @@ var init_EntityRender = __esmMin((() => {
 			const isBERSERK = entity.getOpt3(StatusState_default.Status.BERSERK);
 			renderSecondBody(entity, layers, spr, pal, files, type, _position, {
 				enableHalo: entity.getOpt3(StatusState_default.Status.ASSUMPTIO) || !!entity._enableHalo,
-				enableTrail: isENERGYCOAT || isBUNSIN || isHALLUCINATIONWALK || isQUICKEN || isOVERTHRUST || isEXPLOSIONSPIRITS || isBERSERK || !!entity._enableTrail,
+				enableTrail: isENERGYCOAT || isBUNSIN || isHALLUCINATIONWALK || isQUICKEN || isOVERTHRUST || isEXPLOSIONSPIRITS || isBERSERK || !!entity._fastMoveTrail || !!entity._enableTrail,
 				blurType: isBUNSIN ? 5 : isHALLUCINATIONWALK ? 3 : entity._blurType || 1
 			});
 			for (let i = 0, count = layers.length; i < count; ++i) entity.renderLayer(layers[i], spr, pal, files.size, _position, type, isBlendModeOne);
@@ -319690,7 +319693,7 @@ function onEntityFastMove(pkt) {
 	if (entity && entity.fastMoveTo(pkt.targetXpos, pkt.targetYpos, 15, null, false)) {
 		if (entity.objecttype === entity.constructor.TYPE_PC) {
 			if (DB.isMonk(entity.job)) {
-				entity._enableTrail = true;
+				entity._fastMoveTrail = true;
 				entity.setAction({
 					action: entity.ACTION.ATTACK,
 					frame: 0,
@@ -319698,7 +319701,7 @@ function onEntityFastMove(pkt) {
 					play: false
 				});
 			} else if (DB.isGunslinger(entity.job)) {
-				entity._enableTrail = true;
+				entity._fastMoveTrail = true;
 				entity.setAction({
 					action: entity.ACTION.SKILL,
 					frame: 0,
@@ -324732,7 +324735,7 @@ function onSkillToGround(pkt) {
 		case SkillConst_default.MO_BODYRELOCATION: {
 			const entity = EntityManager.get(pkt.AID);
 			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) {
-				entity._enableTrail = true;
+				entity._fastMoveTrail = true;
 				if (entity.objecttype === entity.constructor.TYPE_PC) entity.setAction({
 					action: entity.ACTION.ATTACK,
 					frame: 0,
@@ -324745,7 +324748,7 @@ function onSkillToGround(pkt) {
 		case SkillConst_default.NJ_SHADOWJUMP: {
 			const entity = EntityManager.get(pkt.AID);
 			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) {
-				entity._enableTrail = true;
+				entity._fastMoveTrail = true;
 				entity.setAction({
 					action: entity.ACTION.SKILL,
 					frame: 0,
@@ -324758,7 +324761,7 @@ function onSkillToGround(pkt) {
 		case SkillConst_default.RL_FALLEN_ANGEL: {
 			const entity = EntityManager.get(pkt.AID);
 			if (entity && entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false)) {
-				entity._enableTrail = true;
+				entity._fastMoveTrail = true;
 				entity.setAction({
 					action: entity.ACTION.SKILL,
 					frame: 0,

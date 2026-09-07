@@ -302186,15 +302186,17 @@ function walkTo(from_x, from_y, to_x, to_y, range, moveStartTime, moveEndTime, i
 	}
 }
 /**
-* Fast move / forced relocation to a destination cell (e.g. MO_BODYRELOCATION, EF_FASTMOVE, ZC_FASTMOVE).
+* Fast move / forced relocation to a destination cell (e.g. MO_BODYRELOCATION, knockback, slide).
 * Bypasses regular rubberbanding, latency compensation, and walk animation cycles.
+* Uses direct linear interpolation between current position and destination cell (no curved walking detours).
 *
 * @param {number} to_x Destination X cell
 * @param {number} to_y Destination Y cell
 * @param {number} [speed=15] Speed in ms per cell
 * @param {function} [onEnd] Callback when relocation finishes
+* @param {boolean} [keepDirection=false] Whether to preserve current facing direction (e.g. knockback/backslide)
 */
-function fastMoveTo(to_x, to_y, speed = 15, onEnd) {
+function fastMoveTo(to_x, to_y, speed = 15, onEnd, keepDirection = false) {
 	const curX = this.position[0];
 	const curY = this.position[1];
 	const hasCurrentPos = isFinite(curX) && isFinite(curY) && (curX !== 0 || curY !== 0);
@@ -302207,51 +302209,28 @@ function fastMoveTo(to_x, to_y, speed = 15, onEnd) {
 	this.resetRoute();
 	if (!this.isFastMoving) this._normalSpeed = this.walk.speed;
 	this.isFastMoving = true;
-	this._enableTrail = true;
 	this.walk.speed = speed || 15;
+	if (this.action === this.ACTION.WALK) this.setAction({ action: this.ACTION.IDLE });
 	const path = this.walk.path;
-	let total = 0;
-	if (hasCurrentPos) total = PathFinding_default.search(curCellX, curCellY, to_x | 0, to_y | 0, 0, path);
-	if (!total) {
-		this.position[0] = to_x | 0;
-		this.position[1] = to_y | 0;
-		this.position[2] = Altitude.getCellHeight(to_x | 0, to_y | 0);
-		this.walk.lastPos.set(this.position);
-		this.resetRoute();
-		if (onEnd) onEnd();
-		return;
-	}
-	if (this.objecttype === this.constructor.TYPE_PC) this.setAction({
-		action: this.ACTION.ATTACK,
-		frame: 0,
-		repeat: false,
-		play: false
-	});
+	path[0] = curCellX;
+	path[1] = curCellY;
+	path[2] = to_x | 0;
+	path[3] = to_y | 0;
 	this.walk.index = 2;
-	this.walk.total = total * 2;
+	this.walk.total = 4;
 	this.walk.pos.set(this.position);
 	this.walk.lastPos.set(this.position);
 	this.walk.dist = 0;
-	const numSegments = total - 1;
 	const firstDx = path[2] - this.position[0];
 	const firstDy = path[3] - this.position[1];
 	this.walk.segmentDurations[0] = Math.max(1, Math.hypot(firstDx, firstDy) * this.walk.speed);
-	for (let i = 1; i < numSegments; i++) {
-		const pIdx = (i + 1) * 2;
-		const segDx = path[pIdx] - path[pIdx - 2];
-		const segDy = path[pIdx + 1] - path[pIdx - 1];
-		const dur = segDx && segDy ? this.walk.speed * DIAGONAL_FACTOR : this.walk.speed;
-		this.walk.segmentDurations[i] = Math.max(1, dur);
-	}
 	const nowTick = Date.now();
 	this.walk.tick = this.walk.prevTick = nowTick;
-	if (this.walk.total >= 2) {
-		const firstX = path[2];
-		const firstY = path[3];
-		const initDir = offsetToFloatDir(firstX - this.position[0], firstY - this.position[1]);
+	if (!keepDirection) {
+		const initDir = offsetToFloatDir(firstDx, firstDy);
 		this.direction = quantizeDir(initDir);
+		this.headDir = 0;
 	}
-	this.headDir = 0;
 	if (onEnd) this.walk.onEnd = onEnd;
 }
 /**
@@ -302319,7 +302298,7 @@ function walkProcess() {
 					next: false
 				}
 			});
-			else this.setAction({
+			else if (this.action !== this.ACTION.DIE) this.setAction({
 				action: this.ACTION.IDLE,
 				frame: 0,
 				play: true,
@@ -318971,13 +318950,34 @@ function onEntityJump(pkt) {
 	}
 }
 /**
-* Body relocation packet support
+* Fast relocation packet support (e.g. Body Relocation, Fallen Angel)
 *
 * @param {object} pkt - PACKET.ZC.FASTMOVE
 */
 function onEntityFastMove(pkt) {
 	const entity = EntityManager.get(pkt.AID);
-	if (entity) entity.fastMoveTo(pkt.targetXpos, pkt.targetYpos, 15);
+	if (entity) {
+		if (entity.objecttype === entity.constructor.TYPE_PC) {
+			if (DB.isMonk(entity.job)) {
+				entity._enableTrail = true;
+				entity.setAction({
+					action: entity.ACTION.ATTACK,
+					frame: 0,
+					repeat: false,
+					play: false
+				});
+			} else if (DB.isGunslinger(entity.job)) {
+				entity._enableTrail = true;
+				entity.setAction({
+					action: entity.ACTION.SKILL,
+					frame: 0,
+					repeat: false,
+					play: false
+				});
+			}
+		}
+		entity.fastMoveTo(pkt.targetXpos, pkt.targetYpos, 15, null, false);
+	}
 }
 /**
 * Perform Entity Action with forced position relocation (knockback / slide)
@@ -318987,7 +318987,7 @@ function onEntityFastMove(pkt) {
 function onEntityActionPosition(pkt) {
 	if (typeof pkt.xPos === "number" && typeof pkt.yPos === "number" && (pkt.xPos !== 0 || pkt.yPos !== 0)) {
 		const targetEntity = EntityManager.get(pkt.targetGID);
-		if (targetEntity) targetEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20);
+		if (targetEntity) targetEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20, null, true);
 	}
 	const srcEntity = EntityManager.get(pkt.GID);
 	const attackSpeed = srcEntity && typeof srcEntity.attack_speed === "number" && srcEntity.attack_speed > 0 ? srcEntity.attack_speed : AVG_ATTACK_SPEED;
@@ -319689,7 +319689,7 @@ function onEntityUseSkillToAttack(pkt) {
 		}
 		if (typeof pkt.xPos === "number" && typeof pkt.yPos === "number" && (pkt.xPos !== 0 || pkt.yPos !== 0)) {
 			const pushedEntity = dstEntity || srcEntity;
-			if (pushedEntity) pushedEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20);
+			if (pushedEntity) pushedEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20, null, true);
 		}
 	}
 	if (srcEntity && dstEntity && pkt.action != SkillAction$1.SPLASH) EffectManager.spamSkill(pkt.SKID, pkt.targetID, null, Renderer.tick + pkt.attackMT, pkt.AID);
@@ -323999,12 +323999,59 @@ function onSkillToGround(pkt) {
 	position[2] = Altitude.getCellHeight(pkt.xPos, pkt.yPos);
 	EffectManager.spamSkill(pkt.SKID, pkt.AID, position, null, pkt.AID);
 	switch (pkt.SKID) {
-		case SkillConst_default.MO_BODYRELOCATION:
-		case SkillConst_default.NJ_SHADOWJUMP:
-		case SkillConst_default.RL_FALLEN_ANGEL:
+		case SkillConst_default.MO_BODYRELOCATION: {
+			const entity = EntityManager.get(pkt.AID);
+			if (entity) {
+				entity._enableTrail = true;
+				if (entity.objecttype === entity.constructor.TYPE_PC) entity.setAction({
+					action: entity.ACTION.ATTACK,
+					frame: 0,
+					repeat: false,
+					play: false
+				});
+				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
+			}
+			break;
+		}
+		case SkillConst_default.NJ_SHADOWJUMP: {
+			const entity = EntityManager.get(pkt.AID);
+			if (entity) {
+				entity._enableTrail = true;
+				entity.setAction({
+					action: entity.ACTION.SKILL,
+					frame: 0,
+					repeat: false,
+					play: false
+				});
+				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
+			}
+			break;
+		}
+		case SkillConst_default.RL_FALLEN_ANGEL: {
+			const entity = EntityManager.get(pkt.AID);
+			if (entity) {
+				entity._enableTrail = true;
+				entity.setAction({
+					action: entity.ACTION.SKILL,
+					frame: 0,
+					repeat: false,
+					play: false
+				});
+				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
+			}
+			break;
+		}
 		case SkillConst_default.SU_LOPE: {
 			const entity = EntityManager.get(pkt.AID);
-			if (entity) entity.fastMoveTo(pkt.xPos, pkt.yPos, 15);
+			if (entity) {
+				entity.setAction({
+					action: entity.ACTION.SKILL,
+					frame: 0,
+					repeat: false,
+					play: true
+				});
+				entity.fastMoveTo(pkt.xPos, pkt.yPos, 15, null, false);
+			}
 			break;
 		}
 	}

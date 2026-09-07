@@ -296478,20 +296478,6 @@ var init_DBManager = __esmMin((() => {
 		static isDoram(jobid) {
 			return jobid >= 4217 && jobid <= 4220 || jobid === 4308 || jobid === 4315;
 		}
-		static isMonk(jobid) {
-			switch (jobid) {
-				case JobConst_default.MONK:
-				case JobConst_default.MONK_H:
-				case JobConst_default.MONK_B:
-				case JobConst_default.SURA:
-				case JobConst_default.SURA_H:
-				case JobConst_default.SURA_B:
-				case JobConst_default.SURA_2ND:
-				case JobConst_default.INQUISITOR:
-				case JobConst_default.INQUISITOR_RIDING: return true;
-			}
-			return false;
-		}
 		/**
 		* Is character id a baby ?
 		*
@@ -296561,6 +296547,7 @@ var init_DBManager = __esmMin((() => {
 			JobConst_default.MONK_H,
 			JobConst_default.SURA,
 			JobConst_default.SURA_H,
+			JobConst_default.SURA_2ND,
 			JobConst_default.INQUISITOR,
 			JobConst_default.MONK_B,
 			JobConst_default.SURA_B,
@@ -318239,6 +318226,7 @@ var init_NPC = __esmMin((() => {
 //#region src/DB/Skills/SkillAction.js
 var SkillAction, makeAttackSkillAction, makeGenericSkillAction, makeSliceAttackAction;
 var init_SkillAction = __esmMin((() => {
+	init_DBManager();
 	init_SkillConst();
 	SkillAction = {};
 	makeAttackSkillAction = (actionProp = "ATTACK") => function(entity, tick, pkt) {
@@ -318280,10 +318268,13 @@ var init_SkillAction = __esmMin((() => {
 	makeSliceAttackAction = (actionProp = "ATTACK", startFrame = 0, length = 0, nextActionProp = "READYFIGHT") => function(entity, tick, pkt) {
 		const holdDelay = pkt && pkt.attackMT ? Math.max(pkt.attackMT, 400) : 400;
 		const nextAction = entity && entity.ACTION && entity.ACTION[nextActionProp] !== void 0 ? entity.ACTION[nextActionProp] : entity && entity.ACTION && entity.ACTION.READYFIGHT !== void 0 ? entity.ACTION.READYFIGHT : entity && entity.ACTION && entity.ACTION.IDLE || 0;
+		const job = entity && (typeof entity._job !== "undefined" ? entity._job : entity.job);
+		const weapon = entity && (typeof entity.weapon !== "undefined" ? entity.weapon : 0);
+		const hasSlice = job !== void 0 ? DB.getAttackSlice(job, weapon) : true;
 		return {
-			action: entity.ACTION[actionProp],
-			frame: startFrame,
-			length: length > 0 ? length : false,
+			action: entity && entity.ACTION && entity.ACTION[actionProp] !== void 0 ? entity.ACTION[actionProp] : 0,
+			frame: hasSlice ? startFrame : 0,
+			length: hasSlice && length > 0 ? length : false,
 			repeat: false,
 			play: true,
 			next: {

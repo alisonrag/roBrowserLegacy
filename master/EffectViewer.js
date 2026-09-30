@@ -167,7 +167,7 @@ var init_Thread = __esmMin((() => {
 		static init = () => {
 			if (!_source) _source = new Worker(new URL(
 				/* @vite-ignore */
-				"" + new URL("ThreadEventHandler.js", import.meta.url).href,
+				new URL("ThreadEventHandler.js", import.meta.url).href,
 				"" + import.meta.url
 			), { type: "module" });
 			if (_source instanceof Worker) _source.addEventListener("message", Thread.receive, false);
@@ -77847,7 +77847,7 @@ var init_preload_helper = __esmMin((() => {
 					link.addEventListener("load", res);
 					link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
 				});
-			}));
+			}).filter((p) => p !== void 0));
 		}
 		function handlePreloadError(err) {
 			const e = new Event("vite:preloadError", { cancelable: true });
@@ -77868,7 +77868,7 @@ var init_preload_helper = __esmMin((() => {
 //#region src/UI/Common.css?raw
 var Common_default$1;
 var init_Common$1 = __esmMin((() => {
-	Common_default$1 = "/* Avoid input focus border */\r\n:focus {\r\n	outline: none;\r\n}\r\n::-moz-focus-inner {\r\n	border: 0;\r\n}\r\n\r\n* {\r\n	-moz-user-select: none;\r\n}\r\n\r\nhtml,\r\nbody {\r\n	touch-action: manipulation;\r\n	margin: 0;\r\n}\r\n\r\n/* Reference for the viewport sized body below */\r\nhtml {\r\n	height: 100%;\r\n}\r\n\r\n/* Prevent mobile browser auto-zoom on input focus and double-tap */\r\n:host {\r\n	touch-action: manipulation;\r\n}\r\n\r\ninput,\r\ntextarea,\r\nselect {\r\n	touch-action: manipulation;\r\n}\r\n\r\ncanvas {\r\n	touch-action: none;\r\n}\r\n\r\nbody {\r\n	background-color: black;\r\n	font-size: 12px;\r\n	/* 'SCDream' first: wins only when the server actually serves the client font (loaded via\r\n	   @font-face in DBManager). When it isn't served it resolves to Arial — the official client's\r\n	   window UI font for intl/america servicetype (Ragexe draws window text with CreateFontA on the\r\n	   Gulim/Arial face table). Liberation Sans / Arimo provide Arial metrics on Linux. */\r\n	font-family: 'SCDream', Arial, 'Liberation Sans', Arimo, sans-serif;\r\n	/* Normalize any resolved font's x-height to Arial's (sxHeight 1062 / unitsPerEm 2048 = 0.5186),\r\n	   so text keeps Arial's apparent size on every OS/font. It's inherited and crosses Shadow DOM\r\n	   hosts, so it also rescales elements that use a non-Arial face; those opt out with\r\n	   `font-size-adjust: none` on the selector declaring that font (Intro, GrfViewer, JoystickUI\r\n	   header). SCDream, when a server serves it, is normalized to Arial on purpose.\r\n	   Progressive enhancement: engines that don't support the numeric form ignore it\r\n	   and render at the resolved font's native x-height (no JS fallback needed — Arial\r\n	   / Liberation Sans already carry correct metrics, only annex fonts degrade). */\r\n	font-size-adjust: 0.5186;\r\n	overflow: hidden;\r\n	-webkit-user-select: none;\r\n	user-select: none;\r\n	min-width: 100vw;\r\n	min-height: 100vh;\r\n	letter-spacing: 0;\r\n	line-height: 1.2;\r\n}\r\n\r\n/* Apps owning the 3D viewport (set by Renderer.init) are a fixed viewport: size the body to it and\r\n   contain it. `overflow: hidden` alone doesn't clip the body box — it propagates to the viewport —\r\n   so content positioned off screen (entity overlays, signboards, dragged windows) still extends the\r\n   document's scrollable area, and the browser scrolls, or on mobile lays the page out at its\r\n   fallback width and scales it down, to reveal it. Paint containment clips the box for real. */\r\nbody.ro-viewport {\r\n	width: 100%;\r\n	height: 100%;\r\n	min-width: 0;\r\n	min-height: 0;\r\n	contain: paint;\r\n}\r\n\r\n.title {\r\n	font-size: 12px;\r\n}\r\n\r\nbutton,\r\nui-button {\r\n	padding: 0;\r\n}\r\n\r\nui-button {\r\n	display: inline-block;\r\n}\r\n\r\n.ui-btn {\r\n	-webkit-appearance: none;\r\n	appearance: none;\r\n	display: inline-flex;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	height: 20px;\r\n	min-width: 52px;\r\n	padding: 0 10px;\r\n\r\n	font-size: 12px;\r\n	line-height: 1;\r\n	color: #3f3f3f;\r\n	text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);\r\n\r\n	border-radius: 4px;\r\n	border: 1px solid;\r\n\r\n	/* 3D border: top right bottom left */\r\n	border-color: #cfcfcf #a9a9a9 #5f5f5f #bdbdbd;\r\n\r\n	/* glossy + subtle depth */\r\n	background: linear-gradient(to bottom, #ffffff 0%, #f2f2f2 35%, #dcdcdc 55%, #f9f9f9 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		/* top highlight */ inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		/* bottom inner edge */ 0 1px 0 rgba(0, 0, 0, 0.12); /* outer bottom shadow */\r\n\r\n	cursor: pointer;\r\n}\r\n\r\n/* Hover: hơi xanh nhẹ giống button Reset */\r\n.ui-btn:hover {\r\n	border-color: #c9d1dd #8ea2c4 #4d5f86 #b1bfd5;\r\n	background: linear-gradient(to bottom, #f7fbff 0%, #dfe8f6 35%, #c0d0ee 55%, #f0f6ff 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		0 1px 0 rgba(0, 0, 0, 0.12);\r\n}\r\n\r\n/* Active: giống \"ấn xuống\" */\r\n.ui-btn:active {\r\n	border-color: #9fb0c9 #6f86a6 #3b4b67 #7f96b6;\r\n\r\n	background: linear-gradient(to bottom, #cdd8eb 0%, #b7c8e5 45%, #dfe9fb 100%);\r\n\r\n	box-shadow:\r\n		inset 0 2px 3px rgba(0, 0, 0, 0.18),\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.35);\r\n\r\n	transform: translateY(1px); /* cảm giác bị nhấn */\r\n}\r\n\r\n/* Disabled */\r\n.ui-btn:disabled,\r\n.ui-btn.is-disabled {\r\n	cursor: default;\r\n	color: #8f8f8f;\r\n	text-shadow: none;\r\n\r\n	border-color: #d3d3d3 #bdbdbd #9b9b9b #c9c9c9;\r\n\r\n	background: linear-gradient(to bottom, #f6f6f6 0%, #e7e7e7 55%, #fafafa 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.9),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.08),\r\n		0 1px 0 rgba(0, 0, 0, 0.08);\r\n\r\n	transform: none;\r\n}\r\n\r\n/* Hide native cursor inside Shadow DOM when custom cursor is active */\r\n:host-context(.custom-cursor) * {\r\n	cursor: none !important;\r\n}\r\n";
+	Common_default$1 = "/* Avoid input focus border */\r\n:focus {\r\n	outline: none;\r\n}\r\n::-moz-focus-inner {\r\n	border: 0;\r\n}\r\n\r\n* {\r\n	-moz-user-select: none;\r\n}\r\n\r\nhtml,\r\nbody {\r\n	touch-action: manipulation;\r\n	margin: 0;\r\n}\r\n\r\n/* Reference for the viewport sized body below */\r\nhtml {\r\n	height: 100%;\r\n}\r\n\r\n/* Prevent mobile browser auto-zoom on input focus and double-tap */\r\n:host {\r\n	touch-action: manipulation;\r\n}\r\n\r\ninput,\r\ntextarea,\r\nselect {\r\n	touch-action: manipulation;\r\n}\r\n\r\ncanvas {\r\n	touch-action: none;\r\n}\r\n\r\n/* Page zoomed in (browser pinch / input focus zoom, tracked by Core/Mobile.js): hand the\r\n   touches back to the browser so the user can pan and pinch the page back out */\r\nbody.ro-page-zoomed canvas {\r\n	touch-action: auto;\r\n}\r\n\r\nbody {\r\n	background-color: black;\r\n	font-size: 12px;\r\n	/* 'SCDream' first: wins only when the server actually serves the client font (loaded via\r\n	   @font-face in DBManager). When it isn't served it resolves to Arial — the official client's\r\n	   window UI font for intl/america servicetype (Ragexe draws window text with CreateFontA on the\r\n	   Gulim/Arial face table). Liberation Sans / Arimo provide Arial metrics on Linux. */\r\n	font-family: 'SCDream', Arial, 'Liberation Sans', Arimo, sans-serif;\r\n	/* Normalize any resolved font's x-height to Arial's (sxHeight 1062 / unitsPerEm 2048 = 0.5186),\r\n	   so text keeps Arial's apparent size on every OS/font. It's inherited and crosses Shadow DOM\r\n	   hosts, so it also rescales elements that use a non-Arial face; those opt out with\r\n	   `font-size-adjust: none` on the selector declaring that font (Intro, GrfViewer, JoystickUI\r\n	   header). SCDream, when a server serves it, is normalized to Arial on purpose.\r\n	   Progressive enhancement: engines that don't support the numeric form ignore it\r\n	   and render at the resolved font's native x-height (no JS fallback needed — Arial\r\n	   / Liberation Sans already carry correct metrics, only annex fonts degrade). */\r\n	font-size-adjust: 0.5186;\r\n	overflow: hidden;\r\n	-webkit-user-select: none;\r\n	user-select: none;\r\n	min-width: 100vw;\r\n	min-height: 100vh;\r\n	letter-spacing: 0;\r\n	line-height: 1.2;\r\n}\r\n\r\n/* Apps owning the 3D viewport (set by Renderer.init) are a fixed viewport: size the body to it and\r\n   contain it. `overflow: hidden` alone doesn't clip the body box — it propagates to the viewport —\r\n   so content positioned off screen (entity overlays, signboards, dragged windows) still extends the\r\n   document's scrollable area, and the browser scrolls, or on mobile lays the page out at its\r\n   fallback width and scales it down, to reveal it. Paint containment clips the box for real. */\r\nbody.ro-viewport {\r\n	width: 100%;\r\n	height: 100%;\r\n	min-width: 0;\r\n	min-height: 0;\r\n	contain: paint;\r\n}\r\n\r\n.title {\r\n	font-size: 12px;\r\n}\r\n\r\nbutton,\r\nui-button {\r\n	padding: 0;\r\n}\r\n\r\nui-button {\r\n	display: inline-block;\r\n}\r\n\r\n.ui-btn {\r\n	-webkit-appearance: none;\r\n	appearance: none;\r\n	display: inline-flex;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	height: 20px;\r\n	min-width: 52px;\r\n	padding: 0 10px;\r\n\r\n	font-size: 12px;\r\n	line-height: 1;\r\n	color: #3f3f3f;\r\n	text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);\r\n\r\n	border-radius: 4px;\r\n	border: 1px solid;\r\n\r\n	/* 3D border: top right bottom left */\r\n	border-color: #cfcfcf #a9a9a9 #5f5f5f #bdbdbd;\r\n\r\n	/* glossy + subtle depth */\r\n	background: linear-gradient(to bottom, #ffffff 0%, #f2f2f2 35%, #dcdcdc 55%, #f9f9f9 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		/* top highlight */ inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		/* bottom inner edge */ 0 1px 0 rgba(0, 0, 0, 0.12); /* outer bottom shadow */\r\n\r\n	cursor: pointer;\r\n}\r\n\r\n/* Hover: hơi xanh nhẹ giống button Reset */\r\n.ui-btn:hover {\r\n	border-color: #c9d1dd #8ea2c4 #4d5f86 #b1bfd5;\r\n	background: linear-gradient(to bottom, #f7fbff 0%, #dfe8f6 35%, #c0d0ee 55%, #f0f6ff 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		0 1px 0 rgba(0, 0, 0, 0.12);\r\n}\r\n\r\n/* Active: giống \"ấn xuống\" */\r\n.ui-btn:active {\r\n	border-color: #9fb0c9 #6f86a6 #3b4b67 #7f96b6;\r\n\r\n	background: linear-gradient(to bottom, #cdd8eb 0%, #b7c8e5 45%, #dfe9fb 100%);\r\n\r\n	box-shadow:\r\n		inset 0 2px 3px rgba(0, 0, 0, 0.18),\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.35);\r\n\r\n	transform: translateY(1px); /* cảm giác bị nhấn */\r\n}\r\n\r\n/* Disabled */\r\n.ui-btn:disabled,\r\n.ui-btn.is-disabled {\r\n	cursor: default;\r\n	color: #8f8f8f;\r\n	text-shadow: none;\r\n\r\n	border-color: #d3d3d3 #bdbdbd #9b9b9b #c9c9c9;\r\n\r\n	background: linear-gradient(to bottom, #f6f6f6 0%, #e7e7e7 55%, #fafafa 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.9),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.08),\r\n		0 1px 0 rgba(0, 0, 0, 0.08);\r\n\r\n	transform: none;\r\n}\r\n\r\n/* Hide native cursor inside Shadow DOM when custom cursor is active */\r\n:host-context(.custom-cursor) * {\r\n	cursor: none !important;\r\n}\r\n";
 }));
 //#endregion
 //#region src/Controls/MouseEventHandler.js
@@ -78426,7 +78426,14 @@ var init_Graphics = __esmMin((() => {
 		cartoonEdgeSlope: 1.5,
 		casEnabled: false,
 		casContrast: 0,
-		casSharpening: 1
+		casSharpening: 1,
+		/**
+		* Fade map geometry blocking the view of the player (not in first person)
+		* 'off' | 'dither' | 'alpha'
+		*/
+		occluderFade: "off",
+		occluderFadeOpacity: .25,
+		occluderFadeRadius: 5
 	};
 	cleanDefaults = JSON.parse(JSON.stringify(defaultGraphicsSettings));
 	GraphicsSettings = Preferences.get("Graphics", defaultGraphicsSettings, 1.1);
@@ -78891,7 +78898,7 @@ var init_Controls = __esmMin((() => {
 }));
 //#endregion
 //#region src/Vendors/gl-matrix.js
-var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$7, vec4$8, mat2$1, mat2d, mat3$5, mat4$22, quat$2;
+var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$8, mat2$1, mat2d, mat3$5, mat4$24, quat$2;
 var init_gl_matrix$1 = __esmMin((() => {
 	exports$3 = {};
 	if (!GLMAT_EPSILON) GLMAT_EPSILON = 1e-6;
@@ -79333,13 +79340,13 @@ var init_gl_matrix$1 = __esmMin((() => {
 		return "vec2(" + a[0] + ", " + a[1] + ")";
 	};
 	if (typeof exports$3 !== "undefined") exports$3.vec2 = vec2$4;
-	vec3$7 = {};
+	vec3$8 = {};
 	/**
 	* Creates a new, empty vec3
 	*
 	* @returns {vec3} a new 3D vector
 	*/
-	vec3$7.create = function() {
+	vec3$8.create = function() {
 		var out = new GLMAT_ARRAY_TYPE(3);
 		out[0] = 0;
 		out[1] = 0;
@@ -79352,7 +79359,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} a vector to clone
 	* @returns {vec3} a new 3D vector
 	*/
-	vec3$7.clone = function(a) {
+	vec3$8.clone = function(a) {
 		var out = new GLMAT_ARRAY_TYPE(3);
 		out[0] = a[0];
 		out[1] = a[1];
@@ -79367,7 +79374,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} z Z component
 	* @returns {vec3} a new 3D vector
 	*/
-	vec3$7.fromValues = function(x, y, z) {
+	vec3$8.fromValues = function(x, y, z) {
 		var out = new GLMAT_ARRAY_TYPE(3);
 		out[0] = x;
 		out[1] = y;
@@ -79381,7 +79388,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} a the source vector
 	* @returns {vec3} out
 	*/
-	vec3$7.copy = function(out, a) {
+	vec3$8.copy = function(out, a) {
 		out[0] = a[0];
 		out[1] = a[1];
 		out[2] = a[2];
@@ -79396,7 +79403,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} z Z component
 	* @returns {vec3} out
 	*/
-	vec3$7.set = function(out, x, y, z) {
+	vec3$8.set = function(out, x, y, z) {
 		out[0] = x;
 		out[1] = y;
 		out[2] = z;
@@ -79410,7 +79417,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.add = function(out, a, b) {
+	vec3$8.add = function(out, a, b) {
 		out[0] = a[0] + b[0];
 		out[1] = a[1] + b[1];
 		out[2] = a[2] + b[2];
@@ -79424,7 +79431,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.subtract = function(out, a, b) {
+	vec3$8.subtract = function(out, a, b) {
 		out[0] = a[0] - b[0];
 		out[1] = a[1] - b[1];
 		out[2] = a[2] - b[2];
@@ -79434,7 +79441,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.subtract}
 	* @function
 	*/
-	vec3$7.sub = vec3$7.subtract;
+	vec3$8.sub = vec3$8.subtract;
 	/**
 	* Multiplies two vec3's
 	*
@@ -79443,7 +79450,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.multiply = function(out, a, b) {
+	vec3$8.multiply = function(out, a, b) {
 		out[0] = a[0] * b[0];
 		out[1] = a[1] * b[1];
 		out[2] = a[2] * b[2];
@@ -79453,7 +79460,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.multiply}
 	* @function
 	*/
-	vec3$7.mul = vec3$7.multiply;
+	vec3$8.mul = vec3$8.multiply;
 	/**
 	* Divides two vec3's
 	*
@@ -79462,7 +79469,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.divide = function(out, a, b) {
+	vec3$8.divide = function(out, a, b) {
 		out[0] = a[0] / b[0];
 		out[1] = a[1] / b[1];
 		out[2] = a[2] / b[2];
@@ -79472,7 +79479,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.divide}
 	* @function
 	*/
-	vec3$7.div = vec3$7.divide;
+	vec3$8.div = vec3$8.divide;
 	/**
 	* Returns the minimum of two vec3's
 	*
@@ -79481,7 +79488,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.min = function(out, a, b) {
+	vec3$8.min = function(out, a, b) {
 		out[0] = Math.min(a[0], b[0]);
 		out[1] = Math.min(a[1], b[1]);
 		out[2] = Math.min(a[2], b[2]);
@@ -79495,7 +79502,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.max = function(out, a, b) {
+	vec3$8.max = function(out, a, b) {
 		out[0] = Math.max(a[0], b[0]);
 		out[1] = Math.max(a[1], b[1]);
 		out[2] = Math.max(a[2], b[2]);
@@ -79509,7 +79516,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} b amount to scale the vector by
 	* @returns {vec3} out
 	*/
-	vec3$7.scale = function(out, a, b) {
+	vec3$8.scale = function(out, a, b) {
 		out[0] = a[0] * b;
 		out[1] = a[1] * b;
 		out[2] = a[2] * b;
@@ -79524,7 +79531,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} scale the amount to scale b by before adding
 	* @returns {vec3} out
 	*/
-	vec3$7.scaleAndAdd = function(out, a, b, scale) {
+	vec3$8.scaleAndAdd = function(out, a, b, scale) {
 		out[0] = a[0] + b[0] * scale;
 		out[1] = a[1] + b[1] * scale;
 		out[2] = a[2] + b[2] * scale;
@@ -79537,7 +79544,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {Number} distance between a and b
 	*/
-	vec3$7.distance = function(a, b) {
+	vec3$8.distance = function(a, b) {
 		var x = b[0] - a[0], y = b[1] - a[1], z = b[2] - a[2];
 		return Math.sqrt(x * x + y * y + z * z);
 	};
@@ -79545,7 +79552,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.distance}
 	* @function
 	*/
-	vec3$7.dist = vec3$7.distance;
+	vec3$8.dist = vec3$8.distance;
 	/**
 	* Calculates the squared euclidian distance between two vec3's
 	*
@@ -79553,7 +79560,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {Number} squared distance between a and b
 	*/
-	vec3$7.squaredDistance = function(a, b) {
+	vec3$8.squaredDistance = function(a, b) {
 		var x = b[0] - a[0], y = b[1] - a[1], z = b[2] - a[2];
 		return x * x + y * y + z * z;
 	};
@@ -79561,14 +79568,14 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.squaredDistance}
 	* @function
 	*/
-	vec3$7.sqrDist = vec3$7.squaredDistance;
+	vec3$8.sqrDist = vec3$8.squaredDistance;
 	/**
 	* Calculates the length of a vec3
 	*
 	* @param {vec3} a vector to calculate length of
 	* @returns {Number} length of a
 	*/
-	vec3$7.length = function(a) {
+	vec3$8.length = function(a) {
 		var x = a[0], y = a[1], z = a[2];
 		return Math.sqrt(x * x + y * y + z * z);
 	};
@@ -79576,14 +79583,14 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.length}
 	* @function
 	*/
-	vec3$7.len = vec3$7.length;
+	vec3$8.len = vec3$8.length;
 	/**
 	* Calculates the squared length of a vec3
 	*
 	* @param {vec3} a vector to calculate squared length of
 	* @returns {Number} squared length of a
 	*/
-	vec3$7.squaredLength = function(a) {
+	vec3$8.squaredLength = function(a) {
 		var x = a[0], y = a[1], z = a[2];
 		return x * x + y * y + z * z;
 	};
@@ -79591,7 +79598,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec3.squaredLength}
 	* @function
 	*/
-	vec3$7.sqrLen = vec3$7.squaredLength;
+	vec3$8.sqrLen = vec3$8.squaredLength;
 	/**
 	* Negates the components of a vec3
 	*
@@ -79599,7 +79606,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} a vector to negate
 	* @returns {vec3} out
 	*/
-	vec3$7.negate = function(out, a) {
+	vec3$8.negate = function(out, a) {
 		out[0] = -a[0];
 		out[1] = -a[1];
 		out[2] = -a[2];
@@ -79612,7 +79619,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} a vector to normalize
 	* @returns {vec3} out
 	*/
-	vec3$7.normalize = function(out, a) {
+	vec3$8.normalize = function(out, a) {
 		var x = a[0], y = a[1], z = a[2];
 		var len = x * x + y * y + z * z;
 		if (len > 0) {
@@ -79630,7 +79637,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {Number} dot product of a and b
 	*/
-	vec3$7.dot = function(a, b) {
+	vec3$8.dot = function(a, b) {
 		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 	};
 	/**
@@ -79641,7 +79648,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} b the second operand
 	* @returns {vec3} out
 	*/
-	vec3$7.cross = function(out, a, b) {
+	vec3$8.cross = function(out, a, b) {
 		var ax = a[0], ay = a[1], az = a[2], bx = b[0], by = b[1], bz = b[2];
 		out[0] = ay * bz - az * by;
 		out[1] = az * bx - ax * bz;
@@ -79657,7 +79664,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} t interpolation amount between the two inputs
 	* @returns {vec3} out
 	*/
-	vec3$7.lerp = function(out, a, b, t) {
+	vec3$8.lerp = function(out, a, b, t) {
 		var ax = a[0], ay = a[1], az = a[2];
 		out[0] = ax + t * (b[0] - ax);
 		out[1] = ay + t * (b[1] - ay);
@@ -79671,7 +79678,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} [scale] Length of the resulting vector. If ommitted, a unit vector will be returned
 	* @returns {vec3} out
 	*/
-	vec3$7.random = function(out, scale) {
+	vec3$8.random = function(out, scale) {
 		scale = scale || 1;
 		var r = GLMAT_RANDOM() * 2 * Math.PI;
 		var z = GLMAT_RANDOM() * 2 - 1;
@@ -79690,7 +79697,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} m matrix to transform with
 	* @returns {vec3} out
 	*/
-	vec3$7.transformMat4 = function(out, a, m) {
+	vec3$8.transformMat4 = function(out, a, m) {
 		var x = a[0], y = a[1], z = a[2];
 		out[0] = m[0] * x + m[4] * y + m[8] * z + m[12];
 		out[1] = m[1] * x + m[5] * y + m[9] * z + m[13];
@@ -79705,7 +79712,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} m the 3x3 matrix to transform with
 	* @returns {vec3} out
 	*/
-	vec3$7.transformMat3 = function(out, a, m) {
+	vec3$8.transformMat3 = function(out, a, m) {
 		var x = a[0], y = a[1], z = a[2];
 		out[0] = x * m[0] + y * m[3] + z * m[6];
 		out[1] = x * m[1] + y * m[4] + z * m[7];
@@ -79720,7 +79727,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {quat} q quaternion to transform with
 	* @returns {vec3} out
 	*/
-	vec3$7.transformQuat = function(out, a, q) {
+	vec3$8.transformQuat = function(out, a, q) {
 		var x = a[0], y = a[1], z = a[2], qx = q[0], qy = q[1], qz = q[2], qw = q[3], ix = qw * x + qy * z - qz * y, iy = qw * y + qz * x - qx * z, iz = qw * z + qx * y - qy * x, iw = -qx * x - qy * y - qz * z;
 		out[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
 		out[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
@@ -79739,8 +79746,8 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {Array} a
 	* @function
 	*/
-	vec3$7.forEach = (function() {
-		var vec = vec3$7.create();
+	vec3$8.forEach = (function() {
+		var vec = vec3$8.create();
 		return function(a, stride, offset, count, fn, arg) {
 			var i, l;
 			if (!stride) stride = 3;
@@ -79765,10 +79772,10 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} vec vector to represent as a string
 	* @returns {String} string representation of the vector
 	*/
-	vec3$7.str = function(a) {
+	vec3$8.str = function(a) {
 		return "vec3(" + a[0] + ", " + a[1] + ", " + a[2] + ")";
 	};
-	if (typeof exports$3 !== "undefined") exports$3.vec3 = vec3$7;
+	if (typeof exports$3 !== "undefined") exports$3.vec3 = vec3$8;
 	vec4$8 = {};
 	/**
 	* Creates a new, empty vec4
@@ -80890,13 +80897,13 @@ var init_gl_matrix$1 = __esmMin((() => {
 		return "mat3(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ")";
 	};
 	if (typeof exports$3 !== "undefined") exports$3.mat3 = mat3$5;
-	mat4$22 = {};
+	mat4$24 = {};
 	/**
 	* Creates a new identity mat4
 	*
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$22.create = function() {
+	mat4$24.create = function() {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = 1;
 		out[1] = 0;
@@ -80922,7 +80929,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a matrix to clone
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$22.clone = function(a) {
+	mat4$24.clone = function(a) {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = a[0];
 		out[1] = a[1];
@@ -80949,7 +80956,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$22.copy = function(out, a) {
+	mat4$24.copy = function(out, a) {
 		out[0] = a[0];
 		out[1] = a[1];
 		out[2] = a[2];
@@ -80974,7 +80981,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} out the receiving matrix
 	* @returns {mat4} out
 	*/
-	mat4$22.identity = function(out) {
+	mat4$24.identity = function(out) {
 		out[0] = 1;
 		out[1] = 0;
 		out[2] = 0;
@@ -81000,7 +81007,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$22.transpose = function(out, a) {
+	mat4$24.transpose = function(out, a) {
 		if (out === a) {
 			var a01 = a[1], a02 = a[2], a03 = a[3], a12 = a[6], a13 = a[7], a23 = a[11];
 			out[1] = a[4];
@@ -81042,7 +81049,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$22.invert = function(out, a) {
+	mat4$24.invert = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31, b11 = a22 * a33 - a23 * a32, det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 		if (!det) return null;
 		det = 1 / det;
@@ -81071,7 +81078,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$22.adjoint = function(out, a) {
+	mat4$24.adjoint = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		out[0] = a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22);
 		out[1] = -(a01 * (a22 * a33 - a23 * a32) - a21 * (a02 * a33 - a03 * a32) + a31 * (a02 * a23 - a03 * a22));
@@ -81097,7 +81104,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {Number} determinant of a
 	*/
-	mat4$22.determinant = function(a) {
+	mat4$24.determinant = function(a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31;
 		return b00 * (a22 * a33 - a23 * a32) - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 	};
@@ -81109,7 +81116,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} b the second operand
 	* @returns {mat4} out
 	*/
-	mat4$22.multiply = function(out, a, b) {
+	mat4$24.multiply = function(out, a, b) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		var b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
 		out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
@@ -81146,7 +81153,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link mat4.multiply}
 	* @function
 	*/
-	mat4$22.mul = mat4$22.multiply;
+	mat4$24.mul = mat4$24.multiply;
 	/**
 	* Translate a mat4 by the given vector
 	*
@@ -81155,7 +81162,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v vector to translate by
 	* @returns {mat4} out
 	*/
-	mat4$22.translate = function(out, a, v) {
+	mat4$24.translate = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2], a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
 		if (a === out) {
 			out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
@@ -81202,7 +81209,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v the vec3 to scale the matrix by
 	* @returns {mat4} out
 	**/
-	mat4$22.scale = function(out, a, v) {
+	mat4$24.scale = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2];
 		out[0] = a[0] * x;
 		out[1] = a[1] * x;
@@ -81231,7 +81238,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} axis the axis to rotate around
 	* @returns {mat4} out
 	*/
-	mat4$22.rotate = function(out, a, rad, axis) {
+	mat4$24.rotate = function(out, a, rad, axis) {
 		var x = axis[0], y = axis[1], z = axis[2], len = Math.sqrt(x * x + y * y + z * z), s, c, t, a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, b00, b01, b02, b10, b11, b12, b20, b21, b22;
 		if (Math.abs(len) < GLMAT_EPSILON) return null;
 		len = 1 / len;
@@ -81290,7 +81297,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$22.rotateX = function(out, a, rad) {
+	mat4$24.rotateX = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[0] = a[0];
@@ -81320,7 +81327,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$22.rotateY = function(out, a, rad) {
+	mat4$24.rotateY = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[4] = a[4];
@@ -81350,7 +81357,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$22.rotateZ = function(out, a, rad) {
+	mat4$24.rotateZ = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
 		if (a !== out) {
 			out[8] = a[8];
@@ -81387,7 +81394,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v Translation vector
 	* @returns {mat4} out
 	*/
-	mat4$22.fromRotationTranslation = function(out, q, v) {
+	mat4$24.fromRotationTranslation = function(out, q, v) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81415,7 +81422,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	*
 	* @returns {mat4} out
 	*/
-	mat4$22.fromQuat = function(out, q) {
+	mat4$24.fromQuat = function(out, q) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81447,7 +81454,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$22.frustum = function(out, left, right, bottom, top, near, far) {
+	mat4$24.frustum = function(out, left, right, bottom, top, near, far) {
 		var rl = 1 / (right - left), tb = 1 / (top - bottom), nf = 1 / (near - far);
 		out[0] = near * 2 * rl;
 		out[1] = 0;
@@ -81477,7 +81484,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$22.perspective = function(out, fovy, aspect, near, far) {
+	mat4$24.perspective = function(out, fovy, aspect, near, far) {
 		var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
 		out[0] = f / aspect;
 		out[1] = 0;
@@ -81509,7 +81516,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$22.ortho = function(out, left, right, bottom, top, near, far) {
+	mat4$24.ortho = function(out, left, right, bottom, top, near, far) {
 		var lr = 1 / (left - right), bt = 1 / (bottom - top), nf = 1 / (near - far);
 		out[0] = -2 * lr;
 		out[1] = 0;
@@ -81538,9 +81545,9 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} up vec3 pointing up
 	* @returns {mat4} out
 	*/
-	mat4$22.lookAt = function(out, eye, center, up) {
+	mat4$24.lookAt = function(out, eye, center, up) {
 		var x0, x1, x2, y0, y1, y2, z0, z1, z2, len, eyex = eye[0], eyey = eye[1], eyez = eye[2], upx = up[0], upy = up[1], upz = up[2], centerx = center[0], centery = center[1], centerz = center[2];
-		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$22.identity(out);
+		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$24.identity(out);
 		z0 = eyex - centerx;
 		z1 = eyey - centery;
 		z2 = eyez - centerz;
@@ -81600,10 +81607,10 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} mat matrix to represent as a string
 	* @returns {String} string representation of the matrix
 	*/
-	mat4$22.str = function(a) {
+	mat4$24.str = function(a) {
 		return "mat4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + ", " + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + ")";
 	};
-	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$22;
+	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$24;
 	quat$2 = {};
 	/**
 	* Creates a new identity quat
@@ -81630,15 +81637,15 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	*/
 	quat$2.rotationTo = (function() {
-		var tmpvec3 = vec3$7.create();
-		var xUnitVec3 = vec3$7.fromValues(1, 0, 0);
-		var yUnitVec3 = vec3$7.fromValues(0, 1, 0);
+		var tmpvec3 = vec3$8.create();
+		var xUnitVec3 = vec3$8.fromValues(1, 0, 0);
+		var yUnitVec3 = vec3$8.fromValues(0, 1, 0);
 		return function(out, a, b) {
-			var dot = vec3$7.dot(a, b);
+			var dot = vec3$8.dot(a, b);
 			if (dot < -.999999) {
-				vec3$7.cross(tmpvec3, xUnitVec3, a);
-				if (vec3$7.length(tmpvec3) < 1e-6) vec3$7.cross(tmpvec3, yUnitVec3, a);
-				vec3$7.normalize(tmpvec3, tmpvec3);
+				vec3$8.cross(tmpvec3, xUnitVec3, a);
+				if (vec3$8.length(tmpvec3) < 1e-6) vec3$8.cross(tmpvec3, yUnitVec3, a);
+				vec3$8.normalize(tmpvec3, tmpvec3);
 				quat$2.setAxisAngle(out, tmpvec3, Math.PI);
 				return out;
 			} else if (dot > .999999) {
@@ -81648,7 +81655,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 				out[3] = 1;
 				return out;
 			} else {
-				vec3$7.cross(tmpvec3, a, b);
+				vec3$8.cross(tmpvec3, a, b);
 				out[0] = tmpvec3[0];
 				out[1] = tmpvec3[1];
 				out[2] = tmpvec3[2];
@@ -83189,7 +83196,7 @@ var init_Texture = __esmMin((() => {
 *
 * @return {object} webgl context
 */
-function getContext(canvas, parameters) {
+function getContext$1(canvas, parameters) {
 	let gl = null;
 	let i;
 	if (!parameters) parameters = {
@@ -83359,7 +83366,7 @@ var init_WebGL = __esmMin((() => {
 	init_Texture();
 	init_Configs();
 	WebGL_default = {
-		getContext,
+		getContext: getContext$1,
 		compileShader,
 		createShaderProgram,
 		detectBadWebGL,
@@ -83590,7 +83597,7 @@ var init_PostProcess = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/VerticalFlip.js
-var _program$27, _buffer$21, _active$3, VerticalFlip;
+var _program$28, _buffer$21, _active$3, VerticalFlip;
 var init_VerticalFlip = __esmMin((() => {
 	init_VerticalFlip$2();
 	init_VerticalFlip$1();
@@ -83599,9 +83606,9 @@ var init_VerticalFlip = __esmMin((() => {
 	_active$3 = false;
 	VerticalFlip = class {
 		static init(gl) {
-			if (_program$27) return;
+			if (_program$28) return;
 			try {
-				_program$27 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
+				_program$28 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
 			} catch (e) {
 				console.error("Error when compiling shader VerticalFlip.", e);
 				return;
@@ -83634,19 +83641,19 @@ var init_VerticalFlip = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$21 || !_program$27 || !_active$3) return;
+			if (!_buffer$21 || !_program$28 || !_active$3) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$27);
+			gl.useProgram(_program$28);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$21);
-			let posLoc = _program$27.attribute.aPosition;
+			let posLoc = _program$28.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 0);
-			posLoc = _program$27.attribute.aTextureCoord;
+			posLoc = _program$28.attribute.aTextureCoord;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 8);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$27.uniform.uTexture, 0);
+			gl.uniform1i(_program$28.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 			PostProcess.afterRenderPass(gl);
 		}
@@ -83654,13 +83661,13 @@ var init_VerticalFlip = __esmMin((() => {
 		* @returns {WebGLProgram} Shader program
 		*/
 		static program() {
-			return _program$27;
+			return _program$28;
 		}
 		/** Resets effect state */
 		static clean(gl) {
 			_active$3 = false;
 			if (_buffer$21) gl.deleteBuffer(_buffer$21);
-			_program$27 = _buffer$21 = null;
+			_program$28 = _buffer$21 = null;
 		}
 		/** @returns {boolean} Whether the effect is active */
 		static isActive() {
@@ -83674,7 +83681,7 @@ var init_VerticalFlip = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Map/Altitude.js
-var _cells, _types$1, mat4$21, vec3$6, vec4$7, _from, _to, _unit, _matrix$7, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
+var _cells, _types$1, mat4$23, vec3$7, vec4$7, _from, _to, _unit, _matrix$8, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
 var init_Altitude = __esmMin((() => {
 	init_gl_matrix$1();
 	init_PathFinding();
@@ -83682,11 +83689,11 @@ var init_Altitude = __esmMin((() => {
 	init_VerticalFlip();
 	_cells = null;
 	_types$1 = null;
-	({mat4: mat4$21, vec3: vec3$6, vec4: vec4$7} = exports$3);
-	_from = vec3$6.create();
+	({mat4: mat4$23, vec3: vec3$7, vec4: vec4$7} = exports$3);
+	_from = vec3$7.create();
 	_to = vec4$7.create();
-	_unit = vec3$6.create();
-	_matrix$7 = mat4$21.create();
+	_unit = vec3$7.create();
+	_matrix$8 = mat4$23.create();
 	buffer1x1 = /* @__PURE__ */ new Float32Array(30);
 	buffer5x5 = /* @__PURE__ */ new Float32Array(750);
 	buffer7x7 = /* @__PURE__ */ new Float32Array(1470);
@@ -83783,23 +83790,23 @@ var init_Altitude = __esmMin((() => {
 		static intersect(modelView, projection, out) {
 			let i;
 			const count = Altitude.MAX_INTERSECT_COUNT;
-			mat4$21.invert(_matrix$7, modelView);
-			_from[0] = _matrix$7[12];
-			_from[1] = _matrix$7[13];
-			_from[2] = _matrix$7[14];
+			mat4$23.invert(_matrix$8, modelView);
+			_from[0] = _matrix$8[12];
+			_from[1] = _matrix$8[13];
+			_from[2] = _matrix$8[14];
 			_to[0] = Mouse.screen.x / Mouse.screen.width * 2 - 1;
 			_to[1] = -(Mouse.screen.y / Mouse.screen.height) * 2 + 1;
 			if (VerticalFlip.isActive()) _to[1] = -_to[1];
 			_to[2] = 1;
 			_to[3] = 1;
-			mat4$21.multiply(_matrix$7, projection, modelView);
-			mat4$21.invert(_matrix$7, _matrix$7);
-			vec4$7.transformMat4(_to, _to, _matrix$7);
+			mat4$23.multiply(_matrix$8, projection, modelView);
+			mat4$23.invert(_matrix$8, _matrix$8);
+			vec4$7.transformMat4(_to, _to, _matrix$8);
 			_to[0] /= _to[3];
 			_to[1] /= _to[3];
 			_to[2] /= _to[3];
-			vec3$6.sub(_unit, _to, _from);
-			vec3$6.normalize(_unit, _unit);
+			vec3$7.sub(_unit, _to, _from);
+			vec3$7.normalize(_unit, _unit);
 			for (i = 0; i < count; ++i) {
 				_from[0] += _unit[0];
 				_from[1] += _unit[1];
@@ -145184,12 +145191,22 @@ function invalidErr(string, message) {
 }
 function internalCalculateObjectSize(object, serializeFunctions, ignoreUndefined) {
 	const objectStack = [{
-		obj: object,
-		ignoreUndefined: ignoreUndefined ?? false
+		object,
+		ignoreUndefined: ignoreUndefined ?? false,
+		exit: false
 	}];
+	const path = /* @__PURE__ */ new Set();
 	let total = 0;
 	while (objectStack.length > 0) {
-		const { obj, ignoreUndefined: frameIgnoreUndefined } = objectStack.pop();
+		const frame = objectStack.pop();
+		if (frame.exit) {
+			path.delete(frame.object);
+			continue;
+		}
+		const { object: obj, ignoreUndefined: frameIgnoreUndefined } = frame;
+		path.add(obj);
+		frame.exit = true;
+		objectStack.push(frame);
 		total += 5;
 		const isObjArray = Array.isArray(obj);
 		const isObjMap = !isObjArray && (obj instanceof Map || isMap(obj));
@@ -145197,13 +145214,13 @@ function internalCalculateObjectSize(object, serializeFunctions, ignoreUndefined
 		if (!isObjArray && !isObjMap && typeof obj?.toBSON === "function") target = obj.toBSON();
 		if (isObjArray) {
 			const array = target;
-			for (let i = 0; i < array.length; i++) total += calculateElementSize(i.toString(), array[i], serializeFunctions, true, frameIgnoreUndefined, objectStack);
-		} else if (isObjMap) for (const [key, value] of target) total += calculateElementSize(key, value, serializeFunctions, false, frameIgnoreUndefined, objectStack);
-		else for (const key of Object.keys(target)) total += calculateElementSize(key, target[key], serializeFunctions, false, frameIgnoreUndefined, objectStack);
+			for (let i = 0; i < array.length; i++) total += calculateElementSize(i.toString(), array[i], serializeFunctions, true, frameIgnoreUndefined, objectStack, path);
+		} else if (isObjMap) for (const [key, value] of target) total += calculateElementSize(key, value, serializeFunctions, false, frameIgnoreUndefined, objectStack, path);
+		else for (const key of Object.keys(target)) total += calculateElementSize(key, target[key], serializeFunctions, false, frameIgnoreUndefined, objectStack, path);
 	}
 	return total;
 }
-function calculateElementSize(name, value, serializeFunctions = false, isArray = false, ignoreUndefined = false, objectStack) {
+function calculateElementSize(name, value, serializeFunctions = false, isArray = false, ignoreUndefined = false, objectStack, path) {
 	if (typeof value?.toBSON === "function") value = value.toBSON();
 	switch (typeof value) {
 		case "string": return 1 + ByteUtils.utf8ByteLength(name) + 1 + 4 + ByteUtils.utf8ByteLength(value) + 1;
@@ -145225,9 +145242,11 @@ function calculateElementSize(name, value, serializeFunctions = false, isArray =
 		else if (value._bsontype === "Int32") return ByteUtils.utf8ByteLength(name) + 1 + 5;
 		else if (value._bsontype === "Code") {
 			if (value.scope != null && Object.keys(value.scope).length > 0) {
+				if (path.has(value.scope)) throw new BSONError("Cannot convert circular structure to BSON");
 				objectStack.push({
-					obj: value.scope,
-					ignoreUndefined
+					object: value.scope,
+					ignoreUndefined,
+					exit: false
 				});
 				return ByteUtils.utf8ByteLength(name) + 1 + 1 + 4 + 4 + ByteUtils.utf8ByteLength(value.code.toString()) + 1;
 			} else return ByteUtils.utf8ByteLength(name) + 1 + 1 + 4 + ByteUtils.utf8ByteLength(value.code.toString()) + 1;
@@ -145243,16 +145262,19 @@ function calculateElementSize(name, value, serializeFunctions = false, isArray =
 			}, value.fields);
 			if (value.db != null) ordered_values["$db"] = value.db;
 			objectStack.push({
-				obj: ordered_values,
-				ignoreUndefined: true
+				object: ordered_values,
+				ignoreUndefined: true,
+				exit: false
 			});
 			return ByteUtils.utf8ByteLength(name) + 1 + 1;
 		} else if (value instanceof RegExp || isRegExp$1(value)) return ByteUtils.utf8ByteLength(name) + 1 + 1 + ByteUtils.utf8ByteLength(value.source) + 1 + (value.global ? 1 : 0) + (value.ignoreCase ? 1 : 0) + (value.multiline ? 1 : 0) + 1;
 		else if (value._bsontype === "BSONRegExp") return ByteUtils.utf8ByteLength(name) + 1 + 1 + ByteUtils.utf8ByteLength(value.pattern) + 1 + ByteUtils.utf8ByteLength(value.options) + 1;
 		else {
+			if (path.has(value)) throw new BSONError("Cannot convert circular structure to BSON");
 			objectStack.push({
-				obj: value,
-				ignoreUndefined
+				object: value,
+				ignoreUndefined,
+				exit: false
 			});
 			return ByteUtils.utf8ByteLength(name) + 1 + 1;
 		}
@@ -162738,22 +162760,23 @@ var init_PacketStructure = __esmMin((() => {
 		this.KafraPoint = fp.readULong();
 		this.CashPoint = fp.readULong();
 		this.itemList = (function() {
-			const div = PacketVerManager_default.value >= 20181121 ? 13 : 11;
+			const base = PacketVerManager_default.value >= 20181121 ? 13 : 11;
+			const ext = base + 7;
 			const itemListLen = end - fp.tell();
-			const itemLen = itemListLen % 20 === 0 ? 20 : itemListLen % 18 == 0 ? 18 : div;
-			const count = (end - fp.tell()) / itemLen | 0;
-			const out = new Array(count);
-			for (let i = 0; i < count; ++i) {
-				out[i] = {};
-				out[i].price = fp.readLong();
-				out[i].discountprice = fp.readLong();
-				out[i].type = fp.readUChar();
-				out[i].ITID = PacketVerManager_default.value >= 20181121 ? fp.readULong() : fp.readUShort();
-				if (itemLen >= 18) {
-					out[i].viewSprite = fp.readUShort();
-					out[i].location = fp.readLong();
-					out[i].unused = fp.readUChar();
+			const itemLen = itemListLen % base !== 0 && itemListLen % ext === 0 ? ext : base;
+			const out = [];
+			while (fp.tell() + itemLen <= end) {
+				const item = {};
+				item.price = fp.readLong();
+				item.discountprice = fp.readLong();
+				item.type = fp.readUChar();
+				item.ITID = PacketVerManager_default.value >= 20181121 ? fp.readULong() : fp.readUShort();
+				if (itemLen === ext) {
+					item.viewSprite = fp.readUShort();
+					item.location = fp.readLong();
+					item.unused = fp.readUChar();
 				}
+				out.push(item);
 			}
 			return out;
 		})();
@@ -206412,100 +206435,67 @@ var init_Audio = __esmMin((() => {
 }));
 //#endregion
 //#region src/Audio/SoundManager.js
-/**
-* Move sound to cache.
-* ff we have a request to play the same sound again, get it back
-* Will avoid to re-create sound object at each request (re-usable object)
-*/
-function onSoundEnded() {
-	if (_sounds[this.filename]) {
-		const pos = _sounds[this.filename].instances.indexOf(this);
-		if (pos !== -1) {
-			_sounds[this.filename].instances.splice(pos, 1);
-			if (_sounds[this.filename].instances.length === 0) delete _sounds[this.filename];
-		}
-		addSoundToCache(this);
+function getContext() {
+	if (!_context) {
+		const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+		if (!AudioContextClass) return null;
+		_context = new AudioContextClass();
+		const resume = () => {
+			if (_context.state !== "running") _context.resume().catch(() => {});
+		};
+		[
+			"pointerdown",
+			"keydown",
+			"touchend"
+		].forEach((type) => {
+			window.addEventListener(type, resume, {
+				capture: true,
+				passive: true
+			});
+		});
 	}
+	return _context;
 }
 /**
-* Clear sound from dom on error
-*/
-function onSoundError() {
-	const entry = _sounds[this.filename];
-	if (entry) {
-		const pos = entry.instances.indexOf(this);
-		if (pos !== -1) {
-			entry.instances.splice(pos, 1);
-			if (entry.instances.length === 0) delete _sounds[this.filename];
-		}
-	}
-	this.remove();
-	mediaPlayerCount--;
-}
-/**
-* Add sound to cache and set associated vars
-*
-* @param {Audio} sound element
-*/
-function addSoundToCache(sound) {
-	if (sound.filename) {
-		if (!(sound.filename in _cache$1)) {
-			_cache$1[sound.filename] = /* @__PURE__ */ new Object();
-			_cache$1[sound.filename].instances = new Array();
-		}
-		if (_cache$1[sound.filename].instances.length < balancedMax(C_MAX_CACHED_SOUND_INSTANCES)) {
-			sound.currentTime = 0;
-			sound.cleanupHandle = setTimeout(() => {
-				cleanupCache(sound);
-			}, C_CACHE_CLEANUP_TIME);
-			_cache$1[sound.filename].instances.push(sound);
-		} else {
-			sound.remove();
-			mediaPlayerCount--;
-		}
-	}
-}
-/**
-* Remove sound from cache and return it
-* Check at the same time to remove sound not used since some times.
+* Load and decode a sound (once per filename)
 *
 * @param {string} filename
-* @param {Audio} sound element
+* @returns {Promise<AudioBuffer|null>}
 */
-function getSoundFromCache(filename) {
-	let out = null;
-	if (filename in _cache$1) {
-		if (_cache$1[filename].instances.length > 0) {
-			out = _cache$1[filename].instances.pop();
-			if (out.cleanupHandle) clearTimeout(out.cleanupHandle);
-		}
+function getBuffer(filename) {
+	if (!(filename in _buffers)) {
+		const context = getContext();
+		const promise = new Promise((resolve) => {
+			Client.loadFile(`data/wav/${filename}`, (url) => {
+				fetch(url).then((response) => response.arrayBuffer()).then((data) => new Promise((ok, fail) => context.decodeAudioData(data, ok, fail))).then(resolve).catch((err) => {
+					console.warn("Failed to load sound:", filename, err);
+					resolve(null);
+				});
+			}, () => resolve(null));
+		});
+		promise.then((buffer) => {
+			if (!buffer && _buffers[filename] === promise) delete _buffers[filename];
+		});
+		_buffers[filename] = promise;
 	}
-	return out;
+	return _buffers[filename];
 }
 /**
-* Remove sound from cache if it was sitting there for too long
+* Stop and disconnect playing instances
 *
-* @param {Audio} sound element
+* @param {Array} instances
 */
-function cleanupCache(sound) {
-	if (sound.filename && sound.filename in _cache$1 && _cache$1[sound.filename].instances.length > 0) {
-		const pos = _cache$1[sound.filename].instances.indexOf(sound);
-		if (pos !== -1) {
-			_cache$1[sound.filename].instances.splice(pos, 1);
-			sound.remove();
-			mediaPlayerCount--;
-		}
+function stopInstances(instances) {
+	while (instances.length > 0) {
+		const instance = instances.shift();
+		instance.source.onended = null;
+		try {
+			instance.source.stop();
+		} catch {}
+		instance.gain.disconnect();
 	}
 }
-/**
-* Returns a balanced value for max audio instance number based on the currently existing HTML Media players in the DOM
-*
-* @param {CONST} max instance const value
-*/
-function balancedMax(maxConst) {
-	return Math.ceil(maxConst * (1 - mediaPlayerCount / C_MAX_MEDIA_PLAYERS));
-}
-var C_MAX_SOUND_INSTANCES, C_MAX_CACHED_SOUND_INSTANCES, C_MAX_MEDIA_PLAYERS, C_SAME_SOUND_DELAY, C_CACHE_CLEANUP_TIME, _sounds, _cache$1, mediaPlayerCount, _playGen, SoundManager;
+var C_MAX_SOUND_INSTANCES, C_SAME_SOUND_DELAY, _sounds, _buffers, _playGen, _fileGen, _context, SoundManager;
 var init_SoundManager = __esmMin((() => {
 	init_Client();
 	init_Audio();
@@ -206513,14 +206503,12 @@ var init_SoundManager = __esmMin((() => {
 	init_gl_matrix();
 	init_SessionStorage();
 	C_MAX_SOUND_INSTANCES = 10;
-	C_MAX_CACHED_SOUND_INSTANCES = 30;
-	C_MAX_MEDIA_PLAYERS = 800;
 	C_SAME_SOUND_DELAY = 100;
-	C_CACHE_CLEANUP_TIME = 3e4;
 	_sounds = {};
-	_cache$1 = {};
-	mediaPlayerCount = 0;
+	_buffers = {};
 	_playGen = 0;
+	_fileGen = {};
+	_context = null;
 	SoundManager = class SoundManager {
 		/**
 		* @var {float} sound volume
@@ -206534,52 +206522,45 @@ var init_SoundManager = __esmMin((() => {
 		* @param {optional|number} vol (volume)
 		*/
 		static play(filename, vol) {
-			let volume;
-			if (vol) volume = vol * this.volume;
-			else volume = this.volume;
-			if (volume <= 0 || !Audio_default.Sound.play) return;
-			if (!(filename in _sounds)) {
-				_sounds[filename] = {};
-				_sounds[filename].instances = [];
-				_sounds[filename].lastTick = 0;
-			}
-			const sound = getSoundFromCache(filename);
-			if (sound) {
-				sound.volume = Math.min(volume, 1);
-				sound._volume = volume;
-				const playPromise = sound.play();
-				if (playPromise) playPromise.catch((err) => {
-					if (err.name === "NotSupportedError" || err.name === "AbortError") {
-						const idx = _sounds[filename]?.instances.indexOf(sound);
-						if (idx !== void 0 && idx !== -1) _sounds[filename].instances.splice(idx, 1);
-						sound.remove();
-						mediaPlayerCount--;
-						SoundManager.play(filename, vol);
-						return;
-					}
-					console.warn("Failed to play sound:", err);
-				});
-				_sounds[filename].instances.push(sound);
-				_sounds[filename].lastTick = Date.now();
-				return;
-			}
+			if (typeof vol !== "number" || !isFinite(vol) || vol <= 0) vol = 1;
+			if (vol * this.volume <= 0 || !Audio_default.Sound.play) return;
+			const context = getContext();
+			if (!context) return;
 			const myGen = _playGen;
-			Client.loadFile(`data/wav/${filename}`, (url) => {
-				if (myGen !== _playGen || !(filename in _sounds)) return;
-				if (_sounds[filename].lastTick > Date.now() - C_SAME_SOUND_DELAY || _sounds[filename].instances.length > balancedMax(C_MAX_SOUND_INSTANCES)) return;
-				const audio = document.createElement("audio");
-				mediaPlayerCount++;
-				audio.filename = filename;
-				audio.src = url;
-				audio.volume = Math.min(volume, 1);
-				audio._volume = volume;
-				audio.addEventListener("error", onSoundError, false);
-				audio.addEventListener("ended", onSoundEnded, false);
-				audio.play().catch((err) => {
-					if (err.name !== "AbortError") console.warn("Failed to play sound:", err);
-				});
-				_sounds[filename].instances.push(audio);
-				_sounds[filename].lastTick = Date.now();
+			const myFileGen = _fileGen[filename] || 0;
+			getBuffer(filename).then((buffer) => {
+				if (!buffer || myGen !== _playGen || myFileGen !== (_fileGen[filename] || 0)) return;
+				if (context.state !== "running") return;
+				const volume = vol * SoundManager.volume;
+				if (volume <= 0 || !Audio_default.Sound.play) return;
+				if (!(filename in _sounds)) _sounds[filename] = {
+					instances: [],
+					lastTick: 0
+				};
+				const entry = _sounds[filename];
+				if (entry.lastTick > Date.now() - C_SAME_SOUND_DELAY || entry.instances.length >= C_MAX_SOUND_INSTANCES) return;
+				const source = context.createBufferSource();
+				const gain = context.createGain();
+				source.buffer = buffer;
+				gain.gain.value = Math.min(volume, 1);
+				source.connect(gain);
+				gain.connect(context.destination);
+				const instance = {
+					source,
+					gain,
+					vol
+				};
+				source.onended = () => {
+					gain.disconnect();
+					const current = _sounds[filename];
+					if (current) {
+						const pos = current.instances.indexOf(instance);
+						if (pos !== -1) current.instances.splice(pos, 1);
+					}
+				};
+				entry.instances.push(instance);
+				entry.lastTick = Date.now();
+				source.start();
 			});
 		}
 		/**
@@ -206600,37 +206581,23 @@ var init_SoundManager = __esmMin((() => {
 		*/
 		static stop(filename) {
 			if (filename) {
+				_fileGen[filename] = (_fileGen[filename] || 0) + 1;
 				if (filename in _sounds) {
-					while (_sounds[filename].instances.length > 0) {
-						const s = _sounds[filename].instances.shift();
-						s.pause();
-						s.remove();
-						mediaPlayerCount--;
-					}
+					stopInstances(_sounds[filename].instances);
 					delete _sounds[filename];
 				}
 				return;
 			}
 			_playGen++;
 			Object.keys(_sounds).forEach((key) => {
-				while (_sounds[key].instances.length > 0) {
-					const s = _sounds[key].instances.shift();
-					s.pause();
-					s.remove();
-					mediaPlayerCount--;
-				}
+				stopInstances(_sounds[key].instances);
 				delete _sounds[key];
 			});
-			Object.keys(_cache$1).forEach((key) => {
-				_cache$1[key].instances.forEach((s) => {
-					if (s.cleanupHandle) clearTimeout(s.cleanupHandle);
-					s.remove();
-					mediaPlayerCount--;
-				});
-				delete _cache$1[key];
+			Object.keys(_buffers).forEach((key) => {
+				delete _buffers[key];
 			});
 			MemoryManager.search(/\.wav$/).forEach((key) => {
-				MemoryManager.remove(key);
+				MemoryManager.remove(null, key);
 			});
 		}
 		/**
@@ -206643,8 +206610,8 @@ var init_SoundManager = __esmMin((() => {
 			Audio_default.Sound.volume = this.volume;
 			Audio_default.save();
 			Object.keys(_sounds).forEach((key) => {
-				_sounds[key].instances.forEach((sound) => {
-					sound.volume = Math.min(sound._volume * this.volume, 1);
+				_sounds[key].instances.forEach((instance) => {
+					instance.gain.gain.value = Math.min(instance.vol * this.volume, 1);
 				});
 			});
 		}
@@ -206805,7 +206772,7 @@ function init$13(gl) {
 		});
 	});
 	_buffer$20 = gl.createBuffer();
-	_program$26 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
+	_program$27 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$20);
 	gl.bufferData(gl.ARRAY_BUFFER, _buffer_data.byteLength, gl.DYNAMIC_DRAW);
 }
@@ -206821,10 +206788,10 @@ function init$13(gl) {
 */
 function render$14(gl, modelView, projection, fog, x, y) {
 	if (!_texture$5) return;
-	const uniform = _program$26.uniform;
-	const attribute = _program$26.attribute;
+	const uniform = _program$27.uniform;
+	const attribute = _program$27.attribute;
 	let z;
-	gl.useProgram(_program$26);
+	gl.useProgram(_program$27);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -206870,12 +206837,12 @@ function free$8(gl) {
 		gl.deleteTexture(_texture$5);
 		_texture$5 = null;
 	}
-	if (_program$26) {
-		gl.deleteProgram(_program$26);
-		_program$26 = null;
+	if (_program$27) {
+		gl.deleteProgram(_program$27);
+		_program$27 = null;
 	}
 }
-var _program$26, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
+var _program$27, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
 var init_GridSelector = __esmMin((() => {
 	init_Altitude();
 	init_Client();
@@ -206884,7 +206851,7 @@ var init_GridSelector = __esmMin((() => {
 	init_Configs();
 	init_GridSelector$2();
 	init_GridSelector$1();
-	_program$26 = null;
+	_program$27 = null;
 	_buffer$20 = null;
 	_texture$5 = null;
 	_xy = null;
@@ -206997,9 +206964,9 @@ var init_Ground$1 = __esmMin((() => {
 * @param {object} light structure
 */
 function render$13(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$25.uniform;
-	const attribute = _program$25.attribute;
-	gl.useProgram(_program$25);
+	const uniform = _program$26.uniform;
+	const attribute = _program$26.attribute;
+	gl.useProgram(_program$26);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -207170,7 +207137,7 @@ function init$12(gl, data) {
 	data.height;
 	_shadowMap = data.shadowMap;
 	if (!_buffer$19) _buffer$19 = gl.createBuffer();
-	if (!_program$25) _program$25 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
+	if (!_program$26) _program$26 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$19);
 	gl.bufferData(gl.ARRAY_BUFFER, data.mesh, gl.STATIC_DRAW);
 	initLightmap(gl, data.lightmap, data.lightmapSize);
@@ -207221,7 +207188,7 @@ function getShadowFactor(x, y) {
 	for (y = -3; y < 3; ++y) for (x = -3; x < 3; ++x) factor += _shadowMap[_x + x + (_y + y) * _width * 8];
 	return factor / 36 / 255;
 }
-var procCanvas$2, procCtx$2, _program$25, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
+var procCanvas$2, procCtx$2, _program$26, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
 var init_Ground = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -207231,7 +207198,7 @@ var init_Ground = __esmMin((() => {
 	init_Ground$1();
 	procCanvas$2 = document.createElement("canvas");
 	procCtx$2 = procCanvas$2.getContext("2d", { willReadFrequently: true });
-	_program$25 = null;
+	_program$26 = null;
 	_buffer$19 = null;
 	_lightmap = null;
 	_tileColor = null;
@@ -207250,7 +207217,7 @@ var init_Ground = __esmMin((() => {
 //#region src/Renderer/SpriteRenderer.vs?raw
 var SpriteRenderer_default$1;
 var init_SpriteRenderer$2 = __esmMin((() => {
-	SpriteRenderer_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uViewModelMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform float uCameraZoom;\r\nuniform float uCameraLatitude;\r\n\r\nuniform vec2 uSpriteRendererSize;\r\nuniform vec2 uSpriteRendererOffset;\r\nuniform mat4 uSpriteRendererAngle;\r\nuniform vec3 uSpriteRendererPosition;\r\nuniform float uSpriteRendererDepth;\r\nuniform float uSpriteRendererZindex;\r\nuniform bool  uDisableDepthCorrection;\r\n\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n    // xyz = x(-z)y + middle of cell (0.5)\r\n    float x =  pos.x + 0.5;\r\n    float y = -pos.z;\r\n    float z =  pos.y + 0.5;\r\n\r\n    // Matrix translation\r\n    mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n    mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n    mat[3].z += (mat[0].z * x + mat[1].z * y + mat[2].z * z);\r\n    mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n    // Spherical billboard\r\n    mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n    mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n    mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n    return mat;\r\n}\r\n\r\nvec3 getCameraPosition() {\r\n    return (uViewModelMat * vec4(0.0, 0.0, 0.0, 1.0)).xyz;\r\n}\r\n\r\nvec3 getCameraForward() {\r\n    return normalize((uViewModelMat * vec4(0.0, 0.0, -1.0, 0.0)).xyz);\r\n}\r\n\r\nvoid main(void) {\r\n    // Calculate position base on angle and sprite offset/size\r\n    vec4 position = uSpriteRendererAngle * vec4( aPosition.x * uSpriteRendererSize.x, aPosition.y * uSpriteRendererSize.y, 0.0, 1.0 );\r\n    position.x   += uSpriteRendererOffset.x;\r\n    position.y   -= uSpriteRendererOffset.y + 0.5;\r\n\r\n    mat4 modelView = Project(uModelViewMat, uSpriteRendererPosition);\r\n    vec4 viewPosition = modelView * position;\r\n    vec4 viewCenter   = modelView * vec4( 0.0, 0.0, 0.0, 1.0 );\r\n\r\n    gl_Position = uProjectionMat * viewPosition;\r\n\r\n    vec3 cameraPos     = getCameraPosition();\r\n    vec3 cameraForward = getCameraForward();\r\n\r\n    if (!uDisableDepthCorrection) {\r\n        // Vertical billboard depth correction (per-vertex), plane anchored at sprite center.\r\n        // Plane normal uses camera forward (flattened Y) for stability.\r\n        vec3 planePoint = (uViewModelMat * viewCenter).xyz;\r\n        vec3 planeNormal = normalize(vec3(cameraForward.x, 0.0, cameraForward.z));\r\n        if (length(planeNormal) < 0.000001) {\r\n            planeNormal = cameraForward;\r\n        }\r\n\r\n        vec3 worldVertex = (uViewModelMat * viewPosition).xyz;\r\n        vec3 rayDir      = normalize(worldVertex - cameraPos);\r\n        float denom      = max(dot(planeNormal, rayDir), 0.000001);\r\n        float dist       = dot(planePoint - cameraPos, planeNormal) / denom;\r\n\r\n        vec4 planeClip       = uProjectionMat * (uModelViewMat * vec4(cameraPos + rayDir * dist, 1.0));\r\n        float correctedZBase = planeClip.z * (gl_Position.w / max(planeClip.w, 0.000001));\r\n\r\n        gl_Position.z = min(gl_Position.z, correctedZBase);\r\n    }\r\n    gl_Position.z -= (uSpriteRendererZindex * 0.01 + uSpriteRendererDepth) / max(uCameraZoom, 1.0);\r\n\r\n    vTextureCoord = aTextureCoord;\r\n}";
+	SpriteRenderer_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uViewModelMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform float uCameraZoom;\r\nuniform float uCameraLatitude;\r\n\r\nuniform vec2 uSpriteRendererSize;\r\nuniform vec2 uSpriteRendererOffset;\r\nuniform mat4 uSpriteRendererAngle;\r\nuniform vec3 uSpriteRendererPosition;\r\nuniform float uSpriteRendererDepth;\r\nuniform float uSpriteRendererZindex;\r\nuniform bool  uDisableDepthCorrection;\r\n\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n    // xyz = x(-z)y + middle of cell (0.5)\r\n    float x =  pos.x + 0.5;\r\n    float y = -pos.z;\r\n    float z =  pos.y + 0.5;\r\n\r\n    // Matrix translation\r\n    mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n    mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n    mat[3].z += (mat[0].z * x + mat[1].z * y + mat[2].z * z);\r\n    mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n    // Spherical billboard\r\n    mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n    mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n    mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n    return mat;\r\n}\r\n\r\nvec3 getCameraPosition() {\r\n    return (uViewModelMat * vec4(0.0, 0.0, 0.0, 1.0)).xyz;\r\n}\r\n\r\nvec3 getCameraForward() {\r\n    return normalize((uViewModelMat * vec4(0.0, 0.0, -1.0, 0.0)).xyz);\r\n}\r\n\r\nvoid main(void) {\r\n    // Calculate position base on angle and sprite offset/size\r\n    vec4 position = uSpriteRendererAngle * vec4( aPosition.x * uSpriteRendererSize.x, aPosition.y * uSpriteRendererSize.y, 0.0, 1.0 );\r\n    position.x   += uSpriteRendererOffset.x;\r\n    position.y   -= uSpriteRendererOffset.y + 0.5;\r\n\r\n    mat4 modelView = Project(uModelViewMat, uSpriteRendererPosition);\r\n    vec4 viewPosition = modelView * position;\r\n    vec4 viewCenter   = modelView * vec4( 0.0, 0.0, 0.0, 1.0 );\r\n\r\n    gl_Position = uProjectionMat * viewPosition;\r\n\r\n    vec3 cameraPos     = getCameraPosition();\r\n    vec3 cameraForward = getCameraForward();\r\n\r\n    if (!uDisableDepthCorrection) {\r\n        // Vertical billboard depth correction (per-vertex), plane anchored at sprite center.\r\n        // Plane normal uses camera forward (flattened Y) for stability.\r\n        // The whole quad takes the vertical plane depth so the part of the sprite below\r\n        // the water surface sorts behind the (later drawn) water pass.\r\n        vec3 planePoint = (uViewModelMat * viewCenter).xyz;\r\n        vec3 planeNormal = normalize(vec3(cameraForward.x, 0.0, cameraForward.z));\r\n        if (length(planeNormal) < 0.000001) {\r\n            planeNormal = cameraForward;\r\n        }\r\n\r\n        vec3 worldVertex = (uViewModelMat * viewPosition).xyz;\r\n        vec3 rayDir      = normalize(worldVertex - cameraPos);\r\n        float denom      = max(dot(planeNormal, rayDir), 0.000001);\r\n        float dist       = dot(planePoint - cameraPos, planeNormal) / denom;\r\n\r\n        vec4 planeClip       = uProjectionMat * (uModelViewMat * vec4(cameraPos + rayDir * dist, 1.0));\r\n        float correctedZBase = planeClip.z * (gl_Position.w / max(planeClip.w, 0.000001));\r\n\r\n        gl_Position.z = correctedZBase;\r\n    }\r\n    gl_Position.z -= (uSpriteRendererZindex * 0.01 + uSpriteRendererDepth) / max(uCameraZoom, 1.0);\r\n\r\n    vTextureCoord = aTextureCoord;\r\n}";
 }));
 //#endregion
 //#region src/Renderer/SpriteRenderer.fs?raw
@@ -207265,7 +207232,7 @@ var init_SpriteRenderer$1 = __esmMin((() => {
 */
 function RenderCanvas3D(isBlendModeOne) {
 	if (!this.image.texture || !this.color[3]) return;
-	const uniform = _program$24.uniform;
+	const uniform = _program$25.uniform;
 	const gl = _gl$2;
 	const use_pal = this.image.palette !== null;
 	if (isBlendModeOne) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -207288,9 +207255,9 @@ function RenderCanvas3D(isBlendModeOne) {
 	gl.uniform1f(uniform.uSpriteRendererZindex, this.zIndex++);
 	if (this.angle !== _angle) {
 		_angle = this.angle;
-		mat4$20.identity(_matrix$6);
-		if (_angle) mat4$20.rotateZ(_matrix$6, _matrix$6, -_angle / 180 * Math.PI);
-		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$6);
+		mat4$22.identity(_matrix$7);
+		if (_angle) mat4$22.rotateZ(_matrix$7, _matrix$7, -_angle / 180 * Math.PI);
+		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$7);
 	}
 	_offset[0] = this.offset[0] / 175 * this.xSize;
 	_offset[1] = this.offset[1] / 175 * this.ySize - .5;
@@ -207299,33 +207266,123 @@ function RenderCanvas3D(isBlendModeOne) {
 	gl.uniform4fv(uniform.uSpriteRendererColor, this.color);
 	gl.uniform2fv(uniform.uSpriteRendererSize, _size$7);
 	gl.uniform2fv(uniform.uSpriteRendererOffset, _offset);
-	gl.uniform1i(uniform.uIsRGBA, this.sprite.type);
+	gl.uniform1i(uniform.uIsRGBA, this.sprite ? this.sprite.type : 1);
 	if (_groupId !== _lastGroupId || _texture$4 !== this.image.texture) {
 		_lastGroupId = _groupId;
 		gl.bindTexture(gl.TEXTURE_2D, _texture$4 = this.image.texture);
 	}
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
-var mat4$20, RenderCanvas2D, _program$24, _buffer$18, _ctx$5, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
+/**
+* Convert a sprite frame (RGBA or palette-indexed) into canvas ImageData,
+* applying the layer color modulation.
+*/
+function fillImageData(imageData, frame, pal, color) {
+	let x, y, r, g, b, a, inRow, outRow;
+	const width = frame.width;
+	const height = frame.height;
+	const input = frame.data;
+	const outputWidth = width;
+	const output32 = new Uint32Array(imageData.data.buffer);
+	const r_mul = color[0], g_mul = color[1], b_mul = color[2], a_mul = color[3];
+	const isColorIdentity = r_mul === 1 && g_mul === 1 && b_mul === 1 && a_mul === 1;
+	if (frame.type === 1) {
+		/**
+		* OLD LOGIC: Per-channel RGBA modulation using byte array access.
+		*            4 loads + 4 stores + multiplications per pixel.
+		* NEW LOGIC: Reads and writes pixels as a single 32-bit integer.
+		*            Uses bitwise extraction and assembly with optional color modulation.
+		*            1 load + 1 store per pixel in the fast path.
+		* Reduces memory writes and bounds checks inside the inner loop.
+		*/
+		const input32 = new Uint32Array(input.buffer);
+		for (y = 0; y < height; ++y) {
+			outRow = y * outputWidth;
+			inRow = y * width;
+			for (x = 0; x < width; ++x) {
+				const pixel = input32[inRow + x];
+				if (pixel === 0) {
+					output32[outRow + x] = 0;
+					continue;
+				}
+				if (isColorIdentity) output32[outRow + x] = pixel;
+				else {
+					r = (pixel & 255) * r_mul;
+					g = (pixel >> 8 & 255) * g_mul;
+					b = (pixel >> 16 & 255) * b_mul;
+					a = (pixel >> 24 & 255) * a_mul;
+					output32[outRow + x] = a << 24 | b << 16 | g << 8 | r;
+				}
+			}
+		}
+	} else {
+		const pal32 = /* @__PURE__ */ new Uint32Array(256);
+		for (let i = 0; i < 256; i++) {
+			if (i === 0) {
+				pal32[i] = 0;
+				continue;
+			}
+			const pIdx = i * 4;
+			r = pal[pIdx + 0] * r_mul | 0;
+			g = pal[pIdx + 1] * g_mul | 0;
+			b = pal[pIdx + 2] * b_mul | 0;
+			a = 255 * a_mul | 0;
+			pal32[i] = a << 24 | b << 16 | g << 8 | r;
+		}
+		for (y = 0; y < height; ++y) {
+			outRow = y * outputWidth;
+			inRow = y * width;
+			for (x = 0; x < width; ++x) output32[outRow + x] = pal32[input[inRow + x]];
+		}
+	}
+}
+var mat4$22, RenderCanvas2D, _program$25, _buffer$18, _ctx$5, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$7, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
 	init_Camera();
 	init_SpriteRenderer$2();
 	init_SpriteRenderer$1();
-	mat4$20 = gl_matrix_default.mat4;
+	mat4$22 = gl_matrix_default.mat4;
 	RenderCanvas2D = (function RenderCanvas2DClosure() {
-		let imageData;
-		const canvas = document.createElement("canvas");
-		const ctx = canvas.getContext("2d");
-		canvas.width = 20;
-		canvas.height = 20;
-		imageData = ctx.createImageData(canvas.width, canvas.height);
+		const _cache = /* @__PURE__ */ new WeakMap();
+		const MAX_COLORS_PER_PALETTE = 8;
+		function getFrameCanvas(frame, pal, color) {
+			let entry = _cache.get(frame);
+			if (!entry) {
+				entry = {
+					rgba: /* @__PURE__ */ new Map(),
+					byPalette: /* @__PURE__ */ new WeakMap()
+				};
+				_cache.set(frame, entry);
+			}
+			let byColor;
+			if (frame.type === 1 || !pal) byColor = entry.rgba;
+			else {
+				byColor = entry.byPalette.get(pal);
+				if (!byColor) {
+					byColor = /* @__PURE__ */ new Map();
+					entry.byPalette.set(pal, byColor);
+				}
+			}
+			const colorKey = `${color[0]},${color[1]},${color[2]},${color[3]}`;
+			let canvas = byColor.get(colorKey);
+			if (!canvas) {
+				if (byColor.size >= MAX_COLORS_PER_PALETTE) byColor.delete(byColor.keys().next().value);
+				canvas = document.createElement("canvas");
+				canvas.width = frame.width;
+				canvas.height = frame.height;
+				const ctx = canvas.getContext("2d");
+				const imageData = ctx.createImageData(frame.width, frame.height);
+				fillImageData(imageData, frame, pal, color);
+				ctx.putImageData(imageData, 0, 0);
+				byColor.set(colorKey, canvas);
+			}
+			return canvas;
+		}
 		return function() {
 			if (this.sprite.width <= 0 || this.sprite.height <= 0) return;
 			let scale_x, scale_y;
-			let x, y;
-			let r, g, b, a, inRow, outRow;
 			scale_x = 1;
 			scale_y = 1;
 			const _x = _pos$8[0] + this.offset[0];
@@ -207343,67 +207400,7 @@ var init_SpriteRenderer = __esmMin((() => {
 				scale_y *= -1;
 				_size$7[1] *= -1;
 			}
-			if (width > canvas.width || height > canvas.height) {
-				canvas.width = width;
-				canvas.height = height;
-				imageData = ctx.createImageData(width, height);
-			}
-			const input = frame.data;
-			const color = this.color;
-			const outputWidth = canvas.width;
-			const output32 = new Uint32Array(imageData.data.buffer);
-			const r_mul = color[0], g_mul = color[1], b_mul = color[2], a_mul = color[3];
-			const isColorIdentity = r_mul === 1 && g_mul === 1 && b_mul === 1 && a_mul === 1;
-			if (this.sprite.type === 1) {
-				/**
-				* OLD LOGIC: Per-channel RGBA modulation using byte array access.
-				*            4 loads + 4 stores + multiplications per pixel.
-				* NEW LOGIC: Reads and writes pixels as a single 32-bit integer.
-				*            Uses bitwise extraction and assembly with optional color modulation.
-				*            1 load + 1 store per pixel in the fast path.
-				* Reduces memory writes and bounds checks inside the inner loop.
-				*/
-				const input32 = new Uint32Array(input.buffer);
-				for (y = 0; y < height; ++y) {
-					outRow = y * outputWidth;
-					inRow = y * width;
-					for (x = 0; x < width; ++x) {
-						const pixel = input32[inRow + x];
-						if (pixel === 0) {
-							output32[outRow + x] = 0;
-							continue;
-						}
-						if (isColorIdentity) output32[outRow + x] = pixel;
-						else {
-							r = (pixel & 255) * r_mul;
-							g = (pixel >> 8 & 255) * g_mul;
-							b = (pixel >> 16 & 255) * b_mul;
-							a = (pixel >> 24 & 255) * a_mul;
-							output32[outRow + x] = a << 24 | b << 16 | g << 8 | r;
-						}
-					}
-				}
-			} else {
-				const pal32 = /* @__PURE__ */ new Uint32Array(256);
-				for (let i = 0; i < 256; i++) {
-					if (i === 0) {
-						pal32[i] = 0;
-						continue;
-					}
-					const pIdx = i * 4;
-					r = pal[pIdx + 0] * r_mul | 0;
-					g = pal[pIdx + 1] * g_mul | 0;
-					b = pal[pIdx + 2] * b_mul | 0;
-					a = 255 * a_mul | 0;
-					pal32[i] = a << 24 | b << 16 | g << 8 | r;
-				}
-				for (y = 0; y < height; ++y) {
-					outRow = y * outputWidth;
-					inRow = y * width;
-					for (x = 0; x < width; ++x) output32[outRow + x] = pal32[input[inRow + x]];
-				}
-			}
-			ctx.putImageData(imageData, 0, 0, 0, 0, width, height);
+			const canvas = getFrameCanvas(frame, pal, this.color);
 			_ctx$5.save();
 			_ctx$5.translate(_x | 0, _y | 0);
 			_ctx$5.rotate(this.angle / 180 * Math.PI);
@@ -207412,7 +207409,7 @@ var init_SpriteRenderer = __esmMin((() => {
 			_ctx$5.restore();
 		};
 	})();
-	_program$24 = null;
+	_program$25 = null;
 	_buffer$18 = null;
 	_ctx$5 = null;
 	_gl$2 = null;
@@ -207427,7 +207424,7 @@ var init_SpriteRenderer = __esmMin((() => {
 	_texture$4 = null;
 	_usepal = null;
 	_pos$8 = /* @__PURE__ */ new Int16Array(2);
-	_matrix$6 = /* @__PURE__ */ new Float32Array(16);
+	_matrix$7 = /* @__PURE__ */ new Float32Array(16);
 	_size$7 = /* @__PURE__ */ new Float32Array(2);
 	_offset = /* @__PURE__ */ new Float32Array(2);
 	SpriteRenderer = class {
@@ -207523,7 +207520,7 @@ var init_SpriteRenderer = __esmMin((() => {
 					1
 				]), gl.STATIC_DRAW);
 			}
-			if (!_program$24) _program$24 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
+			if (!_program$25) _program$25 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
 		}
 		/**
 		* Initialize 3D Context
@@ -207534,12 +207531,12 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {object} fog structure
 		*/
 		static bind3DContext(gl, modelView, projection, fog) {
-			const attribute = _program$24.attribute;
-			const uniform = _program$24.uniform;
-			gl.useProgram(_program$24);
+			const attribute = _program$25.attribute;
+			const uniform = _program$25.uniform;
+			gl.useProgram(_program$25);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
-			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$20.invert(_matrix$6, modelView));
+			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$22.invert(_matrix$7, modelView));
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -207568,7 +207565,7 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {object} gl context
 		*/
 		static unbind(gl) {
-			const attribute = _program$24.attribute;
+			const attribute = _program$25.attribute;
 			gl.disableVertexAttribArray(attribute.aPosition);
 			gl.disableVertexAttribArray(attribute.aTextureCoord);
 		}
@@ -207619,17 +207616,20 @@ var init_SpriteRenderer = __esmMin((() => {
 				_gl$2.depthMask(depthMask);
 			}
 			if (this.disableDepthCorrection !== depthCorrection) this.disableDepthCorrection = depthCorrection;
-			fn();
-			if (_depthTest !== prevDepthTest) {
-				_depthTest = prevDepthTest;
-				if (prevDepthTest) _gl$2.enable(_gl$2.DEPTH_TEST);
-				else _gl$2.disable(_gl$2.DEPTH_TEST);
+			try {
+				fn();
+			} finally {
+				if (_depthTest !== prevDepthTest) {
+					_depthTest = prevDepthTest;
+					if (prevDepthTest) _gl$2.enable(_gl$2.DEPTH_TEST);
+					else _gl$2.disable(_gl$2.DEPTH_TEST);
+				}
+				if (_depthMask !== prevDepthMask) {
+					_depthMask = prevDepthMask;
+					_gl$2.depthMask(prevDepthMask);
+				}
+				if (this.disableDepthCorrection !== prevDepthCorrection) this.disableDepthCorrection = prevDepthCorrection;
 			}
-			if (_depthMask !== prevDepthMask) {
-				_depthMask = prevDepthMask;
-				_gl$2.depthMask(prevDepthMask);
-			}
-			if (this.disableDepthCorrection !== prevDepthCorrection) this.disableDepthCorrection = prevDepthCorrection;
 		}
 	};
 }));
@@ -207657,12 +207657,12 @@ function init$11(gl, water) {
 	_vertCount = water.vertCount;
 	_waveHeight = water.waveHeight;
 	_waveSpeed = water.waveSpeed;
-	water.level;
+	_waterLevel = water.level;
 	_animSpeed = water.animSpeed;
 	_wavePitch = water.wavePitch;
 	_waterOpacity = water.type !== 4 && water.type !== 6 ? .8 : 1;
 	if (!_vertCount) return;
-	if (!_program$23) _program$23 = WebGL_default.createShaderProgram(gl, Water_default$2, Water_default$1);
+	if (!_program$24) _program$24 = WebGL_default.createShaderProgram(gl, Water_default$2, Water_default$1);
 	_buffer$17 = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$17);
 	gl.bufferData(gl.ARRAY_BUFFER, water.mesh, gl.STATIC_DRAW);
@@ -207683,10 +207683,10 @@ function init$11(gl, water) {
 */
 function render$12(gl, modelView, projection, fog, light, tick) {
 	if (!_vertCount) return;
-	const uniform = _program$23.uniform;
-	const attribute = _program$23.attribute;
+	const uniform = _program$24.uniform;
+	const attribute = _program$24.attribute;
 	const frame = tick / (1e3 / 60);
-	gl.useProgram(_program$23);
+	gl.useProgram(_program$24);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -207723,47 +207723,296 @@ function free$6(gl) {
 		gl.deleteBuffer(_buffer$17);
 		_buffer$17 = null;
 	}
-	if (_program$23) {
-		gl.deleteProgram(_program$23);
-		_program$23 = null;
+	if (_program$24) {
+		gl.deleteProgram(_program$24);
+		_program$24 = null;
 	}
 	for (i = 0; i < 32; ++i) if (_textures$1[i]) {
 		gl.deleteTexture(_textures$1[i]);
 		_textures$1[i] = null;
 	}
+	_vertCount = 0;
 }
-var _program$23, _buffer$17, _vertCount, _textures$1, _waveSpeed, _waveHeight, _wavePitch, _animSpeed, _waterOpacity, Water_default;
+/**
+* Is the ground at this cell under the water surface ?
+* (world Y points down: ground is submerged when -altitude is above the wave crest)
+*
+* @param {number} x
+* @param {number} y
+* @return {boolean}
+*/
+function isSubmerged(x, y) {
+	if (!_vertCount) return false;
+	return -Altitude.getCellHeight(x, y) > _waterLevel - _waveHeight;
+}
+/**
+* Does the current map have any water surface ?
+*
+* @return {boolean}
+*/
+function hasWater() {
+	return _vertCount > 0;
+}
+var _program$24, _buffer$17, _vertCount, _textures$1, _waveSpeed, _waveHeight, _wavePitch, _waterLevel, _animSpeed, _waterOpacity, Water_default;
 var init_Water = __esmMin((() => {
 	init_WebGL();
 	init_SpriteRenderer();
+	init_Altitude();
 	init_Water$2();
 	init_Water$1();
-	_program$23 = null;
+	_program$24 = null;
 	_buffer$17 = null;
 	_vertCount = 0;
 	_textures$1 = new Array(32);
 	_waveSpeed = 0;
 	_waveHeight = 0;
 	_wavePitch = 0;
+	_waterLevel = 0;
 	_animSpeed = 0;
 	_waterOpacity = .9;
 	Water_default = {
 		init: init$11,
 		free: free$6,
-		render: render$12
+		render: render$12,
+		isSubmerged,
+		hasWater
 	};
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/GLSL/Models.vs?raw
 var Models_default$2;
 var init_Models$2 = __esmMin((() => {
-	Models_default$2 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec3 aVertexNormal;\r\nin vec2 aTextureCoord;\r\nin float aAlpha;\r\n\r\nout vec2 vTextureCoord;\r\nout float vLightWeighting;\r\nout float vAlpha;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform vec3 uLightDirection;\r\n\r\nvoid main(void) {\r\n	gl_Position     = uProjectionMat * uModelViewMat * vec4( aPosition, 1.0);\r\n\r\n	vTextureCoord   = aTextureCoord;\r\n	vAlpha          = aAlpha;\r\n\r\n	float dotProduct = dot(aVertexNormal, uLightDirection );\r\n	vLightWeighting = max(dotProduct, 0.0);\r\n}";
+	Models_default$2 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec3 aVertexNormal;\r\nin vec2 aTextureCoord;\r\nin float aAlpha;\r\n\r\nout vec2 vTextureCoord;\r\nout float vLightWeighting;\r\nout float vAlpha;\r\nout vec3 vWorldPos;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform vec3 uLightDirection;\r\n\r\nvoid main(void) {\r\n	gl_Position     = uProjectionMat * uModelViewMat * vec4( aPosition, 1.0);\r\n\r\n	vTextureCoord   = aTextureCoord;\r\n	vAlpha          = aAlpha;\r\n	vWorldPos       = aPosition;\r\n\r\n	float dotProduct = dot(aVertexNormal, uLightDirection );\r\n	vLightWeighting = max(dotProduct, 0.0);\r\n}";
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/GLSL/Models.fs?raw
 var Models_default$1;
 var init_Models$1 = __esmMin((() => {
-	Models_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nin float vLightWeighting;\r\nin float vAlpha;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uDiffuse;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nuniform vec3  uLightAmbient;\r\nuniform vec3  uLightDiffuse;\r\nuniform float uLightOpacity;\r\nuniform bool uLightMapUse;\r\nuniform vec3 uLightEnv;\r\n\r\nvoid main(void) {\r\n	vec4 textureSample  = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n	if (textureSample.a == 0.0) {\r\n		discard;\r\n	}\r\n\r\n	vec3 color = ((uLightMapUse ? vLightWeighting : 1.0) * uLightDiffuse + uLightAmbient);\r\n	textureSample.rgb *= clamp(color, 0.0, 1.0);\r\n	textureSample.rgb *= clamp(uLightEnv, 0.0, 1.0);\r\n	textureSample.a *= vAlpha;\r\n\r\n	fragColor = textureSample;\r\n	\r\n	if (uFogUse) {\r\n		float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n		float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n		fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n	}\r\n\r\n}";
+	Models_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nin float vLightWeighting;\r\nin float vAlpha;\r\nin vec3 vWorldPos;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uDiffuse;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nuniform vec3  uLightAmbient;\r\nuniform vec3  uLightDiffuse;\r\nuniform float uLightOpacity;\r\nuniform bool uLightMapUse;\r\nuniform vec3 uLightEnv;\r\n\r\n// #include OccluderFade.glsl\r\n\r\nvoid main(void) {\r\n	vec4 textureSample  = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n	if (textureSample.a == 0.0) {\r\n		discard;\r\n	}\r\n\r\n	if (!occluderFade(vWorldPos, textureSample.a)) {\r\n		discard;\r\n	}\r\n\r\n	vec3 color = ((uLightMapUse ? vLightWeighting : 1.0) * uLightDiffuse + uLightAmbient);\r\n	textureSample.rgb *= clamp(color, 0.0, 1.0);\r\n	textureSample.rgb *= clamp(uLightEnv, 0.0, 1.0);\r\n	textureSample.a *= vAlpha;\r\n\r\n	fragColor = textureSample;\r\n	\r\n	if (uFogUse) {\r\n		float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n		float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n		fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n	}\r\n\r\n}";
+}));
+//#endregion
+//#region src/Renderer/Effects/Shaders/GLSL/OccluderFade.glsl?raw
+var OccluderFade_default;
+var init_OccluderFade$1 = __esmMin((() => {
+	OccluderFade_default = "// Fades world geometry lying between the camera and the followed entity\r\n// (third person camera). Included by the model fragment shaders.\r\n//\r\n// uOccluderFadeMode:\r\n//   0 - disabled\r\n//   1 - dither (screen-door, single opaque pass)\r\n//   2 - alpha, opaque pass: discard fragments inside the fade capsule\r\n//   3 - alpha, blend pass: draw only fragments inside the fade capsule, translucent\r\n//   4 - line of sight query: keep only fragments inside the (narrow) capsule,\r\n//       used with an occlusion query to detect geometry covering the entity\r\n\r\nuniform int   uOccluderFadeMode;\r\nuniform vec3  uOccluderFadeEye;\r\nuniform vec3  uOccluderFadeFocus;\r\nuniform float uOccluderFadeRadius;\r\nuniform float uOccluderFadeOpacity;\r\nuniform float uOccluderFadeStrength;\r\n\r\nconst float OCCLUDER_FADE_BAYER[16] = float[16](\r\n	 0.0,  8.0,  2.0, 10.0,\r\n	12.0,  4.0, 14.0,  6.0,\r\n	 3.0, 11.0,  1.0,  9.0,\r\n	15.0,  7.0, 13.0,  5.0\r\n);\r\n\r\n// The faded region is a cylinder of constant radius from the eye to the focus,\r\n// cut by a vertical plane through the focus (so a raised camera never fades\r\n// anything behind the player); it closes over this distance (cells) before it.\r\nconst float OCCLUDER_FADE_END = 0.5;\r\n\r\n// x: distance to the eye->focus axis,\r\n// y: signed horizontal distance past the focus, along the view direction\r\nvec2 occluderFadeCylinder(vec3 worldPos) {\r\n	vec3 axis = uOccluderFadeFocus - uOccluderFadeEye;\r\n	vec3 rel  = worldPos - uOccluderFadeEye;\r\n	float len  = max(length(axis), 0.01);\r\n	float t    = clamp(dot(rel, axis) / (len * len), 0.0, 1.0);\r\n	// cut plane normal: horizontal view direction, tilting back to the view\r\n	// axis as the camera gets steep (a vertical plane is meaningless top-down)\r\n	vec3 level = vec3(axis.x, 0.0, axis.z);\r\n	float flatness = length(level) / len;\r\n	vec3 hdir  = level / max(length(level), 0.01);\r\n	vec3 cut   = normalize(mix(axis / len, hdir, smoothstep(0.3, 0.6, flatness)));\r\n	return vec2(length(rel - axis * t), dot(worldPos - uOccluderFadeFocus, cut));\r\n}\r\n\r\n// 0.0 = untouched, 1.0 = fully inside the cylinder between eye and focus\r\nfloat occluderFadeAmount(vec3 worldPos) {\r\n	vec2 c = occluderFadeCylinder(worldPos);\r\n	float radial = 1.0 - smoothstep(uOccluderFadeRadius * 0.5, uOccluderFadeRadius, c.x);\r\n	float along  = 1.0 - smoothstep(-OCCLUDER_FADE_END, 0.0, c.y);\r\n	return radial * along * uOccluderFadeStrength;\r\n}\r\n\r\n// Applies the fade to the fragment alpha. Returns false when the fragment must be discarded.\r\nbool occluderFade(vec3 worldPos, inout float alpha) {\r\n	if (uOccluderFadeMode == 0) {\r\n		return true;\r\n	}\r\n\r\n	if (uOccluderFadeMode == 4) {\r\n		vec2 c = occluderFadeCylinder(worldPos);\r\n		// stop short of the focus so the floor under the entity does not count\r\n		return c.x < uOccluderFadeRadius && c.y < -0.5;\r\n	}\r\n\r\n	float fade = occluderFadeAmount(worldPos);\r\n	float visibility = 1.0 - fade * (1.0 - uOccluderFadeOpacity);\r\n\r\n	if (uOccluderFadeMode == 1) {\r\n		ivec2 p = ivec2(gl_FragCoord.xy) & 3;\r\n		float threshold = (OCCLUDER_FADE_BAYER[p.x + p.y * 4] + 0.5) / 16.0;\r\n		return visibility > threshold;\r\n	}\r\n\r\n	if (uOccluderFadeMode == 2) {\r\n		return fade < 0.01;\r\n	}\r\n\r\n	if (fade < 0.01) {\r\n		return false;\r\n	}\r\n	alpha *= visibility;\r\n	return true;\r\n}\r\n";
+}));
+//#endregion
+//#region src/Renderer/Map/OccluderFade.js
+var mat4$21, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick, OccluderFade;
+var init_OccluderFade = __esmMin((() => {
+	init_OccluderFade$1();
+	init_Camera();
+	init_Graphics();
+	init_SpriteRenderer();
+	init_gl_matrix();
+	({mat4: mat4$21, vec3: vec3$6} = gl_matrix_default);
+	SHADER_INCLUDE = "// #include OccluderFade.glsl";
+	MODE = {
+		OFF: 0,
+		DITHER: 1,
+		ALPHA_OPAQUE: 2,
+		ALPHA_BLEND: 3,
+		QUERY: 4
+	};
+	SETTING = {
+		OFF: "off",
+		DITHER: "dither",
+		ALPHA: "alpha"
+	};
+	QUERY = {
+		MODELS: 0,
+		ANIMATED: 1
+	};
+	QUERY_RADIUS = .7;
+	FADE_IN_MS = 150;
+	FADE_OUT_MS = 300;
+	_inverse = mat4$21.create();
+	_eye = vec3$6.create();
+	_queries = [null, null];
+	_queryPending = [false, false];
+	_queryHit = [false, false];
+	_strength = 0;
+	_lastTick = 0;
+	OccluderFade = class OccluderFade {
+		static MODE = MODE;
+		static SETTING = SETTING;
+		static QUERY = QUERY;
+		/**
+		* Inline the shared GLSL into a fragment shader source
+		*
+		* @param {string} source fragment shader
+		* @return {string}
+		*/
+		static injectShader(source) {
+			return source.replace(SHADER_INCLUDE, OccluderFade_default);
+		}
+		/**
+		* Whether the effect can run: enabled in the graphics options and not in
+		* first person camera.
+		*
+		* @return {boolean}
+		*/
+		static isActive() {
+			return GraphicsSettings.occluderFade !== SETTING.OFF && Camera.state !== Camera.states.first_person;
+		}
+		/**
+		* Whether the alpha (two pass) variant is selected
+		*
+		* @return {boolean}
+		*/
+		static useAlpha() {
+			return GraphicsSettings.occluderFade === SETTING.ALPHA;
+		}
+		/**
+		* Current fade strength, 0 (view clear) .. 1 (view blocked)
+		*
+		* @return {number}
+		*/
+		static getStrength() {
+			return _strength;
+		}
+		/**
+		* Whether the fade is visible this frame
+		*
+		* @return {boolean}
+		*/
+		static isFading() {
+			return OccluderFade.isActive() && _strength > .001;
+		}
+		/**
+		* Per frame update: collect last frame's occlusion query results, ease
+		* the fade strength and refresh the camera eye position.
+		*
+		* @param {WebGL2RenderingContext} gl
+		* @param {mat4} modelView
+		* @param {number} tick
+		*/
+		static beginFrame(gl, modelView, tick) {
+			mat4$21.invert(_inverse, modelView);
+			_eye[0] = _inverse[12];
+			_eye[1] = _inverse[13];
+			_eye[2] = _inverse[14];
+			const dt = _lastTick ? Math.min(tick - _lastTick, 100) : 0;
+			_lastTick = tick;
+			if (!OccluderFade.isActive()) {
+				_strength = 0;
+				return;
+			}
+			for (let i = 0; i < _queries.length; ++i) OccluderFade.pollQuery(gl, i);
+			if (_queryHit[QUERY.MODELS] || _queryHit[QUERY.ANIMATED]) _strength = Math.min(1, _strength + dt / FADE_IN_MS);
+			else _strength = Math.max(0, _strength - dt / FADE_OUT_MS);
+		}
+		/**
+		* Read back an occlusion query when its result is available
+		*
+		* @param {WebGL2RenderingContext} gl
+		* @param {number} slot one of QUERY
+		*/
+		static pollQuery(gl, slot) {
+			if (!_queryPending[slot]) return;
+			const query = _queries[slot];
+			if (!gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE)) return;
+			_queryHit[slot] = !!gl.getQueryParameter(query, gl.QUERY_RESULT);
+			_queryPending[slot] = false;
+		}
+		/**
+		* Upload the fade uniforms for a program
+		*
+		* @param {WebGLRenderingContext} gl
+		* @param {object} uniform program uniform locations
+		* @param {number} mode one of MODE
+		*/
+		static setUniforms(gl, uniform, mode) {
+			gl.uniform1i(uniform.uOccluderFadeMode, mode);
+			if (mode === MODE.OFF) return;
+			gl.uniform3fv(uniform.uOccluderFadeEye, _eye);
+			gl.uniform3fv(uniform.uOccluderFadeFocus, Camera.focus);
+			gl.uniform1f(uniform.uOccluderFadeRadius, mode === MODE.QUERY ? QUERY_RADIUS : GraphicsSettings.occluderFadeRadius);
+			gl.uniform1f(uniform.uOccluderFadeOpacity, GraphicsSettings.occluderFadeOpacity);
+			gl.uniform1f(uniform.uOccluderFadeStrength, _strength);
+		}
+		/**
+		* Whether a deferred translucent pass is required this frame
+		* (alpha variant selected and fade visible).
+		*
+		* @return {boolean}
+		*/
+		static needsBlendPass() {
+			return OccluderFade.isFading() && OccluderFade.useAlpha();
+		}
+		/**
+		* Shader mode for the opaque geometry pass
+		*
+		* @return {number} one of MODE
+		*/
+		static opaqueMode() {
+			if (!OccluderFade.isFading()) return MODE.OFF;
+			return OccluderFade.useAlpha() ? MODE.ALPHA_OPAQUE : MODE.DITHER;
+		}
+		/**
+		* Opaque model pass: untouched, dithered, or with the fade capsule cut out.
+		*
+		* @param {WebGLRenderingContext} gl
+		* @param {object} uniform program uniform locations
+		* @param {function} draw issues the draw calls
+		*/
+		static renderOpaque(gl, uniform, draw) {
+			OccluderFade.setUniforms(gl, uniform, OccluderFade.opaqueMode());
+			SpriteRenderer.runWithDepth(true, true, true, draw);
+		}
+		/**
+		* Line of sight pass: re-draw the models without color/depth writes inside
+		* an occlusion query, keeping only fragments between the eye and the player.
+		* Skipped while the previous query of this slot is still in flight.
+		*
+		* @param {WebGL2RenderingContext} gl
+		* @param {object} uniform program uniform locations
+		* @param {function} draw issues the draw calls
+		* @param {number} slot one of QUERY
+		*/
+		static renderQuery(gl, uniform, draw, slot) {
+			if (!OccluderFade.isActive() || _queryPending[slot]) return;
+			if (!_queries[slot]) _queries[slot] = gl.createQuery();
+			OccluderFade.setUniforms(gl, uniform, MODE.QUERY);
+			gl.colorMask(false, false, false, false);
+			gl.beginQuery(gl.ANY_SAMPLES_PASSED_CONSERVATIVE, _queries[slot]);
+			SpriteRenderer.runWithDepth(false, false, true, draw);
+			gl.endQuery(gl.ANY_SAMPLES_PASSED_CONSERVATIVE);
+			gl.colorMask(true, true, true, true);
+			_queryPending[slot] = true;
+		}
+		/**
+		* Translucent model pass (alpha variant): draws only the fade capsule,
+		* depth tested but not depth written. Runs after opaque scene elements
+		* (entities included) so they show through the faded geometry.
+		*
+		* @param {WebGLRenderingContext} gl
+		* @param {object} uniform program uniform locations
+		* @param {function} draw issues the draw calls
+		*/
+		static renderBlend(gl, uniform, draw) {
+			OccluderFade.setUniforms(gl, uniform, MODE.ALPHA_BLEND);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			SpriteRenderer.runWithDepth(true, false, true, draw);
+		}
+		/**
+		* Release GPU queries (map change / context loss)
+		*
+		* @param {WebGL2RenderingContext} gl
+		*/
+		static free(gl) {
+			for (let i = 0; i < _queries.length; ++i) {
+				if (_queries[i]) {
+					gl.deleteQuery(_queries[i]);
+					_queries[i] = null;
+				}
+				_queryPending[i] = false;
+				_queryHit[i] = false;
+			}
+			_strength = 0;
+			_lastTick = 0;
+		}
+	};
 }));
 //#endregion
 //#region src/Renderer/Map/Models.js
@@ -207801,7 +208050,7 @@ function init$10(gl, data) {
 	_batchesReady = false;
 	_pendingTextures = count;
 	if (!_buffer$16) _buffer$16 = gl.createBuffer();
-	if (!_program$22) _program$22 = WebGL_default.createShaderProgram(gl, Models_default$2, Models_default$1);
+	if (!_program$23) _program$23 = WebGL_default.createShaderProgram(gl, Models_default$2, OccluderFade.injectShader(Models_default$1));
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$16);
 	gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
 	function onTextureLoaded(texture, index) {
@@ -207819,20 +208068,39 @@ function init$10(gl, data) {
 	}
 }
 /**
-* Render models
+* Issue the draw calls for every loaded mesh
+*
+* @param {object} gl context
+*/
+function drawMeshes(gl) {
+	let i, count;
+	if (_batchesReady) {
+		let lastTexture = null;
+		for (i = 0, count = _batches.length; i < count; ++i) {
+			if (_batches[i].texture !== lastTexture) {
+				gl.bindTexture(gl.TEXTURE_2D, _batches[i].texture);
+				lastTexture = _batches[i].texture;
+			}
+			gl.drawArrays(gl.TRIANGLES, _batches[i].vertOffset, _batches[i].vertCount);
+		}
+	} else for (i = 0, count = _objects.length; i < count; ++i) if (_objects[i].complete) {
+		gl.bindTexture(gl.TEXTURE_2D, _objects[i].texture);
+		gl.drawArrays(gl.TRIANGLES, _objects[i].vertOffset, _objects[i].vertCount);
+	}
+}
+/**
+* Bind program, uniforms and vertex layout shared by both model passes
 *
 * @param {object} gl context
 * @param {mat4} modelView
 * @param {mat4} projection
-* @param {mat3} normalMat
 * @param {object} fog structure
 * @param {object} light structure
 */
-function render$11(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$22.uniform;
-	const attribute = _program$22.attribute;
-	let i, count;
-	gl.useProgram(_program$22);
+function bind$1(gl, modelView, projection, fog, light) {
+	const uniform = _program$23.uniform;
+	const attribute = _program$23.attribute;
+	gl.useProgram(_program$23);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -207856,25 +208124,51 @@ function render$11(gl, modelView, projection, normalMat, fog, light) {
 	gl.vertexAttribPointer(attribute.aAlpha, 1, gl.FLOAT, false, 36, 32);
 	gl.activeTexture(gl.TEXTURE0);
 	gl.uniform1i(uniform.uDiffuse, 0);
-	SpriteRenderer.runWithDepth(true, true, true, function() {
-		if (_batchesReady) {
-			let lastTexture = null;
-			for (i = 0, count = _batches.length; i < count; ++i) {
-				if (_batches[i].texture !== lastTexture) {
-					gl.bindTexture(gl.TEXTURE_2D, _batches[i].texture);
-					lastTexture = _batches[i].texture;
-				}
-				gl.drawArrays(gl.TRIANGLES, _batches[i].vertOffset, _batches[i].vertCount);
-			}
-		} else for (i = 0, count = _objects.length; i < count; ++i) if (_objects[i].complete) {
-			gl.bindTexture(gl.TEXTURE_2D, _objects[i].texture);
-			gl.drawArrays(gl.TRIANGLES, _objects[i].vertOffset, _objects[i].vertCount);
-		}
-	});
+}
+/**
+* Release the vertex layout
+*
+* @param {object} gl context
+*/
+function unbind(gl) {
+	const attribute = _program$23.attribute;
 	gl.disableVertexAttribArray(attribute.aPosition);
 	gl.disableVertexAttribArray(attribute.aVertexNormal);
 	gl.disableVertexAttribArray(attribute.aTextureCoord);
 	gl.disableVertexAttribArray(attribute.aAlpha);
+}
+/**
+* Render models (opaque pass)
+*
+* @param {object} gl context
+* @param {mat4} modelView
+* @param {mat4} projection
+* @param {mat3} normalMat
+* @param {object} fog structure
+* @param {object} light structure
+*/
+function render$11(gl, modelView, projection, normalMat, fog, light) {
+	bind$1(gl, modelView, projection, fog, light);
+	OccluderFade.renderOpaque(gl, _program$23.uniform, () => drawMeshes(gl));
+	OccluderFade.renderQuery(gl, _program$23.uniform, () => drawMeshes(gl), OccluderFade.QUERY.MODELS);
+	unbind(gl);
+}
+/**
+* Render the faded (see-through) part of the models, translucent.
+* Call after opaque scene elements so they remain visible behind it.
+*
+* @param {object} gl context
+* @param {mat4} modelView
+* @param {mat4} projection
+* @param {mat3} normalMat
+* @param {object} fog structure
+* @param {object} light structure
+*/
+function renderFaded$1(gl, modelView, projection, normalMat, fog, light) {
+	if (!OccluderFade.needsBlendPass()) return;
+	bind$1(gl, modelView, projection, fog, light);
+	OccluderFade.renderBlend(gl, _program$23.uniform, () => drawMeshes(gl));
+	unbind(gl);
 }
 /**
 * Clean textures/buffer from memory
@@ -207887,23 +208181,23 @@ function free$5(gl) {
 		gl.deleteBuffer(_buffer$16);
 		_buffer$16 = null;
 	}
-	if (_program$22) {
-		gl.deleteProgram(_program$22);
-		_program$22 = null;
+	if (_program$23) {
+		gl.deleteProgram(_program$23);
+		_program$23 = null;
 	}
 	for (i = 0, count = _objects.length; i < count; ++i) gl.deleteTexture(_objects[i].texture);
 	_objects.length = 0;
 	_batches.length = 0;
 	_batchesReady = false;
 }
-var _program$22, _buffer$16, _objects, _batches, _batchesReady, _pendingTextures, Models_default;
+var _program$23, _buffer$16, _objects, _batches, _batchesReady, _pendingTextures, Models_default;
 var init_Models = __esmMin((() => {
 	init_Models$2();
 	init_Models$1();
 	init_WebGL();
 	init_Map();
-	init_SpriteRenderer();
-	_program$22 = null;
+	init_OccluderFade();
+	_program$23 = null;
 	_buffer$16 = null;
 	_objects = [];
 	_batches = [];
@@ -207912,6 +208206,7 @@ var init_Models = __esmMin((() => {
 	Models_default = {
 		init: init$10,
 		render: render$11,
+		renderFaded: renderFaded$1,
 		free: free$5
 	};
 }));
@@ -207919,13 +208214,13 @@ var init_Models = __esmMin((() => {
 //#region src/Renderer/Map/AnimatedModels.vs?raw
 var AnimatedModels_default$2;
 var init_AnimatedModels$2 = __esmMin((() => {
-	AnimatedModels_default$2 = "#version 300 es  \r\nprecision highp float;  \r\n  \r\nin vec3 aPosition;  \r\nin vec3 aNormal;  \r\nin vec2 aTextureCoord;  \r\nin float aAlpha;  \r\n  \r\nout vec2 vTextureCoord;  \r\nout float vLightWeighting;  \r\nout float vAlpha;  \r\nout float vFogFactor;  \r\n  \r\nuniform mat4 uModelViewMat;  \r\nuniform mat4 uProjectionMat;  \r\nuniform mat3 uNormalMat;  \r\n  \r\nuniform vec3 uLightDirection;  \r\nuniform float uLightOpacity;  \r\nuniform vec3 uLightAmbient;  \r\nuniform vec3 uLightDiffuse;  \r\n  \r\nuniform bool uFogUse;  \r\nuniform float uFogNear;  \r\nuniform float uFogFar;  \r\n  \r\nvoid main(void) {  \r\n    vec4 position = uModelViewMat * vec4(aPosition, 1.0);  \r\n    gl_Position = uProjectionMat * position;  \r\n  \r\n    vTextureCoord = aTextureCoord;  \r\n    vAlpha = aAlpha;  \r\n  \r\n    vec3 normal = normalize(aNormal);  \r\n    float lightWeight = max(dot(normal, uLightDirection), 0.0);  \r\n    vLightWeighting = (1.0 - uLightOpacity) + lightWeight * uLightOpacity;  \r\n  \r\n    if (uFogUse) {  \r\n        float depth = length(position.xyz);  \r\n        vFogFactor = clamp((uFogFar - depth) / (uFogFar - uFogNear), 0.0, 1.0);  \r\n    } else {  \r\n        vFogFactor = 1.0;  \r\n    }  \r\n}";
+	AnimatedModels_default$2 = "#version 300 es  \r\nprecision highp float;  \r\n  \r\nin vec3 aPosition;  \r\nin vec3 aNormal;  \r\nin vec2 aTextureCoord;  \r\nin float aAlpha;  \r\n  \r\nout vec2 vTextureCoord;  \r\nout float vLightWeighting;  \r\nout float vAlpha;  \r\nout float vFogFactor;  \r\nout vec3 vWorldPos;\r\n  \r\nuniform mat4 uModelViewMat;  \r\nuniform mat4 uProjectionMat;  \r\nuniform mat3 uNormalMat;  \r\n  \r\nuniform vec3 uLightDirection;  \r\nuniform float uLightOpacity;  \r\nuniform vec3 uLightAmbient;  \r\nuniform vec3 uLightDiffuse;  \r\n  \r\nuniform bool uFogUse;  \r\nuniform float uFogNear;  \r\nuniform float uFogFar;  \r\n  \r\nvoid main(void) {  \r\n    vec4 position = uModelViewMat * vec4(aPosition, 1.0);  \r\n    gl_Position = uProjectionMat * position;  \r\n  \r\n    vTextureCoord = aTextureCoord;  \r\n    vAlpha = aAlpha;  \r\n    vWorldPos = aPosition;\r\n  \r\n    vec3 normal = normalize(aNormal);  \r\n    float lightWeight = max(dot(normal, uLightDirection), 0.0);  \r\n    vLightWeighting = (1.0 - uLightOpacity) + lightWeight * uLightOpacity;  \r\n  \r\n    if (uFogUse) {  \r\n        float depth = length(position.xyz);  \r\n        vFogFactor = clamp((uFogFar - depth) / (uFogFar - uFogNear), 0.0, 1.0);  \r\n    } else {  \r\n        vFogFactor = 1.0;  \r\n    }  \r\n}";
 }));
 //#endregion
 //#region src/Renderer/Map/AnimatedModels.fs?raw
 var AnimatedModels_default$1;
 var init_AnimatedModels$1 = __esmMin((() => {
-	AnimatedModels_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;  \r\nin float vLightWeighting;  \r\nin float vAlpha;  \r\nout vec4 fragColor;  \r\n  \r\nuniform sampler2D uDiffuse;  \r\n  \r\nuniform bool  uFogUse;  \r\nuniform float uFogNear;  \r\nuniform float uFogFar;  \r\nuniform vec3  uFogColor;  \r\n  \r\nuniform vec3  uLightAmbient;  \r\nuniform vec3  uLightDiffuse;  \r\nuniform float uLightOpacity;  \r\nuniform vec3  uLightEnv;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture(uDiffuse, vTextureCoord.st);  \r\n    if (textureSample.a == 0.0) {  \r\n        discard;  \r\n    }  \r\n  \r\n    vec3 color = (vLightWeighting * uLightDiffuse + uLightAmbient);  \r\n    textureSample.rgb *= clamp(color, 0.0, 1.0);  \r\n    textureSample.rgb *= clamp(uLightEnv, 0.0, 1.0);  \r\n    textureSample.a *= vAlpha;  \r\n  \r\n    fragColor = textureSample;  \r\n  \r\n    if (uFogUse) {  \r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;  \r\n        float fogFactor = smoothstep(uFogNear, uFogFar, depth);  \r\n        fragColor    = mix(fragColor, vec4(uFogColor, fragColor.w), fogFactor);  \r\n    } \r\n}";
+	AnimatedModels_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;  \r\nin float vLightWeighting;  \r\nin float vAlpha;  \r\nin vec3 vWorldPos;\r\nout vec4 fragColor;  \r\n  \r\nuniform sampler2D uDiffuse;  \r\n  \r\nuniform bool  uFogUse;  \r\nuniform float uFogNear;  \r\nuniform float uFogFar;  \r\nuniform vec3  uFogColor;  \r\n  \r\nuniform vec3  uLightAmbient;  \r\nuniform vec3  uLightDiffuse;  \r\nuniform float uLightOpacity;  \r\nuniform vec3  uLightEnv;\r\n\r\n// #include OccluderFade.glsl\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture(uDiffuse, vTextureCoord.st);  \r\n    if (textureSample.a == 0.0) {  \r\n        discard;  \r\n    }  \r\n\r\n    if (!occluderFade(vWorldPos, textureSample.a)) {\r\n        discard;\r\n    }\r\n  \r\n    vec3 color = (vLightWeighting * uLightDiffuse + uLightAmbient);  \r\n    textureSample.rgb *= clamp(color, 0.0, 1.0);  \r\n    textureSample.rgb *= clamp(uLightEnv, 0.0, 1.0);  \r\n    textureSample.a *= vAlpha;  \r\n  \r\n    fragColor = textureSample;  \r\n  \r\n    if (uFogUse) {  \r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;  \r\n        float fogFactor = smoothstep(uFogNear, uFogFar, depth);  \r\n        fragColor    = mix(fragColor, vec4(uFogColor, fragColor.w), fogFactor);  \r\n    } \r\n}";
 }));
 //#endregion
 //#region src/Renderer/Map/AnimatedModels.js
@@ -207933,27 +208228,33 @@ var init_AnimatedModels$1 = __esmMin((() => {
 * Initialize shader program
 */
 function init$9(gl) {
-	_program$21 = WebGL_default.createShaderProgram(gl, AnimatedModels_default$2, AnimatedModels_default$1);
-	_program$21.uniform = {
-		uModelViewMat: gl.getUniformLocation(_program$21, "uModelViewMat"),
-		uProjectionMat: gl.getUniformLocation(_program$21, "uProjectionMat"),
-		uNormalMat: gl.getUniformLocation(_program$21, "uNormalMat"),
-		uLightDirection: gl.getUniformLocation(_program$21, "uLightDirection"),
-		uLightOpacity: gl.getUniformLocation(_program$21, "uLightOpacity"),
-		uLightAmbient: gl.getUniformLocation(_program$21, "uLightAmbient"),
-		uLightDiffuse: gl.getUniformLocation(_program$21, "uLightDiffuse"),
-		uLightEnv: gl.getUniformLocation(_program$21, "uLightEnv"),
-		uFogUse: gl.getUniformLocation(_program$21, "uFogUse"),
-		uFogNear: gl.getUniformLocation(_program$21, "uFogNear"),
-		uFogFar: gl.getUniformLocation(_program$21, "uFogFar"),
-		uFogColor: gl.getUniformLocation(_program$21, "uFogColor"),
-		uDiffuse: gl.getUniformLocation(_program$21, "uDiffuse")
+	_program$22 = WebGL_default.createShaderProgram(gl, AnimatedModels_default$2, OccluderFade.injectShader(AnimatedModels_default$1));
+	_program$22.uniform = {
+		uModelViewMat: gl.getUniformLocation(_program$22, "uModelViewMat"),
+		uProjectionMat: gl.getUniformLocation(_program$22, "uProjectionMat"),
+		uNormalMat: gl.getUniformLocation(_program$22, "uNormalMat"),
+		uLightDirection: gl.getUniformLocation(_program$22, "uLightDirection"),
+		uLightOpacity: gl.getUniformLocation(_program$22, "uLightOpacity"),
+		uLightAmbient: gl.getUniformLocation(_program$22, "uLightAmbient"),
+		uLightDiffuse: gl.getUniformLocation(_program$22, "uLightDiffuse"),
+		uLightEnv: gl.getUniformLocation(_program$22, "uLightEnv"),
+		uFogUse: gl.getUniformLocation(_program$22, "uFogUse"),
+		uFogNear: gl.getUniformLocation(_program$22, "uFogNear"),
+		uFogFar: gl.getUniformLocation(_program$22, "uFogFar"),
+		uFogColor: gl.getUniformLocation(_program$22, "uFogColor"),
+		uDiffuse: gl.getUniformLocation(_program$22, "uDiffuse"),
+		uOccluderFadeMode: gl.getUniformLocation(_program$22, "uOccluderFadeMode"),
+		uOccluderFadeEye: gl.getUniformLocation(_program$22, "uOccluderFadeEye"),
+		uOccluderFadeFocus: gl.getUniformLocation(_program$22, "uOccluderFadeFocus"),
+		uOccluderFadeRadius: gl.getUniformLocation(_program$22, "uOccluderFadeRadius"),
+		uOccluderFadeOpacity: gl.getUniformLocation(_program$22, "uOccluderFadeOpacity"),
+		uOccluderFadeStrength: gl.getUniformLocation(_program$22, "uOccluderFadeStrength")
 	};
-	_program$21.attribute = {
-		aPosition: gl.getAttribLocation(_program$21, "aPosition"),
-		aNormal: gl.getAttribLocation(_program$21, "aNormal"),
-		aTextureCoord: gl.getAttribLocation(_program$21, "aTextureCoord"),
-		aAlpha: gl.getAttribLocation(_program$21, "aAlpha")
+	_program$22.attribute = {
+		aPosition: gl.getAttribLocation(_program$22, "aPosition"),
+		aNormal: gl.getAttribLocation(_program$22, "aNormal"),
+		aTextureCoord: gl.getAttribLocation(_program$22, "aTextureCoord"),
+		aAlpha: gl.getAttribLocation(_program$22, "aAlpha")
 	};
 }
 /**
@@ -207976,11 +208277,11 @@ function isNodeStatic(node) {
 */
 function add$2(gl, modelData) {
 	if (!modelData || !modelData.nodes || modelData.nodes.length === 0) return;
-	if (!_program$21) init$9(gl);
+	if (!_program$22) init$9(gl);
 	const instances = [];
 	for (let i = 0; i < modelData.instances.length; i++) {
 		const instArray = modelData.instances[i];
-		const matrix = mat4$19.create();
+		const matrix = mat4$20.create();
 		for (let j = 0; j < 16; j++) matrix[j] = instArray[j];
 		instances.push(matrix);
 	}
@@ -208010,20 +208311,20 @@ function add$2(gl, modelData) {
 			_isStatic: !hasAnyAnimation,
 			_index: n,
 			_cache: {
-				local: mat4$19.create(),
-				final: mat4$19.create(),
+				local: mat4$20.create(),
+				final: mat4$20.create(),
 				instances: new Array(instances.length)
 			}
 		};
 		if (node._isStatic) {
-			const local = mat4$19.create();
-			mat4$19.identity(local);
-			mat4$19.translate(local, local, node.pos);
-			mat4$19.rotate(local, local, node.rotangle, node.rotaxis);
-			mat4$19.scale(local, local, node.scale);
+			const local = mat4$20.create();
+			mat4$20.identity(local);
+			mat4$20.translate(local, local, node.pos);
+			mat4$20.rotate(local, local, node.rotangle, node.rotaxis);
+			mat4$20.scale(local, local, node.scale);
 			node._staticLocalMatrix = local;
 		}
-		for (let k = 0; k < instances.length; k++) node._cache.instances[k] = mat4$19.create();
+		for (let k = 0; k < instances.length; k++) node._cache.instances[k] = mat4$20.create();
 		if (node.rotKeyframes) for (let rk = 0; rk < node.rotKeyframes.length; rk++) {
 			const kf = node.rotKeyframes[rk];
 			totalAnimationLength = Math.max(totalAnimationLength, kf.frame || 0);
@@ -208126,7 +208427,7 @@ function add$2(gl, modelData) {
 	};
 	for (let n = 0; n < nodes.length; n++) {
 		animModel._nodeMap[nodes[n].name] = nodes[n];
-		animModel._globalMatrices[n] = mat4$19.create();
+		animModel._globalMatrices[n] = mat4$20.create();
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, animModel._gpuBuffer.byteLength, gl.DYNAMIC_DRAW);
@@ -208134,7 +208435,7 @@ function add$2(gl, modelData) {
 	animModel.vao = gl.createVertexArray();
 	gl.bindVertexArray(animModel.vao);
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
-	const attribute = _program$21.attribute;
+	const attribute = _program$22.attribute;
 	const stride = 36;
 	gl.enableVertexAttribArray(attribute.aPosition);
 	gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, stride, 0);
@@ -208212,9 +208513,9 @@ function getScaleAtFrame$2(keyframes, frame, out) {
 * Writes directly to the monolithic buffer
 */
 function transformAndWrite(node, finalMatrix, textureId, offset, buffer, alpha) {
-	const normalMat = node._cache.normalMat || mat4$19.create();
+	const normalMat = node._cache.normalMat || mat4$20.create();
 	node._cache.normalMat = normalMat;
-	mat4$19.extractRotation(normalMat, finalMatrix);
+	mat4$20.extractRotation(normalMat, finalMatrix);
 	const m = finalMatrix;
 	const n = normalMat;
 	const m0 = m[0], m1 = m[1], m2 = m[2], m4 = m[4], m5 = m[5], m6 = m[6], m8 = m[8], m9 = m[9], m10 = m[10], m12 = m[12], m13 = m[13], m14 = m[14];
@@ -208282,35 +208583,35 @@ function updateModelBuffer(gl, model, frame, force) {
 		const globalMatrix = globalMatrices[n];
 		if (node.parentname && nodeMap[node.parentname] && node.parentname !== node.name) {
 			const parentIdx = nodeMap[node.parentname]._index;
-			mat4$19.copy(globalMatrix, globalMatrices[parentIdx]);
-		} else mat4$19.identity(globalMatrix);
-		if (node._isStatic) mat4$19.multiply(globalMatrix, globalMatrix, node._staticLocalMatrix);
+			mat4$20.copy(globalMatrix, globalMatrices[parentIdx]);
+		} else mat4$20.identity(globalMatrix);
+		if (node._isStatic) mat4$20.multiply(globalMatrix, globalMatrix, node._staticLocalMatrix);
 		else {
 			const animPos = getPositionAtFrame$2(node.posKeyframes, frame, _tempVec3);
-			mat4$19.translate(globalMatrix, globalMatrix, animPos || node.pos);
+			mat4$20.translate(globalMatrix, globalMatrix, animPos || node.pos);
 			const animRot = getRotationAtFrame$2(node.rotKeyframes, frame, _tempQuat);
 			if (animRot) {
-				mat4$19.fromQuat(_tempMat4, animRot);
-				mat4$19.multiply(globalMatrix, globalMatrix, _tempMat4);
-			} else mat4$19.rotate(globalMatrix, globalMatrix, node.rotangle, node.rotaxis);
+				mat4$20.fromQuat(_tempMat4, animRot);
+				mat4$20.multiply(globalMatrix, globalMatrix, _tempMat4);
+			} else mat4$20.rotate(globalMatrix, globalMatrix, node.rotangle, node.rotaxis);
 			const animScale = getScaleAtFrame$2(node.scaleKeyFrames, frame, _tempVec3Scale);
-			mat4$19.scale(globalMatrix, globalMatrix, animScale || node.scale);
+			mat4$20.scale(globalMatrix, globalMatrix, animScale || node.scale);
 		}
 		const finalNodeMatrix = node._cache.final;
-		mat4$19.identity(finalNodeMatrix);
-		mat4$19.translate(finalNodeMatrix, finalNodeMatrix, [
+		mat4$20.identity(finalNodeMatrix);
+		mat4$20.translate(finalNodeMatrix, finalNodeMatrix, [
 			-box.center[0],
 			-box.max[1],
 			-box.center[2]
 		]);
-		mat4$19.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
-		if (!node.is_only) mat4$19.translate(finalNodeMatrix, finalNodeMatrix, node.offset);
-		mat4$19.multiply(finalNodeMatrix, finalNodeMatrix, mat3$4.toMat4(node.mat3));
+		mat4$20.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
+		if (!node.is_only) mat4$20.translate(finalNodeMatrix, finalNodeMatrix, node.offset);
+		mat4$20.multiply(finalNodeMatrix, finalNodeMatrix, mat3$4.toMat4(node.mat3));
 		node.finalMatrix = finalNodeMatrix;
 	}
 	for (let n = 0; n < model.nodes.length; n++) {
 		const node = model.nodes[n];
-		for (let i = 0; i < model.instances.length; i++) mat4$19.multiply(node._cache.instances[i], model.instances[i], node.finalMatrix);
+		for (let i = 0; i < model.instances.length; i++) mat4$20.multiply(node._cache.instances[i], model.instances[i], node.finalMatrix);
 	}
 	const buffer = model._gpuBuffer;
 	const writePlans = model.writePlans;
@@ -208328,13 +208629,11 @@ function updateModelBuffer(gl, model, frame, force) {
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, buffer);
 }
 /**
-* Render animated models
+* Bind program and per-frame uniforms shared by both model passes
 */
-function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
-	if (_animatedModels.length === 0) return;
-	if (!_program$21) init$9(gl);
-	const uniform = _program$21.uniform;
-	gl.useProgram(_program$21);
+function bind(gl, modelView, projection, normalMat, fog, light) {
+	const uniform = _program$22.uniform;
+	gl.useProgram(_program$22);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniformMatrix3fv(uniform.uNormalMat, false, normalMat);
@@ -208349,22 +208648,48 @@ function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 	gl.uniform3fv(uniform.uFogColor, fog.color);
 	gl.activeTexture(gl.TEXTURE0);
 	gl.uniform1i(uniform.uDiffuse, 0);
-	SpriteRenderer.runWithDepth(true, true, true, function() {
-		for (let m = 0; m < _animatedModels.length; m++) {
-			const model = _animatedModels[m];
-			updateModelBuffer(gl, model, tick % (model.animLen || 1), false);
-			if (!model.buffer || model.meshInfos.length === 0) continue;
-			gl.bindVertexArray(model.vao);
-			for (let i = 0; i < model.meshInfos.length; i++) {
-				const info = model.meshInfos[i];
-				const texture = model.textureObjects[info.textureIdx];
-				if (texture) {
-					gl.bindTexture(gl.TEXTURE_2D, texture);
-					gl.drawArrays(gl.TRIANGLES, info.vertOffset, info.vertCount);
-				}
+}
+/**
+* Issue the draw calls for every animated model
+*/
+function drawModels(gl) {
+	for (let m = 0; m < _animatedModels.length; m++) {
+		const model = _animatedModels[m];
+		if (!model.buffer || model.meshInfos.length === 0) continue;
+		gl.bindVertexArray(model.vao);
+		for (let i = 0; i < model.meshInfos.length; i++) {
+			const info = model.meshInfos[i];
+			const texture = model.textureObjects[info.textureIdx];
+			if (texture) {
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				gl.drawArrays(gl.TRIANGLES, info.vertOffset, info.vertCount);
 			}
 		}
-	});
+	}
+}
+/**
+* Render animated models (opaque pass)
+*/
+function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
+	if (_animatedModels.length === 0) return;
+	if (!_program$22) init$9(gl);
+	bind(gl, modelView, projection, normalMat, fog, light);
+	for (let m = 0; m < _animatedModels.length; m++) {
+		const model = _animatedModels[m];
+		updateModelBuffer(gl, model, tick % (model.animLen || 1), false);
+	}
+	OccluderFade.renderOpaque(gl, _program$22.uniform, () => drawModels(gl));
+	OccluderFade.renderQuery(gl, _program$22.uniform, () => drawModels(gl), OccluderFade.QUERY.ANIMATED);
+	gl.bindVertexArray(null);
+}
+/**
+* Render the faded (see-through) part of the animated models, translucent.
+* Reuses the vertex data uploaded by render() this frame.
+*/
+function renderFaded(gl, modelView, projection, normalMat, fog, light) {
+	if (_animatedModels.length === 0 || !_program$22 || !OccluderFade.needsBlendPass()) return;
+	bind(gl, modelView, projection, normalMat, fog, light);
+	OccluderFade.renderBlend(gl, _program$22.uniform, () => drawModels(gl));
 	gl.bindVertexArray(null);
 }
 /**
@@ -208373,7 +208698,7 @@ function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 function hasAnimatedModels() {
 	return _animatedModels.length > 0;
 }
-var mat3$4, mat4$19, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _program$21, _animatedModels, AnimatedModels_default;
+var mat3$4, mat4$20, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _program$22, _animatedModels, AnimatedModels_default;
 var init_AnimatedModels = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -208381,22 +208706,23 @@ var init_AnimatedModels = __esmMin((() => {
 	init_Graphics();
 	init_AnimatedModels$2();
 	init_AnimatedModels$1();
-	init_SpriteRenderer();
+	init_OccluderFade();
 	mat3$4 = gl_matrix_default.mat3;
-	mat4$19 = gl_matrix_default.mat4;
+	mat4$20 = gl_matrix_default.mat4;
 	vec3$5 = gl_matrix_default.vec3;
 	quat$1 = gl_matrix_default.quat;
 	_tempVec3 = vec3$5.create();
 	_tempVec3Scale = vec3$5.create();
 	_tempQuat = quat$1.create();
-	_tempMat4 = mat4$19.create();
-	_program$21 = null;
+	_tempMat4 = mat4$20.create();
+	_program$22 = null;
 	_animatedModels = [];
 	AnimatedModels_default = {
 		init: init$9,
 		free: free$4,
 		add: add$2,
 		render: render$10,
+		renderFaded,
 		hasAnimatedModels
 	};
 }));
@@ -212090,31 +212416,31 @@ function grayBroadcast(src, out) {
 * Initialize the shader program.
 */
 function init$8(gl) {
-	_program$20 = WebGL_default.createShaderProgram(gl, GR2Model_default$1, GR2Model_default);
-	_program$20.uniform = {
-		uModelViewMat: gl.getUniformLocation(_program$20, "uModelViewMat"),
-		uProjectionMat: gl.getUniformLocation(_program$20, "uProjectionMat"),
-		uNormalMat: gl.getUniformLocation(_program$20, "uNormalMat"),
-		uBones: gl.getUniformLocation(_program$20, "uBones[0]"),
-		uLightDirection: gl.getUniformLocation(_program$20, "uLightDirection"),
-		uLightOpacity: gl.getUniformLocation(_program$20, "uLightOpacity"),
-		uLightAmbient: gl.getUniformLocation(_program$20, "uLightAmbient"),
-		uLightDiffuse: gl.getUniformLocation(_program$20, "uLightDiffuse"),
-		uLightEnv: gl.getUniformLocation(_program$20, "uLightEnv"),
-		uAlphaRef: gl.getUniformLocation(_program$20, "uAlphaRef"),
-		uAlpha: gl.getUniformLocation(_program$20, "uAlpha"),
-		uFogUse: gl.getUniformLocation(_program$20, "uFogUse"),
-		uFogNear: gl.getUniformLocation(_program$20, "uFogNear"),
-		uFogFar: gl.getUniformLocation(_program$20, "uFogFar"),
-		uFogColor: gl.getUniformLocation(_program$20, "uFogColor"),
-		uDiffuse: gl.getUniformLocation(_program$20, "uDiffuse")
+	_program$21 = WebGL_default.createShaderProgram(gl, GR2Model_default$1, GR2Model_default);
+	_program$21.uniform = {
+		uModelViewMat: gl.getUniformLocation(_program$21, "uModelViewMat"),
+		uProjectionMat: gl.getUniformLocation(_program$21, "uProjectionMat"),
+		uNormalMat: gl.getUniformLocation(_program$21, "uNormalMat"),
+		uBones: gl.getUniformLocation(_program$21, "uBones[0]"),
+		uLightDirection: gl.getUniformLocation(_program$21, "uLightDirection"),
+		uLightOpacity: gl.getUniformLocation(_program$21, "uLightOpacity"),
+		uLightAmbient: gl.getUniformLocation(_program$21, "uLightAmbient"),
+		uLightDiffuse: gl.getUniformLocation(_program$21, "uLightDiffuse"),
+		uLightEnv: gl.getUniformLocation(_program$21, "uLightEnv"),
+		uAlphaRef: gl.getUniformLocation(_program$21, "uAlphaRef"),
+		uAlpha: gl.getUniformLocation(_program$21, "uAlpha"),
+		uFogUse: gl.getUniformLocation(_program$21, "uFogUse"),
+		uFogNear: gl.getUniformLocation(_program$21, "uFogNear"),
+		uFogFar: gl.getUniformLocation(_program$21, "uFogFar"),
+		uFogColor: gl.getUniformLocation(_program$21, "uFogColor"),
+		uDiffuse: gl.getUniformLocation(_program$21, "uDiffuse")
 	};
-	_program$20.attribute = {
-		aPosition: gl.getAttribLocation(_program$20, "aPosition"),
-		aNormal: gl.getAttribLocation(_program$20, "aNormal"),
-		aTextureCoord: gl.getAttribLocation(_program$20, "aTextureCoord"),
-		aBoneIndex: gl.getAttribLocation(_program$20, "aBoneIndex"),
-		aBoneWeight: gl.getAttribLocation(_program$20, "aBoneWeight")
+	_program$21.attribute = {
+		aPosition: gl.getAttribLocation(_program$21, "aPosition"),
+		aNormal: gl.getAttribLocation(_program$21, "aNormal"),
+		aTextureCoord: gl.getAttribLocation(_program$21, "aTextureCoord"),
+		aBoneIndex: gl.getAttribLocation(_program$21, "aBoneIndex"),
+		aBoneWeight: gl.getAttribLocation(_program$21, "aBoneWeight")
 	};
 }
 /**
@@ -212272,7 +212598,7 @@ function acquire(path) {
 */
 function buildTypeGL(gl, type) {
 	type.textures = makeTypeTextures(gl, type.parsed);
-	const attr = _program$20.attribute;
+	const attr = _program$21.attribute;
 	type.submeshes = type.meshes.map(function(mesh) {
 		const vao = gl.createVertexArray();
 		gl.bindVertexArray(vao);
@@ -212392,13 +212718,13 @@ function normalize3(v) {
 function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 	_gl$1 = gl;
 	if (_instances.length === 0 || !light) return;
-	if (!_program$20) init$8(gl);
+	if (!_program$21) init$8(gl);
 	for (const path in _types) {
 		const type = _types[path];
 		if (type.cpuReady && !type.glReady) buildTypeGL(gl, type);
 	}
-	const uniform = _program$20.uniform;
-	gl.useProgram(_program$20);
+	const uniform = _program$21.uniform;
+	gl.useProgram(_program$21);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1f(uniform.uLightOpacity, light.opacity != null ? light.opacity : 1);
 	gl.uniform3fv(uniform.uLightEnv, light.env || _phaseEnv);
@@ -212461,8 +212787,8 @@ function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 				bones = flattenPose(_r(type.parsed, idx, sampleT), type.boneCount);
 			}
 			seen[key] = bones;
-			mat4$18.multiply(_mv, modelView, inst.world);
-			mat4$18.toInverseMat3(_mv, _nmat);
+			mat4$19.multiply(_mv, modelView, inst.world);
+			mat4$19.toInverseMat3(_mv, _nmat);
 			mat3$3.transpose(_nmat, _nmat);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, _mv);
 			gl.uniformMatrix3fv(uniform.uNormalMat, false, _nmat);
@@ -212485,7 +212811,7 @@ function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 					x2: 0,
 					y2: 0
 				});
-				mat4$18.multiply(_mvp, projection, _mv);
+				mat4$19.multiply(_mvp, projection, _mv);
 				if (!computeBaseSphereRect(_mvp, projection, box)) inst.screenRect = null;
 			}
 			let alpha = 1;
@@ -212743,7 +213069,7 @@ function clear() {
 	for (let i = 0; i < insts.length; i++) detach(insts[i]);
 	_poseCache = {};
 }
-var mat3$3, mat4$18, ALPHA_REF, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$20, _gl$1, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv, _mvp, _nmat, _lightView, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX, TEX_GREY_PX, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE, GR2_VERTEX_LAYOUT, GR2ModelRenderer_default;
+var mat3$3, mat4$19, ALPHA_REF, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$21, _gl$1, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv, _mvp, _nmat, _lightView, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX, TEX_GREY_PX, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE, GR2_VERTEX_LAYOUT, GR2ModelRenderer_default;
 var init_GR2ModelRenderer = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -212761,7 +213087,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 	init_GR2Model$1();
 	init_GR2Model();
 	mat3$3 = gl_matrix_default.mat3;
-	mat4$18 = gl_matrix_default.mat4;
+	mat4$19 = gl_matrix_default.mat4;
 	ALPHA_REF = 207 / 255;
 	_phaseDiffuse = new Float32Array([
 		128 / 255,
@@ -212802,7 +213128,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 		sguardian90_9: "emp",
 		treasurebox_2: "emp"
 	};
-	_program$20 = null;
+	_program$21 = null;
 	_gl$1 = null;
 	_types = {};
 	_missing = {};
@@ -212823,8 +213149,8 @@ var init_GR2ModelRenderer = __esmMin((() => {
 	_debugCell = false;
 	BASE_SPHERE_HALF_EXTENT = Math.sqrt(2);
 	_readyPromise = null;
-	_mv = mat4$18.create();
-	_mvp = mat4$18.create();
+	_mv = mat4$19.create();
+	_mvp = mat4$19.create();
 	_nmat = mat3$3.create();
 	_lightView = /* @__PURE__ */ new Float32Array(3);
 	_clip = /* @__PURE__ */ new Float32Array(4);
@@ -212980,7 +213306,7 @@ var init_SkillEffect = __esmMin((() => {
 		hitEffectId: 51
 	};
 	SkillEffect[SkillConst_default.MG_FROSTDIVER] = {
-		effectId: 27,
+		releaseEffectId: 27,
 		hitEffectId: 28
 	};
 	SkillEffect[SkillConst_default.MG_STONECURSE] = { effectId: 23 };
@@ -213162,7 +213488,7 @@ var init_SkillEffect = __esmMin((() => {
 		hitEffectId: 122
 	};
 	SkillEffect[SkillConst_default.AS_GRIMTOOTH] = {
-		effectId: 123,
+		releaseEffectId: 123,
 		hitEffectId: 132
 	};
 	SkillEffect[SkillConst_default.AS_ENCHANTPOISON] = { effectId: 20 };
@@ -213794,8 +214120,8 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.WL_SOULEXPANSION] = {};
 	SkillEffect[SkillConst_default.WL_FROSTMISTY] = { effectId: 726 };
 	SkillEffect[SkillConst_default.WL_JACKFROST] = {
-		effectId: "ef_jackfrost",
-		groundEffectId: 801
+		successEffectIdOnCaster: "ef_jackfrost",
+		hitEffectId: 28
 	};
 	SkillEffect[SkillConst_default.WL_MARSHOFABYSS] = { effectId: 729 };
 	SkillEffect[SkillConst_default.WL_RECOGNIZEDSPELL] = { effectId: 803 };
@@ -218564,6 +218890,28 @@ function _root$18() {
 	return ChatBox._shadow || ChatBox._host;
 }
 /**
+* Whether an Alt/Option keydown produces a different printable character than its key
+* (macOS Option layer, dead keys), i.e. the user is typing rather than using a hotkey.
+* @param {KeyboardEvent} event
+* @returns {boolean}
+*/
+function isComposedAltCharacter(event) {
+	if (event.ctrlKey || event.metaKey || !event.key) return false;
+	if (event.key === "Dead") return true;
+	if (event.key.length !== 1) return false;
+	const match = /^(?:Key|Digit)(.)$/.exec(event.code || "");
+	return !!match && event.key.toUpperCase() !== match[1];
+}
+/**
+* Move caret to the end of a contenteditable element.
+* Uses Selection.collapse(): WebKit ignores addRange() for ranges inside a shadow root, so the
+* removeAllRanges()+addRange() idiom left Safari with no caret and typing went nowhere.
+* @param {HTMLElement} el
+*/
+function setCaretToEnd$1(el) {
+	window.getSelection().collapse(el, el.childNodes.length);
+}
+/**
 * Extract plain chat text from the contenteditable input while preserving item links.
 */
 function extractChatMessage$1(inputEl) {
@@ -218972,6 +219320,10 @@ var init_ChatBox = __esmMin((() => {
 		});
 		const inputChatbox = root.querySelector(".input-chatbox");
 		if (Configs.get("restoreChatFocus", false) && inputChatbox) inputChatbox.addEventListener("blur", () => {
+			if (inputChatbox.dataset.escapeBlur) {
+				delete inputChatbox.dataset.escapeBlur;
+				return;
+			}
 			Events.setTimeout(() => {
 				const active = KEYS.getDeepActiveElement();
 				const movedInsideChatbox = active && root.querySelector("#chatbox").contains(active);
@@ -218981,20 +219333,10 @@ var init_ChatBox = __esmMin((() => {
 		});
 		if (inputChatbox) {
 			inputChatbox.addEventListener("click", function() {
-				const range = document.createRange();
-				const selection = window.getSelection();
-				range.selectNodeContents(this);
-				range.collapse(false);
-				selection.removeAllRanges();
-				selection.addRange(range);
+				setCaretToEnd$1(this);
 			});
 			inputChatbox.addEventListener("focus", function() {
-				const range = document.createRange();
-				const selection = window.getSelection();
-				range.selectNodeContents(this);
-				range.collapse(false);
-				selection.removeAllRanges();
-				selection.addRange(range);
+				setCaretToEnd$1(this);
 			});
 			inputChatbox.maxLength = MAX_LENGTH;
 			inputChatbox.addEventListener("input", (event) => {
@@ -219442,6 +219784,10 @@ var init_ChatBox = __esmMin((() => {
 						return true;
 					}
 					if (event.altKey || KEYS.ALT) {
+						if (isComposedAltCharacter(event)) {
+							event.stopImmediatePropagation();
+							return true;
+						}
 						if (!(event.which === KEYS.LEFT || event.which === KEYS.RIGHT || event.which === KEYS.UP || event.which === KEYS.DOWN || event.which === KEYS.BACKSPACE || event.which === KEYS.DELETE || event.which === KEYS.HOME || event.which === KEYS.END)) {
 							if (ChatBox.processBattleMode(event.which)) {
 								event.preventDefault();
@@ -219454,7 +219800,12 @@ var init_ChatBox = __esmMin((() => {
 						event.stopImmediatePropagation();
 						return true;
 					}
-					if (event.which === KEYS.ESCAPE || event.key === "Escape") return true;
+					if (event.which === KEYS.ESCAPE || event.key === "Escape") {
+						activeElement.dataset.escapeBlur = "1";
+						activeElement.blur();
+						event.stopImmediatePropagation();
+						return false;
+					}
 					event.stopImmediatePropagation();
 					return true;
 				}
@@ -219521,12 +219872,7 @@ var init_ChatBox = __esmMin((() => {
 					if (bmEl) bmEl.style.display = "none";
 				}
 				messageBox.focus();
-				const range = document.createRange();
-				const sel = window.getSelection();
-				range.selectNodeContents(messageBox);
-				range.collapse(false);
-				sel.removeAllRanges();
-				sel.addRange(range);
+				setCaretToEnd$1(messageBox);
 				event.stopImmediatePropagation();
 				return false;
 			}
@@ -219750,19 +220096,19 @@ async function repeatedGreetingsLoop(book_information) {
 	for (let i = 0; i < text1.length; i++) {
 		if (_BOOK_INFORMATION["book_open"]) break;
 		if (text1[i] === "" && i === 0) {
-			getText("   ");
+			getText$1("   ");
 			continue;
 		}
 		if (i === 1) {
-			getText(text1[i]);
+			getText$1(text1[i]);
 			continue;
 		}
 		await sleepNow(5e3);
 		if (_BOOK_INFORMATION["book_open"]) break;
-		getText(text1[i]);
+		getText$1(text1[i]);
 	}
 }
-function getText(textbook) {
+function getText$1(textbook) {
 	let text = cleanTextColor(textbook);
 	text = CodepageManager.decodeString(text);
 	ChatBox_default.addText(text == "" ? "  " : text, ChatBox_default.TYPE.ANNOUNCE, ChatBox_default.FILTER.PUBLIC_LOG, "#ffffff");
@@ -222183,7 +222529,7 @@ function initializePathFindingWorker() {
 	if (!_pathFindingWorker) {
 		_pathFindingWorker = new Worker(new URL(
 			/* @vite-ignore */
-			"" + new URL("PathFindingWorker.js", import.meta.url).href,
+			new URL("PathFindingWorker.js", import.meta.url).href,
 			"" + import.meta.url
 		).href);
 		_pathFindingWorker.id = (/* @__PURE__ */ new Date()).getTime().toString();
@@ -223858,12 +224204,7 @@ var init_Friends = __esmMin((() => {
 * @param {HTMLElement} el
 */
 function setCaretToEnd(el) {
-	const range = document.createRange();
-	const sel = window.getSelection();
-	range.selectNodeContents(el);
-	range.collapse(false);
-	sel.removeAllRanges();
-	sel.addRange(range);
+	window.getSelection().collapse(el, el.childNodes.length);
 }
 /**
 * Extract plain chat text from input while preserving item links
@@ -229725,7 +230066,7 @@ var init_Context = __esmMin((() => {
 //#region src/UI/Components/GraphicsOption/GraphicsOption.html?raw
 var GraphicsOption_default$2;
 var init_GraphicsOption$2 = __esmMin((() => {
-	GraphicsOption_default$2 = "<div id=\"GraphicsOption\">\r\n	<div class=\"titlebar\" data-background=\"basic_interface/titlebar_mid.bmp\">\r\n		<div class=\"left\">\r\n			<button\r\n				class=\"base\"\r\n				data-background=\"basic_interface/sys_base_off.bmp\"\r\n				data-hover=\"basic_interface/sys_base_on.bmp\"\r\n			></button>\r\n			<span class=\"text\" data-text=\"1484\">Graphics Settings</span>\r\n		</div>\r\n		<div class=\"right\">\r\n			<button\r\n				class=\"base close\"\r\n				data-background=\"basic_interface/sys_close_off.bmp\"\r\n				data-hover=\"basic_interface/sys_close_on.bmp\"\r\n			></button>\r\n		</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"tabs-container\">\r\n		<div class=\"tabs\">\r\n			<button class=\"tab-button selected\" data-tab=\"basic\">Basic</button>\r\n			<button class=\"tab-button\" data-tab=\"advanced\">Advanced</button>\r\n		</div>\r\n	</div>\r\n\r\n	<div class=\"panel\">\r\n		<div class=\"tab-content selected\" id=\"basic\">\r\n			<table>\r\n				<tr>\r\n					<td>Details</td>\r\n					<td style=\"display: inline-block; width: 260px\">\r\n						<input\r\n							class=\"details\"\r\n							type=\"range\"\r\n							value=\"100\"\r\n							max=\"100\"\r\n							min=\"25\"\r\n							step=\"5\"\r\n							style=\"width: 90%\"\r\n						/>\r\n					</td>\r\n				</tr>\r\n				<tr class=\"resolution\">\r\n					<td>Resolution</td>\r\n					<td>\r\n						<select class=\"screensize\">\r\n							<option value=\"650x480\">640 x 480</option>\r\n							<option value=\"800x600\">800 x 600</option>\r\n							<option value=\"1024x768\">1024 x 768</option>\r\n							<option value=\"1280x800\">1280 x 800</option>\r\n							<option value=\"1400x900\">1400 x 900</option>\r\n							<option value=\"1680x1050\">1680 x 1050</option>\r\n							<option value=\"full\">Full Screen</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>Cursor</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"cursor-option\" type=\"checkbox\" />\r\n							Show official cursor\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Limit</td>\r\n					<td>\r\n						<select class=\"fpslimit\">\r\n							<option value=\"-1\">Unlimited</option>\r\n							<option value=\"30\">30</option>\r\n							<option value=\"60\">60</option>\r\n							<option value=\"90\">90</option>\r\n							<option value=\"120\">120</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Display</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"fps\" type=\"checkbox\" />\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n		</div>\r\n\r\n		<div class=\"tab-content\" id=\"advanced\">\r\n			<table>\r\n				<tr>\r\n					<td title=\"Force nearest neighbor filtering for pixel-perfect sprite rendering\">\r\n						Pixel Perfect Sprites\r\n					</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"pixel-perfect\" type=\"checkbox\" />\r\n							Force nearest neighbor filtering\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Add a glowing bloom effect to bright areas\">Bloom</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"bloom\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"bloom-intensity\"\r\n								type=\"range\"\r\n								value=\"0.5\"\r\n								min=\"0.1\"\r\n								max=\"3.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Apply a blur effect to the screen\">Blur</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"blur\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Intensity:\r\n							<input\r\n								class=\"blur-intensity\"\r\n								type=\"range\"\r\n								value=\"3.0\"\r\n								min=\"2.0\"\r\n								max=\"10.0\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Area:\r\n							<input\r\n								class=\"blur-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"3.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Contrast Adaptive Sharpening for enhanced details\">Contr. Adapt. Sharp. (CAS)</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"casEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Contrast:\r\n							<input\r\n								class=\"casContrast\"\r\n								type=\"range\"\r\n								value=\"0.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Sharpening:\r\n							<input\r\n								class=\"casSharpening\"\r\n								type=\"range\"\r\n								value=\"1.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Fast Approximate Anti-Aliasing for smoother edges\">FXAA</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"fxaaEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Subpix:\r\n							<input\r\n								class=\"fxaaSubpix\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Threshold:\r\n							<input\r\n								class=\"fxaaEdgeThreshold\"\r\n								type=\"range\"\r\n								value=\"0.125\"\r\n								min=\"0.063\"\r\n								max=\"0.333\"\r\n								step=\"0.03\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Cartoon rendering effect for stylized visuals\">Cartoon</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"cartoonEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Power:\r\n							<input\r\n								class=\"cartoonPower\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"0.1\"\r\n								max=\"9.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Slope:\r\n							<input\r\n								class=\"cartoonEdgeSlope\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"1.5\"\r\n								max=\"5.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Increase color intensity and saturation\">Vibrance</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"vibranceEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"vibrance\"\r\n								type=\"range\"\r\n								value=\"0.15\"\r\n								min=\"-0.9\"\r\n								max=\"0.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Hide objects outside the viewing area, enable downsampling rendering and others to improve performance\"\r\n					>\r\n						Performance Mode\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"performanceMode\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Culling Area:\r\n							<input\r\n								class=\"view-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"4.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n\r\n			<div class=\"reset-section\">\r\n				<button class=\"reset-button\">Reset to Default Values</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>\r\n";
+	GraphicsOption_default$2 = "<div id=\"GraphicsOption\">\r\n	<div class=\"titlebar\" data-background=\"basic_interface/titlebar_mid.bmp\">\r\n		<div class=\"left\">\r\n			<button\r\n				class=\"base\"\r\n				data-background=\"basic_interface/sys_base_off.bmp\"\r\n				data-hover=\"basic_interface/sys_base_on.bmp\"\r\n			></button>\r\n			<span class=\"text\" data-text=\"1484\">Graphics Settings</span>\r\n		</div>\r\n		<div class=\"right\">\r\n			<button\r\n				class=\"base close\"\r\n				data-background=\"basic_interface/sys_close_off.bmp\"\r\n				data-hover=\"basic_interface/sys_close_on.bmp\"\r\n			></button>\r\n		</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"tabs-container\">\r\n		<div class=\"tabs\">\r\n			<button class=\"tab-button selected\" data-tab=\"basic\">Basic</button>\r\n			<button class=\"tab-button\" data-tab=\"advanced\">Advanced</button>\r\n		</div>\r\n	</div>\r\n\r\n	<div class=\"panel\">\r\n		<div class=\"tab-content selected\" id=\"basic\">\r\n			<table>\r\n				<tr>\r\n					<td>Details</td>\r\n					<td style=\"display: inline-block; width: 260px\">\r\n						<input\r\n							class=\"details\"\r\n							type=\"range\"\r\n							value=\"100\"\r\n							max=\"100\"\r\n							min=\"25\"\r\n							step=\"5\"\r\n							style=\"width: 90%\"\r\n						/>\r\n					</td>\r\n				</tr>\r\n				<tr class=\"resolution\">\r\n					<td>Resolution</td>\r\n					<td>\r\n						<select class=\"screensize\">\r\n							<option value=\"650x480\">640 x 480</option>\r\n							<option value=\"800x600\">800 x 600</option>\r\n							<option value=\"1024x768\">1024 x 768</option>\r\n							<option value=\"1280x800\">1280 x 800</option>\r\n							<option value=\"1400x900\">1400 x 900</option>\r\n							<option value=\"1680x1050\">1680 x 1050</option>\r\n							<option value=\"full\">Full Screen</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>Cursor</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"cursor-option\" type=\"checkbox\" />\r\n							Show official cursor\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Limit</td>\r\n					<td>\r\n						<select class=\"fpslimit\">\r\n							<option value=\"-1\">Unlimited</option>\r\n							<option value=\"30\">30</option>\r\n							<option value=\"60\">60</option>\r\n							<option value=\"90\">90</option>\r\n							<option value=\"120\">120</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Display</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"fps\" type=\"checkbox\" />\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n		</div>\r\n\r\n		<div class=\"tab-content\" id=\"advanced\">\r\n			<table>\r\n				<tr>\r\n					<td title=\"Force nearest neighbor filtering for pixel-perfect sprite rendering\">\r\n						Pixel Perfect Sprites\r\n					</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"pixel-perfect\" type=\"checkbox\" />\r\n							Force nearest neighbor filtering\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Add a glowing bloom effect to bright areas\">Bloom</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"bloom\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"bloom-intensity\"\r\n								type=\"range\"\r\n								value=\"0.5\"\r\n								min=\"0.1\"\r\n								max=\"3.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Apply a blur effect to the screen\">Blur</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"blur\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Intensity:\r\n							<input\r\n								class=\"blur-intensity\"\r\n								type=\"range\"\r\n								value=\"3.0\"\r\n								min=\"2.0\"\r\n								max=\"10.0\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Area:\r\n							<input\r\n								class=\"blur-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"3.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Contrast Adaptive Sharpening for enhanced details\">Contr. Adapt. Sharp. (CAS)</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"casEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Contrast:\r\n							<input\r\n								class=\"casContrast\"\r\n								type=\"range\"\r\n								value=\"0.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Sharpening:\r\n							<input\r\n								class=\"casSharpening\"\r\n								type=\"range\"\r\n								value=\"1.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Fast Approximate Anti-Aliasing for smoother edges\">FXAA</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"fxaaEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Subpix:\r\n							<input\r\n								class=\"fxaaSubpix\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Threshold:\r\n							<input\r\n								class=\"fxaaEdgeThreshold\"\r\n								type=\"range\"\r\n								value=\"0.125\"\r\n								min=\"0.063\"\r\n								max=\"0.333\"\r\n								step=\"0.03\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Cartoon rendering effect for stylized visuals\">Cartoon</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"cartoonEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Power:\r\n							<input\r\n								class=\"cartoonPower\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"0.1\"\r\n								max=\"9.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Slope:\r\n							<input\r\n								class=\"cartoonEdgeSlope\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"1.5\"\r\n								max=\"5.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Increase color intensity and saturation\">Vibrance</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"vibranceEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"vibrance\"\r\n								type=\"range\"\r\n								value=\"0.15\"\r\n								min=\"-0.9\"\r\n								max=\"0.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Hide objects outside the viewing area, enable downsampling rendering and others to improve performance\"\r\n					>\r\n						Performance Mode\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"performanceMode\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Culling Area:\r\n							<input\r\n								class=\"view-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"4.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Make buildings and trees blocking the view of your character see-through (not in first person). Dither is cheaper, Alpha looks smoother.\"\r\n					>\r\n						See-through Occluders\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<select class=\"occluderFade\">\r\n								<option value=\"off\">Off</option>\r\n								<option value=\"dither\">Dither (fast)</option>\r\n								<option value=\"alpha\">Alpha (smooth)</option>\r\n							</select>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 120px\">\r\n							Opacity:\r\n							<input\r\n								class=\"occluderFadeOpacity\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"0.8\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 120px\">\r\n							Area:\r\n							<input\r\n								class=\"occluderFadeRadius\"\r\n								type=\"range\"\r\n								value=\"5.0\"\r\n								min=\"1.5\"\r\n								max=\"12.5\"\r\n								step=\"0.5\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n\r\n			<div class=\"reset-section\">\r\n				<button class=\"reset-button\">Reset to Default Values</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>\r\n";
 }));
 //#endregion
 //#region src/UI/Components/GraphicsOption/GraphicsOption.css?raw
@@ -229894,6 +230235,27 @@ function onTabSwitch(event) {
 	const targetTab = root.querySelector("#" + tabName);
 	if (targetTab) targetTab.classList.add("selected");
 }
+/**
+* Select how geometry blocking the view of the player is faded
+*/
+function onUpdateOccluderFade() {
+	GraphicsSettings.occluderFade = this.value;
+	GraphicsSettings.save();
+}
+/**
+* Remaining opacity of faded geometry
+*/
+function onUpdateOccluderFadeOpacity() {
+	GraphicsSettings.occluderFadeOpacity = parseFloat(this.value);
+	GraphicsSettings.save();
+}
+/**
+* Size (cells) of the faded area around the line of sight
+*/
+function onUpdateOccluderFadeRadius() {
+	GraphicsSettings.occluderFadeRadius = parseFloat(this.value);
+	GraphicsSettings.save();
+}
 function onResetToDefaults() {
 	const defaultSettings = GraphicsSettings.defaults;
 	Object.keys(defaultSettings).forEach((key) => {
@@ -229977,6 +230339,9 @@ var init_GraphicsOption = __esmMin((() => {
 		bindChange(".cartoonEdgeSlope", oncartoonEdgeSlope);
 		bindChange(".performanceMode", onTogglePerformanceMode);
 		bindChange(".view-area", onUpdateAreaView);
+		bindChange(".occluderFade", onUpdateOccluderFade);
+		bindChange(".occluderFadeOpacity", onUpdateOccluderFadeOpacity);
+		bindChange(".occluderFadeRadius", onUpdateOccluderFadeRadius);
 		this.draggable(".titlebar");
 	};
 	/**
@@ -230010,6 +230375,9 @@ var init_GraphicsOption = __esmMin((() => {
 		root.querySelector(".cartoonPower").value = GraphicsSettings.cartoonPower;
 		root.querySelector(".performanceMode").checked = GraphicsSettings.performanceMode;
 		root.querySelector(".view-area").value = GraphicsSettings.viewArea;
+		root.querySelector(".occluderFade").value = GraphicsSettings.occluderFade;
+		root.querySelector(".occluderFadeOpacity").value = GraphicsSettings.occluderFadeOpacity;
+		root.querySelector(".occluderFadeRadius").value = GraphicsSettings.occluderFadeRadius;
 	};
 	/**
 	* Once remove, save preferences
@@ -230745,6 +231113,183 @@ var init_CheckAttendance = __esmMin((() => {
 	CheckAttendance_default = UIManager.addComponent(CheckAttendance);
 }));
 //#endregion
+//#region src/UI/TouchDrag.js
+function resetState(state) {
+	if (state.windowTouchStart) {
+		window.removeEventListener("touchstart", state.windowTouchStart, true);
+		state.windowTouchStart = null;
+	}
+	state.active = false;
+	state.dragging = false;
+	state.moved = false;
+	state.item = null;
+	state.payload = null;
+	state.startX = 0;
+	state.startY = 0;
+	state.startClientX = 0;
+	state.startClientY = 0;
+	state.touchId = null;
+	state.timer = null;
+	state.ghost = null;
+}
+function deepElementFromPoint(x, y) {
+	let el = document.elementFromPoint(x, y);
+	while (el?.shadowRoot) {
+		const inner = el.shadowRoot.elementFromPoint(x, y);
+		if (!inner || inner === el) break;
+		el = inner;
+	}
+	return el;
+}
+function attachTouchDrag(container, { itemSelector, getPayload, createGhost = null, holdDelay = 300, moveThreshold = 10 }) {
+	const state = {
+		active: false,
+		dragging: false,
+		moved: false,
+		item: null,
+		payload: null,
+		startX: 0,
+		startY: 0,
+		startClientX: 0,
+		startClientY: 0,
+		touchId: null,
+		timer: null,
+		ghost: null,
+		windowTouchStart: null
+	};
+	const removeGhost = () => {
+		if (state.ghost) {
+			state.ghost.remove();
+			state.ghost = null;
+		}
+	};
+	const cancel = () => {
+		if (state.timer !== null) clearTimeout(state.timer);
+		removeGhost();
+		delete window._OBJ_DRAG_;
+		resetState(state);
+	};
+	const startDrag = () => {
+		if (!state.active || !state.item || !state.payload) return;
+		state.timer = null;
+		state.dragging = true;
+		state.ghost = createGhost ? createGhost(state.item) : state.item.cloneNode(true);
+		state.ghost.style.position = "fixed";
+		state.ghost.style.zIndex = "10000";
+		state.ghost.style.opacity = "0.8";
+		state.ghost.style.pointerEvents = "none";
+		state.ghost.style.left = `${state.startClientX - 12}px`;
+		state.ghost.style.top = `${state.startClientY - 12}px`;
+		document.body.appendChild(state.ghost);
+		window._OBJ_DRAG_ = state.payload;
+	};
+	const onTouchStart = (event) => {
+		if (state.active) {
+			if (Array.from(event.touches).some((candidate) => candidate.identifier !== state.touchId)) cancel();
+			return;
+		}
+		if (event.touches.length !== 1) return;
+		const item = event.target.closest(itemSelector);
+		if (!item || !container.contains(item)) return;
+		const payload = getPayload(item);
+		if (payload === null || payload === void 0) return;
+		const touch = event.touches[0];
+		state.active = true;
+		state.dragging = false;
+		state.moved = false;
+		state.item = item;
+		state.payload = payload;
+		state.startX = touch.pageX;
+		state.startY = touch.pageY;
+		state.startClientX = touch.clientX;
+		state.startClientY = touch.clientY;
+		state.touchId = touch.identifier;
+		state.timer = setTimeout(startDrag, holdDelay);
+		state.windowTouchStart = (secondTouchEvent) => {
+			if (secondTouchEvent.touches.length > 1) cancel();
+		};
+		window.addEventListener("touchstart", state.windowTouchStart, true);
+	};
+	const onTouchMove = (event) => {
+		if (!state.active || !event.touches.length) return;
+		if (Array.from(event.touches).some((candidate) => candidate.identifier !== state.touchId)) {
+			cancel();
+			return;
+		}
+		const touch = Array.from(event.touches).find((candidate) => candidate.identifier === state.touchId);
+		if (!touch) return;
+		const dx = touch.pageX - state.startX;
+		const dy = touch.pageY - state.startY;
+		if (Math.sqrt(dx * dx + dy * dy) > moveThreshold) state.moved = true;
+		if (state.dragging) {
+			event.preventDefault();
+			state.ghost.style.left = `${touch.clientX - 12}px`;
+			state.ghost.style.top = `${touch.clientY - 12}px`;
+		} else if (state.moved && state.timer !== null) {
+			clearTimeout(state.timer);
+			resetState(state);
+		}
+	};
+	const onTouchEnd = (event) => {
+		if (!state.active) return;
+		if (Array.from(event.touches).some((candidate) => candidate.identifier !== state.touchId)) {
+			cancel();
+			return;
+		}
+		const touch = Array.from(event.changedTouches).find((candidate) => candidate.identifier === state.touchId);
+		if (!touch) return;
+		if (state.timer !== null) clearTimeout(state.timer);
+		if (state.dragging) {
+			removeGhost();
+			const target = deepElementFromPoint(touch.clientX, touch.clientY);
+			if (target) {
+				const dropEvent = new Event("drop", {
+					bubbles: true,
+					composed: true
+				});
+				dropEvent.dataTransfer = { getData: (type) => type === "Text" ? JSON.stringify(state.payload) : "" };
+				target.dispatchEvent(dropEvent);
+			}
+			delete window._OBJ_DRAG_;
+		}
+		resetState(state);
+	};
+	const onTouchCancel = () => {
+		if (state.active) cancel();
+	};
+	const onDragStart = (event) => {
+		if (state.active) {
+			event.preventDefault();
+			event.stopImmediatePropagation();
+		}
+	};
+	const onContextMenu = (event) => {
+		if (!state.active) return;
+		if (state.dragging && state.moved) {
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			return;
+		}
+		cancel();
+	};
+	container.addEventListener("touchstart", onTouchStart);
+	container.addEventListener("touchmove", onTouchMove, { passive: false });
+	container.addEventListener("touchend", onTouchEnd);
+	container.addEventListener("touchcancel", onTouchCancel);
+	container.addEventListener("dragstart", onDragStart, true);
+	container.addEventListener("contextmenu", onContextMenu, true);
+	return () => {
+		container.removeEventListener("touchstart", onTouchStart);
+		container.removeEventListener("touchmove", onTouchMove);
+		container.removeEventListener("touchend", onTouchEnd);
+		container.removeEventListener("touchcancel", onTouchCancel);
+		container.removeEventListener("dragstart", onDragStart, true);
+		container.removeEventListener("contextmenu", onContextMenu, true);
+		cancel();
+	};
+}
+var init_TouchDrag = __esmMin((() => {}));
+//#endregion
 //#region src/UI/Components/SkillList/SkillRequirements.js
 function getOwnedSkill(ownedSkills, skillId) {
 	return ownedSkills?.get?.(skillId) ?? ownedSkills?.[skillId] ?? null;
@@ -230884,7 +231429,7 @@ function _escapeHTML$2(text) {
 function _isNumeric(val) {
 	return !isNaN(parseFloat(val)) && isFinite(val);
 }
-function createSkillList({ name, htmlText, cssText, hasTabs = false, showDescOnMiniHover = false, touchDrag = false, guardMissingJob = false, readdSkillOnUpdate = false, listOnly = false, dragFrom = null, titlebarText = null, containerSelector = null, preferenceDefaults = {
+function createSkillList({ name, htmlText, cssText, hasTabs = false, showDescOnMiniHover = false, guardMissingJob = false, readdSkillOnUpdate = false, listOnly = false, dragFrom = null, titlebarText = null, containerSelector = null, preferenceDefaults = {
 	x: 100,
 	y: 200,
 	width: 8,
@@ -230910,13 +231455,6 @@ function createSkillList({ name, htmlText, cssText, hasTabs = false, showDescOnM
 	let rememberChoice = /* @__PURE__ */ new Map();
 	const hasSkills = [];
 	let _justDragged = false;
-	const _touchDrag = {
-		timer: null,
-		dragging: false,
-		ghost: null,
-		startX: 0,
-		startY: 0
-	};
 	Component.init = function init() {
 		const root = this.getRoot();
 		if (titlebarText) {
@@ -231062,18 +231600,18 @@ function createSkillList({ name, htmlText, cssText, hasTabs = false, showDescOnM
 				_justDragged = false;
 			}, 0);
 		});
-		if (touchDrag) {
-			container.addEventListener("touchstart", (e) => {
-				const iconTarget = e.target.closest(".skill .icon");
-				if (iconTarget) onSkillTouchStart(e, iconTarget);
-			});
-			container.addEventListener("touchmove", (e) => {
-				if (e.target.closest(".skill .icon")) onSkillTouchMove(e);
-			});
-			container.addEventListener("touchend", (e) => {
-				if (e.target.closest(".skill .icon")) onSkillTouchEnd(e);
-			});
-		}
+		attachTouchDrag(container, {
+			itemSelector: ".skill .icon",
+			getPayload: (iconEl) => {
+				const skillDiv = iconEl.closest(".skill");
+				const skill = getSkillById(parseInt(skillDiv.getAttribute("data-index"), 10));
+				return skill && skill.level && skill.type ? {
+					type: "skill",
+					from: _dragFrom,
+					data: skill
+				} : null;
+			}
+		});
 		this.draggable(".titlebar");
 		Client.loadFile(`${DB.INTERFACE_PATH}basic_interface/arw_right.bmp`, (data) => {
 			_rArrow = `url(${data})`;
@@ -231680,79 +232218,6 @@ function createSkillList({ name, htmlText, cssText, hasTabs = false, showDescOnM
 		const id = parseInt(main.getAttribute("data-index"), 10);
 		return getSkillById(id)?.SKID ?? id;
 	}
-	function onSkillTouchStart(event, iconEl) {
-		const touch = event.touches[0];
-		const skillDiv = iconEl.closest(".skill");
-		const skill = getSkillById(parseInt(skillDiv.getAttribute("data-index"), 10));
-		if (!skill || !skill.level || !skill.type) return;
-		_touchDrag.startX = touch.pageX;
-		_touchDrag.startY = touch.pageY;
-		_touchDrag.ghost = null;
-		_touchDrag.dragging = false;
-		_touchDrag.timer = setTimeout(() => {
-			_touchDrag.dragging = true;
-			const ghost = iconEl.cloneNode(true);
-			ghost.classList.add("drag-ghost");
-			ghost.style.position = "absolute";
-			ghost.style.zIndex = "10000";
-			ghost.style.left = `${touch.pageX - 12}px`;
-			ghost.style.top = `${touch.pageY - 12}px`;
-			ghost.style.opacity = "0.8";
-			ghost.style.pointerEvents = "none";
-			document.body.appendChild(ghost);
-			_touchDrag.ghost = ghost;
-			window._OBJ_DRAG_ = {
-				type: "skill",
-				from: _dragFrom,
-				data: skill
-			};
-		}, 300);
-	}
-	function onSkillTouchMove(event) {
-		if (!_touchDrag.timer && !_touchDrag.dragging) return;
-		const touch = event.touches[0];
-		if (_touchDrag.dragging) {
-			event.preventDefault();
-			if (_touchDrag.ghost) {
-				_touchDrag.ghost.style.left = `${touch.pageX - 12}px`;
-				_touchDrag.ghost.style.top = `${touch.pageY - 12}px`;
-			}
-		} else {
-			const dx = touch.pageX - _touchDrag.startX;
-			const dy = touch.pageY - _touchDrag.startY;
-			if (dx * dx + dy * dy > 100) {
-				clearTimeout(_touchDrag.timer);
-				_touchDrag.timer = null;
-			}
-		}
-	}
-	function onSkillTouchEnd(event) {
-		if (_touchDrag.timer) {
-			clearTimeout(_touchDrag.timer);
-			_touchDrag.timer = null;
-		}
-		if (_touchDrag.dragging) {
-			_touchDrag.dragging = false;
-			if (_touchDrag.ghost) {
-				_touchDrag.ghost.remove();
-				_touchDrag.ghost = null;
-			}
-			const touch = event.changedTouches[0];
-			const target = document.elementFromPoint(touch.clientX, touch.clientY);
-			if (target) {
-				const dropTarget = target.closest(".container");
-				if (dropTarget) {
-					const dropEvent = new Event("drop", { bubbles: true });
-					dropEvent.dataTransfer = { getData(type) {
-						if (type === "Text") return JSON.stringify(window._OBJ_DRAG_);
-						return "";
-					} };
-					dropTarget.dispatchEvent(dropEvent);
-				}
-			}
-			delete window._OBJ_DRAG_;
-		}
-	}
 	function skillLevelSelectUp(skill, root) {
 		const level = skill.selectedLevel ? skill.selectedLevel : skill.level;
 		if (level < skill.level) {
@@ -231792,6 +232257,7 @@ var init_SkillListCommon = __esmMin((() => {
 	init_SkillInfo();
 	init_SkillTargetSelection();
 	init_SkillTreeView();
+	init_TouchDrag();
 	init_SkillRequirements();
 	init_UIManager();
 }));
@@ -231854,7 +232320,6 @@ var init_SkillListV2 = __esmMin((() => {
 		cssText: SkillListV2_default$1,
 		hasTabs: true,
 		showDescOnMiniHover: false,
-		touchDrag: true,
 		guardMissingJob: true,
 		readdSkillOnUpdate: true,
 		dragFrom: "SkillList"
@@ -236557,19 +237022,19 @@ function calculateAnimation(layer, keyIndex, result) {
 	}
 	return true;
 }
-var mat4$17, D3DBLEND, _program$19, _buffer$15, _bufferData, _matrix$5, _lastAngle, PIXEL_TO_WORLD_Z, anim, StrEffect;
+var mat4$18, D3DBLEND, _program$20, _buffer$15, _bufferData, _matrix$6, _lastAngle, PIXEL_TO_WORLD_Z, anim, StrEffect;
 var init_StrEffect = __esmMin((() => {
 	init_StrEffect$2();
 	init_StrEffect$1();
 	init_WebGL();
 	init_gl_matrix();
 	init_Client();
-	mat4$17 = gl_matrix_default.mat4;
+	mat4$18 = gl_matrix_default.mat4;
 	D3DBLEND = {};
-	_program$19 = null;
+	_program$20 = null;
 	_buffer$15 = null;
 	_bufferData = /* @__PURE__ */ new Float32Array(16);
-	_matrix$5 = mat4$17.create();
+	_matrix$6 = mat4$18.create();
 	_lastAngle = -1;
 	PIXEL_TO_WORLD_Z = 1 / 5;
 	anim = {
@@ -236662,8 +237127,8 @@ var init_StrEffect = __esmMin((() => {
 		* @param {StrAnimation} animation object
 		*/
 		renderAnimation(gl, material, animat) {
-			const uniform = _program$19.uniform;
-			const attribute = _program$19.attribute;
+			const uniform = _program$20.uniform;
+			const attribute = _program$20.attribute;
 			let sizeScale = 1;
 			if (this.ownerEntity) sizeScale = (this.ownerEntity.xSize + this.ownerEntity.ySize) / 2 / 5;
 			_bufferData[0] = animat.xy[0] * sizeScale;
@@ -236683,8 +237148,8 @@ var init_StrEffect = __esmMin((() => {
 			_bufferData[14] = 1;
 			_bufferData[15] = 1;
 			if (animat.angle !== _lastAngle) {
-				mat4$17.identity(_matrix$5);
-				mat4$17.rotateZ(_matrix$5, _matrix$5, -animat.angle / 180 * Math.PI);
+				mat4$18.identity(_matrix$6);
+				mat4$18.rotateZ(_matrix$6, _matrix$6, -animat.angle / 180 * Math.PI);
 				_lastAngle = animat.angle;
 			}
 			const spriteOffset = /* @__PURE__ */ new Float32Array(2);
@@ -236701,7 +237166,7 @@ var init_StrEffect = __esmMin((() => {
 			gl.uniform2fv(uniform.uSpriteOffset, spriteOffset);
 			gl.uniform1f(uniform.uVerticalBase, verticalBase);
 			gl.uniform3fv(uniform.uSpritePosition, this.position);
-			gl.uniformMatrix4fv(uniform.uSpriteAngle, false, _matrix$5);
+			gl.uniformMatrix4fv(uniform.uSpriteAngle, false, _matrix$6);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$15);
 			gl.bufferSubData(gl.ARRAY_BUFFER, 0, _bufferData);
 			gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 16, 0);
@@ -236721,7 +237186,7 @@ var init_StrEffect = __esmMin((() => {
 				gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$15);
 				gl.bufferData(gl.ARRAY_BUFFER, _bufferData.byteLength, gl.DYNAMIC_DRAW);
 			}
-			if (!_program$19) _program$19 = WebGL_default.createShaderProgram(gl, StrEffect_default$1, StrEffect_default);
+			if (!_program$20) _program$20 = WebGL_default.createShaderProgram(gl, StrEffect_default$1, StrEffect_default);
 			D3DBLEND[1] = gl.ZERO;
 			D3DBLEND[2] = gl.ONE;
 			D3DBLEND[3] = gl.SRC_COLOR;
@@ -236743,9 +237208,9 @@ var init_StrEffect = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$19) {
-				gl.deleteProgram(_program$19);
-				_program$19 = null;
+			if (_program$20) {
+				gl.deleteProgram(_program$20);
+				_program$20 = null;
 			}
 			if (_buffer$15) {
 				gl.deleteBuffer(_buffer$15);
@@ -236763,10 +237228,10 @@ var init_StrEffect = __esmMin((() => {
 		* @param {number} tick
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$19.uniform;
-			const attribute = _program$19.attribute;
+			const uniform = _program$20.uniform;
+			const attribute = _program$20.attribute;
 			gl.depthMask(false);
-			gl.useProgram(_program$19);
+			gl.useProgram(_program$20);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1f(uniform.uFogNear, fog.near * 100);
@@ -236784,8 +237249,8 @@ var init_StrEffect = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.depthMask(true);
-			gl.disableVertexAttribArray(_program$19.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$19.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$20.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$20.attribute.aTextureCoord);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -238792,6 +239257,30 @@ function createInventory(config) {
 				const item = e.target.closest(".item");
 				if (item) onItemClick.call(item, e);
 			});
+			attachTouchDrag(content, {
+				itemSelector: ".item",
+				getPayload: (itemEl) => {
+					const item = Component.getItemByIndex(parseInt(itemEl.getAttribute("data-index"), 10));
+					return item ? {
+						type: "item",
+						from: "Inventory",
+						data: item
+					} : null;
+				},
+				createGhost: (itemEl) => {
+					const icon = itemEl.querySelector(".icon");
+					if (icon?.tagName === "IMG") return icon.cloneNode(true);
+					const iconImage = icon?.querySelector("img");
+					if (iconImage) return iconImage.cloneNode(true);
+					const ghost = document.createElement("div");
+					ghost.style.width = "24px";
+					ghost.style.height = "24px";
+					ghost.style.backgroundImage = icon ? icon.style.backgroundImage : "";
+					ghost.style.backgroundRepeat = "no-repeat";
+					ghost.style.backgroundPosition = "center";
+					return ghost;
+				}
+			});
 		}
 		const ncnt = root.querySelector(".ncnt");
 		if (ncnt) ncnt.textContent = favoriteTab ? "0 / " : "0";
@@ -239782,6 +240271,7 @@ var init_InventoryCommon = __esmMin((() => {
 	init_Enchant();
 	init_Mail$1();
 	init_WriteRodex();
+	init_TouchDrag();
 	init_InventoryItemTransfer();
 }));
 //#endregion
@@ -244721,6 +245211,929 @@ var init_Inflate = __esmMin((() => {
 	};
 }));
 //#endregion
+//#region src/UI/Components/SkillListMH/SkillListMH.js
+/**
+* Build a Homunculus/Mercenary skill window on top of the shared SkillList
+* factory, using its list-only (old-style) mode and layering the MH-specific
+* bits (window name, titlebar text, drag origin, Escape-to-close) on top.
+*/
+function createSkillListMH(type) {
+	const component = createSkillList({
+		name: `SkillList${type === "homunculus" ? "HOM" : "MER"}`,
+		htmlText: SkillList_default$2,
+		cssText: SkillList_default$1,
+		listOnly: true,
+		dragFrom: "SkillListMH",
+		titlebarText: type === "homunculus" ? "Homunculus Skills" : "Mercenary Skills",
+		containerSelector: ".SkillList",
+		preferenceDefaults: {
+			x: 100,
+			y: 200,
+			width: 8,
+			height: 5,
+			show: false
+		}
+	});
+	component.onKeyDown = function onKeyDown(event) {
+		if ((event.which === KEYS.ESCAPE || event.key === "Escape") && this.ui.is(":visible")) this.toggle();
+	};
+	return component;
+}
+var SkillListMH_default;
+var init_SkillListMH = __esmMin((() => {
+	init_KeyEventHandler();
+	init_SkillListCommon();
+	init_SkillList$3();
+	init_SkillList$2();
+	SkillListMH_default = {
+		homunculus: createSkillListMH("homunculus"),
+		mercenary: createSkillListMH("mercenary")
+	};
+}));
+//#endregion
+//#region src/UI/Components/ShortCut/ShortCut.html?raw
+var ShortCut_default$2;
+var init_ShortCut$2 = __esmMin((() => {
+	ShortCut_default$2 = "<div id=\"ShortCut\" data-background=\"basic_interface/shortitem_bg.bmp\">\r\n	<button\r\n		class=\"close\"\r\n		data-background=\"basic_interface/sys_close_off.bmp\"\r\n		data-hover=\"basic_interface/sys_close_on.bmp\"\r\n	></button>\r\n	<button class=\"resize\" data-background=\"btn_resize.bmp\"></button>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"0\"></div>\r\n		<div class=\"container\" data-index=\"1\"></div>\r\n		<div class=\"container\" data-index=\"2\"></div>\r\n		<div class=\"container\" data-index=\"3\"></div>\r\n		<div class=\"container\" data-index=\"4\"></div>\r\n		<div class=\"container\" data-index=\"5\"></div>\r\n		<div class=\"container\" data-index=\"6\"></div>\r\n		<div class=\"container\" data-index=\"7\"></div>\r\n		<div class=\"container\" data-index=\"8\"></div>\r\n		<div class=\"index\">1</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"9\"></div>\r\n		<div class=\"container\" data-index=\"10\"></div>\r\n		<div class=\"container\" data-index=\"11\"></div>\r\n		<div class=\"container\" data-index=\"12\"></div>\r\n		<div class=\"container\" data-index=\"13\"></div>\r\n		<div class=\"container\" data-index=\"14\"></div>\r\n		<div class=\"container\" data-index=\"15\"></div>\r\n		<div class=\"container\" data-index=\"16\"></div>\r\n		<div class=\"container\" data-index=\"17\"></div>\r\n		<div class=\"index\">2</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"18\"></div>\r\n		<div class=\"container\" data-index=\"19\"></div>\r\n		<div class=\"container\" data-index=\"20\"></div>\r\n		<div class=\"container\" data-index=\"21\"></div>\r\n		<div class=\"container\" data-index=\"22\"></div>\r\n		<div class=\"container\" data-index=\"23\"></div>\r\n		<div class=\"container\" data-index=\"24\"></div>\r\n		<div class=\"container\" data-index=\"25\"></div>\r\n		<div class=\"container\" data-index=\"26\"></div>\r\n		<div class=\"index\">3</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"27\"></div>\r\n		<div class=\"container\" data-index=\"28\"></div>\r\n		<div class=\"container\" data-index=\"29\"></div>\r\n		<div class=\"container\" data-index=\"30\"></div>\r\n		<div class=\"container\" data-index=\"31\"></div>\r\n		<div class=\"container\" data-index=\"32\"></div>\r\n		<div class=\"container\" data-index=\"33\"></div>\r\n		<div class=\"container\" data-index=\"34\"></div>\r\n		<div class=\"container\" data-index=\"35\"></div>\r\n		<div class=\"index\">4</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"shortcut-tooltip\"></div>\r\n</div>\r\n";
+}));
+//#endregion
+//#region src/UI/Components/ShortCut/ShortCut.css?raw
+var ShortCut_default$1;
+var init_ShortCut$1 = __esmMin((() => {
+	ShortCut_default$1 = ":host {\r\n	width: 280px;\r\n	top: 0px;\r\n	left: 480px;\r\n	overflow: hidden;\r\n}\r\n\r\n#ShortCut {\r\n	position: absolute;\r\n	width: 280px;\r\n	height: 100%;\r\n	background-repeat: repeat-y;\r\n}\r\n#ShortCut .close {\r\n	position: absolute;\r\n	top: 2px;\r\n	right: 2px;\r\n	border: none;\r\n	background-color: transparent;\r\n	width: 11px;\r\n	height: 11px;\r\n}\r\n#ShortCut .resize {\r\n	position: absolute;\r\n	bottom: 1px;\r\n	right: 1px;\r\n	border: none;\r\n	background-color: transparent;\r\n	width: 13px;\r\n	height: 13px;\r\n}\r\n\r\n#ShortCut .row {\r\n	position: relative;\r\n}\r\n#ShortCut .row .container {\r\n	float: left;\r\n	width: 24px;\r\n	height: 23px;\r\n	margin-top: 5px;\r\n	margin-left: 5px;\r\n	margin-bottom: 6px;\r\n}\r\n#ShortCut .row .container:hover {\r\n	background-color: #b5ffb5;\r\n}\r\n#ShortCut .row .index {\r\n	float: left;\r\n	position: relative;\r\n	top: 13px;\r\n	left: 5px;\r\n}\r\n#ShortCut .row .clear {\r\n}\r\n\r\n#ShortCut .icon {\r\n	position: relative;\r\n}\r\n#ShortCut .icon .img {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n	background-color: transparent;\r\n}\r\n#ShortCut .icon .name {\r\n	display: none;\r\n	z-index: 1;\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 0px;\r\n	background-color: rgba(0, 0, 0, 0.6);\r\n	text-shadow: 1px 1px black;\r\n	color: white;\r\n	padding: 5px;\r\n	white-space: nowrap;\r\n}\r\n#ShortCut .icon:hover .name {\r\n	display: block;\r\n}\r\n#ShortCut .icon.hide .name {\r\n	display: none;\r\n}\r\n#ShortCut .icon .amount {\r\n	position: absolute;\r\n	right: 1px;\r\n	top: 20px;\r\n	text-shadow: 1px 1px 0px white;\r\n	text-align: right;\r\n	font-weight: bold;\r\n}\r\n\r\n.shortcut-tooltip {\r\n	display: none;\r\n	position: fixed;\r\n	background-color: rgba(0, 0, 0, 0.8);\r\n	text-shadow: 1px 1px black;\r\n	color: white;\r\n	padding: 2px 6px;\r\n	white-space: nowrap;\r\n	z-index: 10000;\r\n	border-radius: 2px;\r\n	pointer-events: none;\r\n	line-height: 1.2;\r\n}\r\n.shortcut-tooltip.show {\r\n	display: block;\r\n}\r\n\r\n#ShortCut .cooldown-overlay {\r\n	position: absolute;\r\n	top: 0;\r\n	left: 0;\r\n	width: 24px;\r\n	height: 24px;\r\n	pointer-events: none;\r\n	border-radius: 2px;\r\n	z-index: 999;\r\n	background: conic-gradient(rgba(0, 0, 0, 0.75) 0deg, transparent 0deg);\r\n}\r\n";
+}));
+//#endregion
+//#region src/UI/Components/ShortCut/ShortCut.js
+var ShortCut_exports = /* @__PURE__ */ __exportAll({ default: () => ShortCut_default });
+/**
+* Resolve which skill window owns a skill id
+*
+* @param {number} skill id
+* @return {object} component exposing useSkillID / getSkillById
+*/
+function getSkillOwner(id) {
+	if (id >= SkillConst_default.GD_APPROVAL && id <= SkillConst_default.GD_LAST) return Guild_default;
+	if (id >= SkillConst_default.HOMUN_BEGIN && id <= SkillConst_default.HOMUN_LAST) return SkillListMH_default.homunculus;
+	if (id >= SkillConst_default.MERCENARY_BEGIN && id <= SkillConst_default.MERCENARY_LAST) return SkillListMH_default.mercenary;
+	return Controller$4.getUI();
+}
+/**
+* Update tooltip for empty slots with hotkey only
+*/
+function updateEmptySlotTooltips() {
+	const containers = ShortCut.getRoot().querySelectorAll(".container");
+	for (let i = 0; i < containers.length; ++i) if (!_list$4[i] || !_list$4[i].isSkill && !_list$4[i].ID) {
+		const hotkey = getHotKeyString(i);
+		if (hotkey) containers[i].setAttribute("data-tooltip", hotkey);
+	}
+}
+/**
+* Get hotkey string for shortcut index
+*
+* @param {number} index of the shortcut slot
+* @return {string} hotkey string or empty string
+*/
+function getHotKeyString(index) {
+	const shortcutKeys = [
+		"F1_1",
+		"F1_2",
+		"F1_3",
+		"F1_4",
+		"F1_5",
+		"F1_6",
+		"F1_7",
+		"F1_8",
+		"F1_9",
+		"F2_1",
+		"F2_2",
+		"F2_3",
+		"F2_4",
+		"F2_5",
+		"F2_6",
+		"F2_7",
+		"F2_8",
+		"F2_9",
+		"F3_1",
+		"F3_2",
+		"F3_3",
+		"F3_4",
+		"F3_5",
+		"F3_6",
+		"F3_7",
+		"F3_8",
+		"F3_9",
+		"F4_1",
+		"F4_2",
+		"F4_3",
+		"F4_4",
+		"F4_5",
+		"F4_6",
+		"F4_7",
+		"F4_8",
+		"F4_9"
+	];
+	if (index < 0 || index >= shortcutKeys.length) return "";
+	const scKey = shortcutKeys[index];
+	const shortcut = ShortCutControls_default.ShortCuts[scKey];
+	if (!shortcut) return "";
+	const key = shortcut.cust ? shortcut.cust.key : shortcut.init.key;
+	const alt = shortcut.cust ? shortcut.cust.alt : shortcut.init.alt;
+	const ctrl = shortcut.cust ? shortcut.cust.ctrl : shortcut.init.ctrl;
+	const shift = shortcut.cust ? shortcut.cust.shift : shortcut.init.shift;
+	if (!key) return "";
+	let hotkeyStr = "";
+	if (alt) hotkeyStr += "ALT + ";
+	if (ctrl) hotkeyStr += "CTRL + ";
+	if (shift) hotkeyStr += "SHIFT + ";
+	hotkeyStr += KEYS.toReadableKey(key);
+	return hotkeyStr;
+}
+/**
+* Show fixed tooltip on container hover
+*/
+function onContainerMouseEnter(event) {
+	const tooltipText = event.currentTarget.getAttribute("data-tooltip");
+	if (tooltipText) {
+		const tooltip = ShortCut.getRoot().querySelector(".shortcut-tooltip");
+		const hostRect = ShortCut._host.getBoundingClientRect();
+		tooltip.textContent = tooltipText;
+		tooltip.classList.add("show");
+		const tooltipRect = tooltip.getBoundingClientRect();
+		const showAbove = window.innerHeight - (hostRect.top + hostRect.height) < tooltipRect.height + 10;
+		const left = hostRect.left + hostRect.width / 2 - tooltipRect.width / 2;
+		let top;
+		if (showAbove) top = hostRect.top - tooltipRect.height - 2;
+		else top = hostRect.top + hostRect.height + 2;
+		tooltip.style.left = `${left}px`;
+		tooltip.style.top = `${top}px`;
+	}
+}
+/**
+* Hide fixed tooltip on container leave
+*/
+function onContainerMouseLeave() {
+	const tooltip = ShortCut.getRoot().querySelector(".shortcut-tooltip");
+	if (tooltip) tooltip.classList.remove("show");
+}
+/**
+* Resizing hotkey window
+*/
+function onResize$3(event) {
+	const host = ShortCut._host;
+	const top = host.offsetTop;
+	let lastHeight = 0;
+	function resizing() {
+		let h = Math.floor((Mouse.screen.y - top) / 34 + 1);
+		h = Math.min(Math.max(h, 1), _rowCount);
+		if (h === lastHeight) return;
+		host.style.height = `${h * 34}px`;
+		_preferences$23.size = h;
+		_preferences$23.save();
+		lastHeight = h;
+	}
+	const _Interval = setInterval(resizing, 30);
+	const mouseUpHandler = (_event) => {
+		if (_event.which === 1) {
+			clearInterval(_Interval);
+			window.removeEventListener("mouseup", mouseUpHandler);
+		}
+	};
+	window.addEventListener("mouseup", mouseUpHandler);
+	event.stopImmediatePropagation();
+	event.preventDefault();
+}
+/**
+* Displays the cooldown overlay on an icon
+*
+* @param {number} index of the icon
+* @param {number} delay in ms
+*/
+function setDelayOnIndex(index, delay) {
+	if (!_list$4[index]) return;
+	if (_list$4[index].Delay && _list$4[index].Delay >= Renderer.tick + delay) return;
+	_list$4[index].Delay = Renderer.tick + delay;
+	const ui = ShortCut.getRoot().querySelector(`.container[data-index="${index}"]`);
+	if (!ui) return;
+	const existing = ui.querySelector(".cooldown-overlay");
+	if (existing) existing.remove();
+	const overlay = document.createElement("div");
+	overlay.className = "cooldown-overlay";
+	const icon = ui.querySelector(".icon");
+	if (icon) {
+		icon.appendChild(overlay);
+		const img = icon.querySelector(".img");
+		if (img) img.style.filter = "none";
+	}
+	if (_activeAnimations.has(index)) {
+		cancelAnimationFrame(_activeAnimations.get(index));
+		_activeAnimations.delete(index);
+	}
+	function updateCooldown() {
+		if (!_list$4 || !_list$4[index]) {
+			overlay.remove();
+			if (_activeAnimations.has(index)) {
+				cancelAnimationFrame(_activeAnimations.get(index));
+				_activeAnimations.delete(index);
+			}
+			return;
+		}
+		const now = Renderer.tick;
+		const remaining = _list$4[index].Delay - now;
+		if (remaining <= 0 || !_list$4[index].Delay) {
+			overlay.remove();
+			_list$4[index].Delay = 0;
+			if (_activeAnimations.has(index)) {
+				cancelAnimationFrame(_activeAnimations.get(index));
+				_activeAnimations.delete(index);
+			}
+			return;
+		}
+		const degrees = (1 - remaining / delay) * 360;
+		overlay.style.background = `conic-gradient(transparent 0deg, transparent ${degrees}deg, rgba(0,0,0,0.75) ${degrees}deg)`;
+		const animationId = requestAnimationFrame(updateCooldown);
+		_activeAnimations.set(index, animationId);
+	}
+	const animationId = requestAnimationFrame(updateCooldown);
+	_activeAnimations.set(index, animationId);
+}
+/**
+* Drop something in the shortcut
+* Does the client allow other source than shortcut, inventory
+* and skill window to save to shortcut ?
+*/
+function onDrop$8(event, target) {
+	let data, element;
+	const index = parseInt(target.getAttribute("data-index"), 10);
+	const row = Math.floor(index / 9);
+	event.stopImmediatePropagation();
+	event.preventDefault();
+	try {
+		data = JSON.parse(event.dataTransfer.getData("Text"));
+		element = data.data;
+	} catch (_e) {
+		return;
+	}
+	if (data.type !== "item" && data.type !== "skill") return;
+	switch (data.from) {
+		case "SkillList":
+		case "Guild":
+		case "SkillListMH":
+			ShortCut.removeElement(true, element.SKID, row, element.selectedLevel ? element.selectedLevel : element.level);
+			ShortCut.addElement(index, true, element.SKID, element.selectedLevel ? element.selectedLevel : element.level);
+			ShortCut.onChange(index, true, element.SKID, element.selectedLevel ? element.selectedLevel : element.level);
+			break;
+		case "Inventory":
+			ShortCut.removeElement(false, element.ITID, row);
+			ShortCut.addElement(index, false, element.ITID, 0);
+			ShortCut.onChange(index, false, element.ITID, 0);
+			break;
+		case "ShortCut":
+			ShortCut.removeElement(element.isSkill, element.ID, row, element.isSkill ? element.count : null);
+			ShortCut.addElement(index, element.isSkill, element.ID, element.count);
+			ShortCut.onChange(index, element.isSkill, element.ID, element.count);
+	}
+}
+/**
+* Stop the drag and drop
+*/
+function onDragEnd(icon) {
+	delete window._OBJ_DRAG_;
+	icon.classList.remove("hide");
+}
+/**
+* Prepare data to be stored in the dragged element
+* to change position in the shortcut.
+*/
+function onDragStart$2(event, icon) {
+	const index = parseInt(icon.parentNode.getAttribute("data-index"), 10);
+	icon.classList.add("hide");
+	const img = new Image();
+	img.decoding = "async";
+	img.src = icon.querySelector(".img").style.backgroundImage.match(/\(([^)]+)/)[1].replace(/"/g, "");
+	event.dataTransfer.setDragImage(img, 12, 12);
+	event.dataTransfer.setData("Text", JSON.stringify(window._OBJ_DRAG_ = {
+		type: _list$4[index].isSkill ? "skill" : "item",
+		from: "ShortCut",
+		data: _list$4[index]
+	}));
+}
+/**
+* Get informations from a skill/item when
+* using right click on it.
+*/
+function onElementInfo(event, icon) {
+	const index = parseInt(icon.parentNode.getAttribute("data-index"), 10);
+	const element = _list$4[index];
+	event.stopImmediatePropagation();
+	event.preventDefault();
+	if (element.isSkill) {
+		if (SkillDescription_default.uid === _list$4[index].ID) SkillDescription_default.remove();
+		else {
+			SkillDescription_default.append();
+			SkillDescription_default.setSkill(_list$4[index].ID);
+		}
+	} else {
+		if (ItemInfo_default.uid === _list$4[index].ID) {
+			ItemInfo_default.remove();
+			return;
+		}
+		ItemInfo_default.append();
+		ItemInfo_default.uid = _list$4[index].ID;
+		ItemInfo_default.setItem(InventoryController.getUI().getItemById(_list$4[index].ID));
+	}
+}
+/**
+* Double-click on a shortcut
+*/
+function onUseShortCut(icon) {
+	clickElement(parseInt(icon.parentNode.getAttribute("data-index"), 10));
+}
+/**
+* Clicking on a shortcut
+*
+* @param {number} shortcut index
+*/
+function clickElement(index) {
+	const shortcut = _list$4[index];
+	SkillTargetSelection_default.remove();
+	if (!shortcut) return;
+	if (shortcut.isSkill) ShortCut.useSkill(shortcut.ID, shortcut.count);
+	else {
+		const item = InventoryController.getUI().getItemById(_list$4[index].ID);
+		if (item) InventoryController.getUI().useItem(item);
+	}
+}
+/**
+* Closing the window
+*/
+function onClose$5() {
+	ShortCut._host.style.height = "0px";
+	_preferences$23.size = 0;
+	_preferences$23.save();
+}
+/**
+* Hook Inventory, get informations when there is a change
+* to update the shortcut
+*
+* @param {number} index
+* @param {number} count
+*/
+function onUpdateItem(index, count) {
+	ShortCut.setElement(false, index, count);
+}
+/**
+* Hook Skill List, get informations when there is a change
+* to update the shortcut
+*
+* @param {number} skill id
+* @param {number} level
+*/
+function onUpdateSkill(id, level) {
+	ShortCut.setElement(true, id, level);
+}
+function onUpdateOwnerName$1() {
+	for (const index in _list$4) if (!_list$4[index].isSkill) ShortCut.setElement(false, _list$4[index].ID, _list$4[index].count);
+}
+function convertHotkeysToServerFormat() {
+	const serverData = {
+		Type: 1,
+		data: {
+			EmotionHotkey: [],
+			UserHotkey_V2: { SkillBar_1Tab: [] }
+		}
+	};
+	[
+		"Macro1",
+		"Macro2",
+		"Macro3",
+		"Macro4",
+		"Macro5",
+		"Macro6",
+		"Macro7",
+		"Macro8",
+		"Macro9",
+		"Macro10"
+	].forEach((key, index) => {
+		const shortcut = ShortCutControls_default.ShortCuts[key];
+		if (shortcut && shortcut.cust && shortcut.cust.emotion) serverData.data.EmotionHotkey[index] = shortcut.cust.emotion;
+	});
+	[
+		"F1_1",
+		"F1_2",
+		"F1_3",
+		"F1_4",
+		"F1_5",
+		"F1_6",
+		"F1_7",
+		"F1_8",
+		"F1_9",
+		"F2_1",
+		"F2_2",
+		"F2_3",
+		"F2_4",
+		"F2_5",
+		"F2_6",
+		"F2_7",
+		"F2_8",
+		"F2_9",
+		"F3_1",
+		"F3_2",
+		"F3_3",
+		"F3_4",
+		"F3_5",
+		"F3_6",
+		"F3_7",
+		"F3_8",
+		"F3_9",
+		"F4_1",
+		"F4_2",
+		"F4_3",
+		"F4_4",
+		"F4_5",
+		"F4_6",
+		"F4_7",
+		"F4_8",
+		"F4_9"
+	].forEach((key, index) => {
+		const shortcut = ShortCutControls_default.ShortCuts[key];
+		if (shortcut) {
+			const keyData = shortcut.cust || shortcut.init;
+			serverData.data.UserHotkey_V2.SkillBar_1Tab.push({
+				desc: `Skill ${index + 1}`,
+				index,
+				key1: keyData.key || 0,
+				key2: 0
+			});
+		}
+	});
+	return serverData;
+}
+function convertHotkeysFromServerFormat(serverData) {
+	if (!serverData || !serverData.data) return;
+	if (serverData.data.EmotionHotkey) {
+		const emotionKeys = [
+			"Macro1",
+			"Macro2",
+			"Macro3",
+			"Macro4",
+			"Macro5",
+			"Macro6",
+			"Macro7",
+			"Macro8",
+			"Macro9",
+			"Macro10"
+		];
+		serverData.data.EmotionHotkey.forEach((emotion, index) => {
+			if (emotion && emotionKeys[index]) {
+				if (!ShortCutControls_default.ShortCuts[emotionKeys[index]].cust) ShortCutControls_default.ShortCuts[emotionKeys[index]].cust = {};
+				ShortCutControls_default.ShortCuts[emotionKeys[index]].cust.emotion = emotion;
+			}
+		});
+	}
+	if (serverData.data.UserHotkey_V2 && serverData.data.UserHotkey_V2.SkillBar_1Tab) {
+		const shortcutKeys = [
+			"F1_1",
+			"F1_2",
+			"F1_3",
+			"F1_4",
+			"F1_5",
+			"F1_6",
+			"F1_7",
+			"F1_8",
+			"F1_9",
+			"F2_1",
+			"F2_2",
+			"F2_3",
+			"F2_4",
+			"F2_5",
+			"F2_6",
+			"F2_7",
+			"F2_8",
+			"F2_9",
+			"F3_1",
+			"F3_2",
+			"F3_3",
+			"F3_4",
+			"F3_5",
+			"F3_6",
+			"F3_7",
+			"F3_8",
+			"F3_9",
+			"F4_1",
+			"F4_2",
+			"F4_3",
+			"F4_4",
+			"F4_5",
+			"F4_6",
+			"F4_7",
+			"F4_8",
+			"F4_9"
+		];
+		serverData.data.UserHotkey_V2.SkillBar_1Tab.forEach((skillData) => {
+			if (skillData && skillData.index < shortcutKeys.length) {
+				const key = shortcutKeys[skillData.index];
+				if (key && skillData.key1) {
+					if (!ShortCutControls_default.ShortCuts[key].cust) ShortCutControls_default.ShortCuts[key].cust = {};
+					ShortCutControls_default.ShortCuts[key].cust.key = skillData.key1;
+				}
+			}
+		});
+	}
+}
+function haveHotkeysChanged(currentData) {
+	if (!_lastServerHotkeys) return true;
+	return JSON.stringify(currentData) !== JSON.stringify(_lastServerHotkeys);
+}
+var ShortCut, _list$4, _rowCount, _lastServerHotkeys, _activeAnimations, _preferences$23, ShortCut_default;
+var init_ShortCut = __esmMin((() => {
+	init_DBManager();
+	init_ItemType();
+	init_SkillInfo();
+	init_SkillConst();
+	init_Client();
+	init_Preferences$1();
+	init_SessionStorage();
+	init_Renderer();
+	init_MouseEventHandler();
+	init_UIManager();
+	init_GUIComponent();
+	init_ItemInfo();
+	init_Inventory();
+	init_SkillListMH();
+	init_SkillDescription();
+	init_SkillTargetSelection();
+	init_Guild$1();
+	init_ShortCutControls();
+	init_KeyEventHandler();
+	init_Configs();
+	init_PacketVerManager();
+	init_SkillList();
+	init_ShortCut$2();
+	init_ShortCut$1();
+	ShortCut = new GUIComponent("ShortCut", ShortCut_default$1);
+	ShortCut.render = () => ShortCut_default$2;
+	_list$4 = [];
+	_rowCount = 0;
+	_lastServerHotkeys = null;
+	_activeAnimations = /* @__PURE__ */ new Map();
+	_preferences$23 = Preferences.get("ShortCut", {
+		x: 480,
+		y: 0,
+		size: 1,
+		magnet_top: true,
+		magnet_bottom: false,
+		magnet_left: false,
+		magnet_right: false
+	}, 1);
+	/**
+	* Initialize UI
+	*/
+	ShortCut.init = function init() {
+		const root = ShortCut.getRoot();
+		const resizeBtn = root.querySelector(".resize");
+		if (resizeBtn) resizeBtn.addEventListener("mousedown", onResize$3);
+		const closeBtn = root.querySelector(".close");
+		if (closeBtn) {
+			closeBtn.addEventListener("mousedown", (e) => {
+				e.stopImmediatePropagation();
+				e.preventDefault();
+			});
+			closeBtn.addEventListener("click", onClose$5);
+		}
+		const container = root.querySelector("#ShortCut");
+		container.addEventListener("drop", (e) => {
+			const target = e.target.closest(".container");
+			if (target) onDrop$8(e, target);
+		});
+		container.addEventListener("dragover", (e) => {
+			if (e.target.closest(".container")) {
+				e.stopImmediatePropagation();
+				e.preventDefault();
+			}
+		});
+		container.addEventListener("dragstart", (e) => {
+			const icon = e.target.closest(".icon");
+			if (icon) onDragStart$2(e, icon);
+		});
+		container.addEventListener("dragend", (e) => {
+			const icon = e.target.closest(".icon");
+			if (icon) onDragEnd(icon);
+		});
+		container.addEventListener("dblclick", (e) => {
+			const icon = e.target.closest(".icon");
+			if (icon) onUseShortCut(icon);
+		});
+		container.addEventListener("contextmenu", (e) => {
+			const icon = e.target.closest(".icon");
+			if (icon) onElementInfo(e, icon);
+		});
+		container.addEventListener("mousedown", (e) => {
+			if (e.target.closest(".icon")) e.stopImmediatePropagation();
+		});
+		this.draggable();
+		root.querySelectorAll(".container").forEach((el) => {
+			el.addEventListener("mouseenter", onContainerMouseEnter);
+			el.addEventListener("mouseleave", onContainerMouseLeave);
+		});
+		DB.UpdateOwnerName.ShortCut = onUpdateOwnerName$1;
+		InventoryController.getUI().onUpdateItem = onUpdateItem;
+	};
+	/**
+	* Append to body
+	*/
+	ShortCut.onAppend = function onAppend() {
+		this._host.style.height = `${34 * _preferences$23.size}px`;
+		const rect = this._host.getBoundingClientRect();
+		this._host.style.top = `${Math.min(Math.max(0, _preferences$23.y), Renderer.height - rect.height)}px`;
+		this._host.style.left = `${Math.min(Math.max(0, _preferences$23.x), Renderer.width - rect.width)}px`;
+		this.magnet.TOP = _preferences$23.magnet_top;
+		this.magnet.BOTTOM = _preferences$23.magnet_bottom;
+		this.magnet.LEFT = _preferences$23.magnet_left;
+		this.magnet.RIGHT = _preferences$23.magnet_right;
+		Controller$4.getUI().onUpdateSkill = onUpdateSkill;
+		updateEmptySlotTooltips();
+	};
+	/**
+	* When removed, clean up
+	*/
+	ShortCut.onRemove = function onRemove() {
+		const tooltip = ShortCut.getRoot().querySelector(".shortcut-tooltip");
+		if (tooltip) tooltip.classList.remove("show");
+		for (const [index, animationId] of _activeAnimations.entries()) cancelAnimationFrame(animationId);
+		_activeAnimations.clear();
+		_preferences$23.y = parseInt(this._host.style.top, 10);
+		_preferences$23.x = parseInt(this._host.style.left, 10);
+		_preferences$23.size = Math.floor(parseInt(this._host.style.height, 10) / 34);
+		_preferences$23.magnet_top = this.magnet.TOP;
+		_preferences$23.magnet_bottom = this.magnet.BOTTOM;
+		_preferences$23.magnet_left = this.magnet.LEFT;
+		_preferences$23.magnet_right = this.magnet.RIGHT;
+		_preferences$23.save();
+	};
+	/**
+	* Request to clean the list
+	* Used only from MapEngine when exiting the game
+	*/
+	ShortCut.clean = function clean() {
+		for (const [index, animationId] of _activeAnimations.entries()) cancelAnimationFrame(animationId);
+		_activeAnimations.clear();
+		_list$4.length = 0;
+		ShortCut.getRoot().querySelectorAll(".container").forEach((el) => {
+			el.innerHTML = "";
+		});
+	};
+	/**
+	* Process shortcut
+	*
+	* @param {object} key
+	*/
+	ShortCut.onShortCut = function onShortCut(key) {
+		switch (key.cmd.replace(/\d+$/, "")) {
+			case "EXECUTE":
+				clickElement(parseInt(key.cmd.match(/\d+$/).toString(), 10));
+				break;
+			case "EXTEND":
+				_preferences$23.size = (_preferences$23.size + 1) % (_rowCount + 1);
+				_preferences$23.save();
+				this._host.style.height = `${_preferences$23.size * 34}px`;
+		}
+	};
+	ShortCut.useSkill = function useSkill(id, level) {
+		getSkillOwner(id).useSkillID(id, level);
+	};
+	ShortCut.getSkillById = function getSkillById(id) {
+		return getSkillOwner(id).getSkillById(id);
+	};
+	/**
+	* Bind UI with list of shortcut
+	*
+	* @param {Array} shortcut list
+	*/
+	ShortCut.setList = function setList(list) {
+		let skill;
+		let needGuildSkills = false;
+		ShortCut.getRoot().querySelectorAll(".container").forEach((el) => {
+			el.innerHTML = "";
+		});
+		_list$4.length = list.length;
+		_rowCount = Math.min(4, Math.floor(list.length / 9));
+		for (let i = 0, count = list.length; i < count; ++i) if (list[i].isSkill) {
+			skill = ShortCut.getSkillById(list[i].ID);
+			if (getSkillOwner(list[i].ID) === Guild_default) needGuildSkills = true;
+			if (skill && skill.level) ShortCut.addElement(i, true, list[i].ID, list[i].count || skill.level);
+			else {
+				if (!_list$4[i]) _list$4[i] = {};
+				_list$4[i].isSkill = true;
+				_list$4[i].ID = list[i].ID;
+				_list$4[i].count = list[i].count;
+			}
+		} else ShortCut.addElement(i, list[i].isSkill, list[i].ID, list[i].count);
+		if (needGuildSkills) ShortCut.onRequestGuildSkills();
+	};
+	/**
+	* Hook: ask the server for the guild skill list (set by MapEngine/Guild)
+	*/
+	ShortCut.onRequestGuildSkills = function onRequestGuildSkills() {};
+	/**
+	* Update all tooltips (for both empty and filled slots)
+	* Called when hotkey settings change
+	*/
+	ShortCut.updateAllTooltips = function updateAllTooltips() {
+		const root = ShortCut.getRoot();
+		for (let i = 0, size = _list$4.length; i < size; ++i) {
+			const container = root.querySelector(`.container[data-index="${i}"]`);
+			if (!container) continue;
+			const hotkey = getHotKeyString(i);
+			if (!_list$4[i] || !_list$4[i].isSkill && !_list$4[i].ID) {
+				if (hotkey) container.setAttribute("data-tooltip", hotkey);
+			} else if (_list$4[i] && (_list$4[i].isSkill || _list$4[i].ID)) {
+				let name = "";
+				if (_list$4[i].isSkill && SkillInfo[_list$4[i].ID]) name = SkillInfo[_list$4[i].ID].SkillName;
+				else if (_list$4[i].ID) {
+					const item = InventoryController.getUI().getItemById(_list$4[i].ID);
+					if (item) name = DB.getItemName(item);
+				}
+				if (name) {
+					const tooltipText = hotkey ? `[ ${hotkey} ] ${name}` : name;
+					container.setAttribute("data-tooltip", tooltipText);
+				}
+			}
+		}
+	};
+	ShortCut.setElement = function setElement(isSkill, ID, count) {
+		for (let i = 0, size = _list$4.length; i < size; ++i) if (_list$4[i] && _list$4[i].isSkill == isSkill && _list$4[i].ID === ID) {
+			if (isSkill && _list$4[i].count && _list$4[i].count <= count) ShortCut.addElement(i, isSkill, ID, _list$4[i].count);
+			else ShortCut.addElement(i, isSkill, ID, count);
+		}
+	};
+	/**
+	* Add an element to shortcut
+	*
+	* @param {number} index of the element
+	* @param {boolean} is a skill ?
+	* @param {number} ID
+	* @param {number} count or level
+	*/
+	ShortCut.addElement = function addElement(index, isSkill, ID, count) {
+		let file, name;
+		const ui = ShortCut.getRoot().querySelector(`.container[data-index="${index}"]`);
+		if (!ui) return;
+		ui.innerHTML = "";
+		if (!_list$4[index]) _list$4[index] = {};
+		_list$4[index].isSkill = isSkill;
+		_list$4[index].ID = ID;
+		if (isSkill) {
+			if (!count) return;
+			else {
+				_list$4[index].count = count;
+				file = SkillInfo[ID].Name;
+				name = SkillInfo[ID].SkillName;
+			}
+		} else {
+			_list$4[index].count = count;
+			const item = InventoryController.getUI().getItemById(ID);
+			if (!item) return;
+			const it = DB.getItemInfo(ID);
+			file = item.IsIdentified ? it.identifiedResourceName : it.unidentifiedResourceName;
+			name = DB.getItemName(item);
+			if (item.type === ItemType_default.WEAPON || item.type === ItemType_default.ARMOR || item.type === ItemType_default.SHADOWGEAR) count = 1;
+			else count = item.count;
+			if (!count) return;
+		}
+		const hotkey = getHotKeyString(index);
+		const tooltipText = hotkey ? `[ ${hotkey} ] ${name}` : name;
+		Client.loadFile(`${DB.INTERFACE_PATH}item/${file}.bmp`, (url) => {
+			ui.innerHTML = "<div draggable=\"true\" class=\"icon\"><div class=\"img\"></div><div class=\"amount\"></div></div>";
+			ui.querySelector(".img").style.backgroundImage = `url(${url})`;
+			ui.querySelector(".amount").textContent = count;
+			ui.setAttribute("data-tooltip", tooltipText);
+		});
+	};
+	/**
+	* Displays the cooldown over every skill
+	*
+	* @param {number} delay in ms
+	*/
+	ShortCut.setGlobalSkillDelay = function setGlobalSkillDelay(delay) {
+		_list$4.forEach((element, index) => {
+			if (element.isSkill) setDelayOnIndex(index, delay);
+		});
+	};
+	/**
+	* Displays the cooldown over a single skill
+	*
+	* @param {number} ID of the skill
+	* @param {number} delay in ms
+	*/
+	ShortCut.setSkillDelay = function setSkillDelay(ID, delay) {
+		_list$4.forEach((element, index) => {
+			if (element.isSkill && element.ID == ID) setDelayOnIndex(index, delay);
+		});
+	};
+	/**
+	* Remove an element from shortcut
+	*
+	* @param {boolean} is a skill ?
+	* @param {number} ID of the element to remove
+	* @param {number} row id
+	* @param {number} amount (optional)
+	*/
+	ShortCut.removeElement = function removeElement(isSkill, ID, row, amount) {
+		if (!ID) return;
+		const root = ShortCut.getRoot();
+		for (let i = row * 9, count = Math.min(_list$4.length, row * 9 + 9); i < count; ++i) if (_list$4[i] && _list$4[i].isSkill == isSkill && _list$4[i].ID === ID && (!isSkill || _list$4[i].count == amount)) {
+			const container = root.querySelector(`.container[data-index="${i}"]`);
+			if (container) container.innerHTML = "";
+			_list$4[i].isSkill = 0;
+			_list$4[i].ID = 0;
+			_list$4[i].count = 0;
+			ShortCut.onChange(i, 0, 0, 0);
+		}
+	};
+	Guild_default.onUpdateSkill = (id, level) => {
+		ShortCut.setElement(true, id, level);
+	};
+	SkillListMH_default.mercenary.onUpdateSkill = (id, level) => {
+		ShortCut.setElement(true, id, level);
+	};
+	SkillListMH_default.homunculus.onUpdateSkill = (id, level) => {
+		ShortCut.setElement(true, id, level);
+	};
+	/**
+	* Method to define to notify a change.
+	*
+	* @param {number} index
+	* @param {boolean} isSkill
+	* @param {number} id
+	* @param {number} count
+	*/
+	ShortCut.onChange = function onChange() {};
+	ShortCut.saveToServer = function saveToServer() {
+		if (PacketVerManager_default.value >= 20170315 && SessionStorage_default.WebToken) {
+			const hotkeys = JSON.stringify(convertHotkeysToServerFormat());
+			if (!haveHotkeysChanged(hotkeys)) return;
+			const formData = new FormData();
+			formData.append("AID", SessionStorage_default.AID);
+			formData.append("WorldName", SessionStorage_default.ServerName);
+			formData.append("AuthToken", SessionStorage_default.WebToken);
+			formData.append("data", hotkeys);
+			const xhr = new XMLHttpRequest();
+			let webserverAddress = "";
+			if (window.location.protocol !== "http:" && window.location.protocol !== "https:") webserverAddress = Configs.get("webserverAddress", "http://127.0.0.1:8888");
+			xhr.open("POST", `${webserverAddress}/userconfig/save`, true);
+			xhr.timeout = 5e3;
+			xhr.onload = () => {
+				if (xhr.status === 200) console.log("Hotkeys saved to server successfully");
+				else console.warn("Hotkey save returned non-200 status:", xhr.status);
+			};
+			xhr.onerror = () => {
+				console.warn("Hotkey save failed: web-server unreachable");
+			};
+			xhr.ontimeout = () => {
+				console.warn("Hotkey save timed out");
+			};
+			xhr.send(formData);
+		}
+	};
+	ShortCut.loadFromServer = function loadFromServer(callback) {
+		if (PacketVerManager_default.value >= 20170315 && SessionStorage_default.WebToken) {
+			const formData = new FormData();
+			formData.append("AID", SessionStorage_default.AID);
+			formData.append("WorldName", SessionStorage_default.ServerName);
+			formData.append("AuthToken", SessionStorage_default.WebToken);
+			const xhr = new XMLHttpRequest();
+			let webserverAddress = "";
+			if (window.location.protocol !== "http:" && window.location.protocol !== "https:") webserverAddress = Configs.get("webserverAddress", "http://127.0.0.1:8888");
+			xhr.open("POST", `${webserverAddress}/userconfig/load`, true);
+			xhr.timeout = 5e3;
+			xhr.onload = () => {
+				if (xhr.status === 200) try {
+					const serverData = JSON.parse(xhr.responseText);
+					_lastServerHotkeys = JSON.parse(JSON.stringify(serverData));
+					convertHotkeysFromServerFormat(serverData);
+				} catch (e) {
+					console.error("Error parsing server hotkeys:", e);
+				}
+				else console.warn("Hotkey load returned non-200 status:", xhr.status);
+				if (callback) callback();
+			};
+			xhr.onerror = () => {
+				console.warn("Hotkey load failed: web-server unreachable");
+				if (callback) callback();
+			};
+			xhr.ontimeout = () => {
+				console.warn("Hotkey load timed out");
+				if (callback) callback();
+			};
+			xhr.send(formData);
+		} else if (callback) callback();
+	};
+	ShortCut.getList = function getList() {
+		return _list$4;
+	};
+	ShortCut_default = UIManager.addComponent(ShortCut);
+}));
+//#endregion
 //#region src/Engine/MapEngine/Guild.js
 function adler32(data) {
 	let s1 = 1;
@@ -244778,6 +246191,10 @@ function onGuildOwnInfo(pkt) {
 	if (pkt.GName) SessionStorage_default.guildName = pkt.GName;
 	SessionStorage_default.Entity.GUID = pkt.GDID;
 	SessionStorage_default.Entity.GEmblemVer = pkt.emblemVersion;
+	if (_pendingGuildSkillRequest) {
+		_pendingGuildSkillRequest = false;
+		GuildEngine.requestInfo(3);
+	}
 	if (pkt.GDID && pkt.emblemVersion) GuildEngine.requestGuildEmblem(pkt.GDID, pkt.emblemVersion, (image, gif) => {
 		SessionStorage_default.Entity.setEntityGuildEmblem(image, gif);
 	});
@@ -245073,7 +246490,7 @@ function onGuildHostilityResult(pkt) {
 	}
 }
 function onGuildCastleInfo(pkt) {}
-var _emblems, GuildEngine, onGuildEmblem;
+var _emblems, _pendingGuildSkillRequest, GuildEngine, onGuildEmblem;
 var init_Guild = __esmMin((() => {
 	init_DBManager();
 	init_Inflate();
@@ -245090,7 +246507,9 @@ var init_Guild = __esmMin((() => {
 	init_UIManager();
 	init_Configs();
 	init_MiniMap();
+	init_ShortCut();
 	_emblems = {};
+	_pendingGuildSkillRequest = false;
 	GuildEngine = class GuildEngine {
 		/**
 		* @var {number} our guild id
@@ -245152,6 +246571,14 @@ var init_Guild = __esmMin((() => {
 			Guild_default.onRequestBreakGuild = GuildEngine.breakGuild;
 			Guild_default.onRequestGuildEmblem = GuildEngine.requestGuildEmblem;
 			Guild_default.onSendEmblem = GuildEngine.sendEmblem;
+			ShortCut_default.onRequestGuildSkills = GuildEngine.requestGuildSkills;
+		}
+		/**
+		* Request the guild skill list, deferred until we know the player has a guild
+		*/
+		static requestGuildSkills() {
+			if (SessionStorage_default.hasGuild) GuildEngine.requestInfo(3);
+			else _pendingGuildSkillRequest = true;
 		}
 		/**
 		* Ask server to get guild informations
@@ -245523,46 +246950,6 @@ var init_Guild = __esmMin((() => {
 			}
 		};
 	})();
-}));
-//#endregion
-//#region src/UI/Components/SkillListMH/SkillListMH.js
-/**
-* Build a Homunculus/Mercenary skill window on top of the shared SkillList
-* factory, using its list-only (old-style) mode and layering the MH-specific
-* bits (window name, titlebar text, drag origin, Escape-to-close) on top.
-*/
-function createSkillListMH(type) {
-	const component = createSkillList({
-		name: `SkillList${type === "homunculus" ? "HOM" : "MER"}`,
-		htmlText: SkillList_default$2,
-		cssText: SkillList_default$1,
-		listOnly: true,
-		dragFrom: "SkillListMH",
-		titlebarText: type === "homunculus" ? "Homunculus Skills" : "Mercenary Skills",
-		containerSelector: ".SkillList",
-		preferenceDefaults: {
-			x: 100,
-			y: 200,
-			width: 8,
-			height: 5,
-			show: false
-		}
-	});
-	component.onKeyDown = function onKeyDown(event) {
-		if ((event.which === KEYS.ESCAPE || event.key === "Escape") && this.ui.is(":visible")) this.toggle();
-	};
-	return component;
-}
-var SkillListMH_default;
-var init_SkillListMH = __esmMin((() => {
-	init_KeyEventHandler();
-	init_SkillListCommon();
-	init_SkillList$3();
-	init_SkillList$2();
-	SkillListMH_default = {
-		homunculus: createSkillListMH("homunculus"),
-		mercenary: createSkillListMH("mercenary")
-	};
 }));
 //#endregion
 //#region src/Core/AIDriver.js
@@ -245962,7 +247349,7 @@ var init_HomunInformations$1 = __esmMin((() => {
 * Checks if homun should be fed or not
 */
 function autoFeedCheck() {
-	if (_preferences$23.autoFeed != 1) return;
+	if (_preferences$22.autoFeed != 1) return;
 	const player = SessionStorage_default.Entity;
 	if (!player) return;
 	if (player.life.hp <= 0) return;
@@ -245977,11 +247364,11 @@ function autoFeedCheck() {
 * Toggle AutoFeed
 */
 function homunToggleAutoFeed() {
-	HomunInformations.setFeedConfig(_preferences$23.autoFeed == 1 ? 0 : 1);
+	HomunInformations.setFeedConfig(_preferences$22.autoFeed == 1 ? 0 : 1);
 	if (PacketVerManager_default.value < 20170920) return;
-	HomunInformations.onConfigUpdate(3, _preferences$23.autoFeed ? 1 : 0);
+	HomunInformations.onConfigUpdate(3, _preferences$22.autoFeed ? 1 : 0);
 }
-var autoFeedInterval, autoFeedIntervalMs, autoFeedPercent, HomunInformations, _preferences$23, HomunInformations_default;
+var autoFeedInterval, autoFeedIntervalMs, autoFeedPercent, HomunInformations, _preferences$22, HomunInformations_default;
 var init_HomunInformations = __esmMin((() => {
 	init_DBManager();
 	init_Client();
@@ -246004,7 +247391,7 @@ var init_HomunInformations = __esmMin((() => {
 	HomunInformations = new GUIComponent("HomunInformations", HomunInformations_default$1);
 	HomunInformations.render = () => HomunInformations_default$2;
 	HomunInformations.captureKeyEvents = true;
-	_preferences$23 = Preferences.get("HomunInformations", {
+	_preferences$22 = Preferences.get("HomunInformations", {
 		x: 100,
 		y: 200,
 		show: false,
@@ -246044,7 +247431,7 @@ var init_HomunInformations = __esmMin((() => {
 		if (autoFeedBtn) autoFeedBtn.addEventListener("click", () => {
 			homunToggleAutoFeed();
 		});
-		if (!_preferences$23.show) this._host.style.display = "none";
+		if (!_preferences$22.show) this._host.style.display = "none";
 		const skillBtn = root.querySelector(".skill");
 		if (skillBtn) skillBtn.addEventListener("mousedown", () => {
 			SkillListMH_default.homunculus.toggle();
@@ -246054,7 +247441,7 @@ var init_HomunInformations = __esmMin((() => {
 	};
 	HomunInformations.onAppend = function onAppend() {
 		const root = HomunInformations.getRoot();
-		Client.loadFile(DB.INTERFACE_PATH + `checkbox_${_preferences$23.autoFeed ? "1" : "0"}.bmp`, (data) => {
+		Client.loadFile(DB.INTERFACE_PATH + `checkbox_${_preferences$22.autoFeed ? "1" : "0"}.bmp`, (data) => {
 			const el = root.querySelector(".homun_auto_feed");
 			if (el) el.style.backgroundImage = `url(${data})`;
 		});
@@ -246065,8 +247452,8 @@ var init_HomunInformations = __esmMin((() => {
 				if (feeding) feeding.style.display = "none";
 			}
 		}
-		this._host.style.top = `${Math.min(Math.max(0, _preferences$23.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
-		this._host.style.left = `${Math.min(Math.max(0, _preferences$23.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
+		this._host.style.top = `${Math.min(Math.max(0, _preferences$22.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
+		this._host.style.left = `${Math.min(Math.max(0, _preferences$22.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
 	};
 	HomunInformations.startAutoFeed = function startAutoFeed() {
 		window.clearInterval(autoFeedInterval);
@@ -246080,10 +247467,10 @@ var init_HomunInformations = __esmMin((() => {
 	* Once remove from body, save user preferences
 	*/
 	HomunInformations.onRemove = function onRemove() {
-		_preferences$23.show = this._host.style.display !== "none";
-		_preferences$23.y = parseInt(this._host.style.top, 10);
-		_preferences$23.x = parseInt(this._host.style.left, 10);
-		_preferences$23.save();
+		_preferences$22.show = this._host.style.display !== "none";
+		_preferences$22.y = parseInt(this._host.style.top, 10);
+		_preferences$22.x = parseInt(this._host.style.left, 10);
+		_preferences$22.save();
 		HomunInformations.stopAutoFeed();
 		this.stopAI();
 	};
@@ -246324,10 +247711,10 @@ var init_HomunInformations = __esmMin((() => {
 		this.startAI();
 	};
 	HomunInformations.setFeedConfig = function setFeedConfig(flag) {
-		_preferences$23.autoFeed = flag;
-		_preferences$23.save();
+		_preferences$22.autoFeed = flag;
+		_preferences$22.save();
 		const root = HomunInformations.getRoot();
-		if (root) Client.loadFile(DB.INTERFACE_PATH + `checkbox_${_preferences$23.autoFeed ? "1" : "0"}.bmp`, (data) => {
+		if (root) Client.loadFile(DB.INTERFACE_PATH + `checkbox_${_preferences$22.autoFeed ? "1" : "0"}.bmp`, (data) => {
 			const el = root.querySelector(".homun_auto_feed");
 			if (el) el.style.backgroundImage = `url(${data})`;
 		});
@@ -246359,7 +247746,7 @@ var init_MercenaryInformations$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/UI/Components/MercenaryInformations/MercenaryInformations.js
-var MercenaryInformations, _preferences$22, MercenaryInformations_default;
+var MercenaryInformations, _preferences$21, MercenaryInformations_default;
 var init_MercenaryInformations = __esmMin((() => {
 	init_DBManager();
 	init_Client();
@@ -246377,7 +247764,7 @@ var init_MercenaryInformations = __esmMin((() => {
 	init_MercenaryInformations$1();
 	MercenaryInformations = new GUIComponent("MercenaryInformations", MercenaryInformations_default$1);
 	MercenaryInformations.render = () => MercenaryInformations_default$2;
-	_preferences$22 = Preferences.get("MercenaryInformations", {
+	_preferences$21 = Preferences.get("MercenaryInformations", {
 		x: 100,
 		y: 100,
 		show: false,
@@ -246406,7 +247793,7 @@ var init_MercenaryInformations = __esmMin((() => {
 		if (dismissBtn) dismissBtn.addEventListener("click", () => {
 			MercenaryInformations.reqDeleteMercenary();
 		});
-		if (!_preferences$22.show) this._host.style.display = "none";
+		if (!_preferences$21.show) this._host.style.display = "none";
 		const skillBtn = root.querySelector(".skill");
 		if (skillBtn) skillBtn.addEventListener("mousedown", () => {
 			SkillListMH_default.mercenary.toggle();
@@ -246418,18 +247805,18 @@ var init_MercenaryInformations = __esmMin((() => {
 	* Once append to body
 	*/
 	MercenaryInformations.onAppend = function onAppend() {
-		if (!_preferences$22.show) this._host.style.display = "none";
-		this._host.style.top = `${Math.min(Math.max(0, _preferences$22.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
-		this._host.style.left = `${Math.min(Math.max(0, _preferences$22.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
+		if (!_preferences$21.show) this._host.style.display = "none";
+		this._host.style.top = `${Math.min(Math.max(0, _preferences$21.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
+		this._host.style.left = `${Math.min(Math.max(0, _preferences$21.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
 	};
 	/**
 	* Once remove from body
 	*/
 	MercenaryInformations.onRemove = function onRemove() {
-		_preferences$22.show = this._host.style.display !== "none";
-		_preferences$22.y = parseInt(this._host.style.top, 10);
-		_preferences$22.x = parseInt(this._host.style.left, 10);
-		_preferences$22.save();
+		_preferences$21.show = this._host.style.display !== "none";
+		_preferences$21.y = parseInt(this._host.style.top, 10);
+		_preferences$21.x = parseInt(this._host.style.left, 10);
+		_preferences$21.save();
 		this.stopAI();
 	};
 	/**
@@ -246655,7 +248042,7 @@ var init_CaptchaUpload$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/UI/Components/Captcha/CaptchaUpload.js
-var CaptchaUpload, _preferences$21, CaptchaUpload_default;
+var CaptchaUpload, _preferences$20, CaptchaUpload_default;
 var init_CaptchaUpload = __esmMin((() => {
 	init_UIManager();
 	init_GUIComponent();
@@ -246666,7 +248053,7 @@ var init_CaptchaUpload = __esmMin((() => {
 	init_CaptchaUpload$2();
 	init_CaptchaUpload$1();
 	CaptchaUpload = new GUIComponent("CaptchaUpload", CaptchaUpload_default$1);
-	_preferences$21 = Preferences.get("CaptchaUpload", {
+	_preferences$20 = Preferences.get("CaptchaUpload", {
 		x: 230,
 		y: 295
 	}, 2);
@@ -246737,16 +248124,16 @@ var init_CaptchaUpload = __esmMin((() => {
 	* Append to DOM
 	*/
 	CaptchaUpload.onAppend = function onAppend() {
-		this._host.style.top = `${Math.min(Math.max(0, _preferences$21.y), Renderer.height - this._host.offsetHeight)}px`;
-		this._host.style.left = `${Math.min(Math.max(0, _preferences$21.x), Renderer.width - this._host.offsetWidth)}px`;
+		this._host.style.top = `${Math.min(Math.max(0, _preferences$20.y), Renderer.height - this._host.offsetHeight)}px`;
+		this._host.style.left = `${Math.min(Math.max(0, _preferences$20.x), Renderer.width - this._host.offsetWidth)}px`;
 	};
 	/**
 	* Remove data from UI
 	*/
 	CaptchaUpload.onRemove = function onRemove() {
-		_preferences$21.y = parseInt(this._host.style.top, 10);
-		_preferences$21.x = parseInt(this._host.style.left, 10);
-		_preferences$21.save();
+		_preferences$20.y = parseInt(this._host.style.top, 10);
+		_preferences$20.x = parseInt(this._host.style.left, 10);
+		_preferences$20.save();
 		const root = this.getRoot();
 		const previewBox = root.querySelector(".preview_box");
 		if (previewBox) previewBox.innerHTML = "";
@@ -246784,7 +248171,7 @@ var init_CaptchaSelector$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/UI/Components/Captcha/CaptchaSelector.js
-var CaptchaSelector, _preferences$20, _aidList, _aidInformation, _range, _active$2, CaptchaSelector_default;
+var CaptchaSelector, _preferences$19, _aidList, _aidInformation, _range, _active$2, CaptchaSelector_default;
 var init_CaptchaSelector = __esmMin((() => {
 	init_UIManager();
 	init_GUIComponent();
@@ -246798,7 +248185,7 @@ var init_CaptchaSelector = __esmMin((() => {
 	init_CaptchaSelector$2();
 	init_CaptchaSelector$1();
 	CaptchaSelector = new GUIComponent("CaptchaSelector", CaptchaSelector_default$1);
-	_preferences$20 = Preferences.get("CaptchaSelector", {
+	_preferences$19 = Preferences.get("CaptchaSelector", {
 		x: 230,
 		y: 295
 	}, 2);
@@ -246861,16 +248248,16 @@ var init_CaptchaSelector = __esmMin((() => {
 	* Append to DOM
 	*/
 	CaptchaSelector.onAppend = function onAppend() {
-		this._host.style.top = `${Math.min(Math.max(0, _preferences$20.y), Renderer.height - this._host.offsetHeight)}px`;
-		this._host.style.left = `${Math.min(Math.max(0, _preferences$20.x), Renderer.width - this._host.offsetWidth)}px`;
+		this._host.style.top = `${Math.min(Math.max(0, _preferences$19.y), Renderer.height - this._host.offsetHeight)}px`;
+		this._host.style.left = `${Math.min(Math.max(0, _preferences$19.x), Renderer.width - this._host.offsetWidth)}px`;
 	};
 	/**
 	* Remove data from UI
 	*/
 	CaptchaSelector.onRemove = function onRemove() {
-		_preferences$20.y = parseInt(this._host.style.top, 10);
-		_preferences$20.x = parseInt(this._host.style.left, 10);
-		_preferences$20.save();
+		_preferences$19.y = parseInt(this._host.style.top, 10);
+		_preferences$19.x = parseInt(this._host.style.left, 10);
+		_preferences$19.save();
 		const charInfo = this.getRoot().querySelector(".character_info");
 		if (charInfo) charInfo.style.display = "none";
 		this.cleanUIList();
@@ -247446,7 +248833,7 @@ var init_SakuraWeatherEffect = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/PokJukWeatherEffect.js
-var _instance$2, _mapName$3, _whiteTexture, EXPLOSION_ALTITUDE, PARTICLE_SIZE, FIRE_LIFE_MS, EXPLOSION_LIFE_MS, PokJukWeatherEffect;
+var _instance$2, _mapName$3, _whiteTexture, EXPLOSION_ALTITUDE, PARTICLE_SIZE$1, FIRE_LIFE_MS, EXPLOSION_LIFE_MS, PokJukWeatherEffect;
 var init_PokJukWeatherEffect = __esmMin((() => {
 	init_MapRenderer();
 	init_SpriteRenderer();
@@ -247456,7 +248843,7 @@ var init_PokJukWeatherEffect = __esmMin((() => {
 	_mapName$3 = "";
 	_whiteTexture = null;
 	EXPLOSION_ALTITUDE = 8;
-	PARTICLE_SIZE = 6;
+	PARTICLE_SIZE$1 = 6;
 	FIRE_LIFE_MS = 50;
 	EXPLOSION_LIFE_MS = 1e3;
 	PokJukWeatherEffect = class PokJukWeatherEffect {
@@ -247491,12 +248878,12 @@ var init_PokJukWeatherEffect = __esmMin((() => {
 		createInternalTexture(gl) {
 			if (_whiteTexture) return;
 			const canvas = document.createElement("canvas");
-			canvas.width = PARTICLE_SIZE;
-			canvas.height = PARTICLE_SIZE;
+			canvas.width = PARTICLE_SIZE$1;
+			canvas.height = PARTICLE_SIZE$1;
 			const ctx = canvas.getContext("2d");
-			const center = PARTICLE_SIZE / 2;
+			const center = PARTICLE_SIZE$1 / 2;
 			const radius = 2;
-			ctx.clearRect(0, 0, PARTICLE_SIZE, PARTICLE_SIZE);
+			ctx.clearRect(0, 0, PARTICLE_SIZE$1, PARTICLE_SIZE$1);
 			const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
 			gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
 			gradient.addColorStop(.7, "rgba(255, 255, 255, 0.8)");
@@ -247536,7 +248923,7 @@ var init_PokJukWeatherEffect = __esmMin((() => {
 				colorType: Math.floor(Math.random() * 5),
 				state: 0,
 				particles: [],
-				size: PARTICLE_SIZE,
+				size: PARTICLE_SIZE$1,
 				arcDirection: Math.random() > .5 ? 1 : -1,
 				arcAmplitude: 3 + Math.random() * 2,
 				arcPhase: 0,
@@ -247897,8 +249284,8 @@ var init_CloudWeatherEffect = __esmMin((() => {
 		setUpCloudData(now) {
 			for (let i = 0; i < this._profile.maxClouds; i++) {
 				if (!this._clouds[i]) this._clouds[i] = {
-					position: vec3$7.create(),
-					direction: vec3$7.create(),
+					position: vec3$8.create(),
+					direction: vec3$8.create(),
 					born_tick: 0,
 					death_tick: 0
 				};
@@ -247954,7 +249341,7 @@ var init_CloudWeatherEffect = __esmMin((() => {
 				SpriteRenderer.zIndex = zindex;
 				SpriteRenderer.color[3] = opacity;
 				SpriteRenderer.image.texture = this._textures[cloud.sprite];
-				vec3$7.add(cloud.position, cloud.position, cloud.direction);
+				vec3$8.add(cloud.position, cloud.position, cloud.direction);
 				SpriteRenderer.position.set(cloud.position);
 				SpriteRenderer.runWithDepth(!overlay, false, !overlay, () => {
 					SpriteRenderer.render();
@@ -248935,7 +250322,7 @@ function generateCylinder(totalCircleSides, circleSides, repeatTextureX) {
 	}
 	return new Float32Array(mesh);
 }
-var _program$18, blendMode$3, mat4$16, _matrix$4, Cylinder;
+var _program$19, blendMode$3, mat4$17, _matrix$5, Cylinder;
 var init_Cylinder = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -248945,8 +250332,8 @@ var init_Cylinder = __esmMin((() => {
 	init_Cylinder$2();
 	init_Cylinder$1();
 	blendMode$3 = {};
-	mat4$16 = gl_matrix_default.mat4;
-	_matrix$4 = mat4$16.create();
+	mat4$17 = gl_matrix_default.mat4;
+	_matrix$5 = mat4$17.create();
 	Cylinder = class {
 		constructor(effect, EF_Inst_Par, EF_Init_Par) {
 			const position = EF_Inst_Par.position;
@@ -249039,8 +250426,8 @@ var init_Cylinder = __esmMin((() => {
 		render(gl, tick) {
 			const renderCount = tick - this.startTick;
 			const duration = this.endTick - this.startTick;
-			const uniform = _program$18.uniform;
-			const attribute = _program$18.attribute;
+			const uniform = _program$19.uniform;
+			const attribute = _program$19.attribute;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			if (this.repeatTextureX > 1) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 			gl.enableVertexAttribArray(attribute.aPosition);
@@ -249098,11 +250485,11 @@ var init_Cylinder = __esmMin((() => {
 				this.position[2]
 			];
 			if (this.rotate || this.angleX || this.angleY || this.angleZ || this.rotateWithCamera || this.fixedPerspective) {
-				mat4$16.identity(_matrix$4);
-				if (this.rotate) mat4$16.rotateY(_matrix$4, _matrix$4, tick / 4 / 180 * Math.PI);
-				if (this.angleX) mat4$16.rotateX(_matrix$4, _matrix$4, this.angleX / 180 * Math.PI);
-				if (this.angleY) mat4$16.rotateY(_matrix$4, _matrix$4, this.angleY / 180 * Math.PI);
-				if (this.angleZ) mat4$16.rotateZ(_matrix$4, _matrix$4, this.angleZ / 180 * Math.PI);
+				mat4$17.identity(_matrix$5);
+				if (this.rotate) mat4$17.rotateY(_matrix$5, _matrix$5, tick / 4 / 180 * Math.PI);
+				if (this.angleX) mat4$17.rotateX(_matrix$5, _matrix$5, this.angleX / 180 * Math.PI);
+				if (this.angleY) mat4$17.rotateY(_matrix$5, _matrix$5, this.angleY / 180 * Math.PI);
+				if (this.angleZ) mat4$17.rotateZ(_matrix$5, _matrix$5, this.angleZ / 180 * Math.PI);
 				if (this.rotateWithCamera || this.fixedPerspective) {
 					let magic = this.posY;
 					if (this.fixedPerspective) {
@@ -249111,21 +250498,21 @@ var init_Cylinder = __esmMin((() => {
 							currentPosition[2] += this.posZ * Math.cos(vcRad) - this.posY * Math.sin(vcRad);
 							magic = this.posY * Math.sin(vcRad) + this.posZ * Math.sin(vcRad);
 						}
-						mat4$16.rotateX(_matrix$4, _matrix$4, vcRad);
+						mat4$17.rotateX(_matrix$5, _matrix$5, vcRad);
 					}
 					const hcRad = Camera.angle[1] * Math.PI / 180;
 					if (this.posX || this.posY) {
 						currentPosition[0] += this.posX * Math.cos(hcRad) - magic * Math.sin(hcRad);
 						currentPosition[1] += magic * Math.cos(hcRad) + this.posX * Math.sin(hcRad);
 					}
-					mat4$16.rotateY(_matrix$4, _matrix$4, hcRad);
+					mat4$17.rotateY(_matrix$5, _matrix$5, hcRad);
 				} else {
 					currentPosition[0] += this.posX;
 					currentPosition[1] += this.posY;
 					currentPosition[2] += this.posZ;
 				}
 				gl.uniform1i(uniform.uRotate, true);
-				gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$4);
+				gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$5);
 			} else {
 				currentPosition[0] += this.posX;
 				currentPosition[1] += this.posY;
@@ -249160,7 +250547,7 @@ var init_Cylinder = __esmMin((() => {
 			blendMode$3[13] = gl.CONSTANT_ALPHA;
 			blendMode$3[14] = gl.ONE_MINUS_CONSTANT_ALPHA;
 			blendMode$3[15] = gl.SRC_ALPHA_SATURATE;
-			_program$18 = WebGL_default.createShaderProgram(gl, Cylinder_default$1, Cylinder_default);
+			_program$19 = WebGL_default.createShaderProgram(gl, Cylinder_default$1, Cylinder_default);
 			this.ready = true;
 			this.renderBeforeEntities = false;
 		}
@@ -249170,9 +250557,9 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$18) {
-				gl.deleteProgram(_program$18);
-				_program$18 = null;
+			if (_program$19) {
+				gl.deleteProgram(_program$19);
+				_program$19 = null;
 			}
 			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
@@ -249183,8 +250570,8 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$18.uniform;
-			gl.useProgram(_program$18);
+			const uniform = _program$19.uniform;
+			gl.useProgram(_program$19);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -249200,8 +250587,8 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$18.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$18.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$19.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$19.attribute.aTextureCoord);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -249353,13 +250740,13 @@ function getScaleAtFrame$1(keyframes, frame, animLen) {
 		prev.Scale[2] + (next.Scale[2] - prev.Scale[2]) * t
 	];
 }
-var vec3$4, mat3$2, mat4$15, Box, Node, RSM;
+var vec3$4, mat3$2, mat4$16, Box, Node, RSM;
 var init_Model = __esmMin((() => {
 	init_BinaryReader();
 	init_gl_matrix();
 	vec3$4 = gl_matrix_default.vec3;
 	mat3$2 = gl_matrix_default.mat3;
-	mat4$15 = gl_matrix_default.mat4;
+	mat4$16 = gl_matrix_default.mat4;
 	Box = class {
 		constructor() {
 			this.max = vec3$4.fromValues(-Infinity, -Infinity, -Infinity);
@@ -249556,7 +250943,7 @@ var init_Model = __esmMin((() => {
 				}
 			}
 			this.box = new RSM.Box();
-			this.matrix = mat4$15.create();
+			this.matrix = mat4$16.create();
 			this.textures = textures;
 			this.vertices = vertices;
 			this.tvertices = tvertices;
@@ -249576,18 +250963,18 @@ var init_Model = __esmMin((() => {
 			const v = vec3$4.create();
 			const box = this.box;
 			const nodes = this.main.nodes;
-			const matrix = mat4$15.create();
+			const matrix = mat4$16.create();
 			const vertices = this.vertices;
 			const max = Math.max, min = Math.min;
 			let x, y, z;
-			mat4$15.copy(this.matrix, _matrix);
-			mat4$15.translate(this.matrix, this.matrix, this.pos);
-			if (!this.rotKeyframes.length) mat4$15.rotate(this.matrix, this.matrix, this.rotangle, this.rotaxis);
-			else mat4$15.rotateQuat(this.matrix, this.matrix, this.rotKeyframes[0].q);
-			mat4$15.scale(this.matrix, this.matrix, this.scale);
-			mat4$15.copy(matrix, this.matrix);
-			if (!this.is_only) mat4$15.translate(matrix, matrix, this.offset);
-			mat4$15.multiply(matrix, matrix, mat3$2.toMat4(this.mat3));
+			mat4$16.copy(this.matrix, _matrix);
+			mat4$16.translate(this.matrix, this.matrix, this.pos);
+			if (!this.rotKeyframes.length) mat4$16.rotate(this.matrix, this.matrix, this.rotangle, this.rotaxis);
+			else mat4$16.rotateQuat(this.matrix, this.matrix, this.rotKeyframes[0].q);
+			mat4$16.scale(this.matrix, this.matrix, this.scale);
+			mat4$16.copy(matrix, this.matrix);
+			if (!this.is_only) mat4$16.translate(matrix, matrix, this.offset);
+			mat4$16.multiply(matrix, matrix, mat3$2.toMat4(this.mat3));
 			for (i = 0, count = vertices.length; i < count; ++i) {
 				x = vertices[i][0];
 				y = vertices[i][1];
@@ -249613,8 +251000,8 @@ var init_Model = __esmMin((() => {
 		* @param {mat4} instance_matrix
 		*/
 		compile(instance_matrix) {
-			const modelViewMat = mat4$15.create();
-			const normalMat = mat4$15.create();
+			const modelViewMat = mat4$16.create();
+			const normalMat = mat4$16.create();
 			const textures = this.textures;
 			const faces = this.faces;
 			const vertices = this.vertices;
@@ -249623,18 +251010,18 @@ var init_Model = __esmMin((() => {
 			const shadeGroup = new Array(32);
 			const shadeGroupUsed = new Array(32);
 			let i, x, y, z, count;
-			const matrix = mat4$15.create();
-			mat4$15.identity(matrix);
-			mat4$15.translate(matrix, matrix, [
+			const matrix = mat4$16.create();
+			mat4$16.identity(matrix);
+			mat4$16.translate(matrix, matrix, [
 				-this.main.box.center[0],
 				-this.main.box.max[1],
 				-this.main.box.center[2]
 			]);
-			mat4$15.multiply(matrix, matrix, this.matrix);
-			if (!this.is_only) mat4$15.translate(matrix, matrix, this.offset);
-			mat4$15.multiply(matrix, matrix, mat3$2.toMat4(this.mat3));
-			mat4$15.multiply(modelViewMat, instance_matrix, matrix);
-			mat4$15.extractRotation(normalMat, modelViewMat);
+			mat4$16.multiply(matrix, matrix, this.matrix);
+			if (!this.is_only) mat4$16.translate(matrix, matrix, this.offset);
+			mat4$16.multiply(matrix, matrix, mat3$2.toMat4(this.mat3));
+			mat4$16.multiply(modelViewMat, instance_matrix, matrix);
+			mat4$16.extractRotation(normalMat, modelViewMat);
 			count = vertices.length;
 			const vert = new Float32Array(count * 3);
 			for (i = 0; i < count; ++i) {
@@ -249674,8 +251061,8 @@ var init_Model = __esmMin((() => {
 		* @param {number} animLen - Total animation length
 		*/
 		compileAtFrame(instance_matrix, frame, animLen) {
-			const modelViewMat = mat4$15.create();
-			const normalMat = mat4$15.create();
+			const modelViewMat = mat4$16.create();
+			const normalMat = mat4$16.create();
 			const textures = this.textures;
 			const faces = this.faces;
 			const vertices = this.vertices;
@@ -249684,30 +251071,30 @@ var init_Model = __esmMin((() => {
 			const shadeGroup = new Array(32);
 			const shadeGroupUsed = new Array(32);
 			let i, x, y, z, count;
-			const matrix = mat4$15.create();
-			mat4$15.identity(matrix);
-			mat4$15.translate(matrix, matrix, [
+			const matrix = mat4$16.create();
+			mat4$16.identity(matrix);
+			mat4$16.translate(matrix, matrix, [
 				-this.main.box.center[0],
 				-this.main.box.max[1],
 				-this.main.box.center[2]
 			]);
-			const nodeMatrix = mat4$15.create();
-			mat4$15.identity(nodeMatrix);
+			const nodeMatrix = mat4$16.create();
+			mat4$16.identity(nodeMatrix);
 			const animPos = getPositionAtFrame$1(this.posKeyframes, frame, animLen);
-			if (animPos) mat4$15.translate(nodeMatrix, nodeMatrix, animPos);
-			else mat4$15.translate(nodeMatrix, nodeMatrix, this.pos);
+			if (animPos) mat4$16.translate(nodeMatrix, nodeMatrix, animPos);
+			else mat4$16.translate(nodeMatrix, nodeMatrix, this.pos);
 			const animRot = getRotationAtFrame$1(this.rotKeyframes, frame, animLen);
-			if (animRot) mat4$15.rotateQuat(nodeMatrix, nodeMatrix, animRot);
-			else if (this.rotKeyframes && this.rotKeyframes.length > 0) mat4$15.rotateQuat(nodeMatrix, nodeMatrix, this.rotKeyframes[0].q);
-			else mat4$15.rotate(nodeMatrix, nodeMatrix, this.rotangle, this.rotaxis);
+			if (animRot) mat4$16.rotateQuat(nodeMatrix, nodeMatrix, animRot);
+			else if (this.rotKeyframes && this.rotKeyframes.length > 0) mat4$16.rotateQuat(nodeMatrix, nodeMatrix, this.rotKeyframes[0].q);
+			else mat4$16.rotate(nodeMatrix, nodeMatrix, this.rotangle, this.rotaxis);
 			const animScale = getScaleAtFrame$1(this.scaleKeyFrames, frame, animLen);
-			if (animScale) mat4$15.scale(nodeMatrix, nodeMatrix, animScale);
-			else mat4$15.scale(nodeMatrix, nodeMatrix, this.scale);
-			mat4$15.multiply(matrix, matrix, nodeMatrix);
-			if (!this.is_only) mat4$15.translate(matrix, matrix, this.offset);
-			mat4$15.multiply(matrix, matrix, mat3$2.toMat4(this.mat3));
-			mat4$15.multiply(modelViewMat, instance_matrix, matrix);
-			mat4$15.extractRotation(normalMat, modelViewMat);
+			if (animScale) mat4$16.scale(nodeMatrix, nodeMatrix, animScale);
+			else mat4$16.scale(nodeMatrix, nodeMatrix, this.scale);
+			mat4$16.multiply(matrix, matrix, nodeMatrix);
+			if (!this.is_only) mat4$16.translate(matrix, matrix, this.offset);
+			mat4$16.multiply(matrix, matrix, mat3$2.toMat4(this.mat3));
+			mat4$16.multiply(modelViewMat, instance_matrix, matrix);
+			mat4$16.extractRotation(normalMat, modelViewMat);
 			count = vertices.length;
 			const vert = new Float32Array(count * 3);
 			for (i = 0; i < count; ++i) {
@@ -250006,26 +251393,26 @@ var init_Model = __esmMin((() => {
 		* @param {number} height
 		*/
 		createInstance(model, width, height) {
-			const matrix = mat4$15.create();
-			mat4$15.identity(matrix);
-			mat4$15.translate(matrix, matrix, [
+			const matrix = mat4$16.create();
+			mat4$16.identity(matrix);
+			mat4$16.translate(matrix, matrix, [
 				model.position[0] + width,
 				model.position[1],
 				model.position[2] + height
 			]);
-			mat4$15.rotateZ(matrix, matrix, model.rotation[2] / 180 * Math.PI);
-			mat4$15.rotateX(matrix, matrix, model.rotation[0] / 180 * Math.PI);
-			mat4$15.rotateY(matrix, matrix, model.rotation[1] / 180 * Math.PI);
-			mat4$15.scale(matrix, matrix, model.scale);
+			mat4$16.rotateZ(matrix, matrix, model.rotation[2] / 180 * Math.PI);
+			mat4$16.rotateX(matrix, matrix, model.rotation[0] / 180 * Math.PI);
+			mat4$16.rotateY(matrix, matrix, model.rotation[1] / 180 * Math.PI);
+			mat4$16.scale(matrix, matrix, model.scale);
 			if (this.main_node.main.version >= 2.2) {
-				mat4$15.scale(matrix, matrix, this.main_node.flip);
-				mat4$15.translate(matrix, matrix, this.main_node.offset);
-				mat4$15.translate(matrix, matrix, [
+				mat4$16.scale(matrix, matrix, this.main_node.flip);
+				mat4$16.translate(matrix, matrix, this.main_node.offset);
+				mat4$16.translate(matrix, matrix, [
 					0,
 					this.box.range[1],
 					0
 				]);
-				mat4$15.translate(matrix, matrix, this.box.offset);
+				mat4$16.translate(matrix, matrix, this.box.offset);
 			}
 			this.instances.push(matrix);
 		}
@@ -250035,11 +251422,11 @@ var init_Model = __esmMin((() => {
 		calcBoundingBox() {
 			let i, j;
 			const box = this.box;
-			const matrix = mat4$15.create();
+			const matrix = mat4$16.create();
 			const nodes = this.nodes;
 			const min = Math.min, max = Math.max;
 			const count = nodes.length;
-			mat4$15.identity(matrix);
+			mat4$16.identity(matrix);
 			this.main_node.calcBoundingBox(matrix);
 			for (i = 0; i < 3; ++i) {
 				for (j = 0; j < count; ++j) {
@@ -250360,8 +251747,8 @@ function generate_mesh_SMOOTH(node, vert, shadeGroup, mesh) {
 * Compile a node at a specific animation frame
 */
 function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
-	const modelViewMat = mat4$14.create();
-	const normalMat = mat4$14.create();
+	const modelViewMat = mat4$15.create();
+	const normalMat = mat4$15.create();
 	const textures = node.textures;
 	const faces = node.faces;
 	const vertices = node.vertices;
@@ -250370,30 +251757,30 @@ function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
 	const shadeGroup = new Array(32);
 	const shadeGroupUsed = new Array(32);
 	let i, x, y, z, count;
-	const matrix = mat4$14.create();
-	mat4$14.identity(matrix);
-	mat4$14.translate(matrix, matrix, [
+	const matrix = mat4$15.create();
+	mat4$15.identity(matrix);
+	mat4$15.translate(matrix, matrix, [
 		-node.main.box.center[0],
 		-node.main.box.max[1],
 		-node.main.box.center[2]
 	]);
-	const nodeMatrix = mat4$14.create();
-	mat4$14.identity(nodeMatrix);
+	const nodeMatrix = mat4$15.create();
+	mat4$15.identity(nodeMatrix);
 	const animPos = getPositionAtFrame(node.posKeyframes, frame, animLen);
-	if (animPos) mat4$14.translate(nodeMatrix, nodeMatrix, animPos);
-	else mat4$14.translate(nodeMatrix, nodeMatrix, node.pos);
+	if (animPos) mat4$15.translate(nodeMatrix, nodeMatrix, animPos);
+	else mat4$15.translate(nodeMatrix, nodeMatrix, node.pos);
 	const animRot = getRotationAtFrame(node.rotKeyframes, frame, animLen);
-	if (animRot) mat4$14.rotateQuat(nodeMatrix, nodeMatrix, animRot);
-	else if (node.rotKeyframes && node.rotKeyframes.length > 0) mat4$14.rotateQuat(nodeMatrix, nodeMatrix, node.rotKeyframes[0].q);
-	else mat4$14.rotate(nodeMatrix, nodeMatrix, node.rotangle, node.rotaxis);
+	if (animRot) mat4$15.rotateQuat(nodeMatrix, nodeMatrix, animRot);
+	else if (node.rotKeyframes && node.rotKeyframes.length > 0) mat4$15.rotateQuat(nodeMatrix, nodeMatrix, node.rotKeyframes[0].q);
+	else mat4$15.rotate(nodeMatrix, nodeMatrix, node.rotangle, node.rotaxis);
 	const animScale = getScaleAtFrame(node.scaleKeyFrames, frame, animLen);
-	if (animScale) mat4$14.scale(nodeMatrix, nodeMatrix, animScale);
-	else mat4$14.scale(nodeMatrix, nodeMatrix, node.scale);
-	mat4$14.multiply(matrix, matrix, nodeMatrix);
-	if (!node.is_only) mat4$14.translate(matrix, matrix, node.offset);
-	mat4$14.multiply(matrix, matrix, mat3$1.toMat4(node.mat3));
-	mat4$14.multiply(modelViewMat, instanceMatrix, matrix);
-	mat4$14.extractRotation(normalMat, modelViewMat);
+	if (animScale) mat4$15.scale(nodeMatrix, nodeMatrix, animScale);
+	else mat4$15.scale(nodeMatrix, nodeMatrix, node.scale);
+	mat4$15.multiply(matrix, matrix, nodeMatrix);
+	if (!node.is_only) mat4$15.translate(matrix, matrix, node.offset);
+	mat4$15.multiply(matrix, matrix, mat3$1.toMat4(node.mat3));
+	mat4$15.multiply(modelViewMat, instanceMatrix, matrix);
+	mat4$15.extractRotation(normalMat, modelViewMat);
 	count = vertices.length;
 	const vert = new Float32Array(count * 3);
 	for (i = 0; i < count; ++i) {
@@ -250515,7 +251902,7 @@ function initModel(gl, data) {
 		WebGL_default.texture(gl, data.infos[i].texture, onTextureLoaded, i);
 	}
 }
-var _program$17, _normalMat, mat4$14, mat3$1, quat, vec3$3, _light, RsmEffect;
+var _program$18, _normalMat, mat4$15, mat3$1, quat, vec3$3, _light, RsmEffect;
 var init_RsmEffect = __esmMin((() => {
 	init_RsmEffect$2();
 	init_RsmEffect$1();
@@ -250523,9 +251910,9 @@ var init_RsmEffect = __esmMin((() => {
 	init_gl_matrix();
 	init_Client();
 	init_Model();
-	_program$17 = null;
+	_program$18 = null;
 	_normalMat = /* @__PURE__ */ new Float32Array(9);
-	mat4$14 = gl_matrix_default.mat4;
+	mat4$15 = gl_matrix_default.mat4;
 	mat3$1 = gl_matrix_default.mat3;
 	quat = gl_matrix_default.quat;
 	vec3$3 = gl_matrix_default.vec3;
@@ -250573,7 +251960,7 @@ var init_RsmEffect = __esmMin((() => {
 			this._Params = params;
 		}
 		static init(gl) {
-			_program$17 = WebGL_default.createShaderProgram(gl, RsmEffect_default$1, RsmEffect_default);
+			_program$18 = WebGL_default.createShaderProgram(gl, RsmEffect_default$1, RsmEffect_default);
 			this.ready = true;
 		}
 		init(gl, tick) {
@@ -250653,18 +252040,18 @@ var init_RsmEffect = __esmMin((() => {
 			this.ready = false;
 		}
 		static free(gl) {
-			if (_program$17) {
-				gl.deleteProgram(_program$17);
-				_program$17 = null;
+			if (_program$18) {
+				gl.deleteProgram(_program$18);
+				_program$18 = null;
 			}
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			mat4$14.toInverseMat3(modelView, _normalMat);
+			mat4$15.toInverseMat3(modelView, _normalMat);
 			mat3$1.transpose(_normalMat, _normalMat);
-			const uniform = _program$17.uniform;
-			const attribute = _program$17.attribute;
-			gl.useProgram(_program$17);
+			const uniform = _program$18.uniform;
+			const attribute = _program$18.attribute;
+			gl.useProgram(_program$18);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix3fv(uniform.uNormalMat, false, _normalMat);
@@ -250684,7 +252071,7 @@ var init_RsmEffect = __esmMin((() => {
 			gl.uniform1i(uniform.uDiffuse, 0);
 		}
 		render(gl, tick) {
-			const uniform = _program$17.uniform;
+			const uniform = _program$18.uniform;
 			if (this.isAnimated && this.model && this.animLen > 0) {
 				const elapsed = tick - this.startTick;
 				const frame = Math.floor(elapsed * this.fps / 1e3 % this.animLen);
@@ -250696,7 +252083,7 @@ var init_RsmEffect = __esmMin((() => {
 			gl.uniform3fv(uniform.uPosition, this.position);
 			gl.uniform1f(uniform.uSize, this.size);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-			const attribute = _program$17.attribute;
+			const attribute = _program$18.attribute;
 			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 36, 0);
 			gl.vertexAttribPointer(attribute.aVertexNormal, 3, gl.FLOAT, false, 36, 12);
 			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 36, 24);
@@ -250707,7 +252094,7 @@ var init_RsmEffect = __esmMin((() => {
 			}
 		}
 		static afterRender(gl) {
-			const attribute = _program$17.attribute;
+			const attribute = _program$18.attribute;
 			gl.disableVertexAttribArray(attribute.aPosition);
 			gl.disableVertexAttribArray(attribute.aVertexNormal);
 			gl.disableVertexAttribArray(attribute.aTextureCoord);
@@ -251731,14 +253118,14 @@ var init_QuadHorn$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/QuadHorn.js
-var _program$16, mat4$13, blendMode, vertices, texCoords, rand, QuadHorn;
+var _program$17, mat4$14, blendMode, vertices, texCoords, rand$1, QuadHorn;
 var init_QuadHorn = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
 	init_Client();
 	init_QuadHorn$2();
 	init_QuadHorn$1();
-	mat4$13 = gl_matrix_default.mat4;
+	mat4$14 = gl_matrix_default.mat4;
 	blendMode = {};
 	vertices = [
 		0,
@@ -251804,31 +253191,34 @@ var init_QuadHorn = __esmMin((() => {
 		0,
 		0
 	];
-	rand = (min, max) => parseFloat(Math.min(min + Math.random() * (max - min), max).toFixed(3));
+	rand$1 = (min, max) => parseFloat(Math.min(min + Math.random() * (max - min), max).toFixed(3));
 	QuadHorn = class {
 		constructor(effect, EF_Inst_Par, EF_Init_Par) {
-			this._zRotationMatrix = mat4$13.create();
-			this._yRotationMatrix = mat4$13.create();
-			this._xRotationMatrix = mat4$13.create();
+			this._zRotationMatrix = mat4$14.create();
+			this._yRotationMatrix = mat4$14.create();
+			this._xRotationMatrix = mat4$14.create();
 			this.position = EF_Inst_Par.position;
 			this.blendMode = effect.blendMode || 1;
-			this.height = (effect.height && effect.height instanceof Array ? rand(effect.height[0], effect.height[1]) : effect.height) || 0;
-			this.rotateX = (effect.rotateX && effect.rotateX instanceof Array ? rand(effect.rotateX[0], effect.rotateX[1]) : effect.rotateX) || 0;
-			this.rotateY = (effect.rotateY && effect.rotateY instanceof Array ? rand(effect.rotateY[0], effect.rotateY[1]) : effect.rotateY) || 0;
-			this.rotateZ = (effect.rotateZ && effect.rotateZ instanceof Array ? rand(effect.rotateZ[0], effect.rotateZ[1]) : effect.rotateZ) || 0;
-			this.offsetX = (effect.offsetX && effect.offsetX instanceof Array ? rand(effect.offsetX[0], effect.offsetX[1]) : effect.offsetX) || .5;
-			this.offsetY = (effect.offsetY && effect.offsetY instanceof Array ? rand(effect.offsetY[0], effect.offsetY[1]) : effect.offsetY) || .5;
-			this.offsetZ = (effect.offsetZ && effect.offsetZ instanceof Array ? rand(effect.offsetZ[0], effect.offsetZ[1]) : effect.offsetZ) || .5;
-			this.bottomSize = (effect.bottomSize && effect.bottomSize instanceof Array ? rand(effect.bottomSize[0], effect.bottomSize[1]) : effect.bottomSize) || 0;
-			this.color = effect.color || [
+			this.height = (effect.height && effect.height instanceof Array ? rand$1(effect.height[0], effect.height[1]) : effect.height) || 0;
+			this.rotateX = (effect.rotateX && effect.rotateX instanceof Array ? rand$1(effect.rotateX[0], effect.rotateX[1]) : effect.rotateX) || 0;
+			this.rotateY = (effect.rotateY && effect.rotateY instanceof Array ? rand$1(effect.rotateY[0], effect.rotateY[1]) : effect.rotateY) || 0;
+			this.rotateZ = (effect.rotateZ && effect.rotateZ instanceof Array ? rand$1(effect.rotateZ[0], effect.rotateZ[1]) : effect.rotateZ) || 0;
+			this.offsetX = (effect.offsetX && effect.offsetX instanceof Array ? rand$1(effect.offsetX[0], effect.offsetX[1]) : effect.offsetX) ?? .5;
+			this.offsetY = (effect.offsetY && effect.offsetY instanceof Array ? rand$1(effect.offsetY[0], effect.offsetY[1]) : effect.offsetY) ?? .5;
+			this.offsetZ = (effect.offsetZ && effect.offsetZ instanceof Array ? rand$1(effect.offsetZ[0], effect.offsetZ[1]) : effect.offsetZ) || .5;
+			this.bottomSize = (effect.bottomSize && effect.bottomSize instanceof Array ? rand$1(effect.bottomSize[0], effect.bottomSize[1]) : effect.bottomSize) || 0;
+			this.color = effect.color ? effect.color.slice() : [
 				1,
 				1,
 				1,
 				1
 			];
+			this.baseAlpha = this.color[3];
 			this.animation = effect.animation || 0;
 			this.animationSpeed = effect.animationSpeed || 100;
 			this.animationOut = effect.animationOut || false;
+			this.riseDistance = (effect.riseDistance && effect.riseDistance instanceof Array ? rand$1(effect.riseDistance[0], effect.riseDistance[1]) : effect.riseDistance) || 0;
+			this.fadeOut = effect.fadeOut || 0;
 			this.textureFile = effect.textureFile;
 			this.startTick = EF_Inst_Par.startTick;
 			this.endTick = EF_Inst_Par.endTick;
@@ -251841,21 +253231,31 @@ var init_QuadHorn = __esmMin((() => {
 			this.texCoordBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texCoords), gl.STATIC_DRAW);
-			const self = this;
-			Client.loadFile("data/texture/" + this.textureFile, function(buffer) {
-				WebGL_default.texture(gl, buffer, function(texture) {
-					self.texture = texture;
-					self.ready = true;
+			this.freed = false;
+			Client.loadFile(`data/texture/${this.textureFile}`, (buffer) => {
+				WebGL_default.texture(gl, buffer, (texture) => {
+					if (this.freed) {
+						gl.deleteTexture(texture);
+						return;
+					}
+					this.texture = texture;
+					this.ready = true;
 				});
 			});
 		}
 		free(gl) {
 			gl.deleteBuffer(this.buffer);
+			gl.deleteBuffer(this.texCoordBuffer);
+			if (this.texture) {
+				gl.deleteTexture(this.texture);
+				this.texture = null;
+			}
+			this.freed = true;
 			this.ready = false;
 		}
 		render(gl, tick) {
-			const uniform = _program$16.uniform;
-			const attribute = _program$16.attribute;
+			const uniform = _program$17.uniform;
+			const attribute = _program$17.attribute;
 			const deltaStart = (tick - this.startTick) / 1e3;
 			const deltaEnd = (tick - this.endTick) / 1e3;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -251878,6 +253278,12 @@ var init_QuadHorn = __esmMin((() => {
 					gl.uniform1f(uniform.uOffsetZ, this.offsetZ);
 				} else gl.uniform1f(uniform.uOffsetZ, lerpZOffset);
 				gl.uniform1f(uniform.uHeight, this.height);
+			} else if (this.animation === 4 && !this._endAnimation) {
+				const progress = Math.min(deltaStart / (this.animationSpeed / 1e3), 1);
+				const eased = 1 - (1 - progress) * (1 - progress);
+				if (progress >= 1) this._endAnimation = true;
+				gl.uniform1f(uniform.uOffsetZ, this.offsetZ - this.riseDistance * (1 - eased));
+				gl.uniform1f(uniform.uHeight, this.height);
 			} else if (this.animation === 3 && !this._endAnimation) {
 				const lerpZOffset = deltaStart / (this.animationSpeed / 1e3);
 				if (lerpZOffset > this.height / 2) {
@@ -251888,6 +253294,10 @@ var init_QuadHorn = __esmMin((() => {
 			} else {
 				gl.uniform1f(uniform.uHeight, this.height);
 				gl.uniform1f(uniform.uOffsetZ, this.offsetZ);
+			}
+			if (this.fadeOut > 0 && this.endTick > 0) {
+				const remaining = this.endTick - tick;
+				this.color[3] = this.baseAlpha * Math.max(0, Math.min(1, remaining / this.fadeOut));
 			}
 			if (this.endTick > 0 && this.endTick < tick) {
 				if (this.animationOut && this._endAnimation) {
@@ -251907,22 +253317,22 @@ var init_QuadHorn = __esmMin((() => {
 			gl.uniform1f(uniform.uOffsetX, this.offsetX);
 			gl.uniform1f(uniform.uOffsetY, this.offsetY);
 			gl.uniform4fv(uniform.uColor, this.color);
-			mat4$13.identity(this._xRotationMatrix);
-			mat4$13.rotate(this._xRotationMatrix, this._xRotationMatrix, this.rotateX * Math.PI / 180, [
+			mat4$14.identity(this._xRotationMatrix);
+			mat4$14.rotate(this._xRotationMatrix, this._xRotationMatrix, this.rotateX * Math.PI / 180, [
 				1,
 				0,
 				0
 			]);
 			gl.uniformMatrix4fv(uniform.uXRotationMat, false, this._xRotationMatrix);
-			mat4$13.identity(this._yRotationMatrix);
-			mat4$13.rotate(this._yRotationMatrix, this._yRotationMatrix, this.rotateY * Math.PI / 180, [
+			mat4$14.identity(this._yRotationMatrix);
+			mat4$14.rotate(this._yRotationMatrix, this._yRotationMatrix, this.rotateY * Math.PI / 180, [
 				0,
 				1,
 				0
 			]);
 			gl.uniformMatrix4fv(uniform.uYRotationMat, false, this._yRotationMatrix);
-			mat4$13.identity(this._zRotationMatrix);
-			mat4$13.rotate(this._zRotationMatrix, this._zRotationMatrix, (180 + this.rotateZ) * Math.PI / 180, [
+			mat4$14.identity(this._zRotationMatrix);
+			mat4$14.rotate(this._zRotationMatrix, this._zRotationMatrix, (180 + this.rotateZ) * Math.PI / 180, [
 				0,
 				0,
 				1
@@ -251932,7 +253342,7 @@ var init_QuadHorn = __esmMin((() => {
 			gl.flush();
 		}
 		static init(gl) {
-			_program$16 = WebGL_default.createShaderProgram(gl, QuadHorn_default$1, QuadHorn_default);
+			_program$17 = WebGL_default.createShaderProgram(gl, QuadHorn_default$1, QuadHorn_default);
 			blendMode[1] = gl.ZERO;
 			blendMode[2] = gl.ONE;
 			blendMode[3] = gl.SRC_COLOR;
@@ -251952,16 +253362,16 @@ var init_QuadHorn = __esmMin((() => {
 			this.renderBeforeEntities = true;
 		}
 		static free(gl) {
-			if (_program$16) {
-				gl.deleteProgram(_program$16);
-				_program$16 = null;
+			if (_program$17) {
+				gl.deleteProgram(_program$17);
+				_program$17 = null;
 			}
 			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$16.uniform;
-			gl.useProgram(_program$16);
+			const uniform = _program$17.uniform;
+			gl.useProgram(_program$17);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -251972,12 +253382,477 @@ var init_QuadHorn = __esmMin((() => {
 			gl.uniform1i(uniform.uDiffuse, 0);
 		}
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$16.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$16.attribute.aTextureCoord);
-			gl.disableVertexAttribArray(_program$16.attribute.aColor);
+			gl.disableVertexAttribArray(_program$17.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$17.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$17.attribute.aColor);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
+}));
+//#endregion
+//#region src/Renderer/Effects/Trail.js
+var rand, Trail;
+var init_Trail = __esmMin((() => {
+	init_EffectManager();
+	init_Altitude();
+	init_Map();
+	rand = (min, max) => min + Math.random() * (max - min);
+	Trail = class {
+		constructor(effect, EF_Inst_Par, EF_Init_Par) {
+			const owner = EF_Inst_Par.position;
+			const other = EF_Inst_Par.otherPosition || owner;
+			const source = effect.angles || effect.sourceIsOwner ? owner : other;
+			const target = effect.sourceIsOwner ? other : owner;
+			this.source = [source[0], source[1]];
+			EF_Inst_Par.position = effect.angles ? [
+				source[0],
+				source[1],
+				source[2]
+			] : [
+				(source[0] + target[0]) / 2,
+				(source[1] + target[1]) / 2,
+				source[2]
+			];
+			this.position = EF_Inst_Par.position;
+			if (effect.angles) {
+				this.targetDistance = Infinity;
+				this.directions = effect.angles.map((angle) => {
+					const rad = angle * Math.PI / 180;
+					return [Math.cos(rad), Math.sin(rad)];
+				});
+			} else {
+				const dx = target[0] - this.source[0];
+				const dy = target[1] - this.source[1];
+				this.targetDistance = Math.sqrt(dx * dx + dy * dy);
+				this.directions = [this.targetDistance > 0 ? [dx / this.targetDistance, dy / this.targetDistance] : [0, -1]];
+			}
+			this.spawn = effect.spawn || [];
+			this.speed = effect.speed || 24;
+			this.interval = effect.interval || 17;
+			this.startOffset = effect.startOffset || 0;
+			this.stopAtTarget = !!effect.stopAtTarget;
+			this.overshoot = effect.overshoot || 0;
+			this.spread = effect.spread || 0;
+			this.startTick = EF_Inst_Par.startTick;
+			this.endTick = EF_Inst_Par.endTick > 0 ? EF_Inst_Par.endTick : this.startTick + 2500;
+			this.nextSpawnTick = this.startTick;
+			this.Init = EF_Init_Par;
+			this.ready = true;
+		}
+		init() {}
+		free() {}
+		render(gl, tick) {
+			if (Map_default.mineffect || tick >= this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const maxDistance = this.stopAtTarget ? this.targetDistance + this.overshoot : Infinity;
+			const cellsPerMs = this.speed / 1e3;
+			while (this.nextSpawnTick <= tick) {
+				const distance = this.startOffset + (this.nextSpawnTick - this.startTick) * cellsPerMs;
+				if (distance > maxDistance || this.nextSpawnTick >= this.endTick) {
+					this.needCleanUp = true;
+					return;
+				}
+				this.spawnAt(distance, this.nextSpawnTick);
+				this.nextSpawnTick += this.interval;
+			}
+		}
+		spawnAt(distance, startTick) {
+			for (const direction of this.directions) {
+				const angle = Math.random() * Math.PI * 2;
+				const radius = Array.isArray(this.spread) ? rand(this.spread[0], this.spread[1]) : Math.random() * this.spread;
+				const x = this.source[0] + direction[0] * distance + Math.cos(angle) * radius;
+				const y = this.source[1] + direction[1] * distance + Math.sin(angle) * radius;
+				this.spawnDefinitions([
+					x,
+					y,
+					Altitude.getCellHeight(x, y)
+				], startTick);
+			}
+		}
+		spawnDefinitions(position, startTick) {
+			for (const definition of this.spawn) EffectManager.spamEffect({
+				effect: definition,
+				Inst: {
+					effectID: this.Init.effectId,
+					duplicateID: 0,
+					startTick
+				},
+				Init: {
+					effectId: this.Init.effectId,
+					ownerAID: this.Init.ownerAID,
+					ownerEntity: this.Init.ownerEntity,
+					otherAID: this.Init.otherAID,
+					otherEntity: this.Init.otherEntity,
+					position,
+					otherPosition: this.Init.otherPosition,
+					startTick
+				}
+			});
+		}
+		static init() {
+			this.ready = true;
+			this.renderBeforeEntities = true;
+		}
+		static free() {
+			this.ready = false;
+		}
+		static beforeRender() {}
+		static afterRender() {}
+	};
+}));
+//#endregion
+//#region src/Renderer/Effects/WaterfallEffect.vs?raw
+var WaterfallEffect_default$1;
+var init_WaterfallEffect$2 = __esmMin((() => {
+	WaterfallEffect_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\nuniform mat4 uModelMat;\r\nout vec2 vTextureCoord;\r\n\r\nvoid main(void) {\r\n	vec4 worldPosition = uModelMat * vec4(aPosition.x, -aPosition.y, aPosition.z, 1.0);\r\n	gl_Position = uProjectionMat * uModelViewMat * worldPosition;\r\n	vTextureCoord = aTextureCoord;\r\n}\r\n";
+}));
+//#endregion
+//#region src/Renderer/Effects/WaterfallEffect.fs?raw
+var WaterfallEffect_default;
+var init_WaterfallEffect$1 = __esmMin((() => {
+	WaterfallEffect_default = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uTexture;\r\nuniform bool uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3 uFogColor;\r\nuniform float uOpacity;\r\n\r\nvoid main(void) {\r\n	fragColor = texture(uTexture, vTextureCoord);\r\n	fragColor.a *= uOpacity;\r\n	if (fragColor.a < 0.01) {\r\n		discard;\r\n	}\r\n	if (uFogUse) {\r\n		float fogFactor = smoothstep(uFogNear, uFogFar, gl_FragCoord.z / gl_FragCoord.w);\r\n		fragColor = mix(fragColor, vec4(uFogColor, fragColor.a), fogFactor);\r\n	}\r\n}\r\n";
+}));
+//#endregion
+//#region src/Renderer/Effects/WaterfallParticle.vs?raw
+var WaterfallParticle_default$1;
+var init_WaterfallParticle$1 = __esmMin((() => {
+	WaterfallParticle_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aCorner;\r\nin vec4 aSeed; // x offset, z offset, phase, drift angle\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\nuniform mat4 uModelMat;\r\nuniform float uTime;\r\nuniform float uSize;\r\n\r\nout vec2 vTextureCoord;\r\nout float vAlpha;\r\n\r\n// Spray puffs rise from the pool for RISE units after waiting below it.\r\nconst float CYCLE = 38.0;\r\nconst float RISE = 8.0;\r\nconst float DELAY = CYCLE - RISE;\r\n\r\nvoid main(void) {\r\n	float life = fract(aSeed.z + uTime);\r\n	float t = life * CYCLE - DELAY;\r\n\r\n	if (t <= 0.0) {\r\n		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);\r\n		vTextureCoord = vec2(0.0);\r\n		vAlpha = 0.0;\r\n		return;\r\n	}\r\n\r\n	float progress = t / RISE;\r\n	float drift = sin(aSeed.w + progress * 3.0) * 0.3;\r\n	vec3 local = vec3(aSeed.x + drift, -t * 0.2, aSeed.y);\r\n	vec4 viewPosition = uModelViewMat * uModelMat * vec4(local, 1.0);\r\n	viewPosition.xy += aCorner * uSize;\r\n\r\n	gl_Position = uProjectionMat * viewPosition;\r\n	vTextureCoord = aCorner * 0.5 + 0.5;\r\n	vAlpha = 0.08 * min(1.0, progress * 8.0) * (1.0 - smoothstep(0.5, 1.0, progress));\r\n}\r\n";
+}));
+//#endregion
+//#region src/Renderer/Effects/WaterfallParticle.fs?raw
+var WaterfallParticle_default;
+var init_WaterfallParticle = __esmMin((() => {
+	WaterfallParticle_default = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nin float vAlpha;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uTexture;\r\nuniform vec3 uColor;\r\nuniform bool uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\n\r\nvoid main(void) {\r\n	fragColor = texture(uTexture, vTextureCoord);\r\n	fragColor.rgb *= uColor;\r\n	fragColor.a *= vAlpha;\r\n	if (uFogUse) {\r\n		float fogFactor = smoothstep(uFogNear, uFogFar, gl_FragCoord.z / gl_FragCoord.w);\r\n		fragColor.a *= 1.0 - fogFactor;\r\n	}\r\n	if (fragColor.a < 0.01) {\r\n		discard;\r\n	}\r\n}\r\n";
+}));
+//#endregion
+//#region src/Renderer/Effects/WaterfallEffect.js
+function textureFiles(textureSet) {
+	const files = [];
+	for (let index = 1; index <= TEXTURE_COUNT; index++) files.push(`data/texture/effect/waterfall${textureSet}${index}.tga`);
+	files.push(PARTICLE_TEXTURE);
+	return files;
+}
+function loadTextures(gl, textureSet, effect) {
+	let cache = _textureCache.get(textureSet);
+	if (!cache) {
+		const files = textureFiles(textureSet);
+		cache = {
+			textures: new Array(files.length),
+			waiters: /* @__PURE__ */ new Set(),
+			ready: false,
+			active: true
+		};
+		_textureCache.set(textureSet, cache);
+		files.forEach((file, index) => {
+			Client.loadFile(file, (buffer) => {
+				WebGL_default.texture(gl, buffer, (texture) => {
+					if (!cache.active) {
+						gl.deleteTexture(texture);
+						return;
+					}
+					cache.textures[index] = texture;
+					if (cache.textures.filter(Boolean).length === files.length) {
+						cache.ready = true;
+						cache.waiters.forEach((waiter) => {
+							waiter.textures = cache.textures;
+							waiter.ready = true;
+						});
+						cache.waiters.clear();
+					}
+				});
+			});
+		});
+	}
+	if (cache.ready) {
+		effect.textures = cache.textures;
+		effect.ready = true;
+	} else cache.waiters.add(effect);
+	return cache;
+}
+function getStyle(variant) {
+	const small = variant.includes("small");
+	const dark = variant.includes("dark");
+	return {
+		width: (small ? 18 : 36) * UNIT,
+		particleCount: small ? 320 : 640,
+		particleSpread: (small ? 12 : 22) * UNIT,
+		textureSet: dark ? 3 : 1
+	};
+}
+function buildParticleSeeds(count, spread) {
+	const seeds = new Float32Array(count * PARTICLE_FLOATS);
+	for (let i = 0; i < count; i++) {
+		seeds[i * PARTICLE_FLOATS] = (Math.random() * 2 - 1) * spread;
+		seeds[i * PARTICLE_FLOATS + 1] = (Math.random() * 2 - 1) * 5 * UNIT;
+		seeds[i * PARTICLE_FLOATS + 2] = Math.random();
+		seeds[i * PARTICLE_FLOATS + 3] = Math.random() * Math.PI * 2;
+	}
+	return seeds;
+}
+function setVertex(index, x, y, z, u, v) {
+	const offset = index * 5;
+	_vertices[offset] = x;
+	_vertices[offset + 1] = y;
+	_vertices[offset + 2] = z;
+	_vertices[offset + 3] = u;
+	_vertices[offset + 4] = v;
+}
+var mat4$13, _matrix$4, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$16, _particleProgram, _textureCache, _vertices, WaterfallEffect;
+var init_WaterfallEffect = __esmMin((() => {
+	init_WebGL();
+	init_gl_matrix();
+	init_Client();
+	init_WaterfallEffect$2();
+	init_WaterfallEffect$1();
+	init_WaterfallParticle$1();
+	init_WaterfallParticle();
+	mat4$13 = gl_matrix_default.mat4;
+	_matrix$4 = mat4$13.create();
+	UNIT = 1 / 5;
+	LAYER_COUNT = 4;
+	SEGMENT_COUNT = 5;
+	TEXTURE_COUNT = 3;
+	SEGMENT_HEIGHT = 40 * UNIT;
+	EFFECT_TICK_MS = 24;
+	OPACITY = 80 / 255;
+	PARTICLE_TEXTURE = "data/texture/effect/freeze_a_small.bmp";
+	PARTICLE_CYCLE_MS = 760 * EFFECT_TICK_MS;
+	PARTICLE_SIZE = 6 * Math.SQRT1_2 * UNIT;
+	PARTICLE_COLOR = [
+		.65,
+		1,
+		.75
+	];
+	PARTICLE_FLOATS = 4;
+	PARTICLE_CORNERS = new Float32Array([
+		-1,
+		-1,
+		1,
+		-1,
+		-1,
+		1,
+		1,
+		1
+	]);
+	_textureCache = /* @__PURE__ */ new Map();
+	_vertices = /* @__PURE__ */ new Float32Array(20);
+	WaterfallEffect = class {
+		constructor(effect, instance, init) {
+			const style = getStyle(effect.variant);
+			this.position = instance.position;
+			this.startTick = instance.startTick;
+			this.width = style.width;
+			this.particleCount = style.particleCount;
+			this.particleSpread = style.particleSpread;
+			this.textureSet = style.textureSet;
+			this.textures = [];
+			this.textureCache = null;
+			this.buffer = null;
+			this.cornerBuffer = null;
+			this.seedBuffer = null;
+			this.vertical = effect.vertical;
+			this.ready = false;
+			this.needInit = true;
+		}
+		/**
+		* Initialize WebGL resources
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		init(gl) {
+			this.buffer = gl.createBuffer();
+			this.cornerBuffer = gl.createBuffer();
+			this.seedBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.cornerBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, PARTICLE_CORNERS, gl.STATIC_DRAW);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.seedBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, buildParticleSeeds(this.particleCount, this.particleSpread), gl.STATIC_DRAW);
+			this.textureCache = loadTextures(gl, this.textureSet, this);
+		}
+		render(gl, tick) {
+			const uniform = _program$16.uniform;
+			const attribute = _program$16.attribute;
+			mat4$13.identity(_matrix$4);
+			mat4$13.translate(_matrix$4, _matrix$4, [
+				this.position[0] + .5,
+				1 - this.position[2],
+				this.position[1] + .5
+			]);
+			if (this.vertical) mat4$13.rotateY(_matrix$4, _matrix$4, Math.PI / 2);
+			gl.uniformMatrix4fv(uniform.uModelMat, false, _matrix$4);
+			const elapsed = tick - this.startTick;
+			const process = Math.floor(elapsed / EFFECT_TICK_MS);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+			for (let layer = 0; layer < LAYER_COUNT; layer++) {
+				const speed = 80 - layer * 13;
+				const scroll = process % speed * SEGMENT_HEIGHT / speed;
+				const crop = scroll / SEGMENT_HEIGHT;
+				const phase = Math.floor(process % (TEXTURE_COUNT * speed) / speed);
+				const halfWidth = (this.width + layer * UNIT) / 2;
+				const depth = (layer - 1) * UNIT;
+				for (let segment = 0; segment < SEGMENT_COUNT; segment++) {
+					const top = scroll - segment * SEGMENT_HEIGHT;
+					const bottom = top - SEGMENT_HEIGHT;
+					let visibleTop = top;
+					let visibleBottom = bottom;
+					let vTop = 0;
+					let vBottom = 1;
+					if (segment === 0) {
+						visibleTop = top + (bottom - top) * crop;
+						vTop = crop;
+					} else if (segment === 4) {
+						visibleBottom = top + (bottom - top) * crop;
+						vBottom = crop;
+					}
+					setVertex(0, -halfWidth, -visibleBottom, depth, 0, vBottom);
+					setVertex(1, halfWidth, -visibleBottom, depth, 1, vBottom);
+					setVertex(2, -halfWidth, -visibleTop, depth, 0, vTop);
+					setVertex(3, halfWidth, -visibleTop, depth, 1, vTop);
+					gl.bufferData(gl.ARRAY_BUFFER, _vertices, gl.DYNAMIC_DRAW);
+					gl.bindTexture(gl.TEXTURE_2D, this.textures[(segment + phase) % TEXTURE_COUNT]);
+					gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+				}
+			}
+			this.renderParticles(gl, elapsed);
+		}
+		/**
+		* Additive spray puffs rising from the pool at the base of the fall,
+		* drawn as camera-facing instanced quads.
+		*/
+		renderParticles(gl, elapsed) {
+			const uniform = _particleProgram.uniform;
+			const attribute = _particleProgram.attribute;
+			gl.useProgram(_particleProgram);
+			gl.uniformMatrix4fv(uniform.uModelMat, false, _matrix$4);
+			gl.uniform1f(uniform.uTime, elapsed / PARTICLE_CYCLE_MS);
+			gl.uniform1f(uniform.uSize, PARTICLE_SIZE);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+			gl.enableVertexAttribArray(attribute.aCorner);
+			gl.enableVertexAttribArray(attribute.aSeed);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.cornerBuffer);
+			gl.vertexAttribPointer(attribute.aCorner, 2, gl.FLOAT, false, 0, 0);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.seedBuffer);
+			gl.vertexAttribPointer(attribute.aSeed, PARTICLE_FLOATS, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribDivisor(attribute.aSeed, 1);
+			gl.bindTexture(gl.TEXTURE_2D, this.textures[TEXTURE_COUNT]);
+			gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.particleCount);
+			gl.vertexAttribDivisor(attribute.aSeed, 0);
+			gl.disableVertexAttribArray(attribute.aCorner);
+			gl.disableVertexAttribArray(attribute.aSeed);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			gl.useProgram(_program$16);
+			gl.enableVertexAttribArray(_program$16.attribute.aPosition);
+			gl.enableVertexAttribArray(_program$16.attribute.aTextureCoord);
+		}
+		/**
+		* Free WebGL resources
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		free(gl) {
+			if (this.textureCache) {
+				this.textureCache.waiters.delete(this);
+				this.textureCache = null;
+			}
+			[
+				this.buffer,
+				this.cornerBuffer,
+				this.seedBuffer
+			].forEach((buffer) => {
+				if (buffer) gl.deleteBuffer(buffer);
+			});
+			this.buffer = null;
+			this.cornerBuffer = null;
+			this.seedBuffer = null;
+			this.textures = [];
+			this.ready = false;
+		}
+		/**
+		* Called before rendering all effects of this type
+		*
+		* @param {WebGLRenderingContext} gl
+		* @param {mat4} modelView
+		* @param {mat4} projection
+		* @param {object} fog
+		* @param {number} tick
+		* @param {object} entity
+		*/
+		static beforeRender(gl, modelView, projection, fog) {
+			const fogUse = fog.use && fog.exist;
+			gl.useProgram(_particleProgram);
+			gl.uniformMatrix4fv(_particleProgram.uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(_particleProgram.uniform.uProjectionMat, false, projection);
+			gl.uniform1i(_particleProgram.uniform.uFogUse, fogUse);
+			gl.uniform1f(_particleProgram.uniform.uFogNear, fog.near);
+			gl.uniform1f(_particleProgram.uniform.uFogFar, fog.far);
+			gl.uniform1i(_particleProgram.uniform.uTexture, 0);
+			gl.uniform3fv(_particleProgram.uniform.uColor, PARTICLE_COLOR);
+			const uniform = _program$16.uniform;
+			const attribute = _program$16.attribute;
+			gl.useProgram(_program$16);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fogUse);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.uniform1f(uniform.uOpacity, OPACITY);
+			gl.uniform1i(uniform.uTexture, 0);
+			gl.enable(gl.DEPTH_TEST);
+			gl.enable(gl.BLEND);
+			gl.depthMask(false);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+		}
+		/**
+		* Called after rendering all effects of this type
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		static afterRender(gl) {
+			gl.depthMask(true);
+			gl.disableVertexAttribArray(_program$16.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$16.attribute.aTextureCoord);
+		}
+		/**
+		* Initialize the effect type
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		static init(gl) {
+			_program$16 = WebGL_default.createShaderProgram(gl, WaterfallEffect_default$1, WaterfallEffect_default);
+			_particleProgram = WebGL_default.createShaderProgram(gl, WaterfallParticle_default$1, WaterfallParticle_default);
+			this.ready = true;
+		}
+		/**
+		* Free resources for this effect type
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		static free(gl) {
+			_textureCache.forEach((cache) => {
+				cache.active = false;
+				cache.textures.forEach((texture) => {
+					if (texture) gl.deleteTexture(texture);
+				});
+				cache.waiters.clear();
+			});
+			_textureCache.clear();
+			if (_program$16) gl.deleteProgram(_program$16);
+			if (_particleProgram) gl.deleteProgram(_particleProgram);
+			_program$16 = null;
+			_particleProgram = null;
+			this.ready = false;
+			this.needInit = true;
+		}
+	};
+	WaterfallEffect.renderBeforeEntities = false;
+	WaterfallEffect.needInit = true;
 }));
 //#endregion
 //#region src/Renderer/EffectManager.js
@@ -252094,7 +253969,7 @@ function repeatEffect(effect) {
 function clean(name, AID, effectID) {
 	const effectIdList = Array.isArray(effectID) ? effectID : [effectID];
 	let i, count;
-	const list = _list$4[name];
+	const list = _list$3[name];
 	count = list.length;
 	for (i = 0; i < count; ++i) if ((!AID || list[i]._Params.Init.ownerAID === AID) && (!effectID || effectIdList.includes(list[i]._Params.Inst.effectID))) {
 		if (list[i].free) list[i].free(_gl);
@@ -252102,18 +253977,18 @@ function clean(name, AID, effectID) {
 		i--;
 		count--;
 	}
-	if (!count) delete _list$4[name];
+	if (!count) delete _list$3[name];
 }
 function cleanRepeat(name, AID, effectID) {
 	const effectIdList = Array.isArray(effectID) ? effectID : [effectID];
-	_list$4[name].forEach((item) => {
+	_list$3[name].forEach((item) => {
 		if ((!AID || item._Params.Init.ownerAID === AID) && (!effectID || effectIdList.includes(item.effectID))) {
 			if (item._Params.Inst.persistent) item._Params.Inst.persistent = false;
 			if (item._Params.Inst.repeatEnd) item._Params.Inst.repeatEnd = false;
 		}
 	});
 }
-var _gl, _list$4, _uniqueId, targetableUnits, traps, EffectManager;
+var _gl, _list$3, _uniqueId, targetableUnits, traps, EffectManager;
 var init_EffectManager = __esmMin((() => {
 	init_EffectTable();
 	init_SkillEffect();
@@ -252135,9 +254010,11 @@ var init_EffectManager = __esmMin((() => {
 	init_SoundManager();
 	init_Map();
 	init_QuadHorn();
+	init_Trail();
+	init_WaterfallEffect();
 	init_SessionStorage();
 	init_Graphics();
-	_list$4 = {};
+	_list$3 = {};
 	_uniqueId = 1;
 	targetableUnits = [SkillUnitConst_default.UNT_ICEWALL, SkillUnitConst_default.UNT_REVERBERATION];
 	traps = [
@@ -252181,8 +254058,8 @@ var init_EffectManager = __esmMin((() => {
 		*/
 		static add(effect, Params) {
 			const name = effect.constructor.name || effect.constructor._uid || (effect.constructor._uid = _uniqueId++);
-			if (!(name in _list$4)) {
-				_list$4[name] = [];
+			if (!(name in _list$3)) {
+				_list$3[name] = [];
 				if (effect.constructor.init) effect.constructor.needInit = true;
 			}
 			if (effect.init) effect.needInit = true;
@@ -252200,20 +254077,20 @@ var init_EffectManager = __esmMin((() => {
 					881
 				].indexOf(effect._Params.Inst.effectID) !== -1) effect.renderBeforeEntities = true;
 			}
-			_list$4[name].push(effect);
+			_list$3[name].push(effect);
 		}
 		/**
 		* Destroy all effects
 		*/
 		static free(gl) {
-			Object.keys(_list$4).forEach((key) => {
-				const list = _list$4[key];
+			Object.keys(_list$3).forEach((key) => {
+				const list = _list$3[key];
 				const constructor = list[0].constructor;
 				list.forEach((item) => {
 					if (item.free) item.free(gl);
 				});
 				if (constructor.free) constructor.free(gl);
-				delete _list$4[key];
+				delete _list$3[key];
 			});
 		}
 		/**
@@ -252229,7 +254106,7 @@ var init_EffectManager = __esmMin((() => {
 		* @param {boolean} render before entities ?
 		*/
 		static render(gl, modelView, projection, fog, tick, renderBeforeEntities) {
-			const keys = Object.keys(_list$4);
+			const keys = Object.keys(_list$3);
 			const count = keys.length;
 			let i, j, size, list, constructor;
 			let center = [
@@ -252241,9 +254118,9 @@ var init_EffectManager = __esmMin((() => {
 			const area_size = GraphicsSettings.performanceMode ? GraphicsSettings.viewArea : 20;
 			const cullDistanceSq = area_size * area_size;
 			for (i = 0; i < count; ++i) {
-				list = _list$4[keys[i]];
+				list = _list$3[keys[i]];
 				if (!list.length) {
-					delete _list$4[keys[i]];
+					delete _list$3[keys[i]];
 					continue;
 				}
 				constructor = list[0].constructor;
@@ -252289,7 +254166,7 @@ var init_EffectManager = __esmMin((() => {
 					constructor.afterRender(gl);
 					if (size === 0) {
 						if (constructor.free) constructor.free(gl);
-						delete _list$4[keys[i]];
+						delete _list$3[keys[i]];
 					}
 				}
 			}
@@ -252402,8 +254279,14 @@ var init_EffectManager = __esmMin((() => {
 				case "RSM2":
 					EffectManager.add(new RsmEffect(Params), Params);
 					break;
+				case "WATERFALL":
+					EffectManager.add(new WaterfallEffect(Params.effect, Params.Inst, Params.Init), Params);
+					break;
 				case "QuadHorn":
 					EffectManager.add(new QuadHorn(Params.effect, Params.Inst, Params.Init), Params);
+					break;
+				case "TRAIL":
+					EffectManager.add(new Trail(Params.effect, Params.Inst, Params.Init), Params);
 					break;
 				case "FUNC": if (Params.effect.func) {
 					if (Params.effect.attachedEntity) {
@@ -252561,6 +254444,25 @@ var init_EffectManager = __esmMin((() => {
 					EffectManager.spam(EF_Init_Par);
 				});
 			}
+		}
+		/**
+		* Spam skill effect when the skill is released on its target (hit or miss)
+		*
+		* @param {number} skill id
+		* @param {number} target aid
+		* @param {number} tick
+		* @param {number} source aid
+		*/
+		static spamSkillRelease(skillId, destAID, tick, srcAID) {
+			if (!(skillId in SkillEffect) || !SkillEffect[skillId].releaseEffectId) return;
+			(Array.isArray(SkillEffect[skillId].releaseEffectId) ? SkillEffect[skillId].releaseEffectId : [SkillEffect[skillId].releaseEffectId]).forEach((effectId) => {
+				EffectManager.spam({
+					effectId,
+					ownerAID: destAID,
+					startTick: tick,
+					otherAID: srcAID
+				});
+			});
 		}
 		/**
 		* Spam skill before the hit lands (regardless of damage)
@@ -252737,7 +254639,7 @@ var init_EffectManager = __esmMin((() => {
 			if (hatEffects) delete hatEffects[effectID];
 		}
 		static debug() {
-			console.log("%c[DEBUG] EffectManager _list: ", "color:#F5B342", _list$4);
+			console.log("%c[DEBUG] EffectManager _list: ", "color:#F5B342", _list$3);
 		}
 		/**
 		* Remove an effect
@@ -252746,7 +254648,7 @@ var init_EffectManager = __esmMin((() => {
 		* @param {mixed} effect owner ID
 		*/
 		static remove(effect, AID, effectID) {
-			if (!effect || !(effect.name in _list$4)) Object.keys(_list$4).forEach((key) => clean(key, AID, effectID));
+			if (!effect || !(effect.name in _list$3)) Object.keys(_list$3).forEach((key) => clean(key, AID, effectID));
 			else clean(effect.name, AID, effectID);
 			if (!(AID == null)) {
 				const entity = EntityManager.get(AID);
@@ -252767,8 +254669,8 @@ var init_EffectManager = __esmMin((() => {
 		* @param {mixed} effect ID
 		*/
 		static endRepeat(effect, AID, effectID) {
-			if (!effect || !(effect.name in _list$4)) {
-				Object.keys(_list$4).forEach((key) => cleanRepeat(key, AID, effectID));
+			if (!effect || !(effect.name in _list$3)) {
+				Object.keys(_list$3).forEach((key) => cleanRepeat(key, AID, effectID));
 				return;
 			}
 			cleanRepeat(effect.name, AID, effectID);
@@ -252781,26 +254683,26 @@ var init_EffectManager = __esmMin((() => {
 * Add 3D sound to the list
 */
 function add(mapEffect) {
-	_list$3.push(mapEffect);
+	_list$2.push(mapEffect);
 }
 /**
 * Remove data from memory
 */
 function free$1() {
-	_list$3.length = 0;
+	_list$2.length = 0;
 }
 /**
 * Get effect from list
 */
 function get(GID) {
-	return _list$3.find((mapEffect) => mapEffect.name == GID) || null;
+	return _list$2.find((mapEffect) => mapEffect.name == GID) || null;
 }
 /**
 * Remove effect from list
 */
 function remove(GID) {
-	const index = _list$3.findIndex((mapEffect) => mapEffect.name == GID);
-	if (index !== -1) _list$3.splice(index, 1);
+	const index = _list$2.findIndex((mapEffect) => mapEffect.name == GID);
+	if (index !== -1) _list$2.splice(index, 1);
 }
 /**
 * Add effects to scene
@@ -252808,7 +254710,7 @@ function remove(GID) {
 * @param {vec3} position
 */
 function spam(position, tick) {
-	_list$3.forEach((mapEffect) => {
+	_list$2.forEach((mapEffect) => {
 		if (!mapEffect.isVisible && vec3$2.dist(mapEffect.pos, position) < 25) {
 			const EF_Init_Par = {
 				effectId: mapEffect.id,
@@ -252825,12 +254727,12 @@ function spam(position, tick) {
 		}
 	});
 }
-var vec3$2, _list$3, Effects_default;
+var vec3$2, _list$2, Effects_default;
 var init_Effects = __esmMin((() => {
 	init_gl_matrix();
 	init_EffectManager();
 	vec3$2 = gl_matrix_default.vec3;
-	_list$3 = [];
+	_list$2 = [];
 	Effects_default = {
 		add,
 		free: free$1,
@@ -253582,8 +255484,8 @@ function setUpCloudData() {
 	let i = 0;
 	for (; i < MAX_CLOUDS; i++) {
 		if (!_clouds[i]) _clouds[i] = {
-			position: vec3$7.create(),
-			direction: vec3$7.create(),
+			position: vec3$8.create(),
+			direction: vec3$8.create(),
 			born_tick: 0,
 			death_tick: 0
 		};
@@ -253643,7 +255545,7 @@ function render$7(gl, modelView, projection, fog, tick) {
 		SpriteRenderer.zIndex = 0;
 		SpriteRenderer.color[3] = opacity;
 		SpriteRenderer.image.texture = _textures[cloud.sprite];
-		vec3$7.add(cloud.position, cloud.position, cloud.direction);
+		vec3$8.add(cloud.position, cloud.position, cloud.direction);
 		SpriteRenderer.position.set(cloud.position);
 		SpriteRenderer.runWithDepth(true, false, true, function() {
 			SpriteRenderer.render();
@@ -253672,7 +255574,7 @@ var init_Sky = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Damage.js
-var EndureSound, dpr$1, procCanvas$1, procCtx$1, _skin, _damageSkins, _loadedSkinsData, _enableSuffix, _msgNames, _list$2, prevCombo, Damage;
+var EndureSound, dpr$1, procCanvas$1, procCtx$1, _skin, _damageSkins, _loadedSkinsData, _enableSuffix, _msgNames, _list$1, _rgbaFrame, prevCombo, Damage;
 var init_Damage = __esmMin((() => {
 	init_WebGL();
 	init_Client();
@@ -253726,7 +255628,8 @@ var init_Damage = __esmMin((() => {
 		4: "luckybg",
 		5: "lucky"
 	};
-	_list$2 = [];
+	_list$1 = [];
+	_rgbaFrame = { type: 1 };
 	prevCombo = [];
 	Damage = class Damage {
 		constructor() {
@@ -253919,7 +255822,7 @@ var init_Damage = __esmMin((() => {
 				bgObj.height = msgData.critbg.canvas.height * .6;
 				bgObj.offset = [0, -6];
 				bgObj.isDisposable = false;
-				_list$2.push(bgObj);
+				_list$1.push(bgObj);
 				const EF_Init_Par = {
 					effectId: 1,
 					ownerAID: entity.GID,
@@ -253947,7 +255850,7 @@ var init_Damage = __esmMin((() => {
 				bgObj.height = msgBlueData.critbg.canvas.height * .6;
 				bgObj.offset = [0, -6];
 				bgObj.isDisposable = false;
-				_list$2.push(bgObj);
+				_list$1.push(bgObj);
 			} else {
 				obj.color[0] = 1;
 				obj.color[1] = 1;
@@ -253959,7 +255862,7 @@ var init_Damage = __esmMin((() => {
 					obj.width = msgData.miss.canvas.width;
 					obj.height = msgData.miss.canvas.height;
 					obj.isDisposable = false;
-					_list$2.push(obj);
+					_list$1.push(obj);
 				}
 				return;
 			}
@@ -253997,7 +255900,7 @@ var init_Damage = __esmMin((() => {
 			if (entity.objecttype === Entity.TYPE_PC) hitSound = DB.getJobHitSound(entity._job);
 			else if (weapon || weapon === 0) hitSound = DB.getWeaponHitSound(weapon);
 			if (hitSound) obj.soundFile = hitSound;
-			_list$2.push(obj);
+			_list$1.push(obj);
 		}
 		/**
 		* Remove damages from map, clean up memory
@@ -254005,10 +255908,10 @@ var init_Damage = __esmMin((() => {
 		* @param {object} gl context
 		*/
 		static free(gl) {
-			_list$2.forEach((item) => {
+			_list$1.forEach((item) => {
 				if (item.isDisposable) gl.deleteTexture(item.texture);
 			});
-			_list$2.length = 0;
+			_list$1.length = 0;
 		}
 		/**
 		* Rendering damages on maps
@@ -254020,21 +255923,22 @@ var init_Damage = __esmMin((() => {
 		* @param {number} tick - game tick
 		*/
 		static render(gl, modelView, projection, fog, tick) {
-			if (!_list$2.length) return;
+			if (!_list$1.length) return;
 			SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
 			SpriteRenderer.shadow = 1;
 			SpriteRenderer.angle = 0;
 			SpriteRenderer.image.palette = null;
+			SpriteRenderer.sprite = _rgbaFrame;
 			let i, count, perc;
 			let damage;
 			let size;
 			const skinData = _loadedSkinsData[_skin];
-			for (i = 0, count = _list$2.length; i < count; ++i) {
-				damage = _list$2[i];
+			for (i = 0, count = _list$1.length; i < count; ++i) {
+				damage = _list$1[i];
 				if (damage.startTick > tick) continue;
 				if (damage.startTick + damage.delay < tick) {
 					if (damage.isDisposable) gl.deleteTexture(damage.texture);
-					_list$2.splice(i, 1);
+					_list$1.splice(i, 1);
 					count--;
 					i--;
 					continue;
@@ -254150,879 +256054,6 @@ var init_JoystickSetManager = __esmMin((() => {
 			currentSet = currentSet === 1 ? 2 : 1;
 		}
 	};
-}));
-//#endregion
-//#region src/UI/Components/ShortCut/ShortCut.html?raw
-var ShortCut_default$2;
-var init_ShortCut$2 = __esmMin((() => {
-	ShortCut_default$2 = "<div id=\"ShortCut\" data-background=\"basic_interface/shortitem_bg.bmp\">\r\n	<button\r\n		class=\"close\"\r\n		data-background=\"basic_interface/sys_close_off.bmp\"\r\n		data-hover=\"basic_interface/sys_close_on.bmp\"\r\n	></button>\r\n	<button class=\"resize\" data-background=\"btn_resize.bmp\"></button>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"0\"></div>\r\n		<div class=\"container\" data-index=\"1\"></div>\r\n		<div class=\"container\" data-index=\"2\"></div>\r\n		<div class=\"container\" data-index=\"3\"></div>\r\n		<div class=\"container\" data-index=\"4\"></div>\r\n		<div class=\"container\" data-index=\"5\"></div>\r\n		<div class=\"container\" data-index=\"6\"></div>\r\n		<div class=\"container\" data-index=\"7\"></div>\r\n		<div class=\"container\" data-index=\"8\"></div>\r\n		<div class=\"index\">1</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"9\"></div>\r\n		<div class=\"container\" data-index=\"10\"></div>\r\n		<div class=\"container\" data-index=\"11\"></div>\r\n		<div class=\"container\" data-index=\"12\"></div>\r\n		<div class=\"container\" data-index=\"13\"></div>\r\n		<div class=\"container\" data-index=\"14\"></div>\r\n		<div class=\"container\" data-index=\"15\"></div>\r\n		<div class=\"container\" data-index=\"16\"></div>\r\n		<div class=\"container\" data-index=\"17\"></div>\r\n		<div class=\"index\">2</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"18\"></div>\r\n		<div class=\"container\" data-index=\"19\"></div>\r\n		<div class=\"container\" data-index=\"20\"></div>\r\n		<div class=\"container\" data-index=\"21\"></div>\r\n		<div class=\"container\" data-index=\"22\"></div>\r\n		<div class=\"container\" data-index=\"23\"></div>\r\n		<div class=\"container\" data-index=\"24\"></div>\r\n		<div class=\"container\" data-index=\"25\"></div>\r\n		<div class=\"container\" data-index=\"26\"></div>\r\n		<div class=\"index\">3</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"row\">\r\n		<div class=\"container\" data-index=\"27\"></div>\r\n		<div class=\"container\" data-index=\"28\"></div>\r\n		<div class=\"container\" data-index=\"29\"></div>\r\n		<div class=\"container\" data-index=\"30\"></div>\r\n		<div class=\"container\" data-index=\"31\"></div>\r\n		<div class=\"container\" data-index=\"32\"></div>\r\n		<div class=\"container\" data-index=\"33\"></div>\r\n		<div class=\"container\" data-index=\"34\"></div>\r\n		<div class=\"container\" data-index=\"35\"></div>\r\n		<div class=\"index\">4</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"shortcut-tooltip\"></div>\r\n</div>\r\n";
-}));
-//#endregion
-//#region src/UI/Components/ShortCut/ShortCut.css?raw
-var ShortCut_default$1;
-var init_ShortCut$1 = __esmMin((() => {
-	ShortCut_default$1 = ":host {\r\n	width: 280px;\r\n	top: 0px;\r\n	left: 480px;\r\n	overflow: hidden;\r\n}\r\n\r\n#ShortCut {\r\n	position: absolute;\r\n	width: 280px;\r\n	height: 100%;\r\n	background-repeat: repeat-y;\r\n}\r\n#ShortCut .close {\r\n	position: absolute;\r\n	top: 2px;\r\n	right: 2px;\r\n	border: none;\r\n	background-color: transparent;\r\n	width: 11px;\r\n	height: 11px;\r\n}\r\n#ShortCut .resize {\r\n	position: absolute;\r\n	bottom: 1px;\r\n	right: 1px;\r\n	border: none;\r\n	background-color: transparent;\r\n	width: 13px;\r\n	height: 13px;\r\n}\r\n\r\n#ShortCut .row {\r\n	position: relative;\r\n}\r\n#ShortCut .row .container {\r\n	float: left;\r\n	width: 24px;\r\n	height: 23px;\r\n	margin-top: 5px;\r\n	margin-left: 5px;\r\n	margin-bottom: 6px;\r\n}\r\n#ShortCut .row .container:hover {\r\n	background-color: #b5ffb5;\r\n}\r\n#ShortCut .row .index {\r\n	float: left;\r\n	position: relative;\r\n	top: 13px;\r\n	left: 5px;\r\n}\r\n#ShortCut .row .clear {\r\n}\r\n\r\n#ShortCut .icon {\r\n	position: relative;\r\n}\r\n#ShortCut .icon .img {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n	background-color: transparent;\r\n}\r\n#ShortCut .icon .name {\r\n	display: none;\r\n	z-index: 1;\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 0px;\r\n	background-color: rgba(0, 0, 0, 0.6);\r\n	text-shadow: 1px 1px black;\r\n	color: white;\r\n	padding: 5px;\r\n	white-space: nowrap;\r\n}\r\n#ShortCut .icon:hover .name {\r\n	display: block;\r\n}\r\n#ShortCut .icon.hide .name {\r\n	display: none;\r\n}\r\n#ShortCut .icon .amount {\r\n	position: absolute;\r\n	right: 1px;\r\n	top: 20px;\r\n	text-shadow: 1px 1px 0px white;\r\n	text-align: right;\r\n	font-weight: bold;\r\n}\r\n\r\n.shortcut-tooltip {\r\n	display: none;\r\n	position: fixed;\r\n	background-color: rgba(0, 0, 0, 0.8);\r\n	text-shadow: 1px 1px black;\r\n	color: white;\r\n	padding: 2px 6px;\r\n	white-space: nowrap;\r\n	z-index: 10000;\r\n	border-radius: 2px;\r\n	pointer-events: none;\r\n	line-height: 1.2;\r\n}\r\n.shortcut-tooltip.show {\r\n	display: block;\r\n}\r\n\r\n#ShortCut .cooldown-overlay {\r\n	position: absolute;\r\n	top: 0;\r\n	left: 0;\r\n	width: 24px;\r\n	height: 24px;\r\n	pointer-events: none;\r\n	border-radius: 2px;\r\n	z-index: 999;\r\n	background: conic-gradient(rgba(0, 0, 0, 0.75) 0deg, transparent 0deg);\r\n}\r\n";
-}));
-//#endregion
-//#region src/UI/Components/ShortCut/ShortCut.js
-var ShortCut_exports = /* @__PURE__ */ __exportAll({ default: () => ShortCut_default });
-/**
-* Update tooltip for empty slots with hotkey only
-*/
-function updateEmptySlotTooltips() {
-	const containers = ShortCut.getRoot().querySelectorAll(".container");
-	for (let i = 0; i < containers.length; ++i) if (!_list$1[i] || !_list$1[i].isSkill && !_list$1[i].ID) {
-		const hotkey = getHotKeyString(i);
-		if (hotkey) containers[i].setAttribute("data-tooltip", hotkey);
-	}
-}
-/**
-* Get hotkey string for shortcut index
-*
-* @param {number} index of the shortcut slot
-* @return {string} hotkey string or empty string
-*/
-function getHotKeyString(index) {
-	const shortcutKeys = [
-		"F1_1",
-		"F1_2",
-		"F1_3",
-		"F1_4",
-		"F1_5",
-		"F1_6",
-		"F1_7",
-		"F1_8",
-		"F1_9",
-		"F2_1",
-		"F2_2",
-		"F2_3",
-		"F2_4",
-		"F2_5",
-		"F2_6",
-		"F2_7",
-		"F2_8",
-		"F2_9",
-		"F3_1",
-		"F3_2",
-		"F3_3",
-		"F3_4",
-		"F3_5",
-		"F3_6",
-		"F3_7",
-		"F3_8",
-		"F3_9",
-		"F4_1",
-		"F4_2",
-		"F4_3",
-		"F4_4",
-		"F4_5",
-		"F4_6",
-		"F4_7",
-		"F4_8",
-		"F4_9"
-	];
-	if (index < 0 || index >= shortcutKeys.length) return "";
-	const scKey = shortcutKeys[index];
-	const shortcut = ShortCutControls_default.ShortCuts[scKey];
-	if (!shortcut) return "";
-	const key = shortcut.cust ? shortcut.cust.key : shortcut.init.key;
-	const alt = shortcut.cust ? shortcut.cust.alt : shortcut.init.alt;
-	const ctrl = shortcut.cust ? shortcut.cust.ctrl : shortcut.init.ctrl;
-	const shift = shortcut.cust ? shortcut.cust.shift : shortcut.init.shift;
-	if (!key) return "";
-	let hotkeyStr = "";
-	if (alt) hotkeyStr += "ALT + ";
-	if (ctrl) hotkeyStr += "CTRL + ";
-	if (shift) hotkeyStr += "SHIFT + ";
-	hotkeyStr += KEYS.toReadableKey(key);
-	return hotkeyStr;
-}
-/**
-* Show fixed tooltip on container hover
-*/
-function onContainerMouseEnter(event) {
-	const tooltipText = event.currentTarget.getAttribute("data-tooltip");
-	if (tooltipText) {
-		const tooltip = ShortCut.getRoot().querySelector(".shortcut-tooltip");
-		const hostRect = ShortCut._host.getBoundingClientRect();
-		tooltip.textContent = tooltipText;
-		tooltip.classList.add("show");
-		const tooltipRect = tooltip.getBoundingClientRect();
-		const showAbove = window.innerHeight - (hostRect.top + hostRect.height) < tooltipRect.height + 10;
-		const left = hostRect.left + hostRect.width / 2 - tooltipRect.width / 2;
-		let top;
-		if (showAbove) top = hostRect.top - tooltipRect.height - 2;
-		else top = hostRect.top + hostRect.height + 2;
-		tooltip.style.left = `${left}px`;
-		tooltip.style.top = `${top}px`;
-	}
-}
-/**
-* Hide fixed tooltip on container leave
-*/
-function onContainerMouseLeave() {
-	const tooltip = ShortCut.getRoot().querySelector(".shortcut-tooltip");
-	if (tooltip) tooltip.classList.remove("show");
-}
-/**
-* Resizing hotkey window
-*/
-function onResize$3(event) {
-	const host = ShortCut._host;
-	const top = host.offsetTop;
-	let lastHeight = 0;
-	function resizing() {
-		let h = Math.floor((Mouse.screen.y - top) / 34 + 1);
-		h = Math.min(Math.max(h, 1), _rowCount);
-		if (h === lastHeight) return;
-		host.style.height = `${h * 34}px`;
-		_preferences$19.size = h;
-		_preferences$19.save();
-		lastHeight = h;
-	}
-	const _Interval = setInterval(resizing, 30);
-	const mouseUpHandler = (_event) => {
-		if (_event.which === 1) {
-			clearInterval(_Interval);
-			window.removeEventListener("mouseup", mouseUpHandler);
-		}
-	};
-	window.addEventListener("mouseup", mouseUpHandler);
-	event.stopImmediatePropagation();
-	event.preventDefault();
-}
-/**
-* Displays the cooldown overlay on an icon
-*
-* @param {number} index of the icon
-* @param {number} delay in ms
-*/
-function setDelayOnIndex(index, delay) {
-	if (!_list$1[index]) return;
-	if (_list$1[index].Delay && _list$1[index].Delay >= Renderer.tick + delay) return;
-	_list$1[index].Delay = Renderer.tick + delay;
-	const ui = ShortCut.getRoot().querySelector(`.container[data-index="${index}"]`);
-	if (!ui) return;
-	const existing = ui.querySelector(".cooldown-overlay");
-	if (existing) existing.remove();
-	const overlay = document.createElement("div");
-	overlay.className = "cooldown-overlay";
-	const icon = ui.querySelector(".icon");
-	if (icon) {
-		icon.appendChild(overlay);
-		const img = icon.querySelector(".img");
-		if (img) img.style.filter = "none";
-	}
-	if (_activeAnimations.has(index)) {
-		cancelAnimationFrame(_activeAnimations.get(index));
-		_activeAnimations.delete(index);
-	}
-	function updateCooldown() {
-		if (!_list$1 || !_list$1[index]) {
-			overlay.remove();
-			if (_activeAnimations.has(index)) {
-				cancelAnimationFrame(_activeAnimations.get(index));
-				_activeAnimations.delete(index);
-			}
-			return;
-		}
-		const now = Renderer.tick;
-		const remaining = _list$1[index].Delay - now;
-		if (remaining <= 0 || !_list$1[index].Delay) {
-			overlay.remove();
-			_list$1[index].Delay = 0;
-			if (_activeAnimations.has(index)) {
-				cancelAnimationFrame(_activeAnimations.get(index));
-				_activeAnimations.delete(index);
-			}
-			return;
-		}
-		const degrees = (1 - remaining / delay) * 360;
-		overlay.style.background = `conic-gradient(transparent 0deg, transparent ${degrees}deg, rgba(0,0,0,0.75) ${degrees}deg)`;
-		const animationId = requestAnimationFrame(updateCooldown);
-		_activeAnimations.set(index, animationId);
-	}
-	const animationId = requestAnimationFrame(updateCooldown);
-	_activeAnimations.set(index, animationId);
-}
-/**
-* Drop something in the shortcut
-* Does the client allow other source than shortcut, inventory
-* and skill window to save to shortcut ?
-*/
-function onDrop$8(event, target) {
-	let data, element;
-	const index = parseInt(target.getAttribute("data-index"), 10);
-	const row = Math.floor(index / 9);
-	event.stopImmediatePropagation();
-	event.preventDefault();
-	try {
-		data = JSON.parse(event.dataTransfer.getData("Text"));
-		element = data.data;
-	} catch (_e) {
-		return;
-	}
-	if (data.type !== "item" && data.type !== "skill") return;
-	switch (data.from) {
-		case "SkillList":
-		case "Guild":
-		case "SkillListMH":
-			ShortCut.removeElement(true, element.SKID, row, element.selectedLevel ? element.selectedLevel : element.level);
-			ShortCut.addElement(index, true, element.SKID, element.selectedLevel ? element.selectedLevel : element.level);
-			ShortCut.onChange(index, true, element.SKID, element.selectedLevel ? element.selectedLevel : element.level);
-			break;
-		case "Inventory":
-			ShortCut.removeElement(false, element.ITID, row);
-			ShortCut.addElement(index, false, element.ITID, 0);
-			ShortCut.onChange(index, false, element.ITID, 0);
-			break;
-		case "ShortCut":
-			ShortCut.removeElement(element.isSkill, element.ID, row, element.isSkill ? element.count : null);
-			ShortCut.addElement(index, element.isSkill, element.ID, element.count);
-			ShortCut.onChange(index, element.isSkill, element.ID, element.count);
-	}
-}
-/**
-* Stop the drag and drop
-*/
-function onDragEnd(icon) {
-	delete window._OBJ_DRAG_;
-	icon.classList.remove("hide");
-}
-/**
-* Prepare data to be stored in the dragged element
-* to change position in the shortcut.
-*/
-function onDragStart$2(event, icon) {
-	const index = parseInt(icon.parentNode.getAttribute("data-index"), 10);
-	icon.classList.add("hide");
-	const img = new Image();
-	img.decoding = "async";
-	img.src = icon.querySelector(".img").style.backgroundImage.match(/\(([^)]+)/)[1].replace(/"/g, "");
-	event.dataTransfer.setDragImage(img, 12, 12);
-	event.dataTransfer.setData("Text", JSON.stringify(window._OBJ_DRAG_ = {
-		type: _list$1[index].isSkill ? "skill" : "item",
-		from: "ShortCut",
-		data: _list$1[index]
-	}));
-}
-/**
-* Get informations from a skill/item when
-* using right click on it.
-*/
-function onElementInfo(event, icon) {
-	const index = parseInt(icon.parentNode.getAttribute("data-index"), 10);
-	const element = _list$1[index];
-	event.stopImmediatePropagation();
-	event.preventDefault();
-	if (element.isSkill) {
-		if (SkillDescription_default.uid === _list$1[index].ID) SkillDescription_default.remove();
-		else {
-			SkillDescription_default.append();
-			SkillDescription_default.setSkill(_list$1[index].ID);
-		}
-	} else {
-		if (ItemInfo_default.uid === _list$1[index].ID) {
-			ItemInfo_default.remove();
-			return;
-		}
-		ItemInfo_default.append();
-		ItemInfo_default.uid = _list$1[index].ID;
-		ItemInfo_default.setItem(InventoryController.getUI().getItemById(_list$1[index].ID));
-	}
-}
-/**
-* Double-click on a shortcut
-*/
-function onUseShortCut(icon) {
-	clickElement(parseInt(icon.parentNode.getAttribute("data-index"), 10));
-}
-/**
-* Clicking on a shortcut
-*
-* @param {number} shortcut index
-*/
-function clickElement(index) {
-	const shortcut = _list$1[index];
-	SkillTargetSelection_default.remove();
-	if (!shortcut) return;
-	if (shortcut.isSkill) ShortCut.useSkill(shortcut.ID, shortcut.count);
-	else {
-		const item = InventoryController.getUI().getItemById(_list$1[index].ID);
-		if (item) InventoryController.getUI().useItem(item);
-	}
-}
-/**
-* Closing the window
-*/
-function onClose$5() {
-	ShortCut._host.style.height = "0px";
-	_preferences$19.size = 0;
-	_preferences$19.save();
-}
-/**
-* Hook Inventory, get informations when there is a change
-* to update the shortcut
-*
-* @param {number} index
-* @param {number} count
-*/
-function onUpdateItem(index, count) {
-	ShortCut.setElement(false, index, count);
-}
-/**
-* Hook Skill List, get informations when there is a change
-* to update the shortcut
-*
-* @param {number} skill id
-* @param {number} level
-*/
-function onUpdateSkill(id, level) {
-	ShortCut.setElement(true, id, level);
-}
-function onUpdateOwnerName$1() {
-	for (const index in _list$1) if (!_list$1[index].isSkill) ShortCut.setElement(false, _list$1[index].ID, _list$1[index].count);
-}
-function convertHotkeysToServerFormat() {
-	const serverData = {
-		Type: 1,
-		data: {
-			EmotionHotkey: [],
-			UserHotkey_V2: { SkillBar_1Tab: [] }
-		}
-	};
-	[
-		"Macro1",
-		"Macro2",
-		"Macro3",
-		"Macro4",
-		"Macro5",
-		"Macro6",
-		"Macro7",
-		"Macro8",
-		"Macro9",
-		"Macro10"
-	].forEach((key, index) => {
-		const shortcut = ShortCutControls_default.ShortCuts[key];
-		if (shortcut && shortcut.cust && shortcut.cust.emotion) serverData.data.EmotionHotkey[index] = shortcut.cust.emotion;
-	});
-	[
-		"F1_1",
-		"F1_2",
-		"F1_3",
-		"F1_4",
-		"F1_5",
-		"F1_6",
-		"F1_7",
-		"F1_8",
-		"F1_9",
-		"F2_1",
-		"F2_2",
-		"F2_3",
-		"F2_4",
-		"F2_5",
-		"F2_6",
-		"F2_7",
-		"F2_8",
-		"F2_9",
-		"F3_1",
-		"F3_2",
-		"F3_3",
-		"F3_4",
-		"F3_5",
-		"F3_6",
-		"F3_7",
-		"F3_8",
-		"F3_9",
-		"F4_1",
-		"F4_2",
-		"F4_3",
-		"F4_4",
-		"F4_5",
-		"F4_6",
-		"F4_7",
-		"F4_8",
-		"F4_9"
-	].forEach((key, index) => {
-		const shortcut = ShortCutControls_default.ShortCuts[key];
-		if (shortcut) {
-			const keyData = shortcut.cust || shortcut.init;
-			serverData.data.UserHotkey_V2.SkillBar_1Tab.push({
-				desc: `Skill ${index + 1}`,
-				index,
-				key1: keyData.key || 0,
-				key2: 0
-			});
-		}
-	});
-	return serverData;
-}
-function convertHotkeysFromServerFormat(serverData) {
-	if (!serverData || !serverData.data) return;
-	if (serverData.data.EmotionHotkey) {
-		const emotionKeys = [
-			"Macro1",
-			"Macro2",
-			"Macro3",
-			"Macro4",
-			"Macro5",
-			"Macro6",
-			"Macro7",
-			"Macro8",
-			"Macro9",
-			"Macro10"
-		];
-		serverData.data.EmotionHotkey.forEach((emotion, index) => {
-			if (emotion && emotionKeys[index]) {
-				if (!ShortCutControls_default.ShortCuts[emotionKeys[index]].cust) ShortCutControls_default.ShortCuts[emotionKeys[index]].cust = {};
-				ShortCutControls_default.ShortCuts[emotionKeys[index]].cust.emotion = emotion;
-			}
-		});
-	}
-	if (serverData.data.UserHotkey_V2 && serverData.data.UserHotkey_V2.SkillBar_1Tab) {
-		const shortcutKeys = [
-			"F1_1",
-			"F1_2",
-			"F1_3",
-			"F1_4",
-			"F1_5",
-			"F1_6",
-			"F1_7",
-			"F1_8",
-			"F1_9",
-			"F2_1",
-			"F2_2",
-			"F2_3",
-			"F2_4",
-			"F2_5",
-			"F2_6",
-			"F2_7",
-			"F2_8",
-			"F2_9",
-			"F3_1",
-			"F3_2",
-			"F3_3",
-			"F3_4",
-			"F3_5",
-			"F3_6",
-			"F3_7",
-			"F3_8",
-			"F3_9",
-			"F4_1",
-			"F4_2",
-			"F4_3",
-			"F4_4",
-			"F4_5",
-			"F4_6",
-			"F4_7",
-			"F4_8",
-			"F4_9"
-		];
-		serverData.data.UserHotkey_V2.SkillBar_1Tab.forEach((skillData) => {
-			if (skillData && skillData.index < shortcutKeys.length) {
-				const key = shortcutKeys[skillData.index];
-				if (key && skillData.key1) {
-					if (!ShortCutControls_default.ShortCuts[key].cust) ShortCutControls_default.ShortCuts[key].cust = {};
-					ShortCutControls_default.ShortCuts[key].cust.key = skillData.key1;
-				}
-			}
-		});
-	}
-}
-function haveHotkeysChanged(currentData) {
-	if (!_lastServerHotkeys) return true;
-	return JSON.stringify(currentData) !== JSON.stringify(_lastServerHotkeys);
-}
-var ShortCut, _list$1, _rowCount, _lastServerHotkeys, _activeAnimations, _preferences$19, ShortCut_default;
-var init_ShortCut = __esmMin((() => {
-	init_DBManager();
-	init_ItemType();
-	init_SkillInfo();
-	init_Client();
-	init_Preferences$1();
-	init_SessionStorage();
-	init_Renderer();
-	init_MouseEventHandler();
-	init_UIManager();
-	init_GUIComponent();
-	init_ItemInfo();
-	init_Inventory();
-	init_SkillListMH();
-	init_SkillDescription();
-	init_SkillTargetSelection();
-	init_Guild$1();
-	init_ShortCutControls();
-	init_KeyEventHandler();
-	init_Configs();
-	init_PacketVerManager();
-	init_SkillList();
-	init_ShortCut$2();
-	init_ShortCut$1();
-	ShortCut = new GUIComponent("ShortCut", ShortCut_default$1);
-	ShortCut.render = () => ShortCut_default$2;
-	_list$1 = [];
-	_rowCount = 0;
-	_lastServerHotkeys = null;
-	_activeAnimations = /* @__PURE__ */ new Map();
-	_preferences$19 = Preferences.get("ShortCut", {
-		x: 480,
-		y: 0,
-		size: 1,
-		magnet_top: true,
-		magnet_bottom: false,
-		magnet_left: false,
-		magnet_right: false
-	}, 1);
-	/**
-	* Initialize UI
-	*/
-	ShortCut.init = function init() {
-		const root = ShortCut.getRoot();
-		const resizeBtn = root.querySelector(".resize");
-		if (resizeBtn) resizeBtn.addEventListener("mousedown", onResize$3);
-		const closeBtn = root.querySelector(".close");
-		if (closeBtn) {
-			closeBtn.addEventListener("mousedown", (e) => {
-				e.stopImmediatePropagation();
-				e.preventDefault();
-			});
-			closeBtn.addEventListener("click", onClose$5);
-		}
-		const container = root.querySelector("#ShortCut");
-		container.addEventListener("drop", (e) => {
-			const target = e.target.closest(".container");
-			if (target) onDrop$8(e, target);
-		});
-		container.addEventListener("dragover", (e) => {
-			if (e.target.closest(".container")) {
-				e.stopImmediatePropagation();
-				e.preventDefault();
-			}
-		});
-		container.addEventListener("dragstart", (e) => {
-			const icon = e.target.closest(".icon");
-			if (icon) onDragStart$2(e, icon);
-		});
-		container.addEventListener("dragend", (e) => {
-			const icon = e.target.closest(".icon");
-			if (icon) onDragEnd(icon);
-		});
-		container.addEventListener("dblclick", (e) => {
-			const icon = e.target.closest(".icon");
-			if (icon) onUseShortCut(icon);
-		});
-		container.addEventListener("contextmenu", (e) => {
-			const icon = e.target.closest(".icon");
-			if (icon) onElementInfo(e, icon);
-		});
-		container.addEventListener("mousedown", (e) => {
-			if (e.target.closest(".icon")) e.stopImmediatePropagation();
-		});
-		this.draggable();
-		root.querySelectorAll(".container").forEach((el) => {
-			el.addEventListener("mouseenter", onContainerMouseEnter);
-			el.addEventListener("mouseleave", onContainerMouseLeave);
-		});
-		DB.UpdateOwnerName.ShortCut = onUpdateOwnerName$1;
-		InventoryController.getUI().onUpdateItem = onUpdateItem;
-	};
-	/**
-	* Append to body
-	*/
-	ShortCut.onAppend = function onAppend() {
-		this._host.style.height = `${34 * _preferences$19.size}px`;
-		const rect = this._host.getBoundingClientRect();
-		this._host.style.top = `${Math.min(Math.max(0, _preferences$19.y), Renderer.height - rect.height)}px`;
-		this._host.style.left = `${Math.min(Math.max(0, _preferences$19.x), Renderer.width - rect.width)}px`;
-		this.magnet.TOP = _preferences$19.magnet_top;
-		this.magnet.BOTTOM = _preferences$19.magnet_bottom;
-		this.magnet.LEFT = _preferences$19.magnet_left;
-		this.magnet.RIGHT = _preferences$19.magnet_right;
-		Controller$4.getUI().onUpdateSkill = onUpdateSkill;
-		updateEmptySlotTooltips();
-	};
-	/**
-	* When removed, clean up
-	*/
-	ShortCut.onRemove = function onRemove() {
-		const tooltip = ShortCut.getRoot().querySelector(".shortcut-tooltip");
-		if (tooltip) tooltip.classList.remove("show");
-		for (const [index, animationId] of _activeAnimations.entries()) cancelAnimationFrame(animationId);
-		_activeAnimations.clear();
-		_preferences$19.y = parseInt(this._host.style.top, 10);
-		_preferences$19.x = parseInt(this._host.style.left, 10);
-		_preferences$19.size = Math.floor(parseInt(this._host.style.height, 10) / 34);
-		_preferences$19.magnet_top = this.magnet.TOP;
-		_preferences$19.magnet_bottom = this.magnet.BOTTOM;
-		_preferences$19.magnet_left = this.magnet.LEFT;
-		_preferences$19.magnet_right = this.magnet.RIGHT;
-		_preferences$19.save();
-	};
-	/**
-	* Request to clean the list
-	* Used only from MapEngine when exiting the game
-	*/
-	ShortCut.clean = function clean() {
-		for (const [index, animationId] of _activeAnimations.entries()) cancelAnimationFrame(animationId);
-		_activeAnimations.clear();
-		_list$1.length = 0;
-		ShortCut.getRoot().querySelectorAll(".container").forEach((el) => {
-			el.innerHTML = "";
-		});
-	};
-	/**
-	* Process shortcut
-	*
-	* @param {object} key
-	*/
-	ShortCut.onShortCut = function onShortCut(key) {
-		switch (key.cmd.replace(/\d+$/, "")) {
-			case "EXECUTE":
-				clickElement(parseInt(key.cmd.match(/\d+$/).toString(), 10));
-				break;
-			case "EXTEND":
-				_preferences$19.size = (_preferences$19.size + 1) % (_rowCount + 1);
-				_preferences$19.save();
-				this._host.style.height = `${_preferences$19.size * 34}px`;
-		}
-	};
-	ShortCut.useSkill = function useSkill(id, level) {
-		if (id > 1e4 && id < 10100) Guild_default.useSkillID(id, level);
-		else if (id > 8e3 && id < 8044) {
-			SkillListMH_default.mercenary.useSkillID(id, level);
-			SkillListMH_default.homunculus.useSkillID(id, level);
-		} else Controller$4.getUI().useSkillID(id, level);
-	};
-	ShortCut.getSkillById = function getSkillById(id) {
-		let skill;
-		if (id > 1e4 && id < 10100) skill = Guild_default.getSkillById(id);
-		else if (id > 8e3 && id < 8044) {
-			skill = SkillListMH_default.mercenary.getSkillById(id);
-			if (!skill) skill = SkillListMH_default.homunculus.getSkillById(id);
-		} else skill = Controller$4.getUI().getSkillById(id);
-		return skill;
-	};
-	/**
-	* Bind UI with list of shortcut
-	*
-	* @param {Array} shortcut list
-	*/
-	ShortCut.setList = function setList(list) {
-		let skill;
-		ShortCut.getRoot().querySelectorAll(".container").forEach((el) => {
-			el.innerHTML = "";
-		});
-		_list$1.length = list.length;
-		_rowCount = Math.min(4, Math.floor(list.length / 9));
-		for (let i = 0, count = list.length; i < count; ++i) if (list[i].isSkill) {
-			skill = ShortCut.getSkillById(list[i].ID);
-			if (skill && skill.level) ShortCut.addElement(i, true, list[i].ID, list[i].count || skill.level);
-			else {
-				if (!_list$1[i]) _list$1[i] = {};
-				_list$1[i].isSkill = true;
-				_list$1[i].ID = list[i].ID;
-				_list$1[i].count = list[i].count;
-			}
-		} else ShortCut.addElement(i, list[i].isSkill, list[i].ID, list[i].count);
-	};
-	/**
-	* Update all tooltips (for both empty and filled slots)
-	* Called when hotkey settings change
-	*/
-	ShortCut.updateAllTooltips = function updateAllTooltips() {
-		const root = ShortCut.getRoot();
-		for (let i = 0, size = _list$1.length; i < size; ++i) {
-			const container = root.querySelector(`.container[data-index="${i}"]`);
-			if (!container) continue;
-			const hotkey = getHotKeyString(i);
-			if (!_list$1[i] || !_list$1[i].isSkill && !_list$1[i].ID) {
-				if (hotkey) container.setAttribute("data-tooltip", hotkey);
-			} else if (_list$1[i] && (_list$1[i].isSkill || _list$1[i].ID)) {
-				let name = "";
-				if (_list$1[i].isSkill && SkillInfo[_list$1[i].ID]) name = SkillInfo[_list$1[i].ID].SkillName;
-				else if (_list$1[i].ID) {
-					const item = InventoryController.getUI().getItemById(_list$1[i].ID);
-					if (item) name = DB.getItemName(item);
-				}
-				if (name) {
-					const tooltipText = hotkey ? `[ ${hotkey} ] ${name}` : name;
-					container.setAttribute("data-tooltip", tooltipText);
-				}
-			}
-		}
-	};
-	ShortCut.setElement = function setElement(isSkill, ID, count) {
-		for (let i = 0, size = _list$1.length; i < size; ++i) if (_list$1[i] && _list$1[i].isSkill == isSkill && _list$1[i].ID === ID) {
-			if (isSkill && _list$1[i].count && _list$1[i].count <= count) ShortCut.addElement(i, isSkill, ID, _list$1[i].count);
-			else ShortCut.addElement(i, isSkill, ID, count);
-		}
-	};
-	/**
-	* Add an element to shortcut
-	*
-	* @param {number} index of the element
-	* @param {boolean} is a skill ?
-	* @param {number} ID
-	* @param {number} count or level
-	*/
-	ShortCut.addElement = function addElement(index, isSkill, ID, count) {
-		let file, name;
-		const ui = ShortCut.getRoot().querySelector(`.container[data-index="${index}"]`);
-		if (!ui) return;
-		ui.innerHTML = "";
-		if (!_list$1[index]) _list$1[index] = {};
-		_list$1[index].isSkill = isSkill;
-		_list$1[index].ID = ID;
-		if (isSkill) {
-			if (!count) return;
-			else {
-				_list$1[index].count = count;
-				file = SkillInfo[ID].Name;
-				name = SkillInfo[ID].SkillName;
-			}
-		} else {
-			_list$1[index].count = count;
-			const item = InventoryController.getUI().getItemById(ID);
-			if (!item) return;
-			const it = DB.getItemInfo(ID);
-			file = item.IsIdentified ? it.identifiedResourceName : it.unidentifiedResourceName;
-			name = DB.getItemName(item);
-			if (item.type === ItemType_default.WEAPON || item.type === ItemType_default.ARMOR || item.type === ItemType_default.SHADOWGEAR) count = 1;
-			else count = item.count;
-			if (!count) return;
-		}
-		const hotkey = getHotKeyString(index);
-		const tooltipText = hotkey ? `[ ${hotkey} ] ${name}` : name;
-		Client.loadFile(`${DB.INTERFACE_PATH}item/${file}.bmp`, (url) => {
-			ui.innerHTML = "<div draggable=\"true\" class=\"icon\"><div class=\"img\"></div><div class=\"amount\"></div></div>";
-			ui.querySelector(".img").style.backgroundImage = `url(${url})`;
-			ui.querySelector(".amount").textContent = count;
-			ui.setAttribute("data-tooltip", tooltipText);
-		});
-	};
-	/**
-	* Displays the cooldown over every skill
-	*
-	* @param {number} delay in ms
-	*/
-	ShortCut.setGlobalSkillDelay = function setGlobalSkillDelay(delay) {
-		_list$1.forEach((element, index) => {
-			if (element.isSkill) setDelayOnIndex(index, delay);
-		});
-	};
-	/**
-	* Displays the cooldown over a single skill
-	*
-	* @param {number} ID of the skill
-	* @param {number} delay in ms
-	*/
-	ShortCut.setSkillDelay = function setSkillDelay(ID, delay) {
-		_list$1.forEach((element, index) => {
-			if (element.isSkill && element.ID == ID) setDelayOnIndex(index, delay);
-		});
-	};
-	/**
-	* Remove an element from shortcut
-	*
-	* @param {boolean} is a skill ?
-	* @param {number} ID of the element to remove
-	* @param {number} row id
-	* @param {number} amount (optional)
-	*/
-	ShortCut.removeElement = function removeElement(isSkill, ID, row, amount) {
-		if (!ID) return;
-		const root = ShortCut.getRoot();
-		for (let i = row * 9, count = Math.min(_list$1.length, row * 9 + 9); i < count; ++i) if (_list$1[i] && _list$1[i].isSkill == isSkill && _list$1[i].ID === ID && (!isSkill || _list$1[i].count == amount)) {
-			const container = root.querySelector(`.container[data-index="${i}"]`);
-			if (container) container.innerHTML = "";
-			_list$1[i].isSkill = 0;
-			_list$1[i].ID = 0;
-			_list$1[i].count = 0;
-			ShortCut.onChange(i, 0, 0, 0);
-		}
-	};
-	Guild_default.onUpdateSkill = (id, level) => {
-		ShortCut.setElement(true, id, level);
-	};
-	SkillListMH_default.mercenary.onUpdateSkill = (id, level) => {
-		ShortCut.setElement(true, id, level);
-	};
-	SkillListMH_default.homunculus.onUpdateSkill = (id, level) => {
-		ShortCut.setElement(true, id, level);
-	};
-	/**
-	* Method to define to notify a change.
-	*
-	* @param {number} index
-	* @param {boolean} isSkill
-	* @param {number} id
-	* @param {number} count
-	*/
-	ShortCut.onChange = function onChange() {};
-	ShortCut.saveToServer = function saveToServer() {
-		if (PacketVerManager_default.value >= 20170315 && SessionStorage_default.WebToken) {
-			const hotkeys = JSON.stringify(convertHotkeysToServerFormat());
-			if (!haveHotkeysChanged(hotkeys)) return;
-			const formData = new FormData();
-			formData.append("AID", SessionStorage_default.AID);
-			formData.append("WorldName", SessionStorage_default.ServerName);
-			formData.append("AuthToken", SessionStorage_default.WebToken);
-			formData.append("data", hotkeys);
-			const xhr = new XMLHttpRequest();
-			let webserverAddress = "";
-			if (window.location.protocol !== "http:" && window.location.protocol !== "https:") webserverAddress = Configs.get("webserverAddress", "http://127.0.0.1:8888");
-			xhr.open("POST", `${webserverAddress}/userconfig/save`, true);
-			xhr.timeout = 5e3;
-			xhr.onload = () => {
-				if (xhr.status === 200) console.log("Hotkeys saved to server successfully");
-				else console.warn("Hotkey save returned non-200 status:", xhr.status);
-			};
-			xhr.onerror = () => {
-				console.warn("Hotkey save failed: web-server unreachable");
-			};
-			xhr.ontimeout = () => {
-				console.warn("Hotkey save timed out");
-			};
-			xhr.send(formData);
-		}
-	};
-	ShortCut.loadFromServer = function loadFromServer(callback) {
-		if (PacketVerManager_default.value >= 20170315 && SessionStorage_default.WebToken) {
-			const formData = new FormData();
-			formData.append("AID", SessionStorage_default.AID);
-			formData.append("WorldName", SessionStorage_default.ServerName);
-			formData.append("AuthToken", SessionStorage_default.WebToken);
-			const xhr = new XMLHttpRequest();
-			let webserverAddress = "";
-			if (window.location.protocol !== "http:" && window.location.protocol !== "https:") webserverAddress = Configs.get("webserverAddress", "http://127.0.0.1:8888");
-			xhr.open("POST", `${webserverAddress}/userconfig/load`, true);
-			xhr.timeout = 5e3;
-			xhr.onload = () => {
-				if (xhr.status === 200) try {
-					const serverData = JSON.parse(xhr.responseText);
-					_lastServerHotkeys = JSON.parse(JSON.stringify(serverData));
-					convertHotkeysFromServerFormat(serverData);
-				} catch (e) {
-					console.error("Error parsing server hotkeys:", e);
-				}
-				else console.warn("Hotkey load returned non-200 status:", xhr.status);
-				if (callback) callback();
-			};
-			xhr.onerror = () => {
-				console.warn("Hotkey load failed: web-server unreachable");
-				if (callback) callback();
-			};
-			xhr.ontimeout = () => {
-				console.warn("Hotkey load timed out");
-				if (callback) callback();
-			};
-			xhr.send(formData);
-		} else if (callback) callback();
-	};
-	ShortCut.getList = function getList() {
-		return _list$1;
-	};
-	ShortCut_default = UIManager.addComponent(ShortCut);
 }));
 //#endregion
 //#region src/UI/Components/JoystickUI/JoystickUIRenderer.js
@@ -257113,6 +258144,7 @@ var init_MapRenderer = __esmMin((() => {
 	init_Water();
 	init_Models();
 	init_AnimatedModels();
+	init_OccluderFade();
 	init_GR2ModelRenderer();
 	init_Sounds();
 	init_Effects();
@@ -257241,6 +258273,7 @@ var init_MapRenderer = __esmMin((() => {
 			Water_default.free(gl);
 			Models_default.free(gl);
 			AnimatedModels_default.free(gl);
+			OccluderFade.free(gl);
 			GR2ModelRenderer_default.free(gl);
 			Damage.free(gl);
 			EffectManager.free(gl);
@@ -257297,13 +258330,17 @@ var init_MapRenderer = __esmMin((() => {
 				}
 			}
 			Sky_default.render(gl, modelView, projection, fog, tick);
+			OccluderFade.beginFrame(gl, modelView, tick);
 			Models_default.render(gl, modelView, projection, normalMat, fog, light);
 			AnimatedModels_default.render(gl, modelView, projection, normalMat, fog, light, tick);
 			GR2ModelRenderer_default.render(gl, modelView, projection, normalMat, fog, light, tick);
 			ScreenEffectManager.render(gl, modelView, projection, fog, tick, true);
 			EffectManager.render(gl, modelView, projection, fog, tick, true);
 			EntityManager.render(gl, modelView, projection, fog, false);
+			EntityManager.renderWaterDepth(gl, modelView, projection, fog);
 			Water_default.render(gl, modelView, projection, fog, light, tick);
+			Models_default.renderFaded(gl, modelView, projection, normalMat, fog, light);
+			AnimatedModels_default.renderFaded(gl, modelView, projection, normalMat, fog, light);
 			EffectManager.render(gl, modelView, projection, fog, tick, false);
 			EntityManager.render(gl, modelView, projection, fog, true);
 			Damage.render(gl, modelView, projection, fog, tick);
@@ -257391,6 +258428,10 @@ var init_Camera = __esmMin((() => {
 		* @type {vec3}
 		*/
 		static position = vec3$1.create();
+		/**
+		* @type {vec3} point the camera orbits around, in world (mesh) space
+		*/
+		static focus = vec3$1.create();
 		/**
 		* @type {Entity} Entity currently attached by the camera
 		*/
@@ -257711,6 +258752,7 @@ var init_Camera = __esmMin((() => {
 			_position$1[1] = this.position[2] + zOffset;
 			_position$1[2] = this.position[1] - .5;
 			mat4$10.translate(matrix, matrix, _position$1);
+			vec3$1.negate(this.focus, _position$1);
 			mat4$10.toInverseMat3(matrix, this.normalMat);
 			mat3.transpose(this.normalMat, this.normalMat);
 		}
@@ -262584,8 +263626,38 @@ var init_EffectTable = __esmMin((() => {
 			attachedEntity: false
 		}],
 		27: [{
-			file: "effect/ice",
-			attachedEntity: false
+			type: "TRAIL",
+			attachedEntity: false,
+			duration: 2500,
+			speed: 24,
+			interval: 17,
+			stopAtTarget: true,
+			overshoot: 2,
+			spread: [.1, .3],
+			spawn: [{
+				type: "QuadHorn",
+				textureFile: "effect/ice.tga",
+				attachedEntity: false,
+				duration: 670,
+				height: [.2, 1.8],
+				offsetX: 0,
+				offsetY: 0,
+				offsetZ: 0,
+				bottomSize: [.06, .22],
+				blendMode: 8,
+				rotateX: [-15, 15],
+				rotateY: [0, 360],
+				color: [
+					1,
+					1,
+					1,
+					1
+				],
+				animation: 4,
+				animationSpeed: 330,
+				riseDistance: 2,
+				fadeOut: 170
+			}]
 		}],
 		28: [{
 			attachedEntity: true,
@@ -264319,6 +265391,38 @@ var init_EffectTable = __esmMin((() => {
 		123: [{
 			wav: "effect/ef_frostdiver",
 			attachedEntity: true
+		}, {
+			type: "TRAIL",
+			attachedEntity: false,
+			duration: 2500,
+			speed: 24,
+			interval: 50,
+			stopAtTarget: true,
+			overshoot: 3,
+			spawn: [{
+				type: "QuadHorn",
+				textureFile: "effect/stone.bmp",
+				attachedEntity: false,
+				duration: 670,
+				height: [.6, 1],
+				offsetX: 0,
+				offsetY: 0,
+				offsetZ: 0,
+				bottomSize: [.05, .1],
+				blendMode: 8,
+				rotateX: [-15, 15],
+				rotateY: [0, 360],
+				color: [
+					1,
+					1,
+					1,
+					1
+				],
+				animation: 4,
+				animationSpeed: 330,
+				riseDistance: .8,
+				fadeOut: 170
+			}]
 		}],
 		124: [{
 			type: "STR",
@@ -264368,7 +265472,7 @@ var init_EffectTable = __esmMin((() => {
 				attachedEntity: false,
 				duration: 15e3,
 				height: 2.5,
-				offsetX: 0,
+				offsetX: .5,
 				offsetY: .4,
 				offsetZ: -.2,
 				bottomSize: .15,
@@ -264414,7 +265518,7 @@ var init_EffectTable = __esmMin((() => {
 				attachedEntity: false,
 				duration: 15e3,
 				height: 2.5,
-				offsetX: 0,
+				offsetX: .5,
 				offsetY: .5,
 				offsetZ: 0,
 				bottomSize: .15,
@@ -267887,6 +268991,46 @@ var init_EffectTable = __esmMin((() => {
 			}
 		],
 		347: [{ wav: "effect/wedding" }],
+		349: [{
+			type: "WATERFALL",
+			variant: "large",
+			vertical: false
+		}],
+		350: [{
+			type: "WATERFALL",
+			variant: "large",
+			vertical: true
+		}],
+		351: [{
+			type: "WATERFALL",
+			variant: "small",
+			vertical: false
+		}],
+		352: [{
+			type: "WATERFALL",
+			variant: "small",
+			vertical: true
+		}],
+		353: [{
+			type: "WATERFALL",
+			variant: "dark-large",
+			vertical: false
+		}],
+		354: [{
+			type: "WATERFALL",
+			variant: "dark-large",
+			vertical: true
+		}],
+		355: [{
+			type: "WATERFALL",
+			variant: "dark-small",
+			vertical: false
+		}],
+		356: [{
+			type: "WATERFALL",
+			variant: "dark-small",
+			vertical: true
+		}],
 		361: [{
 			type: "3D",
 			file: "effect/purpleslash.tga",
@@ -273449,6 +274593,48 @@ var init_EffectTable = __esmMin((() => {
 		ef_jackfrost: [{
 			wav: "effect/wl_jackfrost",
 			attachedEntity: true
+		}, {
+			type: "TRAIL",
+			attachedEntity: false,
+			duration: 1e3,
+			speed: 24,
+			interval: 34,
+			startOffset: 1,
+			angles: [
+				0,
+				45,
+				90,
+				135,
+				180,
+				225,
+				270,
+				315
+			],
+			spread: [.1, .4],
+			spawn: [{
+				type: "QuadHorn",
+				textureFile: "effect/ice.tga",
+				attachedEntity: false,
+				duration: 670,
+				height: [.2, 1.8],
+				offsetX: 0,
+				offsetY: 0,
+				offsetZ: 0,
+				bottomSize: [.06, .22],
+				blendMode: 8,
+				rotateX: [-15, 15],
+				rotateY: [0, 360],
+				color: [
+					1,
+					1,
+					1,
+					1
+				],
+				animation: 4,
+				animationSpeed: 330,
+				riseDistance: 2,
+				fadeOut: 170
+			}]
 		}],
 		ef_siennaexecrate: [{
 			wav: "effect/wl_siennaexecrate",
@@ -302620,6 +303806,28 @@ function render$6(modelView, projection) {
 	renderGUI(this, modelView, projection);
 }
 /**
+* Depth-only redraw of the body for entities standing in water, so the water
+* pass (drawn after entities, depth tested) covers only the submerged part.
+* Runs after every entity has been drawn, with colour writes disabled by the
+* caller, so the written depth cannot hide other sprites. Replays the exact
+* layers the colour pass drew this frame (`waterDepthFrame`), so no animation,
+* sound or trail state is touched. Only set for the non-player body pass;
+* entity types that already write depth never get a frame.
+*/
+function renderWaterDepth$1() {
+	const frame = this.waterDepthFrame;
+	if (!frame || this.hideEntity || !this.effectColor[3]) return;
+	if (!Water_default.isSubmerged(this.position[0], this.position[1])) return;
+	const self = this;
+	SpriteRenderer.position.set(this.position);
+	SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
+	SpriteRenderer.zIndex = 150;
+	SpriteRenderer.runWithDepth(true, true, false, function() {
+		for (let i = 0, count = frame.layers.length; i < count; ++i) self.renderLayer(frame.layers[i], frame.spr, frame.pal, frame.size, frame.position, "body", false);
+	});
+	SpriteRenderer.zIndex = 1;
+}
+/**
 * Render second body (BL_DOUBLE_BODY + EF_MAKEBLUR)
 * @param {Entity} entity
 * @param {Array} layers
@@ -302888,6 +304096,9 @@ function Init$3() {
 	this.render = render$6;
 	this.renderLayer = renderLayer;
 	this.renderEntity = renderEntity;
+	this.renderWaterDepth = renderWaterDepth$1;
+	this.waterDepthFrame = void 0;
+	this._waterDepthFrameBuffer = null;
 }
 var WALK_DIST_TO_MOTION, renderGUI, SPRITE_LIFT, calculateBoundingRect, renderEntity, renderElement;
 var init_EntityRender = __esmMin((() => {
@@ -302898,6 +304109,7 @@ var init_EntityRender = __esmMin((() => {
 	init_SpriteRenderer();
 	init_Ground();
 	init_Altitude();
+	init_Water();
 	init_SessionStorage();
 	init_DBManager();
 	init_Graphics();
@@ -303151,6 +304363,7 @@ var init_EntityRender = __esmMin((() => {
 				default:
 					SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
 					SpriteRenderer.zIndex = 150;
+					self.waterDepthFrame = null;
 					SpriteRenderer.runWithDepth(true, false, false, function() {
 						renderElement(self, self.files.body, "body", _position, true);
 					});
@@ -303225,6 +304438,15 @@ var init_EntityRender = __esmMin((() => {
 				blurType: isBUNSIN ? 5 : isHALLUCINATIONWALK ? 3 : entity._blurType || 1
 			});
 			for (let i = 0, count = layers.length; i < count; ++i) entity.renderLayer(layers[i], spr, pal, files.size, _position, type, isBlendModeOne);
+			if (is_main && type === "body" && entity.waterDepthFrame === null) {
+				const frame = entity._waterDepthFrameBuffer || (entity._waterDepthFrameBuffer = { position: /* @__PURE__ */ new Int32Array(2) });
+				frame.layers = layers;
+				frame.spr = spr;
+				frame.pal = pal;
+				frame.size = files.size;
+				frame.position.set(_position);
+				entity.waterDepthFrame = frame;
+			}
 			if (is_main && animation.pos.length) {
 				position[0] = animation.pos[0].x;
 				position[1] = animation.pos[0].y;
@@ -305043,6 +306265,30 @@ function sortByPriority(a, b) {
 	return aDepth - bDepth;
 }
 /**
+* Player-relative view-area culling parameters (performance mode only)
+*
+* @returns {object|null} { x, y, viewAreaSq } or null when culling is off
+*/
+function getCulling() {
+	if (!GraphicsSettings.performanceMode || !SessionStorage_default.Entity || !SessionStorage_default.Entity.position) return null;
+	return {
+		x: SessionStorage_default.Entity.position[0],
+		y: SessionStorage_default.Entity.position[1],
+		viewAreaSq: GraphicsSettings.viewArea * GraphicsSettings.viewArea
+	};
+}
+/**
+* @param {object|null} culling from getCulling()
+* @param {Entity} entity
+* @returns {boolean} true when the entity is outside the view area
+*/
+function isCulled(culling, entity) {
+	if (!culling) return false;
+	const dx = entity.position[0] - culling.x;
+	const dy = entity.position[1] - culling.y;
+	return dx * dx + dy * dy > culling.viewAreaSq;
+}
+/**
 * Render all entities (picking or not)
 *
 * @param {object} gl webgl context
@@ -305065,13 +306311,7 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 		_pickSortDirty = true;
 	}
 	SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
-	const doCulling = GraphicsSettings.performanceMode;
-	let playerX, playerY, viewAreaSq;
-	if (doCulling && SessionStorage_default.Entity && SessionStorage_default.Entity.position) {
-		playerX = SessionStorage_default.Entity.position[0];
-		playerY = SessionStorage_default.Entity.position[1];
-		viewAreaSq = GraphicsSettings.viewArea * GraphicsSettings.viewArea;
-	}
+	const culling = getCulling();
 	for (i = 0, count = _list.length; i < count; ++i) if (_list[i].objecttype != _list[i].constructor.TYPE_EFFECT && !renderEffects || _list[i].objecttype == _list[i].constructor.TYPE_EFFECT && renderEffects) {
 		if (_list[i].remove_tick && _list[i].remove_tick + _list[i].remove_delay < tick) {
 			const entityFocus = getFocusEntity();
@@ -305088,13 +306328,28 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 			_pickSortDirty = true;
 			continue;
 		}
-		if (doCulling) {
-			const dx = _list[i].position[0] - playerX;
-			const dy = _list[i].position[1] - playerY;
-			if (dx * dx + dy * dy > viewAreaSq) continue;
-		}
+		if (isCulled(culling, _list[i])) continue;
 		_list[i].render(modelView, projection);
 	}
+	SpriteRenderer.unbind(gl);
+}
+/**
+* Depth-only pass for entities standing in water, run after all entities
+* are drawn and right before the water so it can hide their submerged part
+* without occluding other sprites.
+*
+* @param {object} gl context
+* @param {mat4} modelView
+* @param {mat4} projection
+* @param {object} fog
+*/
+function renderWaterDepth(gl, modelView, projection, fog) {
+	if (!_list.length || !Water_default.hasWater()) return;
+	const culling = getCulling();
+	SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
+	gl.colorMask(false, false, false, false);
+	for (let i = 0, count = _list.length; i < count; ++i) if (!isCulled(culling, _list[i])) _list[i].renderWaterDepth();
+	gl.colorMask(true, true, true, true);
 	SpriteRenderer.unbind(gl);
 }
 /**
@@ -305235,6 +306490,7 @@ var init_EntityManager = __esmMin((() => {
 	init_PathFinding();
 	init_Graphics();
 	init_Altitude();
+	init_Water();
 	init_GR2ModelRenderer();
 	_list = [];
 	_gidMap = /* @__PURE__ */ new Map();
@@ -305268,6 +306524,7 @@ var init_EntityManager = __esmMin((() => {
 		removeLife,
 		clearLifeCache,
 		render: render$5,
+		renderWaterDepth,
 		intersect,
 		setSupportPicking,
 		pendingTransformations,
@@ -305288,6 +306545,7 @@ function bindMouseEvents() {
 	const cursorCSS = `
 		.custom-cursor * { cursor: none!important; }
 		.custom-cursor .cursor { display: block; }
+		.ro-touch-input .cursor { display: none !important; }
 		.cursor { pointer-events: none; z-index: 9999; position: fixed; width: 50px; height: 50px; overflow: hidden; display: none; }
 		.cursor__sprite { position: absolute; top: 0; left: 0; }
 	`;
@@ -306273,7 +307531,7 @@ var init_GUIComponent = __esmMin((() => {
 			const zList = [];
 			for (const name in components) {
 				const other = components[name];
-				if (other === this || !other.__active) continue;
+				if (other === this || !other.__active || !other.needFocus) continue;
 				zList.push(parseInt(this._getZIndex(other), 10));
 			}
 			this._setZIndex(this, Math.max(50, ...zList) + 1);
@@ -307007,24 +308265,510 @@ var init_Queue = __esmMin((() => {
 //#region src/UI/Components/MobileUI/MobileUI.html?raw
 var MobileUI_default$2;
 var init_MobileUI$2 = __esmMin((() => {
-	MobileUI_default$2 = "<div id=\"MobileUI\">\r\n	<button id=\"toggleUIButton\" class=\"buttons\">🛠️</button>\r\n\r\n	<div id=\"topBar\" class=\"buttonBar disabled\">\r\n		<button id=\"fullscreenButton\" class=\"buttons mobileKeys secondary horizontal\">⛶</button>\r\n	</div>\r\n\r\n	<!-- Joystick -MicromeX -->\r\n	<div id=\"joystickContainer\" class=\"joystick-container disabled\">\r\n		<div id=\"joystickBase\" class=\"joystick-base\">\r\n			<div id=\"joystickThumb\" class=\"joystick-thumb\"></div>\r\n		</div>\r\n	</div>\r\n\r\n	<!-- Functional Buttons -MicromeX -->\r\n	<div id=\"buttonContainer\" class=\"buttonContainer disabled\">\r\n		<!-- Functional Buttons -->\r\n		<button id=\"f1Button\" class=\"FButton mobileKeys vertical secondary disabled\">F1</button>\r\n		<button id=\"f2Button\" class=\"FButton mobileKeys vertical secondary disabled\">F2</button>\r\n		<button id=\"f3Button\" class=\"FButton mobileKeys vertical secondary disabled\">F3</button>\r\n		<button id=\"f4Button\" class=\"FButton mobileKeys vertical secondary disabled\">F4</button>\r\n		<button id=\"f5Button\" class=\"FButton mobileKeys vertical secondary disabled\">F5</button>\r\n		<button id=\"f6Button\" class=\"FButton mobileKeys vertical secondary disabled\">F6</button>\r\n		<button id=\"f7Button\" class=\"FButton mobileKeys vertical secondary disabled\">F7</button>\r\n		<button id=\"f8Button\" class=\"FButton mobileKeys vertical secondary disabled\">F8</button>\r\n		<button id=\"f9Button\" class=\"FButton mobileKeys vertical secondary disabled\">F9</button>\r\n\r\n		<button id=\"n1Button\" class=\"FButton mobileKeys vertical secondary disabled\">1</button>\r\n		<button id=\"n2Button\" class=\"FButton mobileKeys vertical secondary disabled\">2</button>\r\n		<button id=\"n3Button\" class=\"FButton mobileKeys vertical secondary disabled\">3</button>\r\n		<button id=\"n4Button\" class=\"FButton mobileKeys vertical secondary disabled\">4</button>\r\n		<button id=\"n5Button\" class=\"FButton mobileKeys vertical secondary disabled\">5</button>\r\n		<button id=\"n6Button\" class=\"FButton mobileKeys vertical secondary disabled\">6</button>\r\n		<button id=\"n7Button\" class=\"FButton mobileKeys vertical secondary disabled\">7</button>\r\n		<button id=\"n8Button\" class=\"FButton mobileKeys vertical secondary disabled\">8</button>\r\n		<button id=\"n9Button\" class=\"FButton mobileKeys vertical secondary disabled\">9</button>\r\n\r\n		<button id=\"qButton\" class=\"FButton mobileKeys vertical secondary disabled\">Q</button>\r\n		<button id=\"wButton\" class=\"FButton mobileKeys vertical secondary disabled\">W</button>\r\n		<button id=\"eButton\" class=\"FButton mobileKeys vertical secondary disabled\">E</button>\r\n		<button id=\"rButton\" class=\"FButton mobileKeys vertical secondary disabled\">R</button>\r\n		<button id=\"tButton\" class=\"FButton mobileKeys vertical secondary disabled\">T</button>\r\n		<button id=\"yButton\" class=\"FButton mobileKeys vertical secondary disabled\">Y</button>\r\n		<button id=\"uButton\" class=\"FButton mobileKeys vertical secondary disabled\">U</button>\r\n		<button id=\"iButton\" class=\"FButton mobileKeys vertical secondary disabled\">I</button>\r\n		<button id=\"oButton\" class=\"FButton mobileKeys vertical secondary disabled\">O</button>\r\n\r\n		<button id=\"aButton\" class=\"FButton mobileKeys vertical secondary disabled\">A</button>\r\n		<button id=\"sButton\" class=\"FButton mobileKeys vertical secondary disabled\">S</button>\r\n		<button id=\"dButton\" class=\"FButton mobileKeys vertical secondary disabled\">D</button>\r\n		<button id=\"fButton\" class=\"FButton mobileKeys vertical secondary disabled\">F</button>\r\n		<button id=\"gButton\" class=\"FButton mobileKeys vertical secondary disabled\">G</button>\r\n		<button id=\"hButton\" class=\"FButton mobileKeys vertical secondary disabled\">H</button>\r\n		<button id=\"jButton\" class=\"FButton mobileKeys vertical secondary disabled\">J</button>\r\n		<button id=\"kButton\" class=\"FButton mobileKeys vertical secondary disabled\">K</button>\r\n		<button id=\"lButton\" class=\"FButton mobileKeys vertical secondary disabled\">L</button>\r\n\r\n		<button id=\"pickupButton\" class=\"pickupButton mobileKeys vertical secondary disabled\">🖐</button>\r\n		<!-- Pick Up Button -MicromeX -->\r\n		<button id=\"talktonpcButton\" class=\"talktonpcButton mobileKeys vertical secondary disabled\">💬</button>\r\n		<!-- Talk to NPC Button -MicromeX -->\r\n		<button id=\"switchshorcutButton\" class=\"switchshorcutButton mobileKeys vertical secondary disabled\">🔄</button>\r\n		<!-- Auto Skill Button -MicromeX -->\r\n\r\n		<!-- Attack Button -MicromeX -->\r\n		<button id=\"attackButton\" class=\"atkButton mobileKeys vertical secondary disabled\">⚔️</button>\r\n	</div>\r\n\r\n	<div id=\"leftBar\" class=\"buttonBar disabled\">\r\n		<button id=\"f10Button\" class=\"buttons mobileKeys secondary vertical\">F10</button><br />\r\n		<button id=\"f12Button\" class=\"buttons mobileKeys secondary vertical\">F12</button><br />\r\n		<button id=\"insButton\" class=\"buttons mobileKeys secondary vertical\">🧎</button><br />\r\n	</div>\r\n\r\n	<div id=\"rightBar\" class=\"buttonBar disabled\">\r\n		<button id=\"toggleStatusButton\" class=\"buttons mobileKeys secondary vertical\">👀</button><br />\r\n		<button id=\"toggleTargetingButton\" class=\"buttons mobileKeys secondary vertical\">⚙️</button><br />\r\n		<button id=\"toggleAutoFollowButton\" class=\"buttons mobileKeys vertical secondary disabled\">👥</button><br />\r\n		<button id=\"toggleAutoTargetButton\" class=\"buttons mobileKeys vertical secondary disabled\">🎯</button><br />\r\n	</div>\r\n</div>\r\n";
+	MobileUI_default$2 = "<div id=\"MobileUI\">\r\n	<div id=\"buttonTip\" class=\"buttonTip disabled\"></div>\r\n\r\n	<div id=\"guideWindow\" class=\"guideWindow disabled\">\r\n		<div class=\"guideHeader\">\r\n			<span id=\"guideTitle\" class=\"guideTitle\"></span>\r\n			<label class=\"guideNever\"\r\n				><input id=\"guideNeverShow\" type=\"checkbox\" /><span id=\"guideNeverLabel\"></span\r\n			></label>\r\n			<button id=\"guideCloseButton\" class=\"guideClose\">✕</button>\r\n		</div>\r\n		<div id=\"guideBody\" class=\"guideBody\"></div>\r\n	</div>\r\n	<button id=\"toggleUIButton\" class=\"buttons\">🛠️</button>\r\n\r\n	<div id=\"topBar\" class=\"buttonBar disabled\">\r\n		<button id=\"fullscreenButton\" class=\"buttons mobileKeys secondary horizontal\">⛶</button>\r\n	</div>\r\n\r\n	<!-- Joystick -MicromeX -->\r\n	<div id=\"joystickContainer\" class=\"joystick-container disabled\">\r\n		<div id=\"joystickBase\" class=\"joystick-base\">\r\n			<div id=\"joystickThumb\" class=\"joystick-thumb\"></div>\r\n		</div>\r\n	</div>\r\n\r\n	<!-- Functional Buttons -MicromeX -->\r\n	<div id=\"buttonContainer\" class=\"buttonContainer disabled\">\r\n		<!-- Functional Buttons -->\r\n		<button id=\"f1Button\" data-tip-arg=\"F1\" class=\"FButton mobileKeys vertical secondary disabled\">F1</button>\r\n		<button id=\"f2Button\" data-tip-arg=\"F2\" class=\"FButton mobileKeys vertical secondary disabled\">F2</button>\r\n		<button id=\"f3Button\" data-tip-arg=\"F3\" class=\"FButton mobileKeys vertical secondary disabled\">F3</button>\r\n		<button id=\"f4Button\" data-tip-arg=\"F4\" class=\"FButton mobileKeys vertical secondary disabled\">F4</button>\r\n		<button id=\"f5Button\" data-tip-arg=\"F5\" class=\"FButton mobileKeys vertical secondary disabled\">F5</button>\r\n		<button id=\"f6Button\" data-tip-arg=\"F6\" class=\"FButton mobileKeys vertical secondary disabled\">F6</button>\r\n		<button id=\"f7Button\" data-tip-arg=\"F7\" class=\"FButton mobileKeys vertical secondary disabled\">F7</button>\r\n		<button id=\"f8Button\" data-tip-arg=\"F8\" class=\"FButton mobileKeys vertical secondary disabled\">F8</button>\r\n		<button id=\"f9Button\" data-tip-arg=\"F9\" class=\"FButton mobileKeys vertical secondary disabled\">F9</button>\r\n\r\n		<button id=\"n1Button\" data-tip-arg=\"1\" class=\"FButton mobileKeys vertical secondary disabled\">1</button>\r\n		<button id=\"n2Button\" data-tip-arg=\"2\" class=\"FButton mobileKeys vertical secondary disabled\">2</button>\r\n		<button id=\"n3Button\" data-tip-arg=\"3\" class=\"FButton mobileKeys vertical secondary disabled\">3</button>\r\n		<button id=\"n4Button\" data-tip-arg=\"4\" class=\"FButton mobileKeys vertical secondary disabled\">4</button>\r\n		<button id=\"n5Button\" data-tip-arg=\"5\" class=\"FButton mobileKeys vertical secondary disabled\">5</button>\r\n		<button id=\"n6Button\" data-tip-arg=\"6\" class=\"FButton mobileKeys vertical secondary disabled\">6</button>\r\n		<button id=\"n7Button\" data-tip-arg=\"7\" class=\"FButton mobileKeys vertical secondary disabled\">7</button>\r\n		<button id=\"n8Button\" data-tip-arg=\"8\" class=\"FButton mobileKeys vertical secondary disabled\">8</button>\r\n		<button id=\"n9Button\" data-tip-arg=\"9\" class=\"FButton mobileKeys vertical secondary disabled\">9</button>\r\n\r\n		<button id=\"qButton\" data-tip-arg=\"Q\" class=\"FButton mobileKeys vertical secondary disabled\">Q</button>\r\n		<button id=\"wButton\" data-tip-arg=\"W\" class=\"FButton mobileKeys vertical secondary disabled\">W</button>\r\n		<button id=\"eButton\" data-tip-arg=\"E\" class=\"FButton mobileKeys vertical secondary disabled\">E</button>\r\n		<button id=\"rButton\" data-tip-arg=\"R\" class=\"FButton mobileKeys vertical secondary disabled\">R</button>\r\n		<button id=\"tButton\" data-tip-arg=\"T\" class=\"FButton mobileKeys vertical secondary disabled\">T</button>\r\n		<button id=\"yButton\" data-tip-arg=\"Y\" class=\"FButton mobileKeys vertical secondary disabled\">Y</button>\r\n		<button id=\"uButton\" data-tip-arg=\"U\" class=\"FButton mobileKeys vertical secondary disabled\">U</button>\r\n		<button id=\"iButton\" data-tip-arg=\"I\" class=\"FButton mobileKeys vertical secondary disabled\">I</button>\r\n		<button id=\"oButton\" data-tip-arg=\"O\" class=\"FButton mobileKeys vertical secondary disabled\">O</button>\r\n\r\n		<button id=\"aButton\" data-tip-arg=\"A\" class=\"FButton mobileKeys vertical secondary disabled\">A</button>\r\n		<button id=\"sButton\" data-tip-arg=\"S\" class=\"FButton mobileKeys vertical secondary disabled\">S</button>\r\n		<button id=\"dButton\" data-tip-arg=\"D\" class=\"FButton mobileKeys vertical secondary disabled\">D</button>\r\n		<button id=\"fButton\" data-tip-arg=\"F\" class=\"FButton mobileKeys vertical secondary disabled\">F</button>\r\n		<button id=\"gButton\" data-tip-arg=\"G\" class=\"FButton mobileKeys vertical secondary disabled\">G</button>\r\n		<button id=\"hButton\" data-tip-arg=\"H\" class=\"FButton mobileKeys vertical secondary disabled\">H</button>\r\n		<button id=\"jButton\" data-tip-arg=\"J\" class=\"FButton mobileKeys vertical secondary disabled\">J</button>\r\n		<button id=\"kButton\" data-tip-arg=\"K\" class=\"FButton mobileKeys vertical secondary disabled\">K</button>\r\n		<button id=\"lButton\" data-tip-arg=\"L\" class=\"FButton mobileKeys vertical secondary disabled\">L</button>\r\n\r\n		<button id=\"pickupButton\" class=\"pickupButton mobileKeys vertical secondary disabled\">🖐</button>\r\n		<!-- Pick Up Button -MicromeX -->\r\n		<button id=\"talktonpcButton\" class=\"talktonpcButton mobileKeys vertical secondary disabled\">💬</button>\r\n		<!-- Talk to NPC Button -MicromeX -->\r\n		<button id=\"switchshorcutButton\" class=\"switchshorcutButton mobileKeys vertical secondary disabled\">🔄</button>\r\n		<!-- Auto Skill Button -MicromeX -->\r\n\r\n		<!-- Attack Button -MicromeX -->\r\n		<button id=\"attackButton\" class=\"atkButton mobileKeys vertical secondary disabled\">⚔️</button>\r\n	</div>\r\n\r\n	<div id=\"leftBar\" class=\"buttonBar disabled\">\r\n		<button id=\"f10Button\" class=\"buttons mobileKeys secondary vertical\">⏫</button><br />\r\n		<button id=\"f12Button\" class=\"buttons mobileKeys secondary vertical\">🔢</button><br />\r\n		<button id=\"insButton\" class=\"buttons mobileKeys secondary vertical\">🧎</button><br />\r\n	</div>\r\n\r\n	<div id=\"rightBar\" class=\"buttonBar disabled\">\r\n		<button id=\"toggleStatusButton\" class=\"buttons mobileKeys secondary vertical active\">👀</button><br />\r\n		<button id=\"toggleTargetingButton\" class=\"buttons mobileKeys secondary vertical\">⚙️</button><br />\r\n		<button id=\"toggleAutoFollowButton\" class=\"buttons mobileKeys vertical secondary disabled\">👥</button><br />\r\n		<button id=\"toggleAutoTargetButton\" class=\"buttons mobileKeys vertical secondary disabled\">🎯</button><br />\r\n	</div>\r\n</div>\r\n";
 }));
 //#endregion
 //#region src/UI/Components/MobileUI/MobileUI.css?raw
 var MobileUI_default$1;
 var init_MobileUI$1 = __esmMin((() => {
-	MobileUI_default$1 = ":host {\r\n	width: 100%;\r\n	height: 100%;\r\n	pointer-events: none;\r\n}\r\n\r\n#MobileUI {\r\n	position: absolute;\r\n	top: 0;\r\n	left: 0;\r\n	width: 100%;\r\n	height: 100%;\r\n	pointer-events: none;\r\n}\r\n\r\n#MobileUI button,\r\n#MobileUI .joystick-base {\r\n	pointer-events: auto;\r\n}\r\n\r\n#MobileUI * {\r\n	z-index: 1000;\r\n}\r\n\r\n#MobileUI .buttonBar,\r\n#MobileUI #toggleUIButton {\r\n	position: absolute;\r\n}\r\n\r\n#MobileUI #toggleUIButton {\r\n	top: 1%;\r\n	left: 1%;\r\n	width: 6.5vmin;\r\n	height: 6.5vmin;\r\n}\r\n\r\n#MobileUI .buttons {\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border-radius: 6px;\r\n	border: 1px solid grey;\r\n	font-size: 4vmin;\r\n	font-weight: bold;\r\n}\r\n\r\n#MobileUI .mobileKeys {\r\n	visibility: inherit;\r\n}\r\n\r\n#MobileUI .horizontal {\r\n	margin: 0 3.5vmin;\r\n}\r\n\r\n#MobileUI .vertical {\r\n	margin: 3.5vmin 0;\r\n}\r\n\r\n#MobileUI .disabled {\r\n	visibility: hidden;\r\n}\r\n\r\n#MobileUI #topBar {\r\n	left: 50%;\r\n	top: 1%;\r\n	transform: translate(-50%, 0);\r\n}\r\n\r\n#MobileUI #leftBar {\r\n	left: 1%;\r\n	bottom: 35%;\r\n	transform: translate(0, 50%);\r\n}\r\n\r\n#MobileUI #rightBar {\r\n	right: 1%;\r\n	bottom: 35%;\r\n	transform: translate(0, 50%);\r\n}\r\n\r\n#MobileUI #rightBar .buttons {\r\n	float: right;\r\n}\r\n\r\n#MobileUI .active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 8px;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n#MobileUI #toggleUIButton:active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 8px;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n@keyframes pulse {\r\n	0% {\r\n		box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	}\r\n	50% {\r\n		box-shadow: 0px 6px 12px rgba(144, 238, 144, 0.6);\r\n	}\r\n	100% {\r\n		box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	}\r\n}\r\n\r\n#MobileUI .pressed {\r\n	background: rgba(193, 255, 255, 0.33);\r\n}\r\n\r\n#MobileUI .primary {\r\n	width: 11vmin;\r\n	height: 11vmin;\r\n}\r\n\r\n#MobileUI .secondary {\r\n	width: 7.5vmin;\r\n	height: 7.5vmin;\r\n}\r\n\r\n/* Container for all buttons -MicromeX */\r\n#MobileUI #buttonContainer {\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	position: absolute;\r\n	bottom: 10%;\r\n	right: 10%;\r\n	width: 37.5vmin;\r\n	height: 37.5vmin;\r\n	z-index: 1000;\r\n}\r\n\r\n/* Attack Button (center and larger) -MicromeX */\r\n#MobileUI .atkButton {\r\n	position: absolute;\r\n	width: 17.5vmin;\r\n	height: 17.5vmin;\r\n	background-color: #f44336;\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 7vmin;\r\n	color: white;\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n/* Functional Buttons (around the attack button) -MicromeX */\r\n#MobileUI .pickupButton {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 6.25vmin;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n#MobileUI .talktonpcButton {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 6.25vmin;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n#MobileUI .switchshorcutButton {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 6.25vmin;\r\n	font-weight: bold;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n/* Functional Buttons (smaller and proportional) -MicromeX */\r\n#MobileUI .FButton {\r\n	position: absolute;\r\n	width: 7.5vmin;\r\n	height: 7.5vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 3.75vmin;\r\n	font-weight: bold;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #f1Button {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f2Button {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f3Button {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f4Button {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f5Button {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f6Button {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f7Button {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f8Button {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f9Button {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #n1Button {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n2Button {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n3Button {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n4Button {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n5Button {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n6Button {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n7Button {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n8Button {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n9Button {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #qButton {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #wButton {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #eButton {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #rButton {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #tButton {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #yButton {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #uButton {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #iButton {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #oButton {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #aButton {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #sButton {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #dButton {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #fButton {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #gButton {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #hButton {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #jButton {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #kButton {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #lButton {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Pickup Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #attackButton {\r\n	bottom: -10%;\r\n	left: 60%;\r\n	transform: translate(-50%, 0);\r\n}\r\n/* Pickup Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #pickupButton {\r\n	bottom: 10%;\r\n	left: 105%;\r\n	transform: translate(-50%, 0);\r\n}\r\n\r\n/* TalkToNpc Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #talktonpcButton {\r\n	bottom: -23%;\r\n	left: 105%;\r\n	transform: translate(-50%, 0);\r\n}\r\n/* TalkToNpc Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #switchshorcutButton {\r\n	bottom: 43%;\r\n	left: 105%;\r\n	transform: translate(-50%, 0);\r\n}\r\n\r\n/* Hover Effect for Buttons -MicromeX */\r\n#MobileUI #f1Button:active,\r\n#MobileUI #f2Button:active,\r\n#MobileUI #f3Button:active,\r\n#MobileUI #f4Button:active,\r\n#MobileUI #f5Button:active,\r\n#MobileUI #f6Button:active,\r\n#MobileUI #f7Button:active,\r\n#MobileUI #f8Button:active,\r\n#MobileUI #f9Button:active,\r\n#MobileUI #n1Button:active,\r\n#MobileUI #n2Button:active,\r\n#MobileUI #n3Button:active,\r\n#MobileUI #n4Button:active,\r\n#MobileUI #n5Button:active,\r\n#MobileUI #n6Button:active,\r\n#MobileUI #n7Button:active,\r\n#MobileUI #n8Button:active,\r\n#MobileUI #n9Button:active,\r\n#MobileUI #qButton:active,\r\n#MobileUI #wButton:active,\r\n#MobileUI #eButton:active,\r\n#MobileUI #rButton:active,\r\n#MobileUI #tButton:active,\r\n#MobileUI #yButton:active,\r\n#MobileUI #uButton:active,\r\n#MobileUI #iButton:active,\r\n#MobileUI #oButton:active,\r\n#MobileUI #aButton:active,\r\n#MobileUI #sButton:active,\r\n#MobileUI #dButton:active,\r\n#MobileUI #fButton:active,\r\n#MobileUI #gButton:active,\r\n#MobileUI #hButton:active,\r\n#MobileUI #jButton:active,\r\n#MobileUI #kButton:active,\r\n#MobileUI #lButton:active,\r\n#MobileUI #switchshorcutButton:active,\r\n#MobileUI #pickupButton:active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 50%;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n#MobileUI #talktonpcButton:active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 50%;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n#MobileUI #attackButton:active {\r\n	background-color: #4caf50;\r\n	box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.4);\r\n	border: 2px solid #388e3c;\r\n	transition:\r\n		transform 0.2s ease,\r\n		background-color 0.2s ease,\r\n		box-shadow 0.2s ease,\r\n		border 0.2s ease;\r\n}\r\n\r\n/* Joystick container -MicromeX */\r\n#MobileUI .joystick-container {\r\n	position: absolute;\r\n	bottom: 7%;\r\n	left: 10%;\r\n	width: 25vmin;\r\n	height: 25vmin;\r\n	z-index: 1000;\r\n}\r\n\r\n/* Joystick base -MicromeX */\r\n#MobileUI .joystick-base {\r\n	position: relative;\r\n	width: 100%;\r\n	height: 100%;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border-radius: 50%;\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n}\r\n\r\n/* Joystick thumb -MicromeX */\r\n#MobileUI .joystick-thumb {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: radial-gradient(circle, rgba(236, 240, 241, 1) 70%, rgba(189, 195, 199, 1) 100%);\r\n	border-radius: 50%;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.4);\r\n	touch-action: none;\r\n	cursor: grab;\r\n}\r\n";
+	MobileUI_default$1 = ":host {\r\n	width: 100%;\r\n	height: 100%;\r\n	pointer-events: none;\r\n}\r\n\r\n#MobileUI {\r\n	position: absolute;\r\n	top: 0;\r\n	left: 0;\r\n	width: 100%;\r\n	height: 100%;\r\n	pointer-events: none;\r\n}\r\n\r\n#MobileUI button,\r\n#MobileUI .joystick-base {\r\n	pointer-events: auto;\r\n}\r\n\r\n#MobileUI * {\r\n	z-index: 1000;\r\n}\r\n\r\n#MobileUI .buttonBar,\r\n#MobileUI #toggleUIButton {\r\n	position: absolute;\r\n}\r\n\r\n#MobileUI #toggleUIButton {\r\n	top: 1%;\r\n	left: 1%;\r\n	width: 6.5vmin;\r\n	height: 6.5vmin;\r\n}\r\n\r\n#MobileUI .buttons {\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border-radius: 6px;\r\n	border: 1px solid grey;\r\n	font-size: 4vmin;\r\n	font-weight: bold;\r\n}\r\n\r\n#MobileUI .mobileKeys {\r\n	visibility: inherit;\r\n}\r\n\r\n#MobileUI .horizontal {\r\n	margin: 0 3.5vmin;\r\n}\r\n\r\n#MobileUI .vertical {\r\n	margin: 3.5vmin 0;\r\n}\r\n\r\n#MobileUI .disabled {\r\n	visibility: hidden;\r\n}\r\n\r\n#MobileUI #topBar {\r\n	left: 50%;\r\n	top: 1%;\r\n	transform: translate(-50%, 0);\r\n}\r\n\r\n#MobileUI #leftBar {\r\n	left: 1%;\r\n	bottom: 35%;\r\n	transform: translate(0, 50%);\r\n}\r\n\r\n#MobileUI #rightBar {\r\n	right: 1%;\r\n	bottom: 35%;\r\n	transform: translate(0, 50%);\r\n}\r\n\r\n#MobileUI #rightBar .buttons {\r\n	float: right;\r\n}\r\n\r\n#MobileUI .active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 8px;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n#MobileUI #toggleUIButton:active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 8px;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n@keyframes pulse {\r\n	0% {\r\n		box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	}\r\n	50% {\r\n		box-shadow: 0px 6px 12px rgba(144, 238, 144, 0.6);\r\n	}\r\n	100% {\r\n		box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	}\r\n}\r\n\r\n#MobileUI .pressed {\r\n	background: rgba(193, 255, 255, 0.33);\r\n}\r\n\r\n#MobileUI .buttonTip {\r\n	position: fixed;\r\n	z-index: 1001;\r\n	max-width: 70vw;\r\n	padding: 1.2vmin 2vmin;\r\n	background: rgba(0, 0, 0, 0.8);\r\n	border: 1px solid #c6c6c6;\r\n	border-radius: 6px;\r\n	color: white;\r\n	font-size: 3.5vmin;\r\n	text-align: center;\r\n	text-shadow: 1px 1px black;\r\n	pointer-events: none;\r\n}\r\n\r\n#MobileUI .guideWindow {\r\n	position: fixed;\r\n	z-index: 1002;\r\n	top: 50%;\r\n	left: 50%;\r\n	transform: translate(-50%, -50%);\r\n	width: min(90vw, 640px);\r\n	max-height: 85vh;\r\n	display: flex;\r\n	flex-direction: column;\r\n	background: rgba(20, 20, 20, 0.92);\r\n	border: 1px solid #c6c6c6;\r\n	border-radius: 8px;\r\n	color: white;\r\n	font-size: 3.2vmin;\r\n	text-shadow: 1px 1px black;\r\n	pointer-events: auto;\r\n	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);\r\n}\r\n\r\n#MobileUI .guideWindow.disabled {\r\n	display: none;\r\n}\r\n\r\n/* Guide opened on a non-touch device: hide all the mobile controls */\r\n#MobileUI.guideOnly > :not(#guideWindow) {\r\n	visibility: hidden;\r\n}\r\n\r\n#MobileUI .guideHeader {\r\n	flex: 0 0 auto;\r\n	display: flex;\r\n	align-items: center;\r\n	gap: 2vmin;\r\n	padding: 1.5vmin 2vmin;\r\n	border-bottom: 1px solid #666;\r\n	background: rgba(60, 60, 60, 0.9);\r\n	border-radius: 8px 8px 0 0;\r\n}\r\n\r\n#MobileUI .guideTitle {\r\n	flex: 1 1 auto;\r\n	font-weight: bold;\r\n	font-size: 3.8vmin;\r\n}\r\n\r\n#MobileUI .guideNever {\r\n	display: flex;\r\n	align-items: center;\r\n	gap: 1vmin;\r\n	white-space: nowrap;\r\n	font-size: 2.8vmin;\r\n	cursor: pointer;\r\n}\r\n\r\n#MobileUI .guideNever input {\r\n	width: 3.5vmin;\r\n	height: 3.5vmin;\r\n	margin: 0;\r\n}\r\n\r\n#MobileUI .guideClose {\r\n	width: 6vmin;\r\n	height: 6vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid grey;\r\n	border-radius: 6px;\r\n	color: white;\r\n	font-size: 3.5vmin;\r\n	font-weight: bold;\r\n}\r\n\r\n#MobileUI .guideBody {\r\n	flex: 1 1 auto;\r\n	overflow-y: auto;\r\n	-webkit-overflow-scrolling: touch;\r\n	touch-action: pan-y;\r\n	padding: 2vmin;\r\n	line-height: 1.4;\r\n}\r\n\r\n#MobileUI .guideBody p {\r\n	margin: 0 0 2vmin;\r\n}\r\n\r\n#MobileUI .guideSection {\r\n	margin: 2.5vmin 0 1vmin;\r\n	font-weight: bold;\r\n	color: #ffd97a;\r\n	border-bottom: 1px solid #555;\r\n}\r\n\r\n#MobileUI .guideEntry {\r\n	display: flex;\r\n	align-items: flex-start;\r\n	gap: 2vmin;\r\n	margin-bottom: 1.5vmin;\r\n}\r\n\r\n#MobileUI .guideIcon {\r\n	flex: 0 0 9vmin;\r\n	text-align: center;\r\n	font-size: 4.5vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid grey;\r\n	border-radius: 6px;\r\n	padding: 0.5vmin 0;\r\n}\r\n\r\n#MobileUI .guideText {\r\n	flex: 1 1 auto;\r\n	white-space: pre-line;\r\n}\r\n\r\n#MobileUI .guideLabel {\r\n	font-weight: bold;\r\n}\r\n\r\n#MobileUI .primary {\r\n	width: 11vmin;\r\n	height: 11vmin;\r\n}\r\n\r\n#MobileUI .secondary {\r\n	width: 7.5vmin;\r\n	height: 7.5vmin;\r\n}\r\n\r\n/* Container for all buttons -MicromeX */\r\n#MobileUI #buttonContainer {\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	position: absolute;\r\n	bottom: 10%;\r\n	right: max(10%, 80px);\r\n	width: 37.5vmin;\r\n	height: 37.5vmin;\r\n	z-index: 1000;\r\n}\r\n\r\n/* Attack Button (center and larger) -MicromeX */\r\n#MobileUI .atkButton {\r\n	position: absolute;\r\n	width: 17.5vmin;\r\n	height: 17.5vmin;\r\n	background-color: #f44336;\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 7vmin;\r\n	color: white;\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n/* Functional Buttons (around the attack button) -MicromeX */\r\n#MobileUI .pickupButton {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 6.25vmin;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n#MobileUI .talktonpcButton {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 6.25vmin;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n#MobileUI .switchshorcutButton {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 6.25vmin;\r\n	font-weight: bold;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n/* Functional Buttons (smaller and proportional) -MicromeX */\r\n#MobileUI .FButton {\r\n	position: absolute;\r\n	width: 7.5vmin;\r\n	height: 7.5vmin;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border: 1px solid #666;\r\n	border-radius: 50%;\r\n	font-size: 3.75vmin;\r\n	font-weight: bold;\r\n	color: rgb(0, 0, 0);\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);\r\n	cursor: pointer;\r\n}\r\n\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #f1Button {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f2Button {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f3Button {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f4Button {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f5Button {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f6Button {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f7Button {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f8Button {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #f9Button {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #n1Button {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n2Button {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n3Button {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n4Button {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n5Button {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n6Button {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n7Button {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n8Button {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #n9Button {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #qButton {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #wButton {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #eButton {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #rButton {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #tButton {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #yButton {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #uButton {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #iButton {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #oButton {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Positioning Buttons Around Attack Button -MicromeX */\r\n#MobileUI #aButton {\r\n	top: 97%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #sButton {\r\n	top: 78%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #dButton {\r\n	top: 56%;\r\n	left: 24%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #fButton {\r\n	top: 37%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #gButton {\r\n	top: 30%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #hButton {\r\n	top: 37%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #jButton {\r\n	top: 7%;\r\n	left: 35%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #kButton {\r\n	top: 7%;\r\n	left: 57%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n#MobileUI #lButton {\r\n	top: 7%;\r\n	left: 80%;\r\n	transform: translate(-50%, -50%);\r\n}\r\n/* Pickup Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #attackButton {\r\n	bottom: -10%;\r\n	left: 60%;\r\n	transform: translate(-50%, 0);\r\n}\r\n/* Pickup Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #pickupButton {\r\n	bottom: 10%;\r\n	left: 105%;\r\n	transform: translate(-50%, 0);\r\n}\r\n\r\n/* TalkToNpc Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #talktonpcButton {\r\n	bottom: -23%;\r\n	left: 105%;\r\n	transform: translate(-50%, 0);\r\n}\r\n/* TalkToNpc Button (slightly below attackButton) -MicromeX */\r\n#MobileUI #switchshorcutButton {\r\n	bottom: 43%;\r\n	left: 105%;\r\n	transform: translate(-50%, 0);\r\n}\r\n\r\n/* Hover Effect for Buttons -MicromeX */\r\n#MobileUI #f1Button:active,\r\n#MobileUI #f2Button:active,\r\n#MobileUI #f3Button:active,\r\n#MobileUI #f4Button:active,\r\n#MobileUI #f5Button:active,\r\n#MobileUI #f6Button:active,\r\n#MobileUI #f7Button:active,\r\n#MobileUI #f8Button:active,\r\n#MobileUI #f9Button:active,\r\n#MobileUI #n1Button:active,\r\n#MobileUI #n2Button:active,\r\n#MobileUI #n3Button:active,\r\n#MobileUI #n4Button:active,\r\n#MobileUI #n5Button:active,\r\n#MobileUI #n6Button:active,\r\n#MobileUI #n7Button:active,\r\n#MobileUI #n8Button:active,\r\n#MobileUI #n9Button:active,\r\n#MobileUI #qButton:active,\r\n#MobileUI #wButton:active,\r\n#MobileUI #eButton:active,\r\n#MobileUI #rButton:active,\r\n#MobileUI #tButton:active,\r\n#MobileUI #yButton:active,\r\n#MobileUI #uButton:active,\r\n#MobileUI #iButton:active,\r\n#MobileUI #oButton:active,\r\n#MobileUI #aButton:active,\r\n#MobileUI #sButton:active,\r\n#MobileUI #dButton:active,\r\n#MobileUI #fButton:active,\r\n#MobileUI #gButton:active,\r\n#MobileUI #hButton:active,\r\n#MobileUI #jButton:active,\r\n#MobileUI #kButton:active,\r\n#MobileUI #lButton:active,\r\n#MobileUI #switchshorcutButton:active,\r\n#MobileUI #pickupButton:active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 50%;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n#MobileUI #talktonpcButton:active {\r\n	background: linear-gradient(135deg, rgba(144, 238, 144, 0.5), rgba(193, 255, 193, 0.8));\r\n	border: 2px solid rgba(144, 238, 144, 0.8);\r\n	box-shadow: 0px 4px 8px rgba(144, 238, 144, 0.4);\r\n	border-radius: 50%;\r\n	animation: pulse 1.5s infinite;\r\n	transition:\r\n		background 0.3s ease,\r\n		box-shadow 0.3s ease,\r\n		transform 0.3s ease;\r\n}\r\n\r\n#MobileUI #attackButton:active {\r\n	background-color: #4caf50;\r\n	box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.4);\r\n	border: 2px solid #388e3c;\r\n	transition:\r\n		transform 0.2s ease,\r\n		background-color 0.2s ease,\r\n		box-shadow 0.2s ease,\r\n		border 0.2s ease;\r\n}\r\n\r\n/* Joystick container -MicromeX */\r\n#MobileUI .joystick-container {\r\n	position: absolute;\r\n	bottom: 7%;\r\n	left: 10%;\r\n	width: 25vmin;\r\n	height: 25vmin;\r\n	z-index: 1000;\r\n}\r\n\r\n/* Joystick base -MicromeX */\r\n#MobileUI .joystick-base {\r\n	position: relative;\r\n	width: 100%;\r\n	height: 100%;\r\n	background: rgba(193, 193, 193, 0.33);\r\n	border-radius: 50%;\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n}\r\n\r\n/* Joystick thumb -MicromeX */\r\n#MobileUI .joystick-thumb {\r\n	position: absolute;\r\n	width: 10vmin;\r\n	height: 10vmin;\r\n	background: radial-gradient(circle, rgba(236, 240, 241, 1) 70%, rgba(189, 195, 199, 1) 100%);\r\n	border-radius: 50%;\r\n	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.4);\r\n	touch-action: none;\r\n	cursor: grab;\r\n}\r\n";
+}));
+//#endregion
+//#region src/UI/Components/MobileUI/robrowser_mobileui.txt?raw
+var robrowser_mobileui_default;
+var init_robrowser_mobileui = __esmMin((() => {
+	robrowser_mobileui_default = "// roBrowser Mobile UI texts (default: English)\r\n//\r\n// This file holds every text shown by the Mobile UI: the long-press help tips of\r\n// the buttons and the content of the Mobile UI guide window (/mobileguide).\r\n//\r\n// === Server owners: how to add your own translation ===\r\n// 1. Copy this file and translate the text after the \"=\" sign on every line.\r\n//    Do NOT change the ID before the \"=\" sign, the client looks up texts by ID.\r\n// 2. Save the file as UTF-8 and name it exactly:  robrowser_mobileui.txt\r\n// 3. Place it into the \"data\" folder of your remote client (next to files such\r\n//    as data/msgstringtable.txt), so it is reachable as: data/robrowser_mobileui.txt\r\n// The client loads it automatically when the Mobile UI starts. Any ID missing from\r\n// your file falls back to the English text bundled with the client, so a partial\r\n// translation is fine. If the file is not present, this bundled English text is used.\r\n//\r\n// Format: one entry per line -> ID = text\r\n// Lines starting with \"//\" are comments. Use \\n inside a text for a line break.\r\n\r\n// --- Guide window ---\r\nGUIDE_TITLE = Mobile UI guide\r\nGUIDE_INTRO = Welcome to the touch controls! Tap a button to use it, or hold a button for a second to see a short description of it. This guide lists every button of the Mobile UI.\r\nGUIDE_COMMAND = You can open this guide again at any time by typing /mobileguide into the chat.\r\nGUIDE_NEVER_SHOW = Don't show again\r\nGUIDE_CLOSE = Close\r\nGUIDE_SECTION_GENERAL = General\r\nGUIDE_SECTION_SKILLBAR = Skill bar\r\nGUIDE_SECTION_ACTIONS = Actions\r\nGUIDE_SECTION_LEFT = Left bar\r\nGUIDE_SECTION_RIGHT = Right bar\r\nGUIDE_JOYSTICK_LABEL = Joystick\r\nGUIDE_JOYSTICK = Drag the joystick in the bottom left corner to walk. Your character keeps walking in that direction while you hold it.\r\nGUIDE_SKILLROWS_LABEL = F1-F9 / 1-9 / Q-O / A-L\r\nGUIDE_SKILLROWS = The nine buttons around the attack button trigger the skill bar hotkeys of the currently selected row. Use the switch button to cycle through the rows.\r\n\r\n// --- Button descriptions (long-press tips and guide) ---\r\n// Long-press tip: TIP_<button> | Guide description: DESC_<button>\r\nTIP_toggleUIButton = Show / hide the mobile controls\r\nDESC_toggleUIButton = Shows or hides all the other mobile buttons. Hide them when you only want to look at the game and show them again when you need them.\r\n\r\nTIP_fullscreenButton = Toggle full screen\r\nDESC_fullscreenButton = Switches the game between full screen and windowed mode.\r\n\r\nTIP_skillKey = Skill bar hotkey %s\r\nDESC_skillKey = Triggers the skill or item placed on slot %s of the skill bar.\r\n\r\nTIP_switchshorcutButton = Switch skill bar row (F1-F9 / 1-9 / Q-O / A-L)\r\nDESC_switchshorcutButton = Cycles the nine skill buttons through the four hotkey rows: F1-F9, 1-9, Q-O and A-L.\r\n\r\nTIP_attackButton = Attack the selected target\r\nDESC_attackButton = Attacks the selected target. If nothing is selected, the nearest monster gets targeted and attacked.\r\n\r\nTIP_pickupButton = Pick up the nearest item\r\nDESC_pickupButton = Walks to the nearest item on the ground and picks it up.\r\n\r\nTIP_talktonpcButton = Talk to the nearest NPC\r\nDESC_talktonpcButton = Starts a conversation with the nearest NPC within 3 cells.\r\n\r\nTIP_f10Button = Change chat box size (F10)\r\nDESC_f10Button = Changes the size of the chat box, same as pressing F10 on a keyboard.\r\n\r\nTIP_f12Button = Change skill bar size (F12)\r\nDESC_f12Button = Changes the size of the skill bar, same as pressing F12 on a keyboard.\r\n\r\nTIP_insButton = Sit down / stand up\r\nDESC_insButton = Makes your character sit down or stand up (the /sit command).\r\n\r\nTIP_toggleStatusButton = Show / hide status icons\r\nDESC_toggleStatusButton = Shows or hides the status effect icons on the right side of the screen.\r\n\r\nTIP_toggleTargetingButton = Toggle touch targeting\r\nDESC_toggleTargetingButton = Turns touch targeting on or off. While it is on, tapping a monster or player only selects it instead of attacking, and the auto follow and auto target buttons become available.\r\n\r\nTIP_toggleAutoFollowButton = Auto follow the selected target\r\nDESC_toggleAutoFollowButton = Makes your character follow the selected target around until you turn it off. Requires touch targeting.\r\n\r\nTIP_toggleAutoTargetButton = Auto target the nearest monster\r\nDESC_toggleAutoTargetButton = Keeps selecting the nearest monster automatically so the attack button always has a target. Requires touch targeting.\r\n";
+}));
+//#endregion
+//#region src/UI/Components/StatusIcons/StatusIcons.html?raw
+var StatusIcons_default$2;
+var init_StatusIcons$2 = __esmMin((() => {
+	StatusIcons_default$2 = "<div id=\"StatusIcons\"></div>\r\n";
+}));
+//#endregion
+//#region src/UI/Components/StatusIcons/StatusIcons.css?raw
+var StatusIcons_default$1;
+var init_StatusIcons$1 = __esmMin((() => {
+	StatusIcons_default$1 = ":host {\r\n	top: 166px;\r\n	right: 20px;\r\n	overflow: visible;\r\n}\r\n\r\n#StatusIcons {\r\n	display: block;\r\n}\r\n\r\n#StatusIcons .state {\r\n	position: absolute;\r\n}\r\n\r\n#StatusIcons .state .description {\r\n	display: none;\r\n	z-index: 51;\r\n	position: absolute;\r\n	right: 33px;\r\n	top: 0px;\r\n	padding: 0px 5px 0px 5px;\r\n	background-color: rgba(0, 0, 0, 0.5);\r\n	border: 1px solid #c6c6c6;\r\n	border-radius: 3px;\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n	white-space: nowrap;\r\n	line-height: 16px;\r\n}\r\n\r\n#StatusIcons .state:hover .description {\r\n	display: block;\r\n}\r\n\r\n#StatusIcons .state canvas {\r\n	width: 32px;\r\n	height: 32px;\r\n}\r\n";
+}));
+//#endregion
+//#region src/UI/Components/StatusIcons/StatusIcons.js
+function loadStatusIcon(index) {
+	const tkmVariant = SessionStorage_default.Entity && DB.isTaeKwon(SessionStorage_default.Entity._job) && TKM_ICON_OVERRIDE[index] || null;
+	const iconName = tkmVariant || StatusInfo[index].icon;
+	_status[index].tkmVariant = tkmVariant;
+	Client.loadFile(`data/texture/effect/${iconName}`, (data) => {
+		Texture.load(data, function() {
+			if (_status[index] && !_status[index].img) addResizedStatusIcon(this, index);
+		});
+	});
+}
+function addResizedStatusIcon(img, index) {
+	if (img.width < 33 && img.height < 33) {
+		_status[index].img = img;
+		addElement$4(_status[index].element);
+		return;
+	}
+	const canvas = document.createElement("canvas");
+	canvas.width = 32;
+	canvas.height = 32;
+	const ctx = canvas.getContext("2d");
+	ctx.save();
+	ctx.translate(0, 32);
+	ctx.scale(1, -1);
+	const scale = Math.min(32 / img.width, 32 / img.height);
+	const width = img.width * scale;
+	const height = img.height * scale;
+	const x = (32 - width) / 2;
+	const y = (32 - height) / 2;
+	ctx.drawImage(img, x, y, width, height);
+	ctx.restore();
+	const resizedImg = new Image();
+	resizedImg.src = canvas.toDataURL();
+	resizedImg.onload = () => {
+		_status[index].img = resizedImg;
+		addElement$4(_status[index].element);
+	};
+}
+/**
+* Reset elements position.
+*
+* Used when one element is removed.
+*/
+function resetElementsPosition() {
+	const elements = StatusIcons.getRoot().querySelectorAll(".state");
+	const count = elements.length;
+	let x = 0;
+	let y = 0;
+	for (let i = 0; i < count; ++i, y += 36) {
+		if (y > Renderer.height - 166) {
+			y = 0;
+			x += 45;
+		}
+		const element = elements[i];
+		element.style.top = `${y}px`;
+		element.style.right = `${x}px`;
+	}
+}
+/**
+* Remove an element from list and DOM
+*
+* @param {number} index
+*/
+function removeElementIndex(index) {
+	if (!(index in _status)) return;
+	const element = _status[index].element;
+	if (element && element.parentNode) element.parentNode.removeChild(element);
+	ScreenEffectManager.cleanStatusEffect(index);
+	delete _status[index];
+}
+/**
+* Create an element
+*
+* @param {number} index
+*/
+function createElement(index) {
+	const state = document.createElement("div");
+	state.className = "state";
+	const canvas = document.createElement("canvas");
+	canvas.width = 32;
+	canvas.height = 32;
+	state.appendChild(canvas);
+	_status[index] = {};
+	_status[index].element = state;
+	_status[index].ctx = canvas.getContext("2d");
+	if (StatusInfo[index].descript) {
+		const info = document.createElement("div");
+		info.className = "description";
+		const lines = StatusInfo[index].descript;
+		const count = lines.length;
+		for (let i = 0; i < count; ++i) {
+			const line = document.createElement("div");
+			line.textContent = lines[i][0];
+			if (lines[i][1]) line.style.color = lines[i][1];
+			line.innerHTML = line.innerHTML.replace("%s", "<span class=\"time\">0</span>");
+			info.appendChild(line);
+		}
+		const time = info.getElementsByClassName("time");
+		if (time.length) {
+			_status[index].time = time[0];
+			_status[index].timeTick = 0;
+		}
+		state.appendChild(info);
+	}
+}
+/**
+* Add element to the list, helper for multi-column
+*
+* @param {CanvasElement}
+*/
+function addElement$4(element) {
+	const root = StatusIcons.getRoot();
+	const elements = root.querySelectorAll(".state");
+	const max = (Renderer.height - 166) / 36 | 0;
+	const count = elements.length;
+	const x = (count / max | 0) * 45;
+	const y = count % max * 36;
+	element.style.top = `${y}px`;
+	element.style.right = `${x}px`;
+	const container = root.querySelector("#StatusIcons");
+	if (container) container.appendChild(element);
+}
+/**
+* Rendering a status icon
+*
+* @param {object} status
+* @param {number} tick
+*/
+function renderStatus(status, now) {
+	if (!status.img) return;
+	const ctx = status.ctx;
+	const start = status.start;
+	let end = status.end;
+	let color, perc;
+	if (now > end) end = now;
+	if (end < now + 6e4) {
+		color = "rgba(255,150,50,0.65)";
+		perc = 1 - (end - now) / 6e4;
+	} else {
+		color = "rgba(255,255,255,0.65)";
+		perc = (now - start) / (end - 6e4 - start);
+	}
+	ctx.clearRect(0, 0, 32, 32);
+	ctx.drawImage(status.img, 0, 0);
+	ctx.fillStyle = color;
+	ctx.beginPath();
+	ctx.arc(16, 16, 24, 1.5 * Math.PI, (1.5 + perc * 2) % 2 * Math.PI);
+	ctx.lineTo(16, 16);
+	ctx.fill();
+	if (status.time && status.timeTick + 1e3 < now) {
+		status.timeTick = now;
+		const tick = (end - now) / 1e3 | 0;
+		const seconds = tick % 60;
+		const minutes = tick / 60 | 0;
+		status.time.textContent = now >= end || end === Infinity ? "" : (minutes ? `${minutes} ${DB.getMessage(1807, "minute")} ` : "") + `${seconds} ${DB.getMessage(1808, "second")}`;
+	}
+}
+/**
+* Rendering status icons progressbar
+*
+* @param {number} tick
+*/
+function rendering$1(tick) {
+	const indexes = Object.keys(_status);
+	const count = indexes.length;
+	const time_now = Date.now();
+	if (time_now - _last_updated_time > _render_time) {
+		_last_updated_time = time_now;
+		for (let i = 0; i < count; ++i) renderStatus(_status[indexes[i]], tick);
+	}
+}
+var StatusIcons, _status, _last_updated_time, _render_time, TKM_ICON_OVERRIDE, StatusIcons_default;
+var init_StatusIcons = __esmMin((() => {
+	init_StatusInfo();
+	init_StatusConst();
+	init_DBManager();
+	init_Texture();
+	init_Client();
+	init_Renderer();
+	init_UIManager();
+	init_GUIComponent();
+	init_ScreenEffectManager();
+	init_SessionStorage();
+	init_StatusIcons$2();
+	init_StatusIcons$1();
+	StatusIcons = new GUIComponent("StatusIcons", StatusIcons_default$1);
+	StatusIcons.render = () => StatusIcons_default$2;
+	/**
+	* Mouse can cross this UI
+	*/
+	StatusIcons.mouseMode = GUIComponent.MouseMode.CROSS;
+	/**
+	* @var {boolean} do not focus this UI
+	*/
+	StatusIcons.needFocus = false;
+	_status = {};
+	_last_updated_time = Date.now();
+	_render_time = 500;
+	TKM_ICON_OVERRIDE = {
+		[StatusConst_default.ASPERSIO]: "i_p_SAINT.tga",
+		[StatusConst_default.PROPERTYFIRE]: "i_p_FIRE.tga",
+		[StatusConst_default.PROPERTYWATER]: "i_p_WATER.tga",
+		[StatusConst_default.PROPERTYWIND]: "i_p_WIND.tga",
+		[StatusConst_default.PROPERTYGROUND]: "i_p_EARTH.tga",
+		[StatusConst_default.PROPERTYDARK]: "i_p_DARK.tga",
+		[StatusConst_default.PROPERTYTELEKINESIS]: "i_p_TELE.tga"
+	};
+	/**
+	* Start rendering icons
+	*/
+	StatusIcons.onAppend = function onAppend() {
+		Renderer.render(rendering$1);
+	};
+	/**
+	* Stop rendering icons
+	*/
+	StatusIcons.onRemove = function onRemove() {
+		Renderer.stop(rendering$1);
+	};
+	/**
+	* Clean up component
+	*/
+	StatusIcons.clean = function clean() {
+		const container = StatusIcons.getRoot().querySelector("#StatusIcons");
+		if (container) container.innerHTML = "";
+		_status = {};
+		ScreenEffectManager.clean();
+	};
+	/**
+	* Update icon on screen
+	*
+	* @param {number} status id
+	* @param {number} enable/disable
+	* @param {number} life time
+	*/
+	StatusIcons.update = function update(index, state, life) {
+		if (!(index in StatusInfo) || !StatusInfo[index].icon) return;
+		if (!state && (!life || life <= 0)) {
+			removeElementIndex(index);
+			resetElementsPosition();
+			return;
+		}
+		if (!(index in _status)) createElement(index);
+		_status[index].start = Renderer.tick;
+		_status[index].end = Renderer.tick + life;
+		if (life === 9999) _status[index].end = Infinity;
+		if (_status[index].img) {
+			if (TKM_ICON_OVERRIDE[index]) {
+				const wantVariant = SessionStorage_default.Entity && DB.isTaeKwon(SessionStorage_default.Entity._job) && TKM_ICON_OVERRIDE[index] || null;
+				if (_status[index].tkmVariant !== wantVariant) _status[index].img = null;
+				else return;
+			} else return;
+		}
+		loadStatusIcon(index);
+		ScreenEffectManager.parseStatus(index);
+	};
+	StatusIcons_default = UIManager.addComponent(StatusIcons);
 }));
 //#endregion
 //#region src/UI/Components/MobileUI/MobileUI.js
 /**
-* Helper to bind click+touchstart on an element
+* Parse a "ID = text" language file into an object
+*
+* @param {string} content
+* @param {object} [out]
+* @returns {object}
+*/
+function parseTexts(content, out = {}) {
+	content.split(/\r?\n/).forEach((line) => {
+		const trimmed = line.trim();
+		if (!trimmed || trimmed.startsWith("//")) return;
+		const separator = trimmed.indexOf("=");
+		if (separator < 1) return;
+		const id = trimmed.slice(0, separator).trim();
+		const text = trimmed.slice(separator + 1).trim().replace(/\\n/g, "\n");
+		if (id) out[id] = text;
+	});
+	return out;
+}
+/**
+* Get a text by id, replacing %s with the given argument
+*
+* @param {string} id
+* @param {string} [arg]
+* @returns {string}
+*/
+function getText(id, arg) {
+	const text = _texts[id] ?? id;
+	return arg === void 0 ? text : text.replace("%s", arg);
+}
+/**
+* Load the optional translation from the remote client, then apply the texts
+*/
+function loadTexts() {
+	Client.loadFile(C_LANG_FILE, (buffer) => {
+		const data = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
+		parseTexts(new TextDecoder("utf-8").decode(data), _texts);
+		applyTexts();
+	}, () => {});
+}
+/**
+* Write the language texts into the button tips and the guide window
+*/
+function applyTexts() {
+	const root = MobileUI.getRoot();
+	root.querySelectorAll("button[id]").forEach((button) => {
+		const arg = button.dataset.tipArg;
+		const id = arg !== void 0 ? "TIP_skillKey" : `TIP_${button.id}`;
+		if (id in _texts) button.dataset.tip = getText(id, arg);
+	});
+	root.querySelector("#guideTitle").textContent = getText("GUIDE_TITLE");
+	root.querySelector("#guideNeverLabel").textContent = getText("GUIDE_NEVER_SHOW");
+	root.querySelector("#guideCloseButton").title = getText("GUIDE_CLOSE");
+	buildGuide(root);
+}
+/**
+* Build the guide body from the GUIDE_SECTIONS layout
+*
+* @param {ShadowRoot} root
+*/
+function buildGuide(root) {
+	const body = root.querySelector("#guideBody");
+	body.textContent = "";
+	const addParagraph = (id) => {
+		const p = document.createElement("p");
+		p.textContent = getText(id);
+		body.appendChild(p);
+	};
+	addParagraph("GUIDE_INTRO");
+	addParagraph("GUIDE_COMMAND");
+	GUIDE_SECTIONS.forEach((section) => {
+		const title = document.createElement("div");
+		title.className = "guideSection";
+		title.textContent = getText(section.title);
+		body.appendChild(title);
+		section.entries.forEach((entry) => {
+			const button = entry.button ? root.querySelector(entry.button) : null;
+			const row = document.createElement("div");
+			row.className = "guideEntry";
+			const icon = document.createElement("span");
+			icon.className = "guideIcon";
+			icon.textContent = button ? button.textContent.trim() : entry.icon;
+			const text = document.createElement("div");
+			text.className = "guideText";
+			const label = document.createElement("div");
+			label.className = "guideLabel";
+			label.textContent = getText(entry.key ? `TIP_${entry.key}` : entry.label);
+			const desc = document.createElement("div");
+			desc.textContent = getText(entry.key ? `DESC_${entry.key}` : entry.desc);
+			text.appendChild(label);
+			text.appendChild(desc);
+			row.appendChild(icon);
+			row.appendChild(text);
+			body.appendChild(row);
+		});
+	});
+}
+/**
+* Show the guide window
+*/
+function showGuide() {
+	const root = MobileUI.getRoot();
+	const guide = root.querySelector("#guideWindow");
+	if (MobileUI._host.style.display === "none") {
+		MobileUI._host.style.display = "block";
+		root.querySelector("#MobileUI").classList.add("guideOnly");
+	}
+	root.querySelector("#guideNeverShow").checked = _preferences$17.guideNeverShow;
+	root.querySelector("#guideBody").scrollTop = 0;
+	guide.classList.remove("disabled");
+	guideShownThisSession = true;
+}
+/**
+* Hide the guide window
+*/
+function hideGuide() {
+	const root = MobileUI.getRoot();
+	const container = root.querySelector("#MobileUI");
+	root.querySelector("#guideWindow").classList.add("disabled");
+	if (container.classList.contains("guideOnly")) {
+		container.classList.remove("guideOnly");
+		MobileUI._host.style.display = "none";
+	}
+}
+/**
+* Show the guide on the first MobileUI activation of the session,
+* unless the player asked to never see it again
+*
+* @returns {boolean} guide got opened
+*/
+function showGuideOnActivate() {
+	if (guideShownThisSession || _preferences$17.guideNeverShow) return false;
+	showGuide();
+	return true;
+}
+/**
+* Bind the guide window controls
+*
+* @param {ShadowRoot} root
+*/
+function setupGuide(root) {
+	const guide = root.querySelector("#guideWindow");
+	[
+		"touchstart",
+		"touchmove",
+		"touchend",
+		"touchcancel",
+		"mousedown",
+		"mouseup",
+		"click"
+	].forEach((type) => {
+		guide.addEventListener(type, (event) => event.stopPropagation());
+	});
+	const body = root.querySelector("#guideBody");
+	let lastY = 0;
+	body.addEventListener("touchstart", (event) => {
+		lastY = event.touches[0].clientY;
+	}, { passive: true });
+	body.addEventListener("touchmove", (event) => {
+		const y = event.touches[0].clientY;
+		body.scrollTop += lastY - y;
+		lastY = y;
+		event.preventDefault();
+	}, { passive: false });
+	root.querySelector("#guideNeverShow").addEventListener("change", (event) => {
+		_preferences$17.guideNeverShow = event.target.checked;
+		_preferences$17.save();
+	});
+	bindButton(root, "#guideCloseButton", (e) => {
+		hideGuide();
+		stopPropagation$7(e);
+	});
+	ProcessCommand_default.add("mobileguide", getText("GUIDE_TITLE"), showGuide, [], false);
+}
+/**
+* Show the long-press help tip above a button
+*
+* @param {HTMLElement} button
+*/
+function showTip(button) {
+	const tip = MobileUI.getRoot().querySelector("#buttonTip");
+	const text = button.dataset.tip;
+	if (!tip || !text) return;
+	tip.textContent = text;
+	tip.classList.remove("disabled");
+	const rect = button.getBoundingClientRect();
+	const width = tip.offsetWidth;
+	const height = tip.offsetHeight;
+	const margin = 8;
+	let left = rect.left + rect.width / 2 - width / 2;
+	left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+	let top = rect.top - height - margin;
+	if (top < margin) top = rect.bottom + margin;
+	tip.style.left = `${left}px`;
+	tip.style.top = `${top}px`;
+}
+/**
+* Hide the long-press help tip
+*/
+function hideTip() {
+	const tip = MobileUI.getRoot().querySelector("#buttonTip");
+	if (tip) tip.classList.add("disabled");
+}
+/**
+* Helper to bind click+touch on an element.
+* A tap runs the handler on release; holding for C_LONG_PRESS_DELAY shows
+* the button's help tip instead and suppresses the handler.
 */
 function bindButton(root, selector, handler) {
 	const el = root.querySelector(selector);
 	if (el) {
 		let touchHandled = false;
 		let releaseTimer = null;
+		let longPressTimer = null;
+		let longPressed = false;
+		let startX = 0;
+		let startY = 0;
 		const clearGuard = () => {
 			if (releaseTimer !== null) {
 				clearTimeout(releaseTimer);
@@ -307038,6 +308782,21 @@ function bindButton(root, selector, handler) {
 				touchHandled = false;
 			}, C_TOUCH_CLICK_GUARD);
 		};
+		const clearLongPress = () => {
+			if (longPressTimer !== null) {
+				clearTimeout(longPressTimer);
+				longPressTimer = null;
+			}
+		};
+		const endTouch = (event) => {
+			const pending = longPressTimer !== null;
+			clearLongPress();
+			if (longPressed) {
+				longPressed = false;
+				hideTip();
+			} else if (pending && event.type === "touchend") handler(event);
+			releaseGuard();
+		};
 		el.addEventListener("click", (event) => {
 			if (touchHandled) {
 				touchHandled = false;
@@ -307049,12 +308808,26 @@ function bindButton(root, selector, handler) {
 			handler(event);
 		});
 		el.addEventListener("touchstart", (event) => {
+			const touch = event.changedTouches[0];
+			startX = touch.clientX;
+			startY = touch.clientY;
 			touchHandled = true;
+			longPressed = false;
 			clearGuard();
-			handler(event);
+			clearLongPress();
+			longPressTimer = setTimeout(() => {
+				longPressTimer = null;
+				longPressed = true;
+				showTip(el);
+			}, C_LONG_PRESS_DELAY);
+			stopPropagation$7(event);
 		});
-		el.addEventListener("touchend", releaseGuard);
-		el.addEventListener("touchcancel", releaseGuard);
+		el.addEventListener("touchmove", (event) => {
+			const touch = event.changedTouches[0];
+			if (Math.hypot(touch.clientX - startX, touch.clientY - startY) > C_TOUCH_MOVE_TOLERANCE) clearLongPress();
+		});
+		el.addEventListener("touchend", endTouch);
+		el.addEventListener("touchcancel", endTouch);
 	}
 }
 /**
@@ -307063,6 +308836,15 @@ function bindButton(root, selector, handler) {
 */
 function logKeyPress(keyCode) {
 	keyPress(keyCode);
+}
+/**
+* Skill bar button: run the hotkey directly, the number/letter rows are only
+* hotkeys for the keyboard while Battle Mode is on.
+*
+* @param {number} keyCode
+*/
+function skillKeyPress(keyCode) {
+	if (!BattleMode.process(keyCode)) keyPress(keyCode);
 }
 /**
 * Toggles full screen display
@@ -307249,8 +309031,11 @@ function switchSkillButtons() {
 * Toggles status view
 */
 function toggleStatus() {
-	const statusIcons = document.querySelector("#StatusIcons");
-	if (statusIcons) statusIcons.style.display = statusIcons.style.display === "none" ? "" : "none";
+	const button = MobileUI.getRoot().querySelector("#toggleStatusButton");
+	const host = StatusIcons_default.getRoot().host;
+	const show = host.style.display === "none";
+	host.style.display = show ? "" : "none";
+	button.classList.toggle("active", show);
 }
 /**
 * Toggles touch targeting
@@ -307518,7 +309303,7 @@ function moveCharacter(x, y, tileSize) {
 * Talk to NPC Button Function - MicromeX
 */
 function setupTalkToNpcButton() {
-	const talkButton = MobileUI.getRoot().querySelector("#talktonpcButton");
+	const root = MobileUI.getRoot();
 	function findNearestNpc() {
 		const player = SessionStorage_default.Entity;
 		if (!player) return null;
@@ -307544,7 +309329,10 @@ function setupTalkToNpcButton() {
 		talkPacket.NAID = nearestNpc.GID;
 		Network.sendPacket(talkPacket);
 	}
-	talkButton.addEventListener("click", talkToNearestNpc);
+	bindButton(root, "#talktonpcButton", (e) => {
+		talkToNearestNpc();
+		stopPropagation$7(e);
+	});
 }
 /**
 * Search free cells around a position
@@ -307584,7 +309372,7 @@ function isFreeCell$2(x, y) {
 	});
 	return free;
 }
-var vec2, mat2, direction, rotate, targetPos, movementTimer, MobileUI, _preferences$17, showButtons, C_AUTOTARGET_DELAY, C_TOUCH_CLICK_GUARD, centerX, centerY, maxDistance, normalizedX, normalizedY, _joystickBase, _joystickThumb, MobileUI_default;
+var vec2, mat2, direction, rotate, targetPos, movementTimer, MobileUI, _preferences$17, C_LANG_FILE, _texts, guideShownThisSession, GUIDE_SECTIONS, showButtons, C_AUTOTARGET_DELAY, C_TOUCH_CLICK_GUARD, C_LONG_PRESS_DELAY, C_TOUCH_MOVE_TOLERANCE, centerX, centerY, maxDistance, normalizedX, normalizedY, _joystickBase, _joystickThumb, MobileUI_default;
 var init_MobileUI = __esmMin((() => {
 	init_Context();
 	init_UIManager();
@@ -307599,11 +309387,15 @@ var init_MobileUI = __esmMin((() => {
 	init_PathFinding();
 	init_Altitude();
 	init_Events();
+	init_Client();
 	init_MobileUI$2();
 	init_MobileUI$1();
+	init_robrowser_mobileui();
 	init_gl_matrix$1();
 	init_Camera();
-	init_KeyEventHandler();
+	init_BattleMode();
+	init_ProcessCommand();
+	init_StatusIcons();
 	vec2 = exports$3.vec2;
 	mat2 = exports$3.mat2;
 	direction = vec2.create();
@@ -307612,17 +309404,110 @@ var init_MobileUI = __esmMin((() => {
 	movementTimer = null;
 	MobileUI = new GUIComponent("MobileUI", MobileUI_default$1);
 	MobileUI.render = () => MobileUI_default$2;
+	MobileUI.needFocus = false;
 	_preferences$17 = Preferences.get("MobileUI", {
 		x: 0,
 		y: 0,
 		zIndex: 1e3,
 		width: window.innerWidth,
 		height: window.innerHeight,
-		show: false
+		show: false,
+		guideNeverShow: false
 	}, 1);
+	C_LANG_FILE = "data/robrowser_mobileui.txt";
+	_texts = parseTexts(robrowser_mobileui_default);
+	guideShownThisSession = false;
+	GUIDE_SECTIONS = [
+		{
+			title: "GUIDE_SECTION_GENERAL",
+			entries: [
+				{
+					button: "#toggleUIButton",
+					key: "toggleUIButton"
+				},
+				{
+					button: "#fullscreenButton",
+					key: "fullscreenButton"
+				},
+				{
+					icon: "🕹️",
+					label: "GUIDE_JOYSTICK_LABEL",
+					desc: "GUIDE_JOYSTICK"
+				}
+			]
+		},
+		{
+			title: "GUIDE_SECTION_SKILLBAR",
+			entries: [{
+				icon: "F1",
+				label: "GUIDE_SKILLROWS_LABEL",
+				desc: "GUIDE_SKILLROWS"
+			}, {
+				button: "#switchshorcutButton",
+				key: "switchshorcutButton"
+			}]
+		},
+		{
+			title: "GUIDE_SECTION_ACTIONS",
+			entries: [
+				{
+					button: "#attackButton",
+					key: "attackButton"
+				},
+				{
+					button: "#pickupButton",
+					key: "pickupButton"
+				},
+				{
+					button: "#talktonpcButton",
+					key: "talktonpcButton"
+				}
+			]
+		},
+		{
+			title: "GUIDE_SECTION_LEFT",
+			entries: [
+				{
+					button: "#f10Button",
+					key: "f10Button"
+				},
+				{
+					button: "#f12Button",
+					key: "f12Button"
+				},
+				{
+					button: "#insButton",
+					key: "insButton"
+				}
+			]
+		},
+		{
+			title: "GUIDE_SECTION_RIGHT",
+			entries: [
+				{
+					button: "#toggleStatusButton",
+					key: "toggleStatusButton"
+				},
+				{
+					button: "#toggleTargetingButton",
+					key: "toggleTargetingButton"
+				},
+				{
+					button: "#toggleAutoFollowButton",
+					key: "toggleAutoFollowButton"
+				},
+				{
+					button: "#toggleAutoTargetButton",
+					key: "toggleAutoTargetButton"
+				}
+			]
+		}
+	];
 	showButtons = false;
 	C_AUTOTARGET_DELAY = 500;
 	C_TOUCH_CLICK_GUARD = 750;
+	C_LONG_PRESS_DELAY = 1e3;
+	C_TOUCH_MOVE_TOLERANCE = 10;
 	maxDistance = 0;
 	normalizedX = 0;
 	normalizedY = 0;
@@ -307689,7 +309574,7 @@ var init_MobileUI = __esmMin((() => {
 			...letterKeyMap
 		].forEach(([selector, keyCode]) => {
 			bindButton(root, selector, (e) => {
-				logKeyPress(keyCode);
+				skillKeyPress(keyCode);
 				stopPropagation$7(e);
 			});
 		});
@@ -307702,7 +309587,7 @@ var init_MobileUI = __esmMin((() => {
 			stopPropagation$7(e);
 		});
 		bindButton(root, "#insButton", (e) => {
-			logKeyPress(45);
+			ProcessCommand_default.processCommand("sit");
 			stopPropagation$7(e);
 		});
 		bindButton(root, "#toggleStatusButton", (e) => {
@@ -307747,13 +309632,18 @@ var init_MobileUI = __esmMin((() => {
 		});
 		setupJoystick();
 		setupTalkToNpcButton();
+		setupGuide(root);
+		applyTexts();
+		loadTexts();
 	};
 	/**
 	* Apply preferences once append to body
 	*/
 	MobileUI.onAppend = function onAppend() {
-		if (SessionStorage_default.isTouchDevice) this._host.style.display = "block";
-		else this._host.style.display = "none";
+		if (SessionStorage_default.isTouchDevice) {
+			this._host.style.display = "block";
+			showGuideOnActivate();
+		} else this._host.style.display = "none";
 		this._host.style.top = "0px";
 		this._host.style.left = "0px";
 		this._host.style.zIndex = "1000";
@@ -307795,14 +309685,52 @@ var init_MobileUI = __esmMin((() => {
 	};
 	/**
 	* Shows MobileUI
+	*
+	* @returns {boolean} the guide popup got opened by this activation
 	*/
 	MobileUI.show = function show() {
+		this.getRoot().querySelector("#MobileUI").classList.remove("guideOnly");
 		this._host.style.display = "block";
+		return showGuideOnActivate();
 	};
 	MobileUI_default = UIManager.addComponent(MobileUI);
 }));
 //#endregion
 //#region src/Core/Mobile.js
+/**
+* Does the touch land on an interactive UI element (walking through Shadow DOM) ?
+*
+* @param {TouchEvent} event
+* @return {boolean}
+*/
+function isUITouch(event) {
+	const path = event.composedPath ? event.composedPath() : [event.target];
+	for (const node of path) {
+		if (!(node instanceof Element)) continue;
+		if (node instanceof HTMLCanvasElement) return false;
+		if (node.matches(UI_TOUCH_SELECTOR)) return true;
+	}
+	return false;
+}
+/**
+* Make sure the document has a viewport meta (see VIEWPORT_META).
+*/
+function ensureViewportMeta() {
+	if (!document.head || document.head.querySelector("meta[name=\"viewport\"]")) return;
+	const meta = document.createElement("meta");
+	meta.name = "viewport";
+	meta.content = VIEWPORT_META;
+	document.head.appendChild(meta);
+}
+/**
+* Track the browser page zoom (visual viewport smaller than the layout viewport).
+* While zoomed, the canvas gets back its native touch handling (see `body.ro-page-zoomed`
+* in UI/Common.css) and our touch controls step aside.
+*/
+function onVisualViewportResize() {
+	_pageZoomed = window.visualViewport.scale > 1.01;
+	document.body.classList.toggle("ro-page-zoomed", _pageZoomed);
+}
 /**
 * Return distance between touches
 *
@@ -307854,6 +309782,10 @@ function touchTranslationY(oldTouches, touches) {
 * process OnMouseUp if no gesture detected
 */
 function onTouchEnd(event) {
+	if (_uiTouch) {
+		if (event.touches.length === 0) _uiTouch = false;
+		return;
+	}
 	if (_processGesture) {
 		_processGesture = false;
 		KEYS.SHIFT = false;
@@ -307865,6 +309797,24 @@ function onTouchEnd(event) {
 		return;
 	}
 	if (Mobile.onTouchEnd) Mobile.onTouchEnd();
+	Mouse.intersect = false;
+}
+/**
+* The browser aborted the touch sequence: drop any pending tap or gesture
+* without acting on the map.
+*/
+function onTouchCancel(event) {
+	if (event.touches.length > 0 && !_processGesture) return;
+	if (_uiTouch) _uiTouch = false;
+	else if (_processGesture) {
+		_processGesture = false;
+		KEYS.SHIFT = false;
+		Camera.rotate(false);
+	} else if (_timer$1 > -1) {
+		Events.clearTimeout(_timer$1);
+		_timer$1 = -1;
+	} else if (Mobile.onTouchEnd) Mobile.onTouchEnd();
+	_intersect = false;
 	Mouse.intersect = false;
 }
 /**
@@ -307891,11 +309841,16 @@ function onTouchMove(event) {
 		Camera.zoomFinal = Math.max(Camera.zoomFinal, 2);
 	}
 }
-function touchDevice() {
+function touchDevice(event) {
 	SessionStorage_default.isTouchDevice = true;
-	if (SessionStorage_default.Playing) MobileUI_default.show();
+	if (SessionStorage_default.Playing) {
+		if (MobileUI_default.show()) {
+			event.preventDefault();
+			event.stopImmediatePropagation();
+		}
+	}
 }
-var _processGesture, _scale, _touches, _intersect, _timer$1, Mobile, remoteAutoFocus, onTouchStart;
+var _processGesture, _scale, _touches, _intersect, _timer$1, _uiTouch, _pageZoomed, VIEWPORT_META, UI_TOUCH_SELECTOR, Mobile, delayedClick, onTouchStart, onPointerInput;
 var init_Mobile = __esmMin((() => {
 	init_Context();
 	init_Events();
@@ -307906,61 +309861,78 @@ var init_Mobile = __esmMin((() => {
 	init_MobileUI();
 	_processGesture = false;
 	_timer$1 = -1;
+	_uiTouch = false;
+	_pageZoomed = false;
+	VIEWPORT_META = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+	UI_TOUCH_SELECTOR = "input, textarea, select, button, a, label, [contenteditable], ui-button, [data-background], [data-hover], [data-down], .event_add_cursor, td.tab, .draggable";
 	Mobile = class {
 		/**
 		* Initialize
 		*/
 		static init() {}
 	};
-	remoteAutoFocus = (function removeAutoFocusClosure() {
-		let _done = false;
-		return function removeAutoFocus() {
-			if (_done) return;
-			_done = true;
-		};
-	})();
-	onTouchStart = (function onTouchStartClosure() {
-		function delayedClick() {
-			if (!_processGesture) {
-				_timer$1 = -1;
-				if (Mobile.onTouchStart) Mobile.onTouchStart();
-				if (!_intersect) {
-					if (Mobile.onTouchEnd) Mobile.onTouchEnd();
-				}
-				Mouse.intersect = _intersect;
-			}
-		}
-		return function(event) {
-			remoteAutoFocus();
-			_touches = event.touches;
-			event.preventDefault();
-			event.stopImmediatePropagation();
+	delayedClick = () => {
+		if (_processGesture) return;
+		_timer$1 = -1;
+		if (Mobile.onTouchStart) Mobile.onTouchStart();
+		if (!_intersect && Mobile.onTouchEnd) Mobile.onTouchEnd();
+		Mouse.intersect = _intersect;
+	};
+	onTouchStart = (event) => {
+		_touches = event.touches;
+		if (_pageZoomed) _uiTouch = true;
+		else if (_touches.length === 1) _uiTouch = isUITouch(event);
+		if (_uiTouch) {
 			if (_timer$1 > -1) {
 				Events.clearTimeout(_timer$1);
 				_timer$1 = -1;
 			}
-			if (_touches.length > 1) {
-				_scale = touchDistance(_touches);
-				touchAngle(_touches);
-				_processGesture = true;
-				return;
-			}
-			Mouse.screen.x = _touches[0].pageX;
-			Mouse.screen.y = _touches[0].pageY;
-			if (!SessionStorage_default.FreezeUI) {
-				Mouse.intersect = true;
-				_intersect = true;
-			}
-			_timer$1 = Events.setTimeout(delayedClick, 200);
-		};
-	})();
+			return;
+		}
+		event.preventDefault();
+		event.stopImmediatePropagation();
+		if (_timer$1 > -1) {
+			Events.clearTimeout(_timer$1);
+			_timer$1 = -1;
+		}
+		if (_touches.length > 1) {
+			_scale = touchDistance(_touches);
+			touchAngle(_touches);
+			_processGesture = true;
+			return;
+		}
+		Mouse.screen.x = _touches[0].pageX;
+		Mouse.screen.y = _touches[0].pageY;
+		if (!SessionStorage_default.FreezeUI) {
+			Mouse.intersect = true;
+			_intersect = true;
+		}
+		_timer$1 = Events.setTimeout(delayedClick, 200);
+	};
 	if (Math.max(screen.availHeight, screen.availWidth) <= 800) window.addEventListener("touchstart", () => {
 		if (!Context.isFullScreen()) Context.requestFullScreen();
 	});
-	window.addEventListener("touchstart", touchDevice, { once: true });
+	window.addEventListener("touchstart", touchDevice, {
+		once: true,
+		passive: false
+	});
+	ensureViewportMeta();
+	if (window.visualViewport) {
+		window.visualViewport.addEventListener("resize", onVisualViewportResize);
+		onVisualViewportResize();
+	}
 	window.addEventListener("touchstart", onTouchStart, { passive: false });
 	window.addEventListener("touchend", onTouchEnd);
+	window.addEventListener("touchcancel", onTouchCancel);
 	window.addEventListener("touchmove", onTouchMove);
+	window.addEventListener("touchstart", () => {
+		document.body.classList.add("ro-touch-input");
+	}, { capture: true });
+	onPointerInput = (event) => {
+		if (event.pointerType === "mouse") document.body.classList.remove("ro-touch-input");
+	};
+	window.addEventListener("pointermove", onPointerInput);
+	window.addEventListener("pointerdown", onPointerInput);
 }));
 //#endregion
 //#region src/Vendors/html2canvas.js
@@ -312188,277 +314160,6 @@ var init_ShortCuts = __esmMin((() => {
 		this._host.style.height = `${50 + height * 32}px`;
 	};
 	ShortCuts_default = UIManager.addComponent(ShortCuts);
-}));
-//#endregion
-//#region src/UI/Components/StatusIcons/StatusIcons.html?raw
-var StatusIcons_default$2;
-var init_StatusIcons$2 = __esmMin((() => {
-	StatusIcons_default$2 = "<div id=\"StatusIcons\"></div>\r\n";
-}));
-//#endregion
-//#region src/UI/Components/StatusIcons/StatusIcons.css?raw
-var StatusIcons_default$1;
-var init_StatusIcons$1 = __esmMin((() => {
-	StatusIcons_default$1 = ":host {\r\n	top: 166px;\r\n	right: 20px;\r\n	overflow: visible;\r\n}\r\n\r\n#StatusIcons {\r\n	display: block;\r\n}\r\n\r\n#StatusIcons .state {\r\n	position: absolute;\r\n}\r\n\r\n#StatusIcons .state .description {\r\n	display: none;\r\n	z-index: 51;\r\n	position: absolute;\r\n	right: 33px;\r\n	top: 0px;\r\n	padding: 0px 5px 0px 5px;\r\n	background-color: rgba(0, 0, 0, 0.5);\r\n	border: 1px solid #c6c6c6;\r\n	border-radius: 3px;\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n	white-space: nowrap;\r\n	line-height: 16px;\r\n}\r\n\r\n#StatusIcons .state:hover .description {\r\n	display: block;\r\n}\r\n\r\n#StatusIcons .state canvas {\r\n	width: 32px;\r\n	height: 32px;\r\n}\r\n";
-}));
-//#endregion
-//#region src/UI/Components/StatusIcons/StatusIcons.js
-function loadStatusIcon(index) {
-	const tkmVariant = SessionStorage_default.Entity && DB.isTaeKwon(SessionStorage_default.Entity._job) && TKM_ICON_OVERRIDE[index] || null;
-	const iconName = tkmVariant || StatusInfo[index].icon;
-	_status[index].tkmVariant = tkmVariant;
-	Client.loadFile(`data/texture/effect/${iconName}`, (data) => {
-		Texture.load(data, function() {
-			if (_status[index] && !_status[index].img) addResizedStatusIcon(this, index);
-		});
-	});
-}
-function addResizedStatusIcon(img, index) {
-	if (img.width < 33 && img.height < 33) {
-		_status[index].img = img;
-		addElement$4(_status[index].element);
-		return;
-	}
-	const canvas = document.createElement("canvas");
-	canvas.width = 32;
-	canvas.height = 32;
-	const ctx = canvas.getContext("2d");
-	ctx.save();
-	ctx.translate(0, 32);
-	ctx.scale(1, -1);
-	const scale = Math.min(32 / img.width, 32 / img.height);
-	const width = img.width * scale;
-	const height = img.height * scale;
-	const x = (32 - width) / 2;
-	const y = (32 - height) / 2;
-	ctx.drawImage(img, x, y, width, height);
-	ctx.restore();
-	const resizedImg = new Image();
-	resizedImg.src = canvas.toDataURL();
-	resizedImg.onload = () => {
-		_status[index].img = resizedImg;
-		addElement$4(_status[index].element);
-	};
-}
-/**
-* Reset elements position.
-*
-* Used when one element is removed.
-*/
-function resetElementsPosition() {
-	const elements = StatusIcons.getRoot().querySelectorAll(".state");
-	const count = elements.length;
-	let x = 0;
-	let y = 0;
-	for (let i = 0; i < count; ++i, y += 36) {
-		if (y > Renderer.height - 166) {
-			y = 0;
-			x += 45;
-		}
-		const element = elements[i];
-		element.style.top = `${y}px`;
-		element.style.right = `${x}px`;
-	}
-}
-/**
-* Remove an element from list and DOM
-*
-* @param {number} index
-*/
-function removeElementIndex(index) {
-	if (!(index in _status)) return;
-	const element = _status[index].element;
-	if (element && element.parentNode) element.parentNode.removeChild(element);
-	ScreenEffectManager.cleanStatusEffect(index);
-	delete _status[index];
-}
-/**
-* Create an element
-*
-* @param {number} index
-*/
-function createElement(index) {
-	const state = document.createElement("div");
-	state.className = "state";
-	const canvas = document.createElement("canvas");
-	canvas.width = 32;
-	canvas.height = 32;
-	state.appendChild(canvas);
-	_status[index] = {};
-	_status[index].element = state;
-	_status[index].ctx = canvas.getContext("2d");
-	if (StatusInfo[index].descript) {
-		const info = document.createElement("div");
-		info.className = "description";
-		const lines = StatusInfo[index].descript;
-		const count = lines.length;
-		for (let i = 0; i < count; ++i) {
-			const line = document.createElement("div");
-			line.textContent = lines[i][0];
-			if (lines[i][1]) line.style.color = lines[i][1];
-			line.innerHTML = line.innerHTML.replace("%s", "<span class=\"time\">0</span>");
-			info.appendChild(line);
-		}
-		const time = info.getElementsByClassName("time");
-		if (time.length) {
-			_status[index].time = time[0];
-			_status[index].timeTick = 0;
-		}
-		state.appendChild(info);
-	}
-}
-/**
-* Add element to the list, helper for multi-column
-*
-* @param {CanvasElement}
-*/
-function addElement$4(element) {
-	const root = StatusIcons.getRoot();
-	const elements = root.querySelectorAll(".state");
-	const max = (Renderer.height - 166) / 36 | 0;
-	const count = elements.length;
-	const x = (count / max | 0) * 45;
-	const y = count % max * 36;
-	element.style.top = `${y}px`;
-	element.style.right = `${x}px`;
-	const container = root.querySelector("#StatusIcons");
-	if (container) container.appendChild(element);
-}
-/**
-* Rendering a status icon
-*
-* @param {object} status
-* @param {number} tick
-*/
-function renderStatus(status, now) {
-	if (!status.img) return;
-	const ctx = status.ctx;
-	const start = status.start;
-	let end = status.end;
-	let color, perc;
-	if (now > end) end = now;
-	if (end < now + 6e4) {
-		color = "rgba(255,150,50,0.65)";
-		perc = 1 - (end - now) / 6e4;
-	} else {
-		color = "rgba(255,255,255,0.65)";
-		perc = (now - start) / (end - 6e4 - start);
-	}
-	ctx.clearRect(0, 0, 32, 32);
-	ctx.drawImage(status.img, 0, 0);
-	ctx.fillStyle = color;
-	ctx.beginPath();
-	ctx.arc(16, 16, 24, 1.5 * Math.PI, (1.5 + perc * 2) % 2 * Math.PI);
-	ctx.lineTo(16, 16);
-	ctx.fill();
-	if (status.time && status.timeTick + 1e3 < now) {
-		status.timeTick = now;
-		const tick = (end - now) / 1e3 | 0;
-		const seconds = tick % 60;
-		const minutes = tick / 60 | 0;
-		status.time.textContent = now >= end || end === Infinity ? "" : (minutes ? `${minutes} ${DB.getMessage(1807, "minute")} ` : "") + `${seconds} ${DB.getMessage(1808, "second")}`;
-	}
-}
-/**
-* Rendering status icons progressbar
-*
-* @param {number} tick
-*/
-function rendering$1(tick) {
-	const indexes = Object.keys(_status);
-	const count = indexes.length;
-	const time_now = Date.now();
-	if (time_now - _last_updated_time > _render_time) {
-		_last_updated_time = time_now;
-		for (let i = 0; i < count; ++i) renderStatus(_status[indexes[i]], tick);
-	}
-}
-var StatusIcons, _status, _last_updated_time, _render_time, TKM_ICON_OVERRIDE, StatusIcons_default;
-var init_StatusIcons = __esmMin((() => {
-	init_StatusInfo();
-	init_StatusConst();
-	init_DBManager();
-	init_Texture();
-	init_Client();
-	init_Renderer();
-	init_UIManager();
-	init_GUIComponent();
-	init_ScreenEffectManager();
-	init_SessionStorage();
-	init_StatusIcons$2();
-	init_StatusIcons$1();
-	StatusIcons = new GUIComponent("StatusIcons", StatusIcons_default$1);
-	StatusIcons.render = () => StatusIcons_default$2;
-	/**
-	* Mouse can cross this UI
-	*/
-	StatusIcons.mouseMode = GUIComponent.MouseMode.CROSS;
-	/**
-	* @var {boolean} do not focus this UI
-	*/
-	StatusIcons.needFocus = false;
-	_status = {};
-	_last_updated_time = Date.now();
-	_render_time = 500;
-	TKM_ICON_OVERRIDE = {
-		[StatusConst_default.ASPERSIO]: "i_p_SAINT.tga",
-		[StatusConst_default.PROPERTYFIRE]: "i_p_FIRE.tga",
-		[StatusConst_default.PROPERTYWATER]: "i_p_WATER.tga",
-		[StatusConst_default.PROPERTYWIND]: "i_p_WIND.tga",
-		[StatusConst_default.PROPERTYGROUND]: "i_p_EARTH.tga",
-		[StatusConst_default.PROPERTYDARK]: "i_p_DARK.tga",
-		[StatusConst_default.PROPERTYTELEKINESIS]: "i_p_TELE.tga"
-	};
-	/**
-	* Start rendering icons
-	*/
-	StatusIcons.onAppend = function onAppend() {
-		Renderer.render(rendering$1);
-	};
-	/**
-	* Stop rendering icons
-	*/
-	StatusIcons.onRemove = function onRemove() {
-		Renderer.stop(rendering$1);
-	};
-	/**
-	* Clean up component
-	*/
-	StatusIcons.clean = function clean() {
-		const container = StatusIcons.getRoot().querySelector("#StatusIcons");
-		if (container) container.innerHTML = "";
-		_status = {};
-		ScreenEffectManager.clean();
-	};
-	/**
-	* Update icon on screen
-	*
-	* @param {number} status id
-	* @param {number} enable/disable
-	* @param {number} life time
-	*/
-	StatusIcons.update = function update(index, state, life) {
-		if (!(index in StatusInfo) || !StatusInfo[index].icon) return;
-		if (!state && (!life || life <= 0)) {
-			removeElementIndex(index);
-			resetElementsPosition();
-			return;
-		}
-		if (!(index in _status)) createElement(index);
-		_status[index].start = Renderer.tick;
-		_status[index].end = Renderer.tick + life;
-		if (life === 9999) _status[index].end = Infinity;
-		if (_status[index].img) {
-			if (TKM_ICON_OVERRIDE[index]) {
-				const wantVariant = SessionStorage_default.Entity && DB.isTaeKwon(SessionStorage_default.Entity._job) && TKM_ICON_OVERRIDE[index] || null;
-				if (_status[index].tkmVariant !== wantVariant) _status[index].img = null;
-				else return;
-			} else return;
-		}
-		loadStatusIcon(index);
-		ScreenEffectManager.parseStatus(index);
-	};
-	StatusIcons_default = UIManager.addComponent(StatusIcons);
 }));
 //#endregion
 //#region src/UI/Components/CashShop/CashShop.html?raw
@@ -319730,7 +321431,10 @@ function onEntityUseSkillToAttack(pkt) {
 			if (pushedEntity) pushedEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20, null, true);
 		}
 	}
-	if (srcEntity && dstEntity && pkt.action != SkillAction$1.SPLASH) EffectManager.spamSkill(pkt.SKID, pkt.targetID, null, Renderer.tick + pkt.attackMT, pkt.AID);
+	if (srcEntity && dstEntity && pkt.action != SkillAction$1.SPLASH) {
+		EffectManager.spamSkillRelease(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID);
+		EffectManager.spamSkill(pkt.SKID, pkt.targetID, null, Renderer.tick + pkt.attackMT, pkt.AID);
+	}
 }
 /**
 * Cast a skill to someone
@@ -324416,8 +326120,8 @@ function onIncreaseSkill(SKID) {
 function onUseSkill(id, level, targetID) {
 	let entity;
 	let range;
-	const isHomun = id > SkillConst_default.HOMUN_BEGIN && id < SkillConst_default.HOMUN_LAST;
-	const isMerc = id > SkillConst_default.MERCENARY_BEGIN && id < SkillConst_default.MERCENARY_LAST;
+	const isHomun = id >= SkillConst_default.HOMUN_BEGIN && id <= SkillConst_default.HOMUN_LAST;
+	const isMerc = id >= SkillConst_default.MERCENARY_BEGIN && id <= SkillConst_default.MERCENARY_LAST;
 	if (isHomun) entity = EntityManager.get(SessionStorage_default.homunId);
 	else if (isMerc) entity = EntityManager.get(SessionStorage_default.mercId);
 	else entity = SessionStorage_default.Entity;
@@ -324634,8 +326338,10 @@ var init_Skill = __esmMin((() => {
 	SkillTargetSelection_default.onUseSkillToPos = function onUseSkillToPos(id, level, x, y) {
 		let entity;
 		let range;
-		const isHomun = id > 8e3 && id < 8044;
+		const isHomun = id >= SkillConst_default.HOMUN_BEGIN && id <= SkillConst_default.HOMUN_LAST;
+		const isMerc = id >= SkillConst_default.MERCENARY_BEGIN && id <= SkillConst_default.MERCENARY_LAST;
 		if (isHomun) entity = EntityManager.get(SessionStorage_default.homunId);
+		else if (isMerc) entity = EntityManager.get(SessionStorage_default.mercId);
 		else {
 			entity = SessionStorage_default.Entity;
 			if (entity.isOverWeight) {
@@ -324670,6 +326376,9 @@ var init_Skill = __esmMin((() => {
 		if (isHomun) {
 			pkt = new PACKET.CZ.REQUEST_MOVENPC();
 			pkt.GID = SessionStorage_default.homunId;
+		} else if (isMerc) {
+			pkt = new PACKET.CZ.REQUEST_MOVENPC();
+			pkt.GID = SessionStorage_default.mercId;
 		} else if (PacketVerManager_default.value >= 20180307) pkt = new PACKET.CZ.REQUEST_MOVE2();
 		else pkt = new PACKET.CZ.REQUEST_MOVE();
 		pkt.dest[0] = out[(count - 1) * 2 + 0];

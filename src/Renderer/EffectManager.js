@@ -29,6 +29,8 @@ import Altitude from 'Renderer/Map/Altitude.js';
 import Sound from 'Audio/SoundManager.js';
 import Preferences from 'Preferences/Map.js';
 import QuadHorn from 'Renderer/Effects/QuadHorn.js';
+import Trail from 'Renderer/Effects/Trail.js';
+import WaterfallEffect from 'Renderer/Effects/WaterfallEffect.js';
 import Session from 'Engine/SessionStorage.js';
 import GraphicsSettings from 'Preferences/Graphics.js';
 
@@ -708,8 +710,16 @@ class EffectManager {
 				EffectManager.add(new RsmEffect(Params), Params);
 				break;
 
+			case 'WATERFALL':
+				EffectManager.add(new WaterfallEffect(Params.effect, Params.Inst, Params.Init), Params);
+				break;
+
 			case 'QuadHorn':
 				EffectManager.add(new QuadHorn(Params.effect, Params.Inst, Params.Init), Params);
+				break;
+
+			case 'TRAIL':
+				EffectManager.add(new Trail(Params.effect, Params.Inst, Params.Init), Params);
 				break;
 
 			case 'FUNC':
@@ -926,6 +936,33 @@ class EffectManager {
 				EffectManager.spam(EF_Init_Par);
 			});
 		}
+	}
+
+	/**
+	 * Spam skill effect when the skill is released on its target (hit or miss)
+	 *
+	 * @param {number} skill id
+	 * @param {number} target aid
+	 * @param {number} tick
+	 * @param {number} source aid
+	 */
+	static spamSkillRelease(skillId, destAID, tick, srcAID) {
+		if (!(skillId in SkillEffect) || !SkillEffect[skillId].releaseEffectId) {
+			return;
+		}
+
+		const effects = Array.isArray(SkillEffect[skillId].releaseEffectId)
+			? SkillEffect[skillId].releaseEffectId
+			: [SkillEffect[skillId].releaseEffectId];
+
+		effects.forEach(effectId => {
+			EffectManager.spam({
+				effectId: effectId,
+				ownerAID: destAID,
+				startTick: tick,
+				otherAID: srcAID
+			});
+		});
 	}
 
 	/**

@@ -251973,6 +251973,7 @@ var init_Model = __esmMin((() => {
 			const max = Math.max, min = Math.min;
 			let x, y, z;
 			mat4$18.copy(this.matrix, _matrix);
+			if (this.baseMatrix) mat4$18.multiply(this.matrix, this.matrix, this.baseMatrix);
 			mat4$18.translate(this.matrix, this.matrix, this.pos);
 			if (!this.rotKeyframes.length) mat4$18.rotate(this.matrix, this.matrix, this.rotangle, this.rotaxis);
 			else mat4$18.rotateQuat(this.matrix, this.matrix, this.rotKeyframes[0].q);
@@ -251997,7 +251998,10 @@ var init_Model = __esmMin((() => {
 				box.range[i] = (box.max[i] - box.min[i]) / 2;
 				box.center[i] = box.min[i] + box.range[i];
 			}
-			for (i = 0, count = nodes.length; i < count; ++i) if (nodes[i].parentname === this.name && this.name !== this.parentname) nodes[i].calcBoundingBox(this.matrix);
+			for (i = 0, count = nodes.length; i < count; ++i) {
+				if (this.absoluteTransform) break;
+				if (nodes[i].parentname === this.name && this.name !== this.parentname) nodes[i].calcBoundingBox(this.matrix);
+			}
 		}
 		/**
 		* Compile Node
@@ -252085,6 +252089,7 @@ var init_Model = __esmMin((() => {
 			]);
 			const nodeMatrix = mat4$18.create();
 			mat4$18.identity(nodeMatrix);
+			if (this.baseMatrix) mat4$18.multiply(nodeMatrix, nodeMatrix, this.baseMatrix);
 			const animPos = getPositionAtFrame$1(this.posKeyframes, frame, animLen);
 			if (animPos) mat4$18.translate(nodeMatrix, nodeMatrix, animPos);
 			else mat4$18.translate(nodeMatrix, nodeMatrix, this.pos);
@@ -252422,7 +252427,8 @@ var init_Model = __esmMin((() => {
 				for (i = 0; i < textureCount; i++) sharedTextures.push(readString());
 			}
 			const rootNodeCount = fp.readLong();
-			for (i = 0; i < rootNodeCount; i++) readString();
+			const rootNodeNames = new Array(rootNodeCount);
+			for (i = 0; i < rootNodeCount; i++) rootNodeNames[i] = readString();
 			const nodeCount = fp.readLong();
 			const nodes = new Array(nodeCount);
 			const allTextures = sharedTextures.slice();
@@ -252452,9 +252458,9 @@ var init_Model = __esmMin((() => {
 					const y = fp.readFloat();
 					const z = fp.readFloat();
 					vertices[j] = [
-						x * transform[0] + y * transform[3] + z * transform[6] + transform[9],
-						x * transform[1] + y * transform[4] + z * transform[7] + transform[10],
-						x * transform[2] + y * transform[5] + z * transform[8] + transform[11]
+						x,
+						y,
+						z
 					];
 				}
 				const tvertexCount = fp.readLong();
@@ -252585,6 +252591,20 @@ var init_Model = __esmMin((() => {
 				node.posKeyframes = positionKeyFrames;
 				node.scaleKeyFrames = scaleKeyFrames;
 				node.textureKeyFrameGroup = [];
+				node.absoluteTransform = true;
+				node.baseMatrix = mat4$18.create();
+				node.baseMatrix[0] = transform[0];
+				node.baseMatrix[1] = transform[1];
+				node.baseMatrix[2] = transform[2];
+				node.baseMatrix[4] = transform[3];
+				node.baseMatrix[5] = transform[4];
+				node.baseMatrix[6] = transform[5];
+				node.baseMatrix[8] = transform[6];
+				node.baseMatrix[9] = transform[7];
+				node.baseMatrix[10] = transform[8];
+				node.baseMatrix[12] = transform[9];
+				node.baseMatrix[13] = transform[10];
+				node.baseMatrix[14] = transform[11];
 				nodes[i] = node;
 			}
 			if (fp.offset + 4 <= fp.length) {
@@ -252595,7 +252615,8 @@ var init_Model = __esmMin((() => {
 			}
 			this.textures = allTextures;
 			this.nodes = nodes;
-			this.main_node = nodes[0] || null;
+			if (nodes.length === 0) throw new Error("RSM::load() - Model contains no nodes");
+			this.main_node = rootNodeNames.map((name) => nodes.find((node) => node.name === name)).find(Boolean) || nodes[0];
 			this.posKeyframes = [];
 			this.volumebox = [];
 			this.instances = [];

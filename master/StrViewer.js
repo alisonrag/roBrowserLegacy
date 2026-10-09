@@ -114,6 +114,7 @@ var init_Thread = __esmMin((() => {
 		* @param {string} type
 		* @param {mixed} data
 		* @param {function} callback
+		* @return {number} request id, also carried by the hook events the request sends (0 without callback)
 		*/
 		static send = (type, data, callback) => {
 			let uid = 0;
@@ -126,6 +127,7 @@ var init_Thread = __esmMin((() => {
 				data,
 				uid
 			}, _origin);
+			return uid;
 		};
 		/**
 		* Receive data from Thread
@@ -140,7 +142,7 @@ var init_Thread = __esmMin((() => {
 				_memory$1[uid].apply(null, event.data.arguments);
 				delete _memory$1[uid];
 			}
-			if (type && _hook[type]) _hook[type].call(null, event.data.data);
+			if (type && _hook[type]) _hook[type].call(null, event.data.data, event.data.request);
 		};
 		/**
 		* Hook receive data
@@ -77796,7 +77798,7 @@ var init_PacketLength = __esmMin((() => {
 }));
 //#endregion
 //#region \0vite/preload-helper.js
-var scriptRel, assetsURL, seen, isCssPreloadUrl, __vitePreload;
+var scriptRel, assetsURL, seen, isCssPreloadUrl, preloadOnce, __vitePreload;
 var init_preload_helper = __esmMin((() => {
 	scriptRel = "modulepreload";
 	assetsURL = function(dep, importerUrl) {
@@ -77805,6 +77807,22 @@ var init_preload_helper = __esmMin((() => {
 	seen = {};
 	isCssPreloadUrl = function isCssPreloadUrl(url) {
 		return url.pathname.endsWith(".css");
+	};
+	preloadOnce = function preloadOnce(seen, href, preload) {
+		if (href in seen) return seen[href];
+		const promise = preload();
+		if (!promise) {
+			seen[href] = void 0;
+			return;
+		}
+		const preloadPromise = promise.then(() => {
+			seen[href] = void 0;
+		}, (err) => {
+			seen[href] = void 0;
+			throw err;
+		});
+		seen[href] = preloadPromise;
+		return preloadPromise;
 	};
 	__vitePreload = function preload(baseModule, deps, importerUrl) {
 		let promise = Promise.resolve();
@@ -77832,32 +77850,32 @@ var init_preload_helper = __esmMin((() => {
 			promise = allSettled(deps.map((depString) => {
 				depString = assetsURL(depString, importerUrl);
 				const dep = importMetaResolve(depString);
-				if (dep.href in seen) return;
-				seen[dep.href] = true;
 				const isCss = isCssPreloadUrl(dep);
-				if (preloadedHrefs === void 0) {
-					preloadedHrefs = {
-						all: /* @__PURE__ */ new Set(),
-						styles: /* @__PURE__ */ new Set()
-					};
-					const links = document.getElementsByTagName("link");
-					for (let i = links.length - 1; i >= 0; i--) {
-						const link = links[i];
-						preloadedHrefs.all.add(link.href);
-						if (link.rel === "stylesheet") preloadedHrefs.styles.add(link.href);
+				return preloadOnce(seen, dep.href, () => {
+					if (preloadedHrefs === void 0) {
+						preloadedHrefs = {
+							all: /* @__PURE__ */ new Set(),
+							styles: /* @__PURE__ */ new Set()
+						};
+						const links = document.getElementsByTagName("link");
+						for (let i = links.length - 1; i >= 0; i--) {
+							const link = links[i];
+							preloadedHrefs.all.add(link.href);
+							if (link.rel === "stylesheet") preloadedHrefs.styles.add(link.href);
+						}
 					}
-				}
-				if ((isCss ? preloadedHrefs.styles : preloadedHrefs.all).has(dep.href)) return;
-				const link = document.createElement("link");
-				link.rel = isCss ? "stylesheet" : scriptRel;
-				if (!isCss) link.as = "script";
-				link.crossOrigin = "";
-				link.href = dep.href;
-				if (cspNonce) link.setAttribute("nonce", cspNonce);
-				document.head.appendChild(link);
-				if (isCss) return new Promise((res, rej) => {
-					link.addEventListener("load", res);
-					link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
+					if ((isCss ? preloadedHrefs.styles : preloadedHrefs.all).has(dep.href)) return;
+					const link = document.createElement("link");
+					link.rel = isCss ? "stylesheet" : scriptRel;
+					if (!isCss) link.as = "script";
+					link.crossOrigin = "";
+					link.href = dep.href;
+					if (cspNonce) link.setAttribute("nonce", cspNonce);
+					document.head.appendChild(link);
+					if (isCss) return new Promise((res, rej) => {
+						link.addEventListener("load", res);
+						link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
+					});
 				});
 			}).filter((p) => p !== void 0));
 		}
@@ -77880,7 +77898,7 @@ var init_preload_helper = __esmMin((() => {
 //#region src/UI/Common.css?raw
 var Common_default$1;
 var init_Common$1 = __esmMin((() => {
-	Common_default$1 = "/* Avoid input focus border */\r\n:focus {\r\n	outline: none;\r\n}\r\n::-moz-focus-inner {\r\n	border: 0;\r\n}\r\n\r\n* {\r\n	-moz-user-select: none;\r\n}\r\n\r\nhtml,\r\nbody {\r\n	touch-action: manipulation;\r\n	margin: 0;\r\n}\r\n\r\n/* Reference for the viewport sized body below */\r\nhtml {\r\n	height: 100%;\r\n}\r\n\r\n/* Prevent mobile browser auto-zoom on input focus and double-tap */\r\n:host {\r\n	touch-action: manipulation;\r\n}\r\n\r\ninput,\r\ntextarea,\r\nselect {\r\n	touch-action: manipulation;\r\n}\r\n\r\ncanvas {\r\n	touch-action: none;\r\n}\r\n\r\n/* Page zoomed in (browser pinch / input focus zoom, tracked by Core/Mobile.js): hand the\r\n   touches back to the browser so the user can pan and pinch the page back out */\r\nbody.ro-page-zoomed canvas {\r\n	touch-action: auto;\r\n}\r\n\r\nbody {\r\n	background-color: black;\r\n	font-size: 12px;\r\n	/* 'SCDream' first: wins only when the server actually serves the client font (loaded via\r\n	   @font-face in DBManager). When it isn't served it resolves to Arial — the official client's\r\n	   window UI font for intl/america servicetype (Ragexe draws window text with CreateFontA on the\r\n	   Gulim/Arial face table). Liberation Sans / Arimo provide Arial metrics on Linux. */\r\n	font-family: 'SCDream', Arial, 'Liberation Sans', Arimo, sans-serif;\r\n	/* Normalize any resolved font's x-height to Arial's (sxHeight 1062 / unitsPerEm 2048 = 0.5186),\r\n	   so text keeps Arial's apparent size on every OS/font. It's inherited and crosses Shadow DOM\r\n	   hosts, so it also rescales elements that use a non-Arial face; those opt out with\r\n	   `font-size-adjust: none` on the selector declaring that font (Intro, GrfViewer, JoystickUI\r\n	   header). SCDream, when a server serves it, is normalized to Arial on purpose.\r\n	   Progressive enhancement: engines that don't support the numeric form ignore it\r\n	   and render at the resolved font's native x-height (no JS fallback needed — Arial\r\n	   / Liberation Sans already carry correct metrics, only annex fonts degrade). */\r\n	font-size-adjust: 0.5186;\r\n	overflow: hidden;\r\n	-webkit-user-select: none;\r\n	user-select: none;\r\n	min-width: 100vw;\r\n	min-height: 100vh;\r\n	letter-spacing: 0;\r\n	line-height: 1.2;\r\n}\r\n\r\n/* Apps owning the 3D viewport (set by Renderer.init) are a fixed viewport: size the body to it and\r\n   contain it. `overflow: hidden` alone doesn't clip the body box — it propagates to the viewport —\r\n   so content positioned off screen (entity overlays, signboards, dragged windows) still extends the\r\n   document's scrollable area, and the browser scrolls, or on mobile lays the page out at its\r\n   fallback width and scales it down, to reveal it. Paint containment clips the box for real. */\r\nbody.ro-viewport {\r\n	width: 100%;\r\n	height: 100%;\r\n	min-width: 0;\r\n	min-height: 0;\r\n	contain: paint;\r\n}\r\n\r\n.title {\r\n	font-size: 12px;\r\n}\r\n\r\nbutton,\r\nui-button {\r\n	padding: 0;\r\n}\r\n\r\nui-button {\r\n	display: inline-block;\r\n}\r\n\r\n.ui-btn {\r\n	-webkit-appearance: none;\r\n	appearance: none;\r\n	display: inline-flex;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	height: 20px;\r\n	min-width: 52px;\r\n	padding: 0 10px;\r\n\r\n	font-size: 12px;\r\n	line-height: 1;\r\n	color: #3f3f3f;\r\n	text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);\r\n\r\n	border-radius: 4px;\r\n	border: 1px solid;\r\n\r\n	/* 3D border: top right bottom left */\r\n	border-color: #cfcfcf #a9a9a9 #5f5f5f #bdbdbd;\r\n\r\n	/* glossy + subtle depth */\r\n	background: linear-gradient(to bottom, #ffffff 0%, #f2f2f2 35%, #dcdcdc 55%, #f9f9f9 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		/* top highlight */ inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		/* bottom inner edge */ 0 1px 0 rgba(0, 0, 0, 0.12); /* outer bottom shadow */\r\n\r\n	cursor: pointer;\r\n}\r\n\r\n/* Hover: hơi xanh nhẹ giống button Reset */\r\n.ui-btn:hover {\r\n	border-color: #c9d1dd #8ea2c4 #4d5f86 #b1bfd5;\r\n	background: linear-gradient(to bottom, #f7fbff 0%, #dfe8f6 35%, #c0d0ee 55%, #f0f6ff 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		0 1px 0 rgba(0, 0, 0, 0.12);\r\n}\r\n\r\n/* Active: giống \"ấn xuống\" */\r\n.ui-btn:active {\r\n	border-color: #9fb0c9 #6f86a6 #3b4b67 #7f96b6;\r\n\r\n	background: linear-gradient(to bottom, #cdd8eb 0%, #b7c8e5 45%, #dfe9fb 100%);\r\n\r\n	box-shadow:\r\n		inset 0 2px 3px rgba(0, 0, 0, 0.18),\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.35);\r\n\r\n	transform: translateY(1px); /* cảm giác bị nhấn */\r\n}\r\n\r\n/* Disabled */\r\n.ui-btn:disabled,\r\n.ui-btn.is-disabled {\r\n	cursor: default;\r\n	color: #8f8f8f;\r\n	text-shadow: none;\r\n\r\n	border-color: #d3d3d3 #bdbdbd #9b9b9b #c9c9c9;\r\n\r\n	background: linear-gradient(to bottom, #f6f6f6 0%, #e7e7e7 55%, #fafafa 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.9),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.08),\r\n		0 1px 0 rgba(0, 0, 0, 0.08);\r\n\r\n	transform: none;\r\n}\r\n\r\n/* Hide native cursor inside Shadow DOM when custom cursor is active */\r\n:host-context(.custom-cursor) * {\r\n	cursor: none !important;\r\n}\r\n";
+	Common_default$1 = "/* Avoid input focus border */\r\n:focus {\r\n	outline: none;\r\n}\r\n::-moz-focus-inner {\r\n	border: 0;\r\n}\r\n\r\n* {\r\n	-moz-user-select: none;\r\n}\r\n\r\nhtml,\r\nbody {\r\n	touch-action: manipulation;\r\n	margin: 0;\r\n}\r\n\r\n/* Reference for the viewport sized body below */\r\nhtml {\r\n	height: 100%;\r\n}\r\n\r\n/* Prevent mobile browser auto-zoom on input focus and double-tap */\r\n:host {\r\n	touch-action: manipulation;\r\n}\r\n\r\ninput,\r\ntextarea,\r\nselect {\r\n	touch-action: manipulation;\r\n}\r\n\r\ncanvas {\r\n	touch-action: none;\r\n}\r\n\r\n/* Page zoomed in (browser pinch / input focus zoom, tracked by Core/Mobile.js): hand the\r\n   touches back to the browser so the user can pan and pinch the page back out */\r\nbody.ro-page-zoomed canvas {\r\n	touch-action: auto;\r\n}\r\n\r\nbody {\r\n	background-color: black;\r\n	font-size: 12px;\r\n	/* 'SCDream' first: wins only when the server actually serves the client font (loaded via\r\n	   @font-face in DBManager). When it isn't served it resolves to Arial — the official client's\r\n	   window UI font for intl/america servicetype (Ragexe draws window text with CreateFontA on the\r\n	   Gulim/Arial face table). Liberation Sans / Arimo provide Arial metrics on Linux. */\r\n	font-family: 'SCDream', Arial, 'Liberation Sans', Arimo, sans-serif;\r\n	/* Normalize any resolved font's x-height to Arial's (sxHeight 1062 / unitsPerEm 2048 = 0.5186),\r\n	   so text keeps Arial's apparent size on every OS/font. It's inherited and crosses Shadow DOM\r\n	   hosts, so it also rescales elements that use a non-Arial face; those opt out with\r\n	   `font-size-adjust: none` on the selector declaring that font (Intro, GrfViewer, JoystickUI\r\n	   header). SCDream, when a server serves it, is normalized to Arial on purpose.\r\n	   Progressive enhancement: engines that don't support the numeric form ignore it\r\n	   and render at the resolved font's native x-height (no JS fallback needed — Arial\r\n	   / Liberation Sans already carry correct metrics, only annex fonts degrade). */\r\n	font-size-adjust: 0.5186;\r\n	overflow: hidden;\r\n	-webkit-user-select: none;\r\n	user-select: none;\r\n	min-width: 100vw;\r\n	min-height: 100vh;\r\n	letter-spacing: 0;\r\n	line-height: 1.2;\r\n}\r\n\r\n/* Apps owning the 3D viewport (set by Renderer.init) are a fixed viewport: size the body to it and\r\n   contain it. `overflow: hidden` alone doesn't clip the body box — it propagates to the viewport —\r\n   so content positioned off screen (entity overlays, signboards, dragged windows) still extends the\r\n   document's scrollable area, and the browser scrolls, or on mobile lays the page out at its\r\n   fallback width and scales it down, to reveal it. Paint containment clips the box for real. */\r\nbody.ro-viewport {\r\n	width: 100%;\r\n	height: 100%;\r\n	min-width: 0;\r\n	min-height: 0;\r\n	contain: paint;\r\n}\r\n\r\n.title {\r\n	font-size: 12px;\r\n}\r\n\r\nbutton,\r\nui-button {\r\n	padding: 0;\r\n}\r\n\r\nui-button {\r\n	display: inline-block;\r\n}\r\n\r\n.ui-btn {\r\n	-webkit-appearance: none;\r\n	appearance: none;\r\n	display: inline-flex;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	height: 20px;\r\n	min-width: 52px;\r\n	padding: 0 10px;\r\n\r\n	font-size: 12px;\r\n	line-height: 1;\r\n	color: #3f3f3f;\r\n	text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);\r\n\r\n	border-radius: 4px;\r\n	border: 1px solid;\r\n\r\n	/* 3D border: top right bottom left */\r\n	border-color: #cfcfcf #a9a9a9 #5f5f5f #bdbdbd;\r\n\r\n	/* glossy + subtle depth */\r\n	background: linear-gradient(to bottom, #ffffff 0%, #f2f2f2 35%, #dcdcdc 55%, #f9f9f9 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		/* top highlight */ inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		/* bottom inner edge */ 0 1px 0 rgba(0, 0, 0, 0.12); /* outer bottom shadow */\r\n\r\n	cursor: pointer;\r\n}\r\n\r\n/* Hover: hơi xanh nhẹ giống button Reset */\r\n.ui-btn:hover {\r\n	border-color: #c9d1dd #8ea2c4 #4d5f86 #b1bfd5;\r\n	background: linear-gradient(to bottom, #f7fbff 0%, #dfe8f6 35%, #c0d0ee 55%, #f0f6ff 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		0 1px 0 rgba(0, 0, 0, 0.12);\r\n}\r\n\r\n/* Active: giống \"ấn xuống\" */\r\n.ui-btn:active {\r\n	border-color: #9fb0c9 #6f86a6 #3b4b67 #7f96b6;\r\n\r\n	background: linear-gradient(to bottom, #cdd8eb 0%, #b7c8e5 45%, #dfe9fb 100%);\r\n\r\n	box-shadow:\r\n		inset 0 2px 3px rgba(0, 0, 0, 0.18),\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.35);\r\n\r\n	transform: translateY(1px); /* cảm giác bị nhấn */\r\n}\r\n\r\n/* Disabled */\r\n.ui-btn:disabled,\r\n.ui-btn.is-disabled {\r\n	cursor: default;\r\n	color: #8f8f8f;\r\n	text-shadow: none;\r\n\r\n	border-color: #d3d3d3 #bdbdbd #9b9b9b #c9c9c9;\r\n\r\n	background: linear-gradient(to bottom, #f6f6f6 0%, #e7e7e7 55%, #fafafa 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.9),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.08),\r\n		0 1px 0 rgba(0, 0, 0, 0.08);\r\n\r\n	transform: none;\r\n}\r\n\r\n/* Hide native cursor inside Shadow DOM when custom cursor is active */\r\n@container style(--ro-game-cursor: on) {\r\n	* {\r\n		cursor: none !important;\r\n	}\r\n}\r\n";
 }));
 //#endregion
 //#region src/Controls/MouseEventHandler.js
@@ -84822,7 +84840,7 @@ var init_JobNameTable = __esmMin((() => {
 	JobNameTable[JobConst_default.IMPERIAL_GUARD_RIDING] = "imperial_guard_riding";
 	JobNameTable[JobConst_default.BIOLO_RIDING] = "biolo_riding";
 	JobNameTable[JobConst_default.ABYSS_CHASER_RIDING] = "abyss_chaser_riding";
-	JobNameTable[JobConst_default.ELEMENTAL_MASTER_RIDING] = "elemental_master_riding";
+	JobNameTable[JobConst_default.ELEMENTAL_MASTER_RIDING] = "elemetal_master_riding";
 	JobNameTable[JobConst_default.INQUISITOR_RIDING] = "inquisitor_riding";
 	JobNameTable[JobConst_default.TROUBADOUR_RIDING] = "troubadour_riding";
 	JobNameTable[JobConst_default.TROUVERE_RIDING] = "trouvere_riding";
@@ -85090,6 +85108,19 @@ var init_PalNameTable = __esmMin((() => {
 	PalNameTable[JobConst_default.INQUISITOR] = JobNameTable[JobConst_default.INQUISITOR];
 	PalNameTable[JobConst_default.TROUBADOUR] = JobNameTable[JobConst_default.TROUBADOUR];
 	PalNameTable[JobConst_default.TROUVERE] = JobNameTable[JobConst_default.TROUVERE];
+	PalNameTable[JobConst_default.DRAGON_KNIGHT_RIDING] = JobNameTable[JobConst_default.DRAGON_KNIGHT_RIDING];
+	PalNameTable[JobConst_default.MEISTER_RIDING] = JobNameTable[JobConst_default.MEISTER_RIDING];
+	PalNameTable[JobConst_default.SHADOW_CROSS_RIDING] = JobNameTable[JobConst_default.SHADOW_CROSS_RIDING];
+	PalNameTable[JobConst_default.ARCH_MAGE_RIDING] = JobNameTable[JobConst_default.ARCH_MAGE_RIDING];
+	PalNameTable[JobConst_default.CARDINAL_RIDING] = JobNameTable[JobConst_default.CARDINAL_RIDING];
+	PalNameTable[JobConst_default.WINDHAWK_RIDING] = JobNameTable[JobConst_default.WINDHAWK_RIDING];
+	PalNameTable[JobConst_default.IMPERIAL_GUARD_RIDING] = JobNameTable[JobConst_default.IMPERIAL_GUARD_RIDING];
+	PalNameTable[JobConst_default.BIOLO_RIDING] = JobNameTable[JobConst_default.BIOLO_RIDING];
+	PalNameTable[JobConst_default.ABYSS_CHASER_RIDING] = JobNameTable[JobConst_default.ABYSS_CHASER_RIDING];
+	PalNameTable[JobConst_default.ELEMENTAL_MASTER_RIDING] = JobNameTable[JobConst_default.ELEMENTAL_MASTER_RIDING];
+	PalNameTable[JobConst_default.INQUISITOR_RIDING] = JobNameTable[JobConst_default.INQUISITOR_RIDING];
+	PalNameTable[JobConst_default.TROUBADOUR_RIDING] = JobNameTable[JobConst_default.TROUBADOUR_RIDING];
+	PalNameTable[JobConst_default.TROUVERE_RIDING] = JobNameTable[JobConst_default.TROUVERE_RIDING];
 	PalNameTable[JobConst_default.WINDHAWK2] = JobNameTable[JobConst_default.WINDHAWK2];
 	PalNameTable[JobConst_default.MEISTER2] = JobNameTable[JobConst_default.MEISTER2];
 	PalNameTable[JobConst_default.DRAGON_KNIGHT2] = JobNameTable[JobConst_default.DRAGON_KNIGHT2];
@@ -107437,7 +107468,36 @@ var init_SkillConst = __esmMin((() => {
 		ITEM_BANANA_BOMB: 11006,
 		SCRIPT_999: 11999,
 		EFST_DRESS_UP: 12e3,
-		EFST_999: 12999
+		EFST_999: 12999,
+		SS_FOUR_CHARM: 5499,
+		NW_WILD_SHOT: 5500,
+		NW_MIDNIGHT_FALLEN: 5501,
+		SKE_SKY_SUN: 5502,
+		SKE_SKY_MOON: 5503,
+		SKE_STAR_LIGHT_KICK: 5504,
+		HN_OVERCOMING_CRISIS: 5505,
+		SH_CHUL_HO_BATTERING: 5506,
+		SH_HYUN_ROK_SPIRIT_POWER: 5507,
+		DK_DRAGONIC_PIERCE: 6502,
+		IG_RADIANT_SPEAR: 6503,
+		IG_IMPERIAL_CROSS: 6504,
+		IG_IMPERIAL_PRESSURE: 6505,
+		MT_RUSH_STRIKE: 6506,
+		MT_POWERFUL_SWING: 6507,
+		MT_ENERGY_CANNONADE: 6508,
+		BO_MYSTERY_POWDER: 6509,
+		BO_DUST_EXPLOSION: 6510,
+		SHC_CROSS_SLASH: 6511,
+		ABC_HIT_AND_SLIDING: 6512,
+		ABC_CHASING_BREAK: 6513,
+		ABC_CHASING_SHOT: 6514,
+		ABC_ABYSS_FLAME: 6515,
+		AG_ENERGY_CONVERSION: 6516,
+		EM_PSYCHIC_STREAM: 6517,
+		CD_DIVINUS_FLOS: 6518,
+		IQ_BLAZING_FLAME_BLAST: 6519,
+		WH_WILD_WALK: 6520,
+		TR_RHYTHMICAL_WAVE: 6521
 	};
 }));
 //#endregion
@@ -138194,7 +138254,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.DK_MADNESS_CRUSHER]: 19,
 		[SkillConst_default.DK_SERVANT_W_DEMOL]: 22,
 		[SkillConst_default.DK_VIGOR]: 24,
-		[SkillConst_default.DK_DRAGONIC_AURA]: 26
+		[SkillConst_default.DK_DRAGONIC_AURA]: 26,
+		[SkillConst_default.DK_DRAGONIC_PIERCE]: 28
 	};
 	SkillTreeView[JobConst_default.ARCH_MAGE] = {
 		list: 4,
@@ -138216,7 +138277,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.AG_CRYSTAL_IMPACT]: 18,
 		[SkillConst_default.AG_DESTRUCTIVE_HURRICANE]: 19,
 		[SkillConst_default.AG_VIOLENT_QUAKE]: 20,
-		[SkillConst_default.AG_ASTRAL_STRIKE]: 22
+		[SkillConst_default.AG_ASTRAL_STRIKE]: 22,
+		[SkillConst_default.AG_ENERGY_CONVERSION]: 28
 	};
 	SkillTreeView[JobConst_default.INQUISITOR] = {
 		list: 4,
@@ -138237,7 +138299,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.IQ_MASSIVE_F_BLASTER]: 27,
 		[SkillConst_default.IQ_THIRD_PUNISH]: 31,
 		[SkillConst_default.IQ_THIRD_CONSECRATION]: 32,
-		[SkillConst_default.IQ_THIRD_FLAME_BOMB]: 33
+		[SkillConst_default.IQ_THIRD_FLAME_BOMB]: 33,
+		[SkillConst_default.IQ_BLAZING_FLAME_BLAST]: 35
 	};
 	SkillTreeView[JobConst_default.IMPERIAL_GUARD] = {
 		list: 4,
@@ -138254,7 +138317,10 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.IG_HOLY_SHIELD]: 19,
 		[SkillConst_default.IG_GRAND_JUDGEMENT]: 22,
 		[SkillConst_default.IG_ULTIMATE_SACRIFICE]: 25,
-		[SkillConst_default.IG_JUDGEMENT_CROSS]: 26
+		[SkillConst_default.IG_JUDGEMENT_CROSS]: 26,
+		[SkillConst_default.IG_RADIANT_SPEAR]: 28,
+		[SkillConst_default.IG_IMPERIAL_CROSS]: 29,
+		[SkillConst_default.IG_IMPERIAL_PRESSURE]: 30
 	};
 	SkillTreeView[JobConst_default.SHADOW_CROSS] = {
 		list: 4,
@@ -138268,7 +138334,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.SHC_POTENT_VENOM]: 19,
 		[SkillConst_default.SHC_SHADOW_STAB]: 22,
 		[SkillConst_default.SHC_SHADOW_EXCEED]: 25,
-		[SkillConst_default.SHC_FATAL_SHADOW_CROW]: 30
+		[SkillConst_default.SHC_FATAL_SHADOW_CROW]: 30,
+		[SkillConst_default.SHC_CROSS_SLASH]: 35
 	};
 	SkillTreeView[JobConst_default.CARDINAL] = {
 		list: 4,
@@ -138288,7 +138355,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.CD_ARGUTUS_TELUM]: 22,
 		[SkillConst_default.CD_ARGUTUS_VITA]: 23,
 		[SkillConst_default.CD_PNEUMATICUS_PROCELLA]: 25,
-		[SkillConst_default.CD_COMPETENTIA]: 29
+		[SkillConst_default.CD_COMPETENTIA]: 29,
+		[SkillConst_default.CD_DIVINUS_FLOS]: 35
 	};
 	SkillTreeView[JobConst_default.BIOLO] = {
 		list: 4,
@@ -138307,7 +138375,9 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.BO_WOODENWARRIOR]: 18,
 		[SkillConst_default.BO_WOODEN_FAIRY]: 19,
 		[SkillConst_default.BO_RESEARCHREPORT]: 24,
-		[SkillConst_default.BO_HELLTREE]: 25
+		[SkillConst_default.BO_HELLTREE]: 25,
+		[SkillConst_default.BO_MYSTERY_POWDER]: 28,
+		[SkillConst_default.BO_DUST_EXPLOSION]: 29
 	};
 	SkillTreeView[JobConst_default.WINDHAWK] = {
 		list: 4,
@@ -138324,7 +138394,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.WH_FLAMETRAP]: 17,
 		[SkillConst_default.WH_SWIFTTRAP]: 18,
 		[SkillConst_default.WH_CALAMITYGALE]: 21,
-		[SkillConst_default.WH_HAWKBOOMERANG]: 26
+		[SkillConst_default.WH_HAWKBOOMERANG]: 26,
+		[SkillConst_default.WH_WILD_WALK]: 28
 	};
 	SkillTreeView[JobConst_default.TROUBADOUR] = {
 		list: 4,
@@ -138343,7 +138414,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.TR_MYSTIC_SYMPHONY]: 22,
 		[SkillConst_default.TR_ROKI_CAPRICCIO]: 24,
 		[SkillConst_default.TR_NIPELHEIM_REQUIEM]: 25,
-		[SkillConst_default.TR_KVASIR_SONATA]: 31
+		[SkillConst_default.TR_KVASIR_SONATA]: 31,
+		[SkillConst_default.TR_RHYTHMICAL_WAVE]: 35
 	};
 	SkillTreeView[JobConst_default.TROUVERE] = {
 		list: 4,
@@ -138362,7 +138434,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.TR_MYSTIC_SYMPHONY]: 22,
 		[SkillConst_default.TR_ROKI_CAPRICCIO]: 24,
 		[SkillConst_default.TR_NIPELHEIM_REQUIEM]: 25,
-		[SkillConst_default.TR_KVASIR_SONATA]: 31
+		[SkillConst_default.TR_KVASIR_SONATA]: 31,
+		[SkillConst_default.TR_RHYTHMICAL_WAVE]: 35
 	};
 	SkillTreeView[JobConst_default.ABYSS_CHASER] = {
 		list: 4,
@@ -138378,7 +138451,11 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.ABC_FRENZY_SHOT]: 17,
 		[SkillConst_default.ABC_ABYSS_SQUARE]: 19,
 		[SkillConst_default.ABC_ABYSS_SLAYER]: 23,
-		[SkillConst_default.ABC_ABYSS_STRIKE]: 26
+		[SkillConst_default.ABC_ABYSS_STRIKE]: 26,
+		[SkillConst_default.ABC_HIT_AND_SLIDING]: 28,
+		[SkillConst_default.ABC_CHASING_BREAK]: 29,
+		[SkillConst_default.ABC_CHASING_SHOT]: 30,
+		[SkillConst_default.ABC_ABYSS_FLAME]: 31
 	};
 	SkillTreeView[JobConst_default.MEISTER] = {
 		list: 4,
@@ -138396,7 +138473,10 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.MT_SUMMON_ABR_DUAL_CANNON]: 19,
 		[SkillConst_default.MT_TRIPLE_LASER]: 20,
 		[SkillConst_default.MT_SUMMON_ABR_MOTHER_NET]: 26,
-		[SkillConst_default.MT_SUMMON_ABR_INFINITY]: 33
+		[SkillConst_default.MT_SUMMON_ABR_INFINITY]: 33,
+		[SkillConst_default.MT_RUSH_STRIKE]: 35,
+		[SkillConst_default.MT_POWERFUL_SWING]: 36,
+		[SkillConst_default.MT_ENERGY_CANNONADE]: 37
 	};
 	SkillTreeView[JobConst_default.ELEMENTAL_MASTER] = {
 		list: 4,
@@ -138417,7 +138497,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.EM_INCREASING_ACTIVITY]: 24,
 		[SkillConst_default.EM_SUMMON_ELEMENTAL_SERPENS]: 26,
 		[SkillConst_default.EM_SUMMON_ELEMENTAL_TERREMOTUS]: 27,
-		[SkillConst_default.EM_ELEMENTAL_BUSTER]: 33
+		[SkillConst_default.EM_ELEMENTAL_BUSTER]: 33,
+		[SkillConst_default.EM_PSYCHIC_STREAM]: 35
 	};
 	SkillTreeView[JobConst_default.SKY_EMPEROR] = {
 		list: 3,
@@ -138434,7 +138515,10 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.SKE_DAWN_BREAK]: 24,
 		[SkillConst_default.SKE_STAR_CANNON]: 26,
 		[SkillConst_default.SKE_ALL_IN_THE_SKY]: 30,
-		[SkillConst_default.SKE_ENCHANTING_SKY]: 32
+		[SkillConst_default.SKE_ENCHANTING_SKY]: 32,
+		[SkillConst_default.SKE_SKY_SUN]: 35,
+		[SkillConst_default.SKE_SKY_MOON]: 36,
+		[SkillConst_default.SKE_STAR_LIGHT_KICK]: 37
 	};
 	SkillTreeView[JobConst_default.SOUL_ASCETIC] = {
 		list: 3,
@@ -138474,7 +138558,9 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.NW_HASTY_FIRE_IN_THE_HOLE]: 19,
 		[SkillConst_default.NW_GRENADES_DROPPING]: 26,
 		[SkillConst_default.NW_AUTO_FIRING_LAUNCHER]: 27,
-		[SkillConst_default.NW_MISSION_BOMBARD]: 33
+		[SkillConst_default.NW_MISSION_BOMBARD]: 33,
+		[SkillConst_default.NW_WILD_SHOT]: 35,
+		[SkillConst_default.NW_MIDNIGHT_FALLEN]: 36
 	};
 	SkillTreeView[JobConst_default.HYPER_NOVICE] = {
 		list: 3,
@@ -138492,7 +138578,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.HN_GROUND_GRAVITATION]: 17,
 		[SkillConst_default.HN_NAPALM_VULCAN_STRIKE]: 18,
 		[SkillConst_default.HN_BREAKINGLIMIT]: 21,
-		[SkillConst_default.HN_RULEBREAK]: 24
+		[SkillConst_default.HN_RULEBREAK]: 24,
+		[SkillConst_default.HN_OVERCOMING_CRISIS]: 28
 	};
 	SkillTreeView[JobConst_default.SPIRIT_HANDLER] = {
 		list: 2,
@@ -138512,7 +138599,9 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.SH_COMMUNE_WITH_KI_SUL]: 31,
 		[SkillConst_default.SH_COMMUNE_WITH_HYUN_ROK]: 33,
 		[SkillConst_default.SH_TEMPORARY_COMMUNION]: 37,
-		[SkillConst_default.SH_BLESSING_OF_MYSTICAL_CREATURES]: 39
+		[SkillConst_default.SH_BLESSING_OF_MYSTICAL_CREATURES]: 39,
+		[SkillConst_default.SH_CHUL_HO_BATTERING]: 42,
+		[SkillConst_default.SH_HYUN_ROK_SPIRIT_POWER]: 43
 	};
 	SkillTreeView[JobConst_default.SHIRANUI] = {
 		list: 3,
@@ -138536,7 +138625,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.SS_HITOUAKUMU]: 30,
 		[SkillConst_default.SS_KAGEAKUMU]: 32,
 		[SkillConst_default.SS_ANTENPOU]: 34,
-		[SkillConst_default.SS_ANKOKURYUUAKUMU]: 41
+		[SkillConst_default.SS_ANKOKURYUUAKUMU]: 41,
+		[SkillConst_default.SS_FOUR_CHARM]: 42
 	};
 	SkillTreeView[JobConst_default.SHINKIRO] = {
 		list: 3,
@@ -138560,7 +138650,8 @@ var init_SkillTreeView = __esmMin((() => {
 		[SkillConst_default.SS_HITOUAKUMU]: 30,
 		[SkillConst_default.SS_KAGEAKUMU]: 32,
 		[SkillConst_default.SS_ANTENPOU]: 34,
-		[SkillConst_default.SS_ANKOKURYUUAKUMU]: 41
+		[SkillConst_default.SS_ANKOKURYUUAKUMU]: 41,
+		[SkillConst_default.SS_FOUR_CHARM]: 42
 	};
 	duplicateEntry$2(JobConst_default.NOVICE, JobConst_default.NOVICE_B);
 	duplicateEntry$2(JobConst_default.SWORDMAN, JobConst_default.SWORDMAN_B);
@@ -138668,6 +138759,53 @@ var init_SkillTreeView = __esmMin((() => {
 	duplicateEntry$2(JobConst_default.DRAGON_KNIGHT, JobConst_default.DRAGON_KNIGHT2);
 	duplicateEntry$2(JobConst_default.IMPERIAL_GUARD, JobConst_default.IMPERIAL_GUARD2);
 	duplicateEntry$2(JobConst_default.SKY_EMPEROR, JobConst_default.SKY_EMPEROR2);
+}));
+//#endregion
+//#region src/DB/Skills/SkillTreeMerge.js
+/**
+* Put the tree back to the built-in layout, dropping every job and position a
+* previously loaded client file added.
+*
+* @param {object} tree - SkillTreeView, changed in place
+* @param {object} [builtIn] - the layout to restore
+*/
+function resetSkillTree(tree, builtIn = BuiltInSkillTreeView) {
+	for (const jobId of Object.keys(tree)) if (!(jobId in builtIn)) delete tree[jobId];
+	for (const [jobId, entry] of Object.entries(builtIn)) tree[jobId] = { ...entry };
+}
+/**
+* For each job a client file defined, put back the built-in position of any
+* skill the file leaves out, or the next free slot when the file has taken
+* that one. Positions the file set are never moved.
+*
+* @param {object} tree - SkillTreeView after the file was read, changed in place
+* @param {Iterable} jobIds - the jobs the file defined
+* @param {object} [builtIn] - the built-in layout
+*/
+function keepBuiltInSkills(tree, jobIds, builtIn = BuiltInSkillTreeView) {
+	for (const jobId of jobIds) {
+		const entry = tree[jobId];
+		const base = builtIn[jobId];
+		if (!entry || !base) continue;
+		const taken = new Set(Object.keys(entry).filter(isSkill).map((key) => entry[key]));
+		let next = Math.max(-1, ...taken) + 1;
+		for (const [skillId, pos] of Object.entries(base)) {
+			if (!isSkill(skillId) || skillId in entry) continue;
+			let slot = pos;
+			if (taken.has(slot)) {
+				while (taken.has(next)) next++;
+				slot = next;
+			}
+			entry[skillId] = slot;
+			taken.add(slot);
+		}
+	}
+}
+var isSkill, BuiltInSkillTreeView;
+var init_SkillTreeMerge = __esmMin((() => {
+	init_SkillTreeView();
+	isSkill = (key) => /^\d+$/.test(key);
+	BuiltInSkillTreeView = Object.freeze(Object.fromEntries(Object.entries(SkillTreeView).map(([jobId, entry]) => [jobId, Object.freeze({ ...entry })])));
 }));
 //#endregion
 //#region src/DB/Jobs/JobHitSoundTable.js
@@ -206062,7 +206200,7 @@ var init_HtmlHelper = __esmMin((() => {
 */
 function render$15() {
 	_ctx$6.clearRect(0, 0, _canvas.width, _canvas.height);
-	if (_progress > -1) Background.setPercent(_progress);
+	if (Background._progress > -1) Background.setPercent(Background._progress);
 }
 /**
 * Play with the overlay
@@ -206071,17 +206209,17 @@ function render$15() {
 */
 function transition(callback) {
 	const transitionDuration = Configs.get("transitionDuration") ? Configs.get("transitionDuration") : 500;
-	if (_overlayAnim) _overlayAnim.stop();
+	if (Background._overlayAnim) Background._overlayAnim.stop();
 	_overlay.style.opacity = "0.01";
 	document.body.appendChild(_overlay);
-	_overlayAnim = animateElement(_overlay, { opacity: 1 }, transitionDuration, () => {
+	Background._overlayAnim = animateElement(_overlay, { opacity: 1 }, transitionDuration, () => {
 		callback();
-		_overlayAnim = animateElement(_overlay, { opacity: .01 }, transitionDuration, () => {
+		Background._overlayAnim = animateElement(_overlay, { opacity: .01 }, transitionDuration, () => {
 			if (_overlay.parentNode) _overlay.parentNode.removeChild(_overlay);
 		});
 	});
 }
-var _overlay, _container, _canvas, _ctx$6, _progress, _overlayAnim, _loading, Background;
+var _overlay, _container, _canvas, _ctx$6, Background;
 var init_Background = __esmMin((() => {
 	init_DBManager();
 	init_Client();
@@ -206115,10 +206253,24 @@ var init_Background = __esmMin((() => {
 		zIndex: "2"
 	});
 	_ctx$6 = _canvas.getContext("2d");
-	_progress = -1;
-	_overlayAnim = null;
-	_loading = [];
 	Background = class Background {
+		/**
+		* Background loading progress
+		* @var {number} percent
+		*/
+		static _progress = -1;
+		/**
+		* @var {object|null} current overlay animation handle
+		*/
+		static _overlayAnim = null;
+		/**
+		* @var {Array} loading screen filenames
+		*/
+		static _loading = [];
+		/**
+		* @var {object|null} removal in progress, dropped when a background is set during its fade
+		*/
+		static _removal = null;
 		/**
 		* Initialize Background component
 		*
@@ -206126,15 +206278,15 @@ var init_Background = __esmMin((() => {
 		*/
 		static init(loading) {
 			let i;
-			_progress = 0;
+			Background._progress = 0;
 			_canvas.style.zIndex = "1";
 			render$15();
 			if (loading) {
-				_loading = loading;
+				Background._loading = loading;
 				return;
 			}
-			_loading.length = 10;
-			for (i = 1; i <= 10; ++i) _loading[i - 1] = `loading${i < 10 ? "0" + i : i}.jpg`;
+			Background._loading.length = 10;
+			for (i = 1; i <= 10; ++i) Background._loading[i - 1] = `loading${i < 10 ? "0" + i : i}.jpg`;
 		}
 		/**
 		* Resize the background
@@ -206161,7 +206313,8 @@ var init_Background = __esmMin((() => {
 		*/
 		static setImage(filename, callback) {
 			const exist = !!_container.parentNode;
-			_progress = -1;
+			Background._progress = -1;
+			Background._removal = null;
 			_container.innerHTML = "";
 			_container.style.backgroundImage = "none";
 			render$15();
@@ -206248,8 +206401,8 @@ var init_Background = __esmMin((() => {
 		* @param {function} callback once the loading is display (optional)
 		*/
 		static setLoading(callback) {
-			const index = Math.floor(Math.random() * _loading.length);
-			Background.setImage(_loading[index] || "loading01.jpg", () => {
+			const index = Math.floor(Math.random() * Background._loading.length);
+			Background.setImage(Background._loading[index] || "loading01.jpg", () => {
 				_canvas.style.zIndex = "999";
 				Background.setPercent(0);
 				if (callback) callback();
@@ -206261,17 +206414,18 @@ var init_Background = __esmMin((() => {
 		* @param {function} callback once the overlay hide the window (optional)
 		*/
 		static remove(callback) {
-			if (!!!_container.parentNode) {
-				if (callback) callback();
-				return;
-			}
+			const removal = {};
+			Background._removal = removal;
 			transition(() => {
-				_container.style.zIndex = "0";
-				_canvas.style.zIndex = "0";
-				if (_container.parentNode) _container.parentNode.removeChild(_container);
-				if (_canvas.parentNode) _canvas.parentNode.removeChild(_canvas);
-				_container.innerHTML = "";
-				_container.style.backgroundImage = "none";
+				if (Background._removal === removal) {
+					Background._removal = null;
+					_container.style.zIndex = "0";
+					_canvas.style.zIndex = "0";
+					if (_container.parentNode) _container.parentNode.removeChild(_container);
+					if (_canvas.parentNode) _canvas.parentNode.removeChild(_canvas);
+					_container.innerHTML = "";
+					_container.style.backgroundImage = "none";
+				}
 				if (callback) callback();
 			});
 		}
@@ -206281,7 +206435,7 @@ var init_Background = __esmMin((() => {
 		* @param {number} percent
 		*/
 		static setPercent(percent) {
-			_progress = Math.min(Math.floor(percent), 100);
+			Background._progress = Math.min(Math.floor(percent), 100);
 			const width = 240;
 			const height = 15;
 			const x = Math.floor((_canvas.width - width) * .5);
@@ -207301,7 +207455,7 @@ var init_Ground = __esmMin((() => {
 //#region src/Renderer/SpriteRenderer.vs?raw
 var SpriteRenderer_default$1;
 var init_SpriteRenderer$2 = __esmMin((() => {
-	SpriteRenderer_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uViewModelMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform float uCameraZoom;\r\nuniform float uCameraLatitude;\r\n\r\nuniform vec2 uSpriteRendererSize;\r\nuniform vec2 uSpriteRendererOffset;\r\nuniform mat4 uSpriteRendererAngle;\r\nuniform vec3 uSpriteRendererPosition;\r\nuniform float uSpriteRendererDepth;\r\nuniform float uSpriteRendererZindex;\r\nuniform bool  uDisableDepthCorrection;\r\n\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n    // xyz = x(-z)y + middle of cell (0.5)\r\n    float x =  pos.x + 0.5;\r\n    float y = -pos.z;\r\n    float z =  pos.y + 0.5;\r\n\r\n    // Matrix translation\r\n    mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n    mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n    mat[3].z += (mat[0].z * x + mat[1].z * y + mat[2].z * z);\r\n    mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n    // Spherical billboard\r\n    mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n    mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n    mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n    return mat;\r\n}\r\n\r\nvec3 getCameraPosition() {\r\n    return (uViewModelMat * vec4(0.0, 0.0, 0.0, 1.0)).xyz;\r\n}\r\n\r\nvec3 getCameraForward() {\r\n    return normalize((uViewModelMat * vec4(0.0, 0.0, -1.0, 0.0)).xyz);\r\n}\r\n\r\nvoid main(void) {\r\n    // Calculate position base on angle and sprite offset/size\r\n    vec4 position = uSpriteRendererAngle * vec4( aPosition.x * uSpriteRendererSize.x, aPosition.y * uSpriteRendererSize.y, 0.0, 1.0 );\r\n    position.x   += uSpriteRendererOffset.x;\r\n    position.y   -= uSpriteRendererOffset.y + 0.5;\r\n\r\n    mat4 modelView = Project(uModelViewMat, uSpriteRendererPosition);\r\n    vec4 viewPosition = modelView * position;\r\n    vec4 viewCenter   = modelView * vec4( 0.0, 0.0, 0.0, 1.0 );\r\n\r\n    gl_Position = uProjectionMat * viewPosition;\r\n\r\n    vec3 cameraPos     = getCameraPosition();\r\n    vec3 cameraForward = getCameraForward();\r\n\r\n    if (!uDisableDepthCorrection) {\r\n        // Vertical billboard depth correction (per-vertex), plane anchored at sprite center.\r\n        // Plane normal uses camera forward (flattened Y) for stability.\r\n        // The whole quad takes the vertical plane depth so the part of the sprite below\r\n        // the water surface sorts behind the (later drawn) water pass.\r\n        vec3 planePoint = (uViewModelMat * viewCenter).xyz;\r\n        vec3 planeNormal = normalize(vec3(cameraForward.x, 0.0, cameraForward.z));\r\n        if (length(planeNormal) < 0.000001) {\r\n            planeNormal = cameraForward;\r\n        }\r\n\r\n        vec3 worldVertex = (uViewModelMat * viewPosition).xyz;\r\n        vec3 rayDir      = normalize(worldVertex - cameraPos);\r\n        float denom      = max(dot(planeNormal, rayDir), 0.000001);\r\n        float dist       = dot(planePoint - cameraPos, planeNormal) / denom;\r\n\r\n        vec4 planeClip       = uProjectionMat * (uModelViewMat * vec4(cameraPos + rayDir * dist, 1.0));\r\n        float correctedZBase = planeClip.z * (gl_Position.w / max(planeClip.w, 0.000001));\r\n\r\n        gl_Position.z = correctedZBase;\r\n    }\r\n    gl_Position.z -= (uSpriteRendererZindex * 0.01 + uSpriteRendererDepth) / max(uCameraZoom, 1.0);\r\n\r\n    vTextureCoord = aTextureCoord;\r\n}";
+	SpriteRenderer_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uViewModelMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform float uCameraZoom;\r\nuniform float uCameraLatitude;\r\n\r\nuniform vec2 uSpriteRendererSize;\r\nuniform vec2 uSpriteRendererOffset;\r\nuniform mat4 uSpriteRendererAngle;\r\nuniform vec3 uSpriteRendererPosition;\r\nuniform float uSpriteRendererDepth;\r\nuniform float uSpriteRendererZindex;\r\nuniform bool  uDisableDepthCorrection;\r\nuniform bool  uIgnoreZindexCap;\r\n\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n    // xyz = x(-z)y + middle of cell (0.5)\r\n    float x =  pos.x + 0.5;\r\n    float y = -pos.z;\r\n    float z =  pos.y + 0.5;\r\n\r\n    // Matrix translation\r\n    mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n    mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n    mat[3].z += (mat[0].z * x + mat[1].z * y + mat[2].z * z);\r\n    mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n    // Spherical billboard\r\n    mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n    mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n    mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n    return mat;\r\n}\r\n\r\nvec3 getCameraPosition() {\r\n    return (uViewModelMat * vec4(0.0, 0.0, 0.0, 1.0)).xyz;\r\n}\r\n\r\nvec3 getCameraForward() {\r\n    return normalize((uViewModelMat * vec4(0.0, 0.0, -1.0, 0.0)).xyz);\r\n}\r\n\r\nvoid main(void) {\r\n    // Calculate position base on angle and sprite offset/size\r\n    vec4 position = uSpriteRendererAngle * vec4( aPosition.x * uSpriteRendererSize.x, aPosition.y * uSpriteRendererSize.y, 0.0, 1.0 );\r\n    position.x   += uSpriteRendererOffset.x;\r\n    position.y   -= uSpriteRendererOffset.y + 0.5;\r\n\r\n    mat4 modelView = Project(uModelViewMat, uSpriteRendererPosition);\r\n    vec4 viewPosition = modelView * position;\r\n    vec4 viewCenter   = modelView * vec4( 0.0, 0.0, 0.0, 1.0 );\r\n\r\n    gl_Position = uProjectionMat * viewPosition;\r\n\r\n    vec3 cameraPos     = getCameraPosition();\r\n    vec3 cameraForward = getCameraForward();\r\n\r\n    if (!uDisableDepthCorrection) {\r\n        // Vertical billboard depth correction (per-vertex), plane anchored at sprite center.\r\n        // Plane normal uses camera forward (flattened Y) for stability.\r\n        // The whole quad takes the vertical plane depth so the part of the sprite below\r\n        // the water surface sorts behind the (later drawn) water pass.\r\n        vec3 planePoint = (uViewModelMat * viewCenter).xyz;\r\n        vec3 planeNormal = normalize(vec3(cameraForward.x, 0.0, cameraForward.z));\r\n        if (length(planeNormal) < 0.000001) {\r\n            planeNormal = cameraForward;\r\n        }\r\n\r\n        vec3 worldVertex = (uViewModelMat * viewPosition).xyz;\r\n        vec3 rayDir      = normalize(worldVertex - cameraPos);\r\n        float denom      = max(dot(planeNormal, rayDir), 0.000001);\r\n        float dist       = dot(planePoint - cameraPos, planeNormal) / denom;\r\n\r\n        vec4 planeClip       = uProjectionMat * (uModelViewMat * vec4(cameraPos + rayDir * dist, 1.0));\r\n        float correctedZBase = planeClip.z * (gl_Position.w / max(planeClip.w, 0.000001));\r\n\r\n        gl_Position.z = uIgnoreZindexCap ? correctedZBase : min(gl_Position.z, correctedZBase);\r\n    }\r\n    gl_Position.z -= (uSpriteRendererZindex * 0.01 + uSpriteRendererDepth) / max(uCameraZoom, 1.0);\r\n\r\n    vTextureCoord = aTextureCoord;\r\n}";
 }));
 //#endregion
 //#region src/Renderer/SpriteRenderer.fs?raw
@@ -207336,6 +207490,7 @@ function RenderCanvas3D(isBlendModeOne) {
 		_disableDepthCorrection = disableDepthCorrection;
 		gl.uniform1i(uniform.uDisableDepthCorrection, disableDepthCorrection);
 	}
+	gl.uniform1i(uniform.uIgnoreZindexCap, this.ignoreDepthMinCap);
 	gl.uniform1f(uniform.uSpriteRendererZindex, this.zIndex++);
 	if (this.angle !== _angle) {
 		_angle = this.angle;
@@ -207569,6 +207724,10 @@ var init_SpriteRenderer = __esmMin((() => {
 		*/
 		static disableDepthCorrection = false;
 		/**
+		* @type {boolean} cached depth test state
+		*/
+		static ignoreDepthMinCap = false;
+		/**
 		* @type {number} width unity
 		*/
 		static xSize = 5;
@@ -207741,7 +207900,7 @@ function init$11(gl, water) {
 	_vertCount = water.vertCount;
 	_waveHeight = water.waveHeight;
 	_waveSpeed = water.waveSpeed;
-	_waterLevel = water.level;
+	water.level;
 	_animSpeed = water.animSpeed;
 	_wavePitch = water.wavePitch;
 	_waterOpacity = water.type !== 4 && water.type !== 6 ? .8 : 1;
@@ -207817,27 +207976,7 @@ function free$6(gl) {
 	}
 	_vertCount = 0;
 }
-/**
-* Is the ground at this cell under the water surface ?
-* (world Y points down: ground is submerged when -altitude is above the wave crest)
-*
-* @param {number} x
-* @param {number} y
-* @return {boolean}
-*/
-function isSubmerged(x, y) {
-	if (!_vertCount) return false;
-	return -Altitude.getCellHeight(x, y) > _waterLevel - _waveHeight;
-}
-/**
-* Does the current map have any water surface ?
-*
-* @return {boolean}
-*/
-function hasWater() {
-	return _vertCount > 0;
-}
-var _program$24, _buffer$17, _vertCount, _textures$1, _waveSpeed, _waveHeight, _wavePitch, _waterLevel, _animSpeed, _waterOpacity, Water_default;
+var _program$24, _buffer$17, _vertCount, _textures$1, _waveSpeed, _waveHeight, _wavePitch, _animSpeed, _waterOpacity, Water_default;
 var init_Water = __esmMin((() => {
 	init_WebGL();
 	init_SpriteRenderer();
@@ -207851,15 +207990,12 @@ var init_Water = __esmMin((() => {
 	_waveSpeed = 0;
 	_waveHeight = 0;
 	_wavePitch = 0;
-	_waterLevel = 0;
 	_animSpeed = 0;
 	_waterOpacity = .9;
 	Water_default = {
 		init: init$11,
 		free: free$6,
-		render: render$12,
-		isSubmerged,
-		hasWater
+		render: render$12
 	};
 }));
 //#endregion
@@ -221291,7 +221427,7 @@ var init_ItemCompare$2 = __esmMin((() => {
 //#region src/UI/Components/ItemCompare/ItemCompare.css?raw
 var ItemCompare_default$1;
 var init_ItemCompare$1 = __esmMin((() => {
-	ItemCompare_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n.ItemCompare {\r\n	position: relative;\r\n	width: 280px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n.ItemCompare .container {\r\n	height: 120px;\r\n	position: relative;\r\n	box-shadow:\r\n		white 0px 0px 0px 3px inset,\r\n		rgb(192, 192, 192) 0px 0px 0px 4px inset;\r\n	background-repeat: no-repeat;\r\n	background-color: #c5ddf6;\r\n	border-radius: 5px;\r\n}\r\n.ItemCompare .event_view {\r\n	position: absolute;\r\n}\r\n.ItemCompare .event_view .view {\r\n	position: absolute;\r\n	width: 42px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	top: 6px;\r\n	left: 6px;\r\n}\r\n.ItemCompare .collection {\r\n	position: absolute;\r\n	top: 11px;\r\n	left: 10px;\r\n	width: 75px;\r\n	height: 100px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n.ItemCompare .title {\r\n	position: absolute;\r\n	top: 3px;\r\n	left: 86px;\r\n	width: 185px;\r\n	height: 14px;\r\n	padding-left: 4px;\r\n	padding-top: 6px;\r\n	text-shadow: 1px 1px 0px white;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n.ItemCompare .close {\r\n	position: absolute;\r\n	top: 3px;\r\n	right: 3px;\r\n	width: 11px;\r\n	height: 11px;\r\n	display: block;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n}\r\n.ItemCompare .description {\r\n	position: absolute;\r\n	background-color: white;\r\n	top: 35px;\r\n	left: 100px;\r\n	line-height: 18px;\r\n	width: 170px;\r\n	height: 75px;\r\n	overflow-y: auto;\r\n}\r\n.ItemCompare .description .description-inner {\r\n	width: 150px;\r\n}\r\n.ItemCompare .extend {\r\n	position: absolute;\r\n	right: 4px;\r\n	bottom: 3px;\r\n	width: 13px;\r\n	height: 13px;\r\n	border: none;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n\r\n.ItemCompare .cardlist {\r\n	border-radius: 5px;\r\n	background-color: white;\r\n	padding: 2px;\r\n	margin-top: 3px;\r\n}\r\n.ItemCompare .cardlist .border {\r\n	border: 1px solid #c1c6c2;\r\n	background-color: #c5ddf6;\r\n	padding-top: 2px;\r\n	padding-left: 5px;\r\n	border-radius: 5px;\r\n}\r\n.ItemCompare .cardlist .item {\r\n	position: relative;\r\n	display: inline-block;\r\n}\r\n.ItemCompare .cardlist .item .icon {\r\n	width: 24px;\r\n	height: 24px;\r\n}\r\n.ItemCompare .cardlist .item .name {\r\n	position: absolute;\r\n	top: -20px;\r\n	left: -20px;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n.ItemCompare .cardlist .item:hover .name {\r\n	display: block;\r\n}\r\n\r\n.ItemCompare .book_open {\r\n	margin-top: 6px;\r\n	margin-left: 7px;\r\n}\r\n.ItemCompare .book_read {\r\n	position: absolute;\r\n	margin-top: 7px;\r\n}\r\n\r\n.ItemCompare .overlay_open {\r\n	pointer-events: none;\r\n	position: absolute;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	background: rgba(0, 0, 0, 0.5);\r\n	color: white;\r\n	text-shadow: black 1px 1px;\r\n	top: -7px;\r\n	left: 7px;\r\n	text-align: center;\r\n	padding: 3px 4px 1px 4px;\r\n	display: none;\r\n}\r\n.ItemCompare .overlay_read {\r\n	pointer-events: none;\r\n	position: absolute;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	background: rgba(0, 0, 0, 0.5);\r\n	color: white;\r\n	text-shadow: black 1px 1px;\r\n	top: -7px;\r\n	left: 27px;\r\n	text-align: center;\r\n	padding: 3px 4px 1px 4px;\r\n	display: none;\r\n}\r\n\r\n.ItemCompare .optionlist {\r\n	border-radius: 5px;\r\n	background-color: white;\r\n	padding: 2px;\r\n	margin-top: 3px;\r\n}\r\n.ItemCompare .optionlist .border {\r\n	border: 1px solid #c1c6c2;\r\n	background-color: #c5ddf6;\r\n	padding-top: 2px;\r\n	padding-left: 5px;\r\n	border-radius: 5px;\r\n}\r\n.ItemCompare .optionlist .item {\r\n	position: relative;\r\n	display: inline-block;\r\n}\r\n.ItemCompare .optionlist .item .icon {\r\n	width: 24px;\r\n	height: 24px;\r\n}\r\n.ItemCompare .optionlist .item .name {\r\n	position: absolute;\r\n	top: -20px;\r\n	left: -20px;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n.ItemCompare .optionlist .item:hover .name {\r\n	display: block;\r\n}\r\n\r\n.ItemCompare .title.damaged {\r\n	text-shadow: red 1px 1px 0px;\r\n}\r\n";
+	ItemCompare_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n.ItemCompare {\r\n	position: relative;\r\n	width: 280px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n.ItemCompare .container {\r\n	height: 120px;\r\n	position: relative;\r\n	box-shadow:\r\n		white 0px 0px 0px 3px inset,\r\n		rgb(192, 192, 192) 0px 0px 0px 4px inset;\r\n	background-repeat: no-repeat;\r\n	background-color: #c5ddf6;\r\n	border-radius: 5px;\r\n}\r\n.ItemCompare .event_view {\r\n	position: absolute;\r\n}\r\n.ItemCompare .event_view .view {\r\n	position: absolute;\r\n	width: 42px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	top: 6px;\r\n	left: 6px;\r\n}\r\n.ItemCompare .collection {\r\n	position: absolute;\r\n	top: 11px;\r\n	left: 10px;\r\n	width: 75px;\r\n	height: 100px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n.ItemCompare .title {\r\n	position: absolute;\r\n	top: 3px;\r\n	left: 86px;\r\n	width: 185px;\r\n	height: 14px;\r\n	padding-left: 4px;\r\n	padding-top: 6px;\r\n	text-shadow: 1px 1px 0px white;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n.ItemCompare .close {\r\n	position: absolute;\r\n	top: 3px;\r\n	right: 3px;\r\n	width: 11px;\r\n	height: 11px;\r\n	display: block;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n}\r\n.ItemCompare .description {\r\n	position: absolute;\r\n	background-color: white;\r\n	top: 35px;\r\n	left: 100px;\r\n	line-height: 18px;\r\n	width: 170px;\r\n	height: 75px;\r\n	overflow-y: auto;\r\n}\r\n.ItemCompare .description .description-inner {\r\n	width: 150px;\r\n	white-space: pre-wrap;\r\n}\r\n.ItemCompare .extend {\r\n	position: absolute;\r\n	right: 4px;\r\n	bottom: 3px;\r\n	width: 13px;\r\n	height: 13px;\r\n	border: none;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n\r\n.ItemCompare .cardlist {\r\n	border-radius: 5px;\r\n	background-color: white;\r\n	padding: 2px;\r\n	margin-top: 3px;\r\n}\r\n.ItemCompare .cardlist .border {\r\n	border: 1px solid #c1c6c2;\r\n	background-color: #c5ddf6;\r\n	padding-top: 2px;\r\n	padding-left: 5px;\r\n	border-radius: 5px;\r\n}\r\n.ItemCompare .cardlist .item {\r\n	position: relative;\r\n	display: inline-block;\r\n}\r\n.ItemCompare .cardlist .item .icon {\r\n	width: 24px;\r\n	height: 24px;\r\n}\r\n.ItemCompare .cardlist .item .name {\r\n	position: absolute;\r\n	top: -20px;\r\n	left: -20px;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n.ItemCompare .cardlist .item:hover .name {\r\n	display: block;\r\n}\r\n\r\n.ItemCompare .book_open {\r\n	margin-top: 6px;\r\n	margin-left: 7px;\r\n}\r\n.ItemCompare .book_read {\r\n	position: absolute;\r\n	margin-top: 7px;\r\n}\r\n\r\n.ItemCompare .overlay_open {\r\n	pointer-events: none;\r\n	position: absolute;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	background: rgba(0, 0, 0, 0.5);\r\n	color: white;\r\n	text-shadow: black 1px 1px;\r\n	top: -7px;\r\n	left: 7px;\r\n	text-align: center;\r\n	padding: 3px 4px 1px 4px;\r\n	display: none;\r\n}\r\n.ItemCompare .overlay_read {\r\n	pointer-events: none;\r\n	position: absolute;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	background: rgba(0, 0, 0, 0.5);\r\n	color: white;\r\n	text-shadow: black 1px 1px;\r\n	top: -7px;\r\n	left: 27px;\r\n	text-align: center;\r\n	padding: 3px 4px 1px 4px;\r\n	display: none;\r\n}\r\n\r\n.ItemCompare .optionlist {\r\n	border-radius: 5px;\r\n	background-color: white;\r\n	padding: 2px;\r\n	margin-top: 3px;\r\n}\r\n.ItemCompare .optionlist .border {\r\n	border: 1px solid #c1c6c2;\r\n	background-color: #c5ddf6;\r\n	padding-top: 2px;\r\n	padding-left: 5px;\r\n	border-radius: 5px;\r\n}\r\n.ItemCompare .optionlist .item {\r\n	position: relative;\r\n	display: inline-block;\r\n}\r\n.ItemCompare .optionlist .item .icon {\r\n	width: 24px;\r\n	height: 24px;\r\n}\r\n.ItemCompare .optionlist .item .name {\r\n	position: absolute;\r\n	top: -20px;\r\n	left: -20px;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n.ItemCompare .optionlist .item:hover .name {\r\n	display: block;\r\n}\r\n\r\n.ItemCompare .title.damaged {\r\n	text-shadow: red 1px 1px 0px;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/ItemCompare/ItemCompare.js
@@ -221606,7 +221742,11 @@ var init_ItemCompare = __esmMin((() => {
 			}
 			case ItemType_default.PETEGG: if (cardListParent) cardListParent.style.display = "none";
 		}
-		if (descInner) resize$4(descInner.offsetHeight + 45);
+		if (descInner) {
+			const rawDesc = item.IsIdentified ? it.identifiedDescriptionName : it.unidentifiedDescriptionName;
+			descInner.innerHTML = DB.formatMsgToHtml(_escapeHTML$5(rawDesc));
+			resize$4(descInner.offsetHeight + 45);
+		}
 	};
 	rendering$3 = (function renderingClosure() {
 		const position = new Uint16Array([0, 0]);
@@ -226251,12 +226391,10 @@ var init_Rodex$1 = __esmMin((() => {
 	*/
 	Rodex.render = () => Rodex_default$2;
 	/**
-	* Apply preferences once append to body
+	* Bind the window controls once
 	*/
-	Rodex.onAppend = function OnAppend() {
+	Rodex.init = function init() {
 		const root = _root$17();
-		this._host.style.top = `${Math.min(Math.max(0, _preferences$37.y), Renderer.height - this._host.offsetHeight)}px`;
-		this._host.style.left = `${Math.min(Math.max(0, _preferences$37.x), Renderer.width - this._host.offsetWidth)}px`;
 		this.draggable(root.querySelector(".titlebar"));
 		root.querySelector(".close").addEventListener("click", onClickClose$2);
 		root.querySelector(".refresh").addEventListener("click", onClickRefresh);
@@ -226268,8 +226406,16 @@ var init_Rodex$1 = __esmMin((() => {
 		root.querySelectorAll(".nav-item").forEach((el) => el.addEventListener("click", onClickTab));
 		root.querySelector(".search-title").addEventListener("click", onClickSearchTitle);
 		root.querySelector(".search-sender").addEventListener("click", onClickSearchSender);
-		root.querySelector(".search").value = "";
 		root.querySelector(".search-btn").addEventListener("click", onClickSearchButton);
+	};
+	/**
+	* Apply preferences once append to body
+	*/
+	Rodex.onAppend = function OnAppend() {
+		const root = _root$17();
+		this._host.style.top = `${Math.min(Math.max(0, _preferences$37.y), Renderer.height - this._host.offsetHeight)}px`;
+		this._host.style.left = `${Math.min(Math.max(0, _preferences$37.x), Renderer.width - this._host.offsetWidth)}px`;
+		root.querySelector(".search").value = "";
 		Rodex.openType = 0;
 		root.querySelectorAll(".nav-item.active").forEach((el) => el.classList.remove("active"));
 		root.querySelector("#tab_0").classList.add("active");
@@ -226384,7 +226530,7 @@ var init_Rodex$1 = __esmMin((() => {
 	* Show/Hide UI
 	*/
 	Rodex.toggle = function toggle() {
-		if (this._host && this._host.style.display !== "none") {
+		if (this.__active && this._host.style.display !== "none") {
 			Rodex.closeRodexBox();
 			this._host.style.display = "none";
 		} else {
@@ -236763,7 +236909,7 @@ var init_Refine$2 = __esmMin((() => {
 //#region src/UI/Components/Refine/Refine.css?raw
 var Refine_default$1;
 var init_Refine$1 = __esmMin((() => {
-	Refine_default$1 = ":host {\r\n	width: 261px;\r\n	height: 350px;\r\n}\r\n\r\n#Refine {\r\n	position: relative;\r\n	height: 100%;\r\n	width: 100%;\r\n}\r\n\r\n#Refine .titlebar {\r\n	width: 100%;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#Refine .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#Refine .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#Refine .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#Refine .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#Refine .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#Refine .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 15px;\r\n	line-height: 15px;\r\n	border-radius: 3px;\r\n	padding: 4px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#Refine .panel {\r\n	width: 100%;\r\n	height: 100%;\r\n	overflow: hidden;\r\n	position: absolute;\r\n}\r\n\r\n#Refine .image-container {\r\n	position: absolute;\r\n	top: 1px;\r\n	height: 301px;\r\n	width: 262px;\r\n}\r\n\r\n#Refine .success {\r\n	position: absolute;\r\n	height: 20px;\r\n	width: 261px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	top: 12px;\r\n}\r\n\r\n#Refine .success .number {\r\n	color: #2963de;\r\n}\r\n\r\n#Refine .item_to_refine {\r\n	position: absolute;\r\n	height: 45px;\r\n	width: 50px;\r\n	top: 185px;\r\n	left: 106px;\r\n}\r\n\r\n#Refine .item_to_refine .item .grade {\r\n	position: absolute;\r\n	width: 12px;\r\n	height: 12px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	pointer-events: none;\r\n	z-index: 2;\r\n	top: 12px;\r\n}\r\n\r\n#Refine .item_to_refine_name {\r\n	position: absolute;\r\n	height: 18px;\r\n	width: 261px;\r\n	text-align: center;\r\n	top: 225px;\r\n	align-content: center;\r\n	font-weight: bold;\r\n	color: #102142;\r\n}\r\n\r\n#Refine .item {\r\n	position: relative;\r\n	float: left;\r\n	height: 24px;\r\n	width: 24px;\r\n	left: 13px;\r\n	top: 7px;\r\n}\r\n\r\n#Refine .item .icon {\r\n	position: absolute;\r\n	top: 0px;\r\n	width: 24px;\r\n	height: 24px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	z-index: 2;\r\n}\r\n\r\n#Refine .footer {\r\n	position: absolute;\r\n	height: 30px;\r\n	width: 261px;\r\n	bottom: 18px;\r\n}\r\n\r\n#Refine .some_notifs {\r\n	position: absolute;\r\n	height: 20px;\r\n	width: 180px;\r\n	left: 5px;\r\n	top: 4px;\r\n}\r\n\r\n#Refine .notif {\r\n	position: absolute;\r\n	height: 13px;\r\n	width: 14px;\r\n	top: 4px;\r\n}\r\n\r\n#Refine .info_msg {\r\n	position: absolute;\r\n	height: 20px;\r\n	width: 170px;\r\n	left: 15px;\r\n	font-size: 0.8em;\r\n	align-content: center;\r\n}\r\n\r\n#Refine .info_msg.red {\r\n	color: red;\r\n}\r\n\r\n#Refine .info_msg.blue {\r\n	color: blue;\r\n}\r\n\r\n#Refine .cancel {\r\n	position: absolute;\r\n	height: 21px;\r\n	width: 57px;\r\n	bottom: 4px;\r\n	right: 5px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .materials {\r\n	position: absolute;\r\n	height: 78px;\r\n	width: 100%;\r\n	top: 30px;\r\n}\r\n\r\n#Refine .mat_overlay,\r\n#Refine .bsb_overlay {\r\n	position: absolute;\r\n	height: 53px;\r\n	width: 46px;\r\n	background-size: 0px;\r\n}\r\n\r\n#Refine .mat_overlay.selected,\r\n#Refine .bsb_overlay.selected {\r\n	background-size: cover;\r\n}\r\n\r\n#Refine .mat_0 {\r\n	left: 10px;\r\n	top: 8px;\r\n}\r\n\r\n#Refine .mat_1 {\r\n	left: 59px;\r\n	top: 8px;\r\n}\r\n\r\n#Refine .mat_2 {\r\n	top: 8px;\r\n	left: 108px;\r\n}\r\n\r\n#Refine .mat_3 {\r\n	top: 8px;\r\n	left: 157px;\r\n}\r\n\r\n#Refine .bsb_overlay {\r\n	top: 8px;\r\n	left: 206px;\r\n}\r\n\r\n#Refine .material_0,\r\n#Refine .material_1,\r\n#Refine .material_2,\r\n#Refine .material_3 {\r\n	display: block;\r\n}\r\n\r\n#Refine .materials .item .icon {\r\n	position: absolute;\r\n	top: 7px;\r\n	left: -2px;\r\n	width: 24px;\r\n	height: 24px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	z-index: 2;\r\n}\r\n\r\n#Refine .mat_count {\r\n	height: 20px;\r\n	position: absolute;\r\n	width: 50px;\r\n	top: 46px;\r\n	text-align: center;\r\n	left: -15px;\r\n}\r\n\r\n#Refine .selected_materials {\r\n	position: absolute;\r\n	height: 50px;\r\n	top: 83px;\r\n	width: 100%;\r\n}\r\n\r\n#Refine .selected_mat {\r\n	position: relative;\r\n	height: 30px;\r\n	width: 30px;\r\n	left: 68px;\r\n	top: 6px;\r\n}\r\n\r\n#Refine .bsb_selected {\r\n	position: absolute;\r\n	height: 30px;\r\n	width: 30px;\r\n	left: 149px;\r\n	top: 6px;\r\n}\r\n\r\n#Refine .refine_button {\r\n	position: absolute;\r\n	height: 45px;\r\n	width: 92px;\r\n	bottom: 9px;\r\n	left: 85px;\r\n}\r\n\r\n#Refine .refine_disabled {\r\n	position: absolute;\r\n	height: 48px;\r\n	width: 96px;\r\n	top: -2px;\r\n	left: -2px;\r\n}\r\n\r\n#Refine .refine_enabled {\r\n	position: absolute;\r\n	height: 48px;\r\n	width: 96px;\r\n	top: -2px;\r\n	left: -2px;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .refine_text {\r\n	font-weight: bold;\r\n	position: relative;\r\n	height: 15px;\r\n	width: 92px;\r\n	text-align: center;\r\n	color: #101839;\r\n	top: 5px;\r\n	pointer-events: none;\r\n}\r\n\r\n#Refine .refine_zeny {\r\n	position: relative;\r\n	height: 15px;\r\n	width: 65px;\r\n	top: 9px;\r\n	left: 20px;\r\n	color: white;\r\n	text-align: right;\r\n	font-weight: bold;\r\n	pointer-events: none;\r\n}\r\n\r\n#Refine .back_button {\r\n	position: absolute;\r\n	height: 38px;\r\n	width: 101px;\r\n	bottom: 13px;\r\n	left: 19px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n}\r\n\r\n#Refine .back_success,\r\n#Refine .back_fail {\r\n	position: relative;\r\n	height: 38px;\r\n	width: 101px;\r\n	top: 0px;\r\n	left: 0px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .refine_cont {\r\n	position: absolute;\r\n	height: 50px;\r\n	width: 101px;\r\n	bottom: 1px;\r\n	right: 20px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n	z-index: 5;\r\n}\r\n\r\n#Refine .refine_cont.item {\r\n	position: absolute !important;\r\n	float: none !important;\r\n	height: 50px !important;\r\n	width: 101px !important;\r\n	left: auto !important;\r\n	top: auto !important;\r\n	bottom: 1px !important;\r\n	right: 20px !important;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n	z-index: 5;\r\n}\r\n\r\n#Refine .success_refine_cont_enabled,\r\n#Refine .success_refine_cont_disabled,\r\n#Refine .fail_refine_cont_enabled,\r\n#Refine .fail_refine_cont_disabled {\r\n	position: absolute;\r\n	height: 50px;\r\n	width: 101px;\r\n	top: 0px;\r\n	left: 0px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n}\r\n\r\n#Refine .success_refine_cont_enabled,\r\n#Refine .fail_refine_cont_enabled {\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .refine_text_cont {\r\n	position: absolute;\r\n	height: 15px;\r\n	width: 100px;\r\n	text-align: center;\r\n	align-content: center;\r\n	pointer-events: none;\r\n	font-weight: bold;\r\n	bottom: 27px;\r\n	left: 0px;\r\n}\r\n\r\n#Refine .chance_rate {\r\n	position: absolute;\r\n	height: 15px;\r\n	width: 100px;\r\n	bottom: 14px;\r\n	left: 0px;\r\n	text-align: center;\r\n	align-content: center;\r\n	pointer-events: none;\r\n}\r\n\r\n#Refine .refine_zeny_cont {\r\n	position: absolute;\r\n	height: 15px;\r\n	width: 100px;\r\n	bottom: 0px;\r\n	left: 0px;\r\n	text-align: center;\r\n	align-content: center;\r\n	color: white;\r\n	pointer-events: none;\r\n	font-weight: bold;\r\n}\r\n";
+	Refine_default$1 = ":host {\r\n	width: 261px;\r\n	height: 350px;\r\n}\r\n\r\n/* GUIComponent wraps the content in .ui-component-root: let it fill :host,\r\n   otherwise #Refine's 100% collapses to the titlebar and the window body is cut off */\r\n.ui-component-root {\r\n	height: 100%;\r\n}\r\n\r\n#Refine {\r\n	position: relative;\r\n	height: 100%;\r\n	width: 100%;\r\n}\r\n\r\n#Refine .titlebar {\r\n	width: 100%;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#Refine .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#Refine .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#Refine .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#Refine .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#Refine .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#Refine .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 15px;\r\n	line-height: 15px;\r\n	border-radius: 3px;\r\n	padding: 4px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#Refine .panel {\r\n	width: 100%;\r\n	height: 100%;\r\n	overflow: hidden;\r\n	position: absolute;\r\n}\r\n\r\n#Refine .image-container {\r\n	position: absolute;\r\n	top: 1px;\r\n	height: 301px;\r\n	width: 262px;\r\n}\r\n\r\n#Refine .success {\r\n	position: absolute;\r\n	height: 20px;\r\n	width: 261px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	top: 12px;\r\n}\r\n\r\n#Refine .success .number {\r\n	color: #2963de;\r\n}\r\n\r\n#Refine .item_to_refine {\r\n	position: absolute;\r\n	height: 45px;\r\n	width: 50px;\r\n	top: 185px;\r\n	left: 106px;\r\n}\r\n\r\n#Refine .item_to_refine .item .grade {\r\n	position: absolute;\r\n	width: 12px;\r\n	height: 12px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	pointer-events: none;\r\n	z-index: 2;\r\n	top: 12px;\r\n}\r\n\r\n#Refine .item_to_refine_name {\r\n	position: absolute;\r\n	height: 18px;\r\n	width: 261px;\r\n	text-align: center;\r\n	top: 225px;\r\n	align-content: center;\r\n	font-weight: bold;\r\n	color: #102142;\r\n}\r\n\r\n#Refine .item {\r\n	position: relative;\r\n	float: left;\r\n	height: 24px;\r\n	width: 24px;\r\n	left: 13px;\r\n	top: 7px;\r\n}\r\n\r\n#Refine .item .icon {\r\n	position: absolute;\r\n	top: 0px;\r\n	width: 24px;\r\n	height: 24px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	z-index: 2;\r\n}\r\n\r\n#Refine .footer {\r\n	position: absolute;\r\n	height: 30px;\r\n	width: 261px;\r\n	bottom: 18px;\r\n}\r\n\r\n#Refine .some_notifs {\r\n	position: absolute;\r\n	height: 20px;\r\n	width: 180px;\r\n	left: 5px;\r\n	top: 4px;\r\n}\r\n\r\n#Refine .notif {\r\n	position: absolute;\r\n	height: 13px;\r\n	width: 14px;\r\n	top: 4px;\r\n}\r\n\r\n#Refine .info_msg {\r\n	position: absolute;\r\n	height: 20px;\r\n	width: 170px;\r\n	left: 15px;\r\n	font-size: 0.8em;\r\n	align-content: center;\r\n}\r\n\r\n#Refine .info_msg.red {\r\n	color: red;\r\n}\r\n\r\n#Refine .info_msg.blue {\r\n	color: blue;\r\n}\r\n\r\n#Refine .cancel {\r\n	position: absolute;\r\n	height: 21px;\r\n	width: 57px;\r\n	bottom: 4px;\r\n	right: 5px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .materials {\r\n	position: absolute;\r\n	height: 78px;\r\n	width: 100%;\r\n	top: 30px;\r\n}\r\n\r\n#Refine .mat_overlay,\r\n#Refine .bsb_overlay {\r\n	position: absolute;\r\n	height: 53px;\r\n	width: 46px;\r\n	background-size: 0px;\r\n}\r\n\r\n#Refine .mat_overlay.selected,\r\n#Refine .bsb_overlay.selected {\r\n	background-size: cover;\r\n}\r\n\r\n#Refine .mat_0 {\r\n	left: 10px;\r\n	top: 8px;\r\n}\r\n\r\n#Refine .mat_1 {\r\n	left: 59px;\r\n	top: 8px;\r\n}\r\n\r\n#Refine .mat_2 {\r\n	top: 8px;\r\n	left: 108px;\r\n}\r\n\r\n#Refine .mat_3 {\r\n	top: 8px;\r\n	left: 157px;\r\n}\r\n\r\n#Refine .bsb_overlay {\r\n	top: 8px;\r\n	left: 206px;\r\n}\r\n\r\n#Refine .material_0,\r\n#Refine .material_1,\r\n#Refine .material_2,\r\n#Refine .material_3 {\r\n	display: block;\r\n}\r\n\r\n#Refine .materials .item .icon {\r\n	position: absolute;\r\n	top: 7px;\r\n	left: -2px;\r\n	width: 24px;\r\n	height: 24px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	z-index: 2;\r\n}\r\n\r\n#Refine .mat_count {\r\n	height: 20px;\r\n	position: absolute;\r\n	width: 50px;\r\n	top: 46px;\r\n	text-align: center;\r\n	left: -15px;\r\n}\r\n\r\n#Refine .selected_materials {\r\n	position: absolute;\r\n	height: 50px;\r\n	top: 83px;\r\n	width: 100%;\r\n}\r\n\r\n#Refine .selected_mat {\r\n	position: relative;\r\n	height: 30px;\r\n	width: 30px;\r\n	left: 68px;\r\n	top: 6px;\r\n}\r\n\r\n#Refine .bsb_selected {\r\n	position: absolute;\r\n	height: 30px;\r\n	width: 30px;\r\n	left: 149px;\r\n	top: 6px;\r\n}\r\n\r\n#Refine .refine_button {\r\n	position: absolute;\r\n	height: 45px;\r\n	width: 92px;\r\n	bottom: 9px;\r\n	left: 85px;\r\n}\r\n\r\n#Refine .refine_disabled {\r\n	position: absolute;\r\n	height: 48px;\r\n	width: 96px;\r\n	top: -2px;\r\n	left: -2px;\r\n}\r\n\r\n#Refine .refine_enabled {\r\n	position: absolute;\r\n	height: 48px;\r\n	width: 96px;\r\n	top: -2px;\r\n	left: -2px;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .refine_text {\r\n	font-weight: bold;\r\n	position: relative;\r\n	height: 15px;\r\n	width: 92px;\r\n	text-align: center;\r\n	color: #101839;\r\n	top: 5px;\r\n	pointer-events: none;\r\n}\r\n\r\n#Refine .refine_zeny {\r\n	position: relative;\r\n	height: 15px;\r\n	width: 65px;\r\n	top: 9px;\r\n	left: 20px;\r\n	color: white;\r\n	text-align: right;\r\n	font-weight: bold;\r\n	pointer-events: none;\r\n}\r\n\r\n#Refine .back_button {\r\n	position: absolute;\r\n	height: 38px;\r\n	width: 101px;\r\n	bottom: 13px;\r\n	left: 19px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n}\r\n\r\n#Refine .back_success,\r\n#Refine .back_fail {\r\n	position: relative;\r\n	height: 38px;\r\n	width: 101px;\r\n	top: 0px;\r\n	left: 0px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .refine_cont {\r\n	position: absolute;\r\n	height: 50px;\r\n	width: 101px;\r\n	bottom: 1px;\r\n	right: 20px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n	z-index: 5;\r\n}\r\n\r\n#Refine .refine_cont.item {\r\n	position: absolute !important;\r\n	float: none !important;\r\n	height: 50px !important;\r\n	width: 101px !important;\r\n	left: auto !important;\r\n	top: auto !important;\r\n	bottom: 1px !important;\r\n	right: 20px !important;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n	z-index: 5;\r\n}\r\n\r\n#Refine .success_refine_cont_enabled,\r\n#Refine .success_refine_cont_disabled,\r\n#Refine .fail_refine_cont_enabled,\r\n#Refine .fail_refine_cont_disabled {\r\n	position: absolute;\r\n	height: 50px;\r\n	width: 101px;\r\n	top: 0px;\r\n	left: 0px;\r\n	text-align: center;\r\n	font-weight: bold;\r\n	align-content: center;\r\n	cursor: pointer;\r\n}\r\n\r\n#Refine .success_refine_cont_enabled,\r\n#Refine .fail_refine_cont_enabled {\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: 0;\r\n}\r\n\r\n#Refine .refine_text_cont {\r\n	position: absolute;\r\n	height: 15px;\r\n	width: 100px;\r\n	text-align: center;\r\n	align-content: center;\r\n	pointer-events: none;\r\n	font-weight: bold;\r\n	bottom: 27px;\r\n	left: 0px;\r\n}\r\n\r\n#Refine .chance_rate {\r\n	position: absolute;\r\n	height: 15px;\r\n	width: 100px;\r\n	bottom: 14px;\r\n	left: 0px;\r\n	text-align: center;\r\n	align-content: center;\r\n	pointer-events: none;\r\n}\r\n\r\n#Refine .refine_zeny_cont {\r\n	position: absolute;\r\n	height: 15px;\r\n	width: 100px;\r\n	bottom: 0px;\r\n	left: 0px;\r\n	text-align: center;\r\n	align-content: center;\r\n	color: white;\r\n	pointer-events: none;\r\n	font-weight: bold;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/Refine/Refine.js
@@ -238719,14 +238865,30 @@ var init_StrEffect = __esmMin((() => {
 		xy: /* @__PURE__ */ new Float32Array(8)
 	};
 	StrEffect = class {
-		constructor(filename, position, startTick, texturePath) {
+		constructor(filename, position, startTick, texturePath, fallbacks = []) {
 			this.filename = filename;
 			this.startTick = startTick;
 			this.position = position;
 			this.texturePath = texturePath;
+			this.fallbacks = fallbacks.slice();
+			this.load();
+		}
+		/**
+		* Load the file. Clients keep the same art under different folders from one
+		* release to the next, so a missing file moves on to the next candidate;
+		* when none is left the effect is removed.
+		*/
+		load() {
 			Client.loadFile(this.filename, null, () => {
-				this.needCleanUp = true;
-			}, { texturePath });
+				const next = this.fallbacks.shift();
+				if (!next) {
+					this.needCleanUp = true;
+					return;
+				}
+				this.filename = next.filename;
+				this.texturePath = next.texturePath;
+				this.load();
+			}, { texturePath: this.texturePath });
 		}
 		/**
 		* Preparing for render
@@ -240665,7 +240827,7 @@ var init_WriteRodex = __esmMin((() => {
 		root.querySelector(".validate-name").style.display = "none";
 		const baloon = root.querySelector(".baloon");
 		baloon.innerHTML = text;
-		baloon.style.display = "";
+		baloon.style.display = "block";
 		const nameInput = root.querySelector(".name");
 		nameInput.type = "none";
 		WriteRodex.receiver = pkt.name !== void 0 ? pkt.name : nameInput.value;
@@ -242098,6 +242260,7 @@ function createStorage(config) {
 	};
 	const _list = [];
 	let _openFilters = {};
+	let _searchTerm = "";
 	const _preferences = Preferences.get("Storage", {
 		x: 200,
 		y: 500,
@@ -242145,6 +242308,10 @@ function createStorage(config) {
 				searchBtn.addEventListener("mousedown", (e) => e.stopImmediatePropagation());
 				searchBtn.addEventListener("click", () => Component.onSearch());
 			}
+			const searchInput = root.querySelector("#storage-search-input");
+			if (searchInput) searchInput.addEventListener("keydown", (e) => {
+				if (e.key === "Enter") Component.onSearch();
+			});
 		}
 		if (hasOrderBy) {
 			const orderBySelect = root.querySelector(".storage-order-by");
@@ -242223,6 +242390,7 @@ function createStorage(config) {
 			const itemTab = getItemTab(item);
 			if (_openFilters[itemTab]) _openFilters[itemTab].addItem(item);
 		}
+		if (hasSearch && _openFilters[ItemType_default.SEARCH] && matchesSearch(item)) _openFilters[ItemType_default.SEARCH].addItem(item);
 		if (i > -1) {
 			_list[i].count += item.count;
 			const countEl = this.getRoot().querySelector(`.item[data-index="${item.index}"] .count`);
@@ -242309,10 +242477,8 @@ function createStorage(config) {
 	if (hasSearch) Component.onSearch = function onSearch() {
 		const searchInput = this.getRoot().querySelector("#storage-search-input");
 		if (!searchInput) return;
-		const searchTerm = searchInput.value.toLowerCase();
-		const filteredItems = _list.filter((item) => {
-			return DB.getItemName(item).toLowerCase().indexOf(searchTerm) > -1;
-		});
+		_searchTerm = searchInput.value.toLowerCase();
+		const filteredItems = _list.filter(matchesSearch);
 		if (!_openFilters[ItemType_default.SEARCH]) {
 			const newFilter = new StorageFilter(ItemType_default.SEARCH);
 			_openFilters[ItemType_default.SEARCH] = newFilter;
@@ -242399,6 +242565,9 @@ function createStorage(config) {
 			}
 		}
 		for (let i = 0, count = list.length; i < count; ++i) Component.addItemSub(list[i]);
+	}
+	function matchesSearch(item) {
+		return DB.getItemName(item).toLowerCase().includes(_searchTerm);
 	}
 	function getItemIndexById(index) {
 		for (let i = 0, count = _list.length; i < count; ++i) if (_list[i].index === index) return i;
@@ -242577,31 +242746,7 @@ var init_StorageFilter$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/UI/Components/Storage/StorageV3/StorageFilter.js
-function StorageFilter(tabId) {
-	const prefName = "StorageFilter_" + tabId;
-	GUIComponent.call(this, prefName, StorageFilter_default);
-	this.render = () => StorageFilter_default$1;
-	this.onRemove = function() {
-		const root = this.getRoot();
-		const content = root.querySelector(".content");
-		if (content) content.innerHTML = "";
-		this._list.length = 0;
-		this._currentTabId = -1;
-		this._preferences.y = parseInt(this._host.style.top, 10);
-		this._preferences.x = parseInt(this._host.style.left, 10);
-		this._preferences.height = Math.floor((root.querySelector(".content") ? root.querySelector(".content").offsetHeight : 128) / 32);
-		this._preferences.save();
-		if (typeof this.onCloseCallback === "function") this.onCloseCallback();
-	};
-	this._list = [];
-	this._currentTabId = -1;
-	this._preferences = Preferences.get(prefName, {
-		x: 300 + tabId * 20,
-		y: 200 + tabId * 20,
-		height: 4
-	}, 1);
-	this.onCloseCallback = null;
-}
+var StorageFilter;
 var init_StorageFilter = __esmMin((() => {
 	init_DBManager();
 	init_Client();
@@ -242613,216 +242758,239 @@ var init_StorageFilter = __esmMin((() => {
 	init_ItemInfo();
 	init_StorageFilter$2();
 	init_StorageFilter$1();
-	StorageFilter.prototype = Object.create(GUIComponent.prototype);
-	StorageFilter.prototype.constructor = StorageFilter;
-	StorageFilter.prototype.init = function init() {
-		const self = this;
-		const root = this.getRoot();
-		const closeBtn = root.querySelector(".titlebar .right .close");
-		if (closeBtn) {
-			closeBtn.addEventListener("mousedown", (e) => e.stopImmediatePropagation());
-			closeBtn.addEventListener("click", () => {
-				self.remove();
+	StorageFilter = class extends GUIComponent {
+		constructor(tabId) {
+			const prefName = `StorageFilter_${tabId}`;
+			super(prefName, StorageFilter_default);
+			this._list = [];
+			this._currentTabId = -1;
+			this._preferences = Preferences.get(prefName, {
+				x: 300 + tabId * 20,
+				y: 200 + tabId * 20,
+				height: 4
+			}, 1);
+			this.onCloseCallback = null;
+			this.mouseMode = GUIComponent.MouseMode.STOP;
+		}
+		render() {
+			return StorageFilter_default$1;
+		}
+		onRemove() {
+			const root = this.getRoot();
+			const content = root.querySelector(".content");
+			if (content) content.innerHTML = "";
+			this._list.length = 0;
+			this._currentTabId = -1;
+			this._preferences.y = parseInt(this._host.style.top, 10);
+			this._preferences.x = parseInt(this._host.style.left, 10);
+			this._preferences.height = Math.floor((root.querySelector(".content") ? root.querySelector(".content").offsetHeight : 128) / 32);
+			this._preferences.save();
+			if (typeof this.onCloseCallback === "function") this.onCloseCallback();
+		}
+		init() {
+			const root = this.getRoot();
+			const closeBtn = root.querySelector(".titlebar .right .close");
+			if (closeBtn) {
+				closeBtn.addEventListener("mousedown", (e) => e.stopImmediatePropagation());
+				closeBtn.addEventListener("click", () => this.remove());
+			}
+			const extendBtn = root.querySelector(".footer .extend");
+			if (extendBtn) extendBtn.addEventListener("mousedown", () => this.onResize());
+			this.resizeHeight(this._preferences.height);
+			const content = root.querySelector(".content");
+			if (content) {
+				content.addEventListener("mouseover", (e) => {
+					const itemEl = e.target.closest(".item");
+					if (itemEl) this.onItemOver(itemEl, root);
+				});
+				content.addEventListener("mouseout", (e) => {
+					if (e.target.closest(".item")) this.onItemOut(root);
+				});
+				content.addEventListener("contextmenu", (e) => {
+					const itemEl = e.target.closest(".item");
+					if (itemEl) {
+						e.preventDefault();
+						this.onItemInfo(e, itemEl);
+					}
+				});
+				content.addEventListener("dragstart", (e) => {
+					const itemEl = e.target.closest(".item");
+					if (itemEl) {
+						this.onItemDragStart(e, itemEl);
+						this.onItemOut(root);
+					}
+				});
+				content.addEventListener("dragend", (e) => {
+					if (e.target.closest(".item")) this.onItemDragEnd();
+				});
+			}
+			this.draggable(".titlebar");
+			this.ui.hide();
+		}
+		onAppend() {
+			this.ui.show();
+			this._host.style.left = `${Math.min(Math.max(0, this._preferences.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
+			this._host.style.top = `${Math.min(Math.max(0, this._preferences.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
+		}
+		setItems(title, items, tabId) {
+			this._list = items.map((item) => ({ ...item }));
+			this._currentTabId = tabId;
+			const root = this.getRoot();
+			const titleEl = root.querySelector(".titlebar .text");
+			if (titleEl) titleEl.textContent = title;
+			const content = root.querySelector(".content");
+			if (content) content.innerHTML = "";
+			for (let i = 0, count = this._list.length; i < count; ++i) this.renderItem(this._list[i]);
+		}
+		renderItem(item) {
+			const it = DB.getItemInfo(item.ITID);
+			const root = this.getRoot();
+			const content = root.querySelector(".content");
+			const itemEl = document.createElement("div");
+			itemEl.className = "item";
+			itemEl.setAttribute("data-index", item.index);
+			itemEl.setAttribute("draggable", "true");
+			const iconDiv = document.createElement("div");
+			iconDiv.className = "icon";
+			itemEl.appendChild(iconDiv);
+			const amountDiv = document.createElement("div");
+			amountDiv.className = "amount";
+			if (item.count) {
+				const countSpan = document.createElement("span");
+				countSpan.className = "count";
+				countSpan.textContent = item.count;
+				amountDiv.appendChild(countSpan);
+				amountDiv.appendChild(document.createTextNode(" "));
+			}
+			itemEl.appendChild(amountDiv);
+			const nameSpan = document.createElement("span");
+			nameSpan.className = "name";
+			nameSpan.innerHTML = DB.getItemName(item);
+			itemEl.appendChild(nameSpan);
+			if (content) content.appendChild(itemEl);
+			Client.loadFile(`${DB.INTERFACE_PATH}item/${item.IsIdentified ? it.identifiedResourceName : it.unidentifiedResourceName}.bmp`, (data) => {
+				const icon = root.querySelector(`.item[data-index="${item.index}"] .icon`);
+				if (icon) icon.style.backgroundImage = `url(${data})`;
 			});
 		}
-		const extendBtn = root.querySelector(".footer .extend");
-		if (extendBtn) extendBtn.addEventListener("mousedown", () => this.onResize());
-		this.resizeHeight(this._preferences.height);
-		const content = root.querySelector(".content");
-		if (content) {
-			content.addEventListener("mouseover", (e) => {
-				const itemEl = e.target.closest(".item");
-				if (itemEl) this.onItemOver(itemEl, root);
-			});
-			content.addEventListener("mouseout", (e) => {
-				if (e.target.closest(".item")) this.onItemOut(root);
-			});
-			content.addEventListener("contextmenu", (e) => {
-				const itemEl = e.target.closest(".item");
-				if (itemEl) {
-					e.preventDefault();
-					this.onItemInfo(e, itemEl);
-				}
-			});
-			content.addEventListener("dragstart", (e) => {
-				const itemEl = e.target.closest(".item");
-				if (itemEl) {
-					this.onItemDragStart(e, itemEl);
-					this.onItemOut(root);
-				}
-			});
-			content.addEventListener("dragend", (e) => {
-				if (e.target.closest(".item")) this.onItemDragEnd();
-			});
+		getItemFromIndex(index) {
+			return this._list.filter((item) => item.index === index)[0];
 		}
-		this.draggable(".titlebar");
-		this.ui.hide();
-	};
-	StorageFilter.prototype.onAppend = function onAppend() {
-		this.ui.show();
-		this._host.style.left = `${Math.min(Math.max(0, this._preferences.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
-		this._host.style.top = `${Math.min(Math.max(0, this._preferences.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
-	};
-	StorageFilter.prototype.setItems = function setItems(title, items, tabId) {
-		this._list = items.slice(0);
-		this._currentTabId = tabId;
-		const root = this.getRoot();
-		const titleEl = root.querySelector(".titlebar .text");
-		if (titleEl) titleEl.textContent = title;
-		const content = root.querySelector(".content");
-		if (content) content.innerHTML = "";
-		for (let i = 0, count = this._list.length; i < count; ++i) this.renderItem(this._list[i]);
-	};
-	StorageFilter.prototype.renderItem = function renderItem(item) {
-		const it = DB.getItemInfo(item.ITID);
-		const root = this.getRoot();
-		const content = root.querySelector(".content");
-		const itemEl = document.createElement("div");
-		itemEl.className = "item";
-		itemEl.setAttribute("data-index", item.index);
-		itemEl.setAttribute("draggable", "true");
-		const iconDiv = document.createElement("div");
-		iconDiv.className = "icon";
-		itemEl.appendChild(iconDiv);
-		const amountDiv = document.createElement("div");
-		amountDiv.className = "amount";
-		if (item.count) {
-			const countSpan = document.createElement("span");
-			countSpan.className = "count";
-			countSpan.textContent = item.count;
-			amountDiv.appendChild(countSpan);
-			amountDiv.appendChild(document.createTextNode(" "));
+		onItemOver(itemEl, root) {
+			const index = parseInt(itemEl.getAttribute("data-index"), 10);
+			const item = this.getItemFromIndex(index);
+			if (!item) return;
+			const overlay = root.querySelector(".overlay");
+			if (overlay) {
+				overlay.style.display = "";
+				overlay.style.top = `${itemEl.offsetTop - 10}px`;
+				overlay.style.left = `${itemEl.offsetLeft + 35}px`;
+				overlay.innerHTML = `${DB.getItemName(item)} ${item.count || 1} ea`;
+				if (item.IsIdentified) overlay.classList.remove("grey");
+				else overlay.classList.add("grey");
+			}
 		}
-		itemEl.appendChild(amountDiv);
-		const nameSpan = document.createElement("span");
-		nameSpan.className = "name";
-		nameSpan.innerHTML = DB.getItemName(item);
-		itemEl.appendChild(nameSpan);
-		if (content) content.appendChild(itemEl);
-		Client.loadFile(`${DB.INTERFACE_PATH}item/${item.IsIdentified ? it.identifiedResourceName : it.unidentifiedResourceName}.bmp`, (data) => {
-			const icon = root.querySelector(`.item[data-index="${item.index}"] .icon`);
-			if (icon) icon.style.backgroundImage = `url(${data})`;
-		});
-	};
-	StorageFilter.prototype.getItemFromIndex = function getItemFromIndex(index) {
-		return this._list.filter((item) => item.index === index)[0];
-	};
-	StorageFilter.prototype.onItemOver = function onItemOver(itemEl, root) {
-		const index = parseInt(itemEl.getAttribute("data-index"), 10);
-		const item = this.getItemFromIndex(index);
-		if (!item) return;
-		const overlay = root.querySelector(".overlay");
-		if (overlay) {
-			overlay.style.display = "";
-			overlay.style.top = `${itemEl.offsetTop - 10}px`;
-			overlay.style.left = `${itemEl.offsetLeft + 35}px`;
-			overlay.innerHTML = `${DB.getItemName(item)} ${item.count || 1} ea`;
-			if (item.IsIdentified) overlay.classList.remove("grey");
-			else overlay.classList.add("grey");
+		onItemOut(root) {
+			if (!root) root = this.getRoot();
+			const overlay = root.querySelector(".overlay");
+			if (overlay) overlay.style.display = "none";
 		}
-	};
-	StorageFilter.prototype.onItemOut = function onItemOut(root) {
-		if (!root) root = this.getRoot();
-		const overlay = root.querySelector(".overlay");
-		if (overlay) overlay.style.display = "none";
-	};
-	StorageFilter.prototype.onItemDragStart = function onItemDragStart(event, itemEl) {
-		const index = parseInt(itemEl.getAttribute("data-index"), 10);
-		const item = this.getItemFromIndex(index);
-		if (!item) return;
-		const img = new Image();
-		let url = itemEl.firstChild.style.backgroundImage.match(/\(([^)]+)/)[1];
-		url = url.replace(/^"/, "").replace(/"$/, "");
-		img.src = url;
-		event.dataTransfer.setDragImage(img, 12, 12);
-		event.dataTransfer.setData("Text", JSON.stringify(window._OBJ_DRAG_ = {
-			type: "item",
-			from: "Storage",
-			data: item
-		}));
-	};
-	StorageFilter.prototype.onItemDragEnd = function onItemDragEnd() {
-		delete window._OBJ_DRAG_;
-	};
-	StorageFilter.prototype.onItemInfo = function onItemInfo(event, itemEl) {
-		event.stopImmediatePropagation();
-		const index = parseInt(itemEl.getAttribute("data-index"), 10);
-		const item = this.getItemFromIndex(index);
-		if (!item) return false;
-		if (event.altKey && event.which === 3) {
-			if (typeof this.onTransferItemToOtherUI === "function") this.onTransferItemToOtherUI(item);
+		onItemDragStart(event, itemEl) {
+			const index = parseInt(itemEl.getAttribute("data-index"), 10);
+			const item = this.getItemFromIndex(index);
+			if (!item) return;
+			const img = new Image();
+			let url = itemEl.firstChild.style.backgroundImage.match(/\(([^)]+)/)[1];
+			url = url.replace(/^"/, "").replace(/"$/, "");
+			img.src = url;
+			event.dataTransfer.setDragImage(img, 12, 12);
+			event.dataTransfer.setData("Text", JSON.stringify(window._OBJ_DRAG_ = {
+				type: "item",
+				from: "Storage",
+				data: item
+			}));
+		}
+		onItemDragEnd() {
+			delete window._OBJ_DRAG_;
+		}
+		onItemInfo(event, itemEl) {
+			event.stopImmediatePropagation();
+			const index = parseInt(itemEl.getAttribute("data-index"), 10);
+			const item = this.getItemFromIndex(index);
+			if (!item) return false;
+			if (event.altKey && event.which === 3) {
+				if (typeof this.onTransferItemToOtherUI === "function") this.onTransferItemToOtherUI(item);
+				return false;
+			}
+			if (ItemInfo_default.uid === item.ITID) ItemInfo_default.remove();
+			ItemInfo_default.append();
+			ItemInfo_default.uid = item.ITID;
+			ItemInfo_default.setItem(item);
 			return false;
 		}
-		if (ItemInfo_default.uid === item.ITID) ItemInfo_default.remove();
-		ItemInfo_default.append();
-		ItemInfo_default.uid = item.ITID;
-		ItemInfo_default.setItem(item);
-		return false;
-	};
-	StorageFilter.prototype.resizeHeight = function resizeHeight(height) {
-		height = Math.min(Math.max(height, 4), 10);
-		const content = this.getRoot().querySelector(".content");
-		if (content) content.style.height = `${height * 32}px`;
-		this._host.style.height = `${height * 32 + 17 + 19}px`;
-	};
-	StorageFilter.prototype.onResize = function onResize() {
-		const self = this;
-		const top = this._host.offsetTop;
-		let lastHeight = 0;
-		const extraY = 36;
-		function resizing() {
-			let h = Math.floor((Mouse.screen.y - top - extraY) / 32);
-			h = Math.min(Math.max(h, 4), 10);
-			if (h === lastHeight) return;
-			self.resizeHeight(h);
-			lastHeight = h;
+		resizeHeight(height) {
+			height = Math.min(Math.max(height, 4), 10);
+			const content = this.getRoot().querySelector(".content");
+			if (content) content.style.height = `${height * 32}px`;
+			this._host.style.height = `${height * 32 + 17 + 19}px`;
 		}
-		const _Interval = setInterval(resizing, 30);
-		const onMouseUp = (event) => {
-			if (event.which === 1) {
-				clearInterval(_Interval);
-				window.removeEventListener("mouseup", onMouseUp);
+		onResize() {
+			const top = this._host.offsetTop;
+			let lastHeight = 0;
+			const extraY = 36;
+			const resizing = () => {
+				let h = Math.floor((Mouse.screen.y - top - extraY) / 32);
+				h = Math.min(Math.max(h, 4), 10);
+				if (h === lastHeight) return;
+				this.resizeHeight(h);
+				lastHeight = h;
+			};
+			const _Interval = setInterval(resizing, 30);
+			const onMouseUp = (event) => {
+				if (event.which === 1) {
+					clearInterval(_Interval);
+					window.removeEventListener("mouseup", onMouseUp);
+				}
+			};
+			window.addEventListener("mouseup", onMouseUp);
+		}
+		getCurrentTab() {
+			return this._currentTabId;
+		}
+		removeItem(index, count) {
+			let i = -1;
+			for (let j = 0, count_ = this._list.length; j < count_; ++j) if (this._list[j].index === index) {
+				i = j;
+				break;
 			}
-		};
-		window.addEventListener("mouseup", onMouseUp);
-	};
-	StorageFilter.prototype.getCurrentTab = function getCurrentTab() {
-		return this._currentTabId;
-	};
-	StorageFilter.prototype.removeItem = function removeItem(index, count) {
-		let i = -1;
-		for (let j = 0, count_ = this._list.length; j < count_; ++j) if (this._list[j].index === index) {
-			i = j;
-			break;
+			if (i < 0) return;
+			const item = this._list[i];
+			const root = this.getRoot();
+			if (item.count) {
+				item.count -= count;
+				if (item.count > 0) {
+					const countEl = root.querySelector(`.item[data-index="${index}"] .count`);
+					if (countEl) countEl.textContent = item.count;
+					return;
+				}
+			}
+			this._list.splice(i, 1);
+			const el = root.querySelector(`.item[data-index="${index}"]`);
+			if (el) el.remove();
+			const overlay = root.querySelector(".overlay");
+			if (overlay) overlay.style.display = "none";
 		}
-		if (i < 0) return;
-		const item = this._list[i];
-		const root = this.getRoot();
-		if (item.count) {
-			item.count -= count;
-			if (item.count > 0) {
-				const countEl = root.querySelector(`.item[data-index="${index}"] .count`);
-				if (countEl) countEl.textContent = item.count;
+		addItem(item) {
+			for (let j = 0, count_ = this._list.length; j < count_; ++j) if (this._list[j].index === item.index) {
+				this._list[j].count += item.count;
+				const countEl = this.getRoot().querySelector(`.item[data-index="${item.index}"] .count`);
+				if (countEl) countEl.textContent = this._list[j].count;
 				return;
 			}
+			this._list.push(JSON.parse(JSON.stringify(item)));
+			this.renderItem(item);
 		}
-		this._list.splice(i, 1);
-		const el = root.querySelector(`.item[data-index="${index}"]`);
-		if (el) el.remove();
-		const overlay = root.querySelector(".overlay");
-		if (overlay) overlay.style.display = "none";
 	};
-	StorageFilter.prototype.addItem = function addItem(item) {
-		for (let j = 0, count_ = this._list.length; j < count_; ++j) if (this._list[j].index === item.index) {
-			this._list[j].count += item.count;
-			const countEl = this.getRoot().querySelector(`.item[data-index="${item.index}"] .count`);
-			if (countEl) countEl.textContent = this._list[j].count;
-			return;
-		}
-		this._list.push(JSON.parse(JSON.stringify(item)));
-		this.renderItem(item);
-	};
-	StorageFilter.prototype.mouseMode = GUIComponent.MouseMode.STOP;
 }));
 //#endregion
 //#region src/UI/Components/Storage/StorageV3/Storage.html?raw
@@ -243158,7 +243326,10 @@ var init_CartItems = __esmMin((() => {
 			CartItems._host.style.display = "none";
 		});
 		this._host.addEventListener("drop", onDrop$9);
-		this._host.addEventListener("dragover", (e) => e.stopImmediatePropagation());
+		this._host.addEventListener("dragover", (e) => {
+			e.stopImmediatePropagation();
+			e.preventDefault();
+		});
 		const content = root.querySelector(".container .content");
 		if (content) {
 			content.addEventListener("wheel", onScroll$5);
@@ -243545,8 +243716,7 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 		this._host.addEventListener("dragover", onDragOver);
 		this._host.addEventListener("dragleave", onDragLeave);
 		this._host.addEventListener("drop", onDrop);
-		const content = root.querySelector(".content");
-		if (content) {
+		root.querySelectorAll(".content").forEach((content) => {
 			content.addEventListener("contextmenu", (e) => {
 				e.preventDefault();
 				const item = e.target.closest(".item");
@@ -243563,7 +243733,7 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 			content.addEventListener("mouseout", (e) => {
 				if (e.target.closest("button")) onEquipmentOut();
 			});
-		}
+		});
 		this.draggable(".titlebar");
 		if (switchEquip) switchappend = root.querySelector(".footer");
 		if (costumeConfig) {
@@ -252780,6 +252950,7 @@ var init_Model = __esmMin((() => {
 			const max = Math.max, min = Math.min;
 			let x, y, z;
 			mat4$17.copy(this.matrix, _matrix);
+			if (this.baseMatrix) mat4$17.multiply(this.matrix, this.matrix, this.baseMatrix);
 			mat4$17.translate(this.matrix, this.matrix, this.pos);
 			if (!this.rotKeyframes.length) mat4$17.rotate(this.matrix, this.matrix, this.rotangle, this.rotaxis);
 			else mat4$17.rotateQuat(this.matrix, this.matrix, this.rotKeyframes[0].q);
@@ -252804,7 +252975,10 @@ var init_Model = __esmMin((() => {
 				box.range[i] = (box.max[i] - box.min[i]) / 2;
 				box.center[i] = box.min[i] + box.range[i];
 			}
-			for (i = 0, count = nodes.length; i < count; ++i) if (nodes[i].parentname === this.name && this.name !== this.parentname) nodes[i].calcBoundingBox(this.matrix);
+			for (i = 0, count = nodes.length; i < count; ++i) {
+				if (this.absoluteTransform) break;
+				if (nodes[i].parentname === this.name && this.name !== this.parentname) nodes[i].calcBoundingBox(this.matrix);
+			}
 		}
 		/**
 		* Compile Node
@@ -252892,6 +253066,7 @@ var init_Model = __esmMin((() => {
 			]);
 			const nodeMatrix = mat4$17.create();
 			mat4$17.identity(nodeMatrix);
+			if (this.baseMatrix) mat4$17.multiply(nodeMatrix, nodeMatrix, this.baseMatrix);
 			const animPos = getPositionAtFrame$1(this.posKeyframes, frame, animLen);
 			if (animPos) mat4$17.translate(nodeMatrix, nodeMatrix, animPos);
 			else mat4$17.translate(nodeMatrix, nodeMatrix, this.pos);
@@ -253115,7 +253290,13 @@ var init_Model = __esmMin((() => {
 			const fp = new BinaryReader(data);
 			const header = fp.readBinaryString(4);
 			if (header !== "GRSM" && header !== "GRSX") throw new Error(`RSM::load() - Incorrect header "${header}", must be "GRSM"`);
-			this.version = fp.readByte() + fp.readByte() / 10;
+			const major = fp.readByte();
+			const minor = fp.readByte();
+			this.version = major + minor / 10;
+			if (major === 2 && minor >= 2) {
+				this.loadRsm2(fp, minor);
+				return;
+			}
 			this.animLen = fp.readLong();
 			this.shadeType = fp.readLong();
 			this.main_node = null;
@@ -253139,6 +253320,7 @@ var init_Model = __esmMin((() => {
 			}
 			count = fp.readLong();
 			const nodes = new Array(count);
+			if (nodes.length === 0) throw new Error("RSM::load() - Model contains no nodes");
 			for (i = 0; i < count; ++i) {
 				nodes[i] = new RSM.Node(this, fp, count === 1);
 				if (mainNodeName && nodes[i].name === mainNodeName) this.main_node = nodes[i];
@@ -253193,6 +253375,227 @@ var init_Model = __esmMin((() => {
 				});
 			}
 			this.volumebox = volumebox;
+			this.instances = [];
+			this.box = new RSM.Box();
+			this.calcBoundingBox();
+		}
+		/**
+		* Load an RSM2 model.
+		*
+		* RSM2 stores an absolute 3x4 world transform per node and uses
+		* length-prefixed strings. Versions 2.2 and 2.3 also use different face
+		* encodings, so they cannot be parsed by the legacy Node constructor.
+		* The transform is baked into the vertices here while retaining the
+		* existing Node/renderer mesh API.
+		*
+		* @param {object} fp BinaryReader
+		* @param {number} minor RSM2 minor version
+		*/
+		loadRsm2(fp, minor) {
+			let i;
+			const readString = () => fp.readBinaryString(fp.readLong());
+			this.animLen = fp.readLong();
+			this.shadeType = fp.readLong();
+			this.alpha = fp.readUByte() / 255;
+			this.frameRatePerSecond = fp.readFloat();
+			const sharedTextures = [];
+			if (minor <= 2) {
+				const textureCount = fp.readLong();
+				for (i = 0; i < textureCount; i++) sharedTextures.push(readString());
+			}
+			const rootNodeCount = fp.readLong();
+			const rootNodeNames = new Array(rootNodeCount);
+			for (i = 0; i < rootNodeCount; i++) rootNodeNames[i] = readString();
+			const nodeCount = fp.readLong();
+			const nodes = new Array(nodeCount);
+			const allTextures = sharedTextures.slice();
+			const addTexture = (texture) => {
+				let index = allTextures.indexOf(texture);
+				if (index === -1) {
+					index = allTextures.length;
+					allTextures.push(texture);
+				}
+				return index;
+			};
+			for (i = 0; i < nodeCount; i++) {
+				const name = readString();
+				const parentname = readString();
+				const textureCount = fp.readLong();
+				const nodeTextures = new Array(textureCount);
+				for (let j = 0; j < textureCount; j++) {
+					const texture = minor <= 2 ? sharedTextures[fp.readLong()] : readString();
+					nodeTextures[j] = addTexture(texture || "");
+				}
+				const transform = new Array(12);
+				for (let j = 0; j < transform.length; j++) transform[j] = fp.readFloat();
+				const vertexCount = fp.readLong();
+				const vertices = new Array(vertexCount);
+				for (let j = 0; j < vertexCount; j++) {
+					const x = fp.readFloat();
+					const y = fp.readFloat();
+					const z = fp.readFloat();
+					vertices[j] = [
+						x,
+						y,
+						z
+					];
+				}
+				const tvertexCount = fp.readLong();
+				const tvertices = new Float32Array(tvertexCount * 6);
+				for (let j = 0; j < tvertexCount; j++) {
+					const offset = j * 6;
+					fp.readULong();
+					tvertices[offset + 4] = fp.readFloat() * .98 + .01;
+					tvertices[offset + 5] = fp.readFloat() * .98 + .01;
+				}
+				const faceCount = fp.readLong();
+				const faces = new Array(faceCount);
+				for (let j = 0; j < faceCount; j++) {
+					let faceLength = 24;
+					if (minor >= 2) faceLength = fp.readLong();
+					const face = {
+						vertidx: [
+							fp.readUShort(),
+							fp.readUShort(),
+							fp.readUShort()
+						],
+						tvertidx: [
+							fp.readUShort(),
+							fp.readUShort(),
+							fp.readUShort()
+						],
+						texid: fp.readUShort(),
+						padding: fp.readUShort(),
+						twoSide: fp.readLong(),
+						smoothGroup: 0
+					};
+					if (minor === 1 || minor >= 2) face.smoothGroup = fp.readLong();
+					const consumed = minor >= 2 ? 24 : 24;
+					if (minor >= 2 && faceLength > consumed) fp.seek(faceLength - consumed, SEEK_CUR);
+					faces[j] = face;
+				}
+				const scaleCount = fp.readLong();
+				const scaleKeyFrames = new Array(scaleCount);
+				for (let j = 0; j < scaleCount; j++) scaleKeyFrames[j] = {
+					Frame: fp.readLong(),
+					Scale: [
+						fp.readFloat(),
+						fp.readFloat(),
+						fp.readFloat()
+					],
+					Data: fp.readFloat()
+				};
+				const rotationCount = fp.readLong();
+				const rotationKeyFrames = new Array(rotationCount);
+				for (let j = 0; j < rotationCount; j++) rotationKeyFrames[j] = {
+					frame: fp.readLong(),
+					q: [
+						fp.readFloat(),
+						fp.readFloat(),
+						fp.readFloat(),
+						fp.readFloat()
+					]
+				};
+				const positionCount = fp.readLong();
+				const positionKeyFrames = new Array(positionCount);
+				for (let j = 0; j < positionCount; j++) positionKeyFrames[j] = {
+					frame: fp.readLong(),
+					px: fp.readFloat(),
+					py: fp.readFloat(),
+					pz: fp.readFloat(),
+					Data: fp.readLong()
+				};
+				if (minor === 3) {
+					const uvAnimationCount = fp.readLong();
+					for (let j = 0; j < uvAnimationCount; j++) {
+						fp.readLong();
+						const typeCount = fp.readLong();
+						for (let k = 0; k < typeCount; k++) {
+							fp.readLong();
+							fp.seek(fp.readLong() * 8, SEEK_CUR);
+						}
+					}
+				}
+				const node = Object.create(Node.prototype);
+				node.main = this;
+				node.is_only = true;
+				node.name = name;
+				node.parentname = parentname || null;
+				node.textures = nodeTextures;
+				node.mat3 = [
+					1,
+					0,
+					0,
+					0,
+					1,
+					0,
+					0,
+					0,
+					1
+				];
+				node.offset = [
+					0,
+					0,
+					0
+				];
+				node.pos = [
+					0,
+					0,
+					0
+				];
+				node.rotangle = 0;
+				node.rotaxis = [
+					0,
+					0,
+					0
+				];
+				node.scale = [
+					1,
+					1,
+					1
+				];
+				node.flip = [
+					1,
+					-1,
+					1
+				];
+				node.box = new RSM.Box();
+				node.matrix = mat4$17.create();
+				node.vertices = vertices;
+				node.tvertices = tvertices;
+				node.faces = faces;
+				node.rotKeyframes = rotationKeyFrames;
+				node.posKeyframes = positionKeyFrames;
+				node.scaleKeyFrames = scaleKeyFrames;
+				node.textureKeyFrameGroup = [];
+				node.absoluteTransform = true;
+				node.baseMatrix = mat4$17.create();
+				node.baseMatrix[0] = transform[0];
+				node.baseMatrix[1] = transform[1];
+				node.baseMatrix[2] = transform[2];
+				node.baseMatrix[4] = transform[3];
+				node.baseMatrix[5] = transform[4];
+				node.baseMatrix[6] = transform[5];
+				node.baseMatrix[8] = transform[6];
+				node.baseMatrix[9] = transform[7];
+				node.baseMatrix[10] = transform[8];
+				node.baseMatrix[12] = transform[9];
+				node.baseMatrix[13] = transform[10];
+				node.baseMatrix[14] = transform[11];
+				nodes[i] = node;
+			}
+			if (fp.offset + 4 <= fp.length) {
+				const volumeBoxCount = fp.readLong();
+				const remaining = fp.length - fp.offset;
+				const volumeBoxSize = remaining === volumeBoxCount * 40 || remaining < volumeBoxCount * 232 ? 40 : 232;
+				if (volumeBoxCount >= 0 && fp.offset + volumeBoxCount * volumeBoxSize <= fp.length) fp.seek(volumeBoxCount * volumeBoxSize, SEEK_CUR);
+			}
+			this.textures = allTextures;
+			this.nodes = nodes;
+			if (nodes.length === 0) throw new Error("RSM::load() - Model contains no nodes");
+			this.main_node = rootNodeNames.map((name) => nodes.find((node) => node.name === name)).find(Boolean) || nodes[0];
+			this.posKeyframes = [];
+			this.volumebox = [];
 			this.instances = [];
 			this.box = new RSM.Box();
 			this.calcBoundingBox();
@@ -255699,10 +256102,24 @@ function PrepareInit(callParams) {
 function spamSTR(Params) {
 	let filename;
 	const texturePath = Params.effect.texturePath || "";
-	if (Map_default.mineffect && Params.effect.min) filename = Params.effect.min;
+	const minimal = !!(Map_default.mineffect && Params.effect.min);
+	if (minimal) filename = Params.effect.min;
 	else filename = Params.effect.file;
-	if (Params.effect.rand) filename = filename.replace("%d", Math.round(Params.effect.rand[0] + (Params.effect.rand[1] - Params.effect.rand[0]) * Math.random()));
-	EffectManager.add(new StrEffect("data/texture/effect/" + filename + ".str", Params.Inst.position, Params.Inst.startTick, texturePath), Params);
+	let pick = (name) => name;
+	if (Params.effect.rand) {
+		const n = Math.round(Params.effect.rand[0] + (Params.effect.rand[1] - Params.effect.rand[0]) * Math.random());
+		pick = (name) => name.replace("%d", n);
+	}
+	filename = pick(filename);
+	const fallbacks = (Params.effect.fallback || []).map((file) => ({
+		filename: "data/texture/effect/" + pick(file) + ".str",
+		texturePath: file.substring(0, file.lastIndexOf("/") + 1)
+	}));
+	if (minimal) fallbacks.unshift({
+		filename: "data/texture/effect/" + pick(Params.effect.file) + ".str",
+		texturePath
+	});
+	EffectManager.add(new StrEffect("data/texture/effect/" + filename + ".str", Params.Inst.position, Params.Inst.startTick, texturePath, fallbacks), Params);
 }
 /**
 * Spam an effect to the scene
@@ -259799,6 +260216,27 @@ function stripMapExtension(mapname) {
 	return (mapname || "").replace(/\.[^.]*$/, "");
 }
 /**
+* Bind a map load step to its load, so that it does nothing once the load is cancelled
+*
+* @param {number} loadId
+* @param {function} step
+*/
+function loadStep(loadId, step) {
+	return (...args) => {
+		if (loadId === MapRenderer._loadId) step.apply(MapRenderer, args);
+	};
+}
+/**
+* Bind a worker event of map loading, so that it only reaches the load whose request sent it
+*
+* @param {function} step
+*/
+function loadEvent(step) {
+	return (data, request) => {
+		if (request === MapRenderer._loadRequest) step.call(MapRenderer, data);
+	};
+}
+/**
 * Received progress from Thread
 *
 * @param {number} percent (progress)
@@ -259905,6 +260343,7 @@ function registerPostProcessModules(gl) {
 * Once the map finished to load
 */
 function onMapComplete(success, error) {
+	const loadId = MapRenderer._loadId;
 	const worldResource = this.currentMap.replace(/\.gat$/i, ".rsw");
 	const mapInfo = DB.getMap(worldResource);
 	if (!success) {
@@ -259929,6 +260368,7 @@ function onMapComplete(success, error) {
 	registerPostProcessModules(gl);
 	JoystickUI_default.onRestore();
 	Background.remove(() => {
+		if (loadId !== MapRenderer._loadId) return;
 		MapRenderer.loading = false;
 		MapRenderer.onLoad();
 		Sky_default.setUpCloudData();
@@ -260013,6 +260453,14 @@ var init_MapRenderer = __esmMin((() => {
 		*/
 		static loading = false;
 		/**
+		* @var {number} id of the latest map load, bumped to cancel the one in progress
+		*/
+		static _loadId = 0;
+		/**
+		* @var {number} worker request of the map load in progress, 0 when none
+		*/
+		static _loadRequest = 0;
+		/**
 		* @var {Float32Array} diffuse Modified diffuse color
 		*/
 		static diffuse = null;
@@ -260039,6 +260487,7 @@ var init_MapRenderer = __esmMin((() => {
 		static setMap(mapname) {
 			if (this.loading) return;
 			mapname = mapname.replace(/^(\d{3})(\d@)/, "$2").replace(/^\d{3}#/, "");
+			const loadId = ++this._loadId;
 			SoundManager.stop();
 			Renderer.stop();
 			UIManager.removeComponents();
@@ -260049,15 +260498,16 @@ var init_MapRenderer = __esmMin((() => {
 				this.currentMap = mapname;
 				const filename = mapname.replace(/\.gat$/i, ".rsw");
 				Background.setLoading(function() {
-					Thread.hook("MAP_PROGRESS", onProgressUpdate.bind(MapRenderer));
-					Thread.hook("MAP_WORLD", onWorldComplete.bind(MapRenderer));
-					Thread.hook("MAP_GROUND", onGroundComplete.bind(MapRenderer));
-					Thread.hook("MAP_ALTITUDE", onAltitudeComplete.bind(MapRenderer));
-					Thread.hook("MAP_MODELS", onModelsComplete.bind(MapRenderer));
-					Thread.hook("MAP_ANIMATED_MODEL", onAnimatedModelComplete.bind(MapRenderer));
+					if (loadId !== MapRenderer._loadId) return;
+					Thread.hook("MAP_PROGRESS", loadEvent(onProgressUpdate));
+					Thread.hook("MAP_WORLD", loadEvent(onWorldComplete));
+					Thread.hook("MAP_GROUND", loadEvent(onGroundComplete));
+					Thread.hook("MAP_ALTITUDE", loadEvent(onAltitudeComplete));
+					Thread.hook("MAP_MODELS", loadEvent(onModelsComplete));
+					Thread.hook("MAP_ANIMATED_MODEL", loadEvent(onAnimatedModelComplete));
 					MapRenderer.free();
 					Renderer.remove();
-					Thread.send("LOAD_MAP", filename, onMapComplete.bind(MapRenderer));
+					MapRenderer._loadRequest = Thread.send("LOAD_MAP", filename, loadStep(loadId, onMapComplete));
 				});
 				return;
 			}
@@ -260068,11 +260518,20 @@ var init_MapRenderer = __esmMin((() => {
 			JoystickUI_default.onRestore();
 			Mouse.intersect = false;
 			Background.remove(() => {
+				if (loadId !== MapRenderer._loadId) return;
 				MapRenderer.onLoad();
 				Sky_default.setUpCloudData();
 				Renderer.render(MapRenderer.onRender);
 				Mouse.intersect = true;
 			});
+		}
+		/**
+		* Cancel the map load in progress, if any: its remaining steps do nothing
+		*/
+		static cancelLoad() {
+			this._loadId++;
+			this._loadRequest = 0;
+			this.loading = false;
 		}
 		/**
 		* Clean up data
@@ -260152,7 +260611,6 @@ var init_MapRenderer = __esmMin((() => {
 			ScreenEffectManager.render(gl, modelView, projection, fog, tick, true);
 			EffectManager.render(gl, modelView, projection, fog, tick, true);
 			EntityManager.render(gl, modelView, projection, fog, false);
-			EntityManager.renderWaterDepth(gl, modelView, projection, fog);
 			Water_default.render(gl, modelView, projection, fog, light, tick);
 			Models_default.renderFaded(gl, modelView, projection, normalMat, fog, light);
 			AnimatedModels_default.renderFaded(gl, modelView, projection, normalMat, fog, light);
@@ -277998,18 +278456,21 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance/new_guard_stance",
 			texturePath: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance/",
+			fallback: ["guard_stance/guard_stance/guard_stance"],
 			wav: "effect/ig_guard_stance"
 		}],
 		ef_ig_guard_stance_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast/new_guard_stance_cast",
 			texturePath: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast/",
-			min: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast/min_new_guard_stance_cast"
+			min: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast/min_new_guard_stance_cast",
+			fallback: ["guard_stance/guard_stance_cast/guard_stance_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast_bottom/new_guard_stance_cast_bottom",
 			texturePath: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast_bottom/",
 			min: "imperial_guard/ig_guard_stance/new_guard_stance/new_guard_stance_cast_bottom/min_new_guard_stance_cast_bottom",
+			fallback: ["guard_stance/guard_stance_cast_bottom/guard_stance_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_guardian_shield: [{
@@ -278017,12 +278478,14 @@ var init_EffectTable = __esmMin((() => {
 			file: "imperial_guard/ig_guardian_shield/new_guardianshield/guardianshield/guardianshield",
 			texturePath: "imperial_guard/ig_guardian_shield/new_guardianshield/guardianshield/",
 			min: "imperial_guard/ig_guardian_shield/new_guardianshield/guardianshield/min_guardianshield",
+			fallback: ["guardianshield/guardianshield/guardianshield"],
 			wav: "effect/ig_guardian_shield"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_guardian_shield/new_guardianshield/guardianshield_bottom/guardianshield_bottom",
 			texturePath: "imperial_guard/ig_guardian_shield/new_guardianshield/guardianshield_bottom/",
 			min: "imperial_guard/ig_guardian_shield/new_guardianshield/guardianshield_bottom/min_guardianshield_bottom",
+			fallback: ["guardianshield/guardianshield_bottom/guardianshield_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_rebound_shield: [{
@@ -278030,41 +278493,48 @@ var init_EffectTable = __esmMin((() => {
 			file: "imperial_guard/ig_rebound_shield/new_rebound_shield/new_rebound_shield/new_rebound_shield",
 			texturePath: "imperial_guard/ig_rebound_shield/new_rebound_shield/new_rebound_shield/",
 			min: "imperial_guard/ig_rebound_shield/new_rebound_shield/new_rebound_shield/min_new_rebound_shield",
+			fallback: ["rebound_shield/rebound_shield/rebound_shield"],
 			wav: "effect/ig_rebound_shield"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_rebound_shield/new_rebound_shield/new_rebound_shield_bottom/new_rebound_shield_bottom",
 			texturePath: "imperial_guard/ig_rebound_shield/new_rebound_shield/new_rebound_shield_bottom/",
 			min: "imperial_guard/ig_rebound_shield/new_rebound_shield/new_rebound_shield_bottom/min_new_rebound_shield_bottom",
+			fallback: ["rebound_shield/rebound_shield_bottom/rebound_shield_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_rebound_shield_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast/rebound_shield_cast",
 			texturePath: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast/",
-			min: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast/min_rebound_shield_cast"
+			min: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast/min_rebound_shield_cast",
+			fallback: ["rebound_shield/rebound_shield_cast/rebound_shield_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast_bottom/rebound_shield_cast_bottom",
 			texturePath: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast_bottom/",
 			min: "imperial_guard/ig_rebound_shield/new_rebound_shield/rebound_shield_cast_bottom/min_rebound_shield_cast_bottom",
+			fallback: ["rebound_shield/rebound_shield_cast_bottom/rebound_shield_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_attack_stance: [{
 			type: "STR",
 			file: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance/new_attack_stance",
-			texturePath: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance/"
+			texturePath: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance/",
+			fallback: ["attack_stance/attack_stance/attack_stance"]
 		}],
 		ef_ig_attack_stance_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast/new_attack_stance_cast",
 			texturePath: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast/",
-			min: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast/min_new_attack_stance_cast"
+			min: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast/min_new_attack_stance_cast",
+			fallback: ["attack_stance/attack_stance_cast/attack_stance_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast_bottom/new_attack_stance_cast_bottom",
 			texturePath: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast_bottom/",
 			min: "imperial_guard/ig_attack_stance/new_attack_stance/new_attack_stance_cast_bottom/min_new_attack_stance_cast_bottom",
+			fallback: ["attack_stance/attack_stance_cast_bottom/attack_stance_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_ultimate_sacrifice: [{
@@ -278072,19 +278542,22 @@ var init_EffectTable = __esmMin((() => {
 			file: "imperial_guard/ig_ultimate_sacrifice/ultimatesacrifice/ultimatesacrifice",
 			texturePath: "imperial_guard/ig_ultimate_sacrifice/ultimatesacrifice/",
 			min: "imperial_guard/ig_ultimate_sacrifice/ultimatesacrifice/min_ultimatesacrifice",
+			fallback: ["ultimate_sacrifice/ultimatesacrifice/ultimatesacrifice"],
 			wav: "effect/ig_ultimate_sacrifice"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_ultimate_sacrifice/ultimatesacrifice_bottom/ultimatesacrifice_bottom",
 			texturePath: "imperial_guard/ig_ultimate_sacrifice/ultimatesacrifice_bottom/",
 			min: "imperial_guard/ig_ultimate_sacrifice/ultimatesacrifice_bottom/min_ultimatesacrifice_bottom",
+			fallback: ["ultimate_sacrifice/ultimatesacrifice_bottom/ultimatesacrifice_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_holy_shield: [{
 			type: "STR",
 			file: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield/new_holy_shield",
 			texturePath: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield/",
-			min: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield/min_new_holy_shield"
+			min: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield/min_new_holy_shield",
+			fallback: ["holy_shield/holy_shield/holy_shield"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield_bottom/new_holy_shield_bottom",
@@ -278096,7 +278569,8 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield_cast/new_holy_shield_cast",
 			texturePath: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield_cast/",
-			min: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield_cast/min_new_holy_shield_cast"
+			min: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield_cast/min_new_holy_shield_cast",
+			fallback: ["holy_shield/holy_shield_cast/holy_shield_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_holy_shield/new_holy_shield/new_holy_shield_cast_bottom/new_holy_shield_cast_bottom",
@@ -278109,24 +278583,28 @@ var init_EffectTable = __esmMin((() => {
 			file: "imperial_guard/ig_grand_judgement/new_grand_judgement/new_grand_judgement/new_grand_judgement",
 			texturePath: "imperial_guard/ig_grand_judgement/new_grand_judgement/new_grand_judgement/",
 			min: "imperial_guard/ig_grand_judgement/new_grand_judgement/new_grand_judgement/min_new_grand_judgement",
+			fallback: ["grand_judgement/grand_judgement/grand_judgement"],
 			wav: "effect/ig_grand_judgement"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_grand_judgement/new_grand_judgement/new_grand_judgement_bottom/new_grand_judgement_bottom",
 			texturePath: "imperial_guard/ig_grand_judgement/new_grand_judgement/new_grand_judgement_bottom/",
 			min: "imperial_guard/ig_grand_judgement/new_grand_judgement/new_grand_judgement_bottom/min_new_grand_judgement_bottom",
+			fallback: ["grand_judgement/grand_judgement_bottom/grand_judgement_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_grand_judgement_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast/grand_judgement_cast",
 			texturePath: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast/",
-			min: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast/min_grand_judgement_cast"
+			min: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast/min_grand_judgement_cast",
+			fallback: ["grand_judgement/grand_judgement_cast/grand_judgement_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast_bottom/grand_judgement_cast_bottom",
 			texturePath: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast_bottom/",
 			min: "imperial_guard/ig_grand_judgement/new_grand_judgement/grand_judgement_cast_bottom/min_grand_judgement_cast_bottom",
+			fallback: ["grand_judgement/grand_judgement_cast_bottom/grand_judgement_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_judgement_cross: [{
@@ -278134,24 +278612,28 @@ var init_EffectTable = __esmMin((() => {
 			file: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross/new_judgement_cross",
 			texturePath: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross/",
 			min: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross/min_new_judgement_cross",
+			fallback: ["judgement_cross/judgement_cross/judgement_cross"],
 			wav: "effect/ig_judgement_cross"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_bottom/new_judgement_cross_bottom",
 			texturePath: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_bottom/",
 			min: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_bottom/min_new_judgement_cross_bottom",
+			fallback: ["judgement_cross/judgement_cross_bottom/judgement_cross_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_judgement_cross_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast/new_judgement_cross_cast",
 			texturePath: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast/",
-			min: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast/min_new_judgement_cross_cast"
+			min: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast/min_new_judgement_cross_cast",
+			fallback: ["judgement_cross/judgement_cross_cast/judgement_cross_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast_bottom/new_judgement_cross_cast_bottom",
 			texturePath: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast_bottom/",
 			min: "imperial_guard/ig_judgement_cross/new_judgement_cross/new_judgement_cross_cast_bottom/min_new_judgement_cross_cast_bottom",
+			fallback: ["judgement_cross/judgement_cross_cast_bottom/judgement_cross_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_judgement_cross_hit: [{
@@ -278183,49 +278665,57 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "imperial_guard/ig_overslash/new_overslash/new_overslash/new_overslash",
 			texturePath: "imperial_guard/ig_overslash/new_overslash/new_overslash/",
+			fallback: ["overslash/overslash/overslash"],
 			wav: "effect/ig_overslash"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_overslash/new_overslash/new_overslash_bottom/new_overslash_bottom",
 			texturePath: "imperial_guard/ig_overslash/new_overslash/new_overslash_bottom/",
 			min: "imperial_guard/ig_overslash/new_overslash/new_overslash_bottom/min_new_overslash_bottom",
+			fallback: ["overslash/overslash_bottom/overslash_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_overslash_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_overslash/new_overslash/overslash_cast/overslash_cast",
 			texturePath: "imperial_guard/ig_overslash/new_overslash/overslash_cast/",
-			min: "imperial_guard/ig_overslash/new_overslash/overslash_cast/min_overslash_cast"
+			min: "imperial_guard/ig_overslash/new_overslash/overslash_cast/min_overslash_cast",
+			fallback: ["overslash/overslash_cast/overslash_cast"]
 		}],
 		ef_ig_overslash_hit: [{
 			type: "STR",
 			file: "imperial_guard/ig_overslash/new_overslash/new_overslash_hit/new_overslash_hit",
 			texturePath: "imperial_guard/ig_overslash/new_overslash/new_overslash_hit/",
-			min: "imperial_guard/ig_overslash/new_overslash/new_overslash_hit/min_new_overslash_hit"
+			min: "imperial_guard/ig_overslash/new_overslash/new_overslash_hit/min_new_overslash_hit",
+			fallback: ["overslash/overslash_hit/overslash_hit"]
 		}],
 		ef_ig_cross_rain: [{
 			type: "STR",
 			file: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain/new_cross_rain",
 			texturePath: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain/",
 			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain/min_new_cross_rain",
+			fallback: ["crossrain/cross_rain/cross_rain"],
 			wav: "effect/ig_cross_rain"
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_bottom/new_cross_rain_bottom",
 			texturePath: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_bottom/",
 			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_bottom/min_new_cross_rain_bottom",
+			fallback: ["crossrain/cross_rain_bottom/cross_rain_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_cross_rain_cast: [{
 			type: "STR",
 			file: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast/new_cross_rain_cast",
 			texturePath: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast/",
-			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast/min_new_cross_rain_cast"
+			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast/min_new_cross_rain_cast",
+			fallback: ["crossrain/cross_rain_cast/cross_rain_cast"]
 		}, {
 			type: "STR",
 			file: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast_bottom/new_cross_rain_cast_bottom",
 			texturePath: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast_bottom/",
 			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_cast_bottom/min_new_cross_rain_cast_bottom",
+			fallback: ["crossrain/cross_rain_cast_bottom/cross_rain_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_ig_radiant_spear_cast: [{
@@ -278264,7 +278754,8 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "imperial_guard/ig_imperial_pressure/new_rayofgenesis_hit/new_rayofgenesis_hit",
 			texturePath: "imperial_guard/ig_imperial_pressure/new_rayofgenesis_hit/",
-			min: "imperial_guard/ig_imperial_pressure/new_rayofgenesis_hit/min_new_rayofgenesis_hit"
+			min: "imperial_guard/ig_imperial_pressure/new_rayofgenesis_hit/min_new_rayofgenesis_hit",
+			fallback: ["new_rayofgenesis/new_rayofgenesis_hit/new_rayofgenesis_hit"]
 		}],
 		ef_crescentelbow: [{
 			wav: "effect/sr_crescentelbow",
@@ -279374,24 +279865,28 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_servantweapon/servantweapon/servantweapon",
 			texturePath: "dragon_knight/dk_servantweapon/servantweapon/",
 			min: "dragon_knight/dk_servantweapon/servantweapon/min_servantweapon",
+			fallback: ["new_servantweapon/new_servantweapon/new_servantweapon"],
 			wav: "effect/dk_servantweapon"
 		}],
 		ef_dk_servantweapon_cast: [{
 			type: "STR",
 			file: "dragon_knight/dk_servantweapon/servantweapon_cast/servantweapon_cast",
 			texturePath: "dragon_knight/dk_servantweapon/servantweapon_cast/",
-			min: "dragon_knight/dk_servantweapon/servantweapon_cast/min_servantweapon_cast"
+			min: "dragon_knight/dk_servantweapon/servantweapon_cast/min_servantweapon_cast",
+			fallback: ["new_servantweapon/new_servantweapon_cast/new_servantweapon_cast"]
 		}],
 		ef_dk_servantweapon_hit: [{
 			type: "STR",
 			file: "dragon_knight/dk_servantweapon/servantweapon_hit/servantweapon_hit",
 			texturePath: "dragon_knight/dk_servantweapon/servantweapon_hit/",
-			min: "dragon_knight/dk_servantweapon/servantweapon_hit/min_servantweapon_hit"
+			min: "dragon_knight/dk_servantweapon/servantweapon_hit/min_servantweapon_hit",
+			fallback: ["new_servantweapon/new_servantweapon_hit/new_servantweapon_hit"]
 		}, {
 			type: "STR",
 			file: "dragon_knight/dk_servantweapon/servantweapon_hit_bottom/servantweapon_hit_bottom",
 			texturePath: "dragon_knight/dk_servantweapon/servantweapon_hit_bottom/",
 			min: "dragon_knight/dk_servantweapon/servantweapon_hit_bottom/min_servantweapon_hit_bottom",
+			fallback: ["new_servantweapon/new_servantweapon_hit_bottom/new_servantweapon_hit_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_dk_servantweapon_atk: [{
@@ -279411,12 +279906,14 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_servant_w_sign/servant_sign/servant_sign",
 			texturePath: "dragon_knight/dk_servant_w_sign/servant_sign/",
 			min: "dragon_knight/dk_servant_w_sign/servant_sign/min_servant_sign",
+			fallback: ["servant_sign/servant_sign/servant_sign"],
 			wav: "effect/dk_servant_w_sign"
 		}, {
 			type: "STR",
 			file: "dragon_knight/dk_servant_w_sign/servant_sign_bottom/servant_sign_bottom",
 			texturePath: "dragon_knight/dk_servant_w_sign/servant_sign_bottom/",
 			min: "dragon_knight/dk_servant_w_sign/servant_sign_bottom/min_servant_sign_bottom",
+			fallback: ["servant_sign/servant_sign_bottom/servant_sign_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_dk_servant_w_phantom: [{
@@ -279424,12 +279921,14 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_servant_w_phantom/servant_phantom_sub/servant_phantom_sub",
 			texturePath: "dragon_knight/dk_servant_w_phantom/servant_phantom_sub/",
 			min: "dragon_knight/dk_servant_w_phantom/servant_phantom_sub/min_servant_phantom_sub",
+			fallback: ["servant_phantom/servant_phantom_sub/servant_phantom_sub"],
 			wav: "effect/dk_servant_w_phantom"
 		}, {
 			type: "STR",
 			file: "dragon_knight/dk_servant_w_phantom/servant_phantom_sub_bottom/servant_phantom_sub_bottom",
 			texturePath: "dragon_knight/dk_servant_w_phantom/servant_phantom_sub_bottom/",
 			min: "dragon_knight/dk_servant_w_phantom/servant_phantom_sub_bottom/min_servant_phantom_sub_bottom",
+			fallback: ["servant_phantom/servant_phantom_sub_bottom/servant_phantom_sub_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_dk_servant_w_demol_hit: [{
@@ -279437,23 +279936,27 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_servant_w_demol/servant_demolition_hit/servant_demolition_hit",
 			texturePath: "dragon_knight/dk_servant_w_demol/servant_demolition_hit/",
 			min: "dragon_knight/dk_servant_w_demol/servant_demolition_hit/min_servant_demolition_hit",
+			fallback: ["servant_demolition/servant_demolition_hit/servant_demolition_hit"],
 			wav: "effect/dk_servant_w_demol"
 		}],
 		ef_dk_chargingpierce_cast: [{
 			type: "STR",
 			file: "dragon_knight/dk_chargingpierce/chargingpierce_cast/chargingpierce_cast",
 			texturePath: "dragon_knight/dk_chargingpierce/chargingpierce_cast/",
+			fallback: ["new_chargingpierce/new_chargingpierce_cast/new_chargingpierce_cast"],
 			wav: "effect/dk_chargingpierce1"
 		}, {
 			type: "STR",
 			file: "dragon_knight/dk_chargingpierce/chargingpierce_cast_bottom/chargingpierce_cast_bottom",
 			texturePath: "dragon_knight/dk_chargingpierce/chargingpierce_cast_bottom/",
+			fallback: ["new_chargingpierce/new_chargingpierce_cast_bottom/new_chargingpierce_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_dk_chargingpierce_hit: [{
 			type: "STR",
 			file: "dragon_knight/dk_chargingpierce/chargingpierce_hit/chargingpierce_hit",
 			texturePath: "dragon_knight/dk_chargingpierce/chargingpierce_hit/",
+			fallback: ["new_chargingpierce/new_chargingpierce_hit/new_chargingpierce_hit"],
 			wav: "effect/dk_chargingpierce2"
 		}],
 		ef_dk_hackandslasher: [{
@@ -279461,19 +279964,22 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_hackandslasher/hackandslash/hackandslash",
 			texturePath: "dragon_knight/dk_hackandslasher/hackandslash/",
 			min: "dragon_knight/dk_hackandslasher/hackandslash/min_hackandslash",
+			fallback: ["hackandslash/hackandslash/hackandslash"],
 			wav: "effect/dk_hackandslasher"
 		}, {
 			type: "STR",
 			file: "dragon_knight/dk_hackandslasher/hackandslash_bottom/hackandslash_bottom",
 			texturePath: "dragon_knight/dk_hackandslasher/hackandslash_bottom/",
 			min: "dragon_knight/dk_hackandslasher/hackandslash_bottom/min_hackandslash_bottom",
+			fallback: ["hackandslash/hackandslash_bottom/hackandslash_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_dk_hackandslasher_hit: [{
 			type: "STR",
 			file: "dragon_knight/dk_hackandslasher/hackandslash_hit/hackandslash_hit",
 			texturePath: "dragon_knight/dk_hackandslasher/hackandslash_hit/",
-			min: "dragon_knight/dk_hackandslasher/hackandslash_hit/min_hackandslash_hit"
+			min: "dragon_knight/dk_hackandslasher/hackandslash_hit/min_hackandslash_hit",
+			fallback: ["hackandslash/hackandslash_hit/hackandslash_hit"]
 		}],
 		ef_dk_hackandslasher_atk: [{
 			type: "STR",
@@ -279490,12 +279996,14 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_madness_crusher/madness_crusher/madness_crusher",
 			texturePath: "dragon_knight/dk_madness_crusher/madness_crusher/",
 			min: "dragon_knight/dk_madness_crusher/madness_crusher/min_madness_crusher",
+			fallback: ["madness_crusher/madness_crusher/madness_crusher"],
 			wav: "effect/dk_madness_crusher"
 		}, {
 			type: "STR",
 			file: "dragon_knight/dk_madness_crusher/madness_crusher_bottom/madness_crusher_bottom",
 			texturePath: "dragon_knight/dk_madness_crusher/madness_crusher_bottom/",
 			min: "dragon_knight/dk_madness_crusher/madness_crusher_bottom/min_madness_crusher_bottom",
+			fallback: ["madness_crusher/madness_crusher_bottom/madness_crusher_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_dk_vigor: [{
@@ -279503,13 +280011,15 @@ var init_EffectTable = __esmMin((() => {
 			file: "dragon_knight/dk_vigor/vigor_buff/vigor_buff",
 			texturePath: "dragon_knight/dk_vigor/vigor_buff/",
 			min: "dragon_knight/dk_vigor/vigor_buff/min_vigor_buff",
+			fallback: ["vigor/vigor_buff/vigor_buff"],
 			wav: "effect/dk_vigor"
 		}],
 		ef_dk_vigor_cast: [{
 			type: "STR",
 			file: "dragon_knight/dk_vigor/vigor_cast/vigor_cast",
 			texturePath: "dragon_knight/dk_vigor/vigor_cast/",
-			min: "dragon_knight/dk_vigor/vigor_cast/min_vigor_cast"
+			min: "dragon_knight/dk_vigor/vigor_cast/min_vigor_cast",
+			fallback: ["vigor/vigor_cast/vigor_cast"]
 		}],
 		ef_dk_stormslash_hit: [{
 			type: "STR",
@@ -279517,6 +280027,7 @@ var init_EffectTable = __esmMin((() => {
 			min: "dragon_knight/dk_stormslash/stormslash/min_stormslash_%d",
 			rand: [1, 5],
 			texturePath: "dragon_knight/dk_stormslash/stormslash/",
+			fallback: ["stormslash/stormslash/stormslash_%d"],
 			wav: "effect/dk_stormslash1"
 		}],
 		ef_dk_dragonic_breath: [{
@@ -279573,17 +280084,20 @@ var init_EffectTable = __esmMin((() => {
 			file: "shadow_cross/shc_shadow_exceed/shadow_exceed_cast/shadow_exceed_cast",
 			texturePath: "shadow_cross/shc_shadow_exceed/shadow_exceed_cast/",
 			min: "shadow_cross/shc_shadow_exceed/shadow_exceed_cast/min_shadow_exceed_cast",
+			fallback: ["shadow_exceed/shadow_exceed_cast/shadow_exceed_cast"],
 			wav: "effect/shc_shadow_exceed"
 		}],
 		ef_shc_dancing_knife_cast: [{
 			type: "STR",
 			file: "shadow_cross/shc_dancing_knife/dancing_knife_cast/dancing_knife_cast",
 			texturePath: "shadow_cross/shc_dancing_knife/dancing_knife_cast/",
+			fallback: ["dancing_knife/dancing_knife_cast/dancing_knife_cast"],
 			wav: "effect/shc_dancing_knife"
 		}, {
 			type: "STR",
 			file: "shadow_cross/shc_dancing_knife/dancing_knife_cast_bottom/dancing_knife_cast_bottom",
 			texturePath: "shadow_cross/shc_dancing_knife/dancing_knife_cast_bottom/",
+			fallback: ["dancing_knife/dancing_knife_cast_bottom/dancing_knife_cast_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_shc_savage_impact: [{
@@ -279629,6 +280143,7 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "shadow_cross/shc_shadow_stab/shadow_stab/shadow_stab",
 			texturePath: "shadow_cross/shc_shadow_stab/shadow_stab/",
+			fallback: ["shadow_stab/shadow_stab/shadow_stab"],
 			wav: "effect/shc_shadow_stab"
 		}],
 		ef_shc_impact_crater: [{
@@ -279636,30 +280151,35 @@ var init_EffectTable = __esmMin((() => {
 			file: "shadow_cross/shc_impact_crater/impact_crater/impact_crater",
 			texturePath: "shadow_cross/shc_impact_crater/impact_crater/",
 			min: "shadow_cross/shc_impact_crater/impact_crater/min_impact_crater",
+			fallback: ["impact_crater/impact_crater/impact_crater"],
 			wav: "effect/shc_impact_crater"
 		}, {
 			type: "STR",
 			file: "shadow_cross/shc_impact_crater/impact_crater_bottom/impact_crater_bottom",
 			texturePath: "shadow_cross/shc_impact_crater/impact_crater_bottom/",
 			min: "shadow_cross/shc_impact_crater/impact_crater_bottom/min_impact_crater_bottom",
+			fallback: ["impact_crater/impact_crater_bottom/impact_crater_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_shc_impact_crater_hit: [{
 			type: "STR",
 			file: "shadow_cross/shc_impact_crater/impact_crater_hit/impact_crater_hit",
 			texturePath: "shadow_cross/shc_impact_crater/impact_crater_hit/",
-			min: "shadow_cross/shc_impact_crater/impact_crater_hit/min_impact_crater_hit"
+			min: "shadow_cross/shc_impact_crater/impact_crater_hit/min_impact_crater_hit",
+			fallback: ["impact_crater/impact_crater_hit/impact_crater_hit"]
 		}],
 		ef_shc_enchanting_shadow: [{
 			type: "STR",
 			file: "shadow_cross/shc_enchanting_shadow/enchanting_shadow/enchanting_shadow",
 			texturePath: "shadow_cross/shc_enchanting_shadow/enchanting_shadow/",
-			min: "shadow_cross/shc_enchanting_shadow/enchanting_shadow/min_enchanting_shadow"
+			min: "shadow_cross/shc_enchanting_shadow/enchanting_shadow/min_enchanting_shadow",
+			fallback: ["enchanting_shadow/enchanting_shadow/new_enchanting_shadow"]
 		}, {
 			type: "STR",
 			file: "shadow_cross/shc_enchanting_shadow/enchanting_shadow_bottom/enchanting_shadow_bottom",
 			texturePath: "shadow_cross/shc_enchanting_shadow/enchanting_shadow_bottom/",
 			min: "shadow_cross/shc_enchanting_shadow/enchanting_shadow_bottom/min_enchanting_shadow_bottom",
+			fallback: ["enchanting_shadow/enchanting_shadow_bottom/new_enchanting_shadow_bottom"],
 			renderBeforeEntities: true
 		}],
 		ef_shc_fatal_shadow_crow: [{
@@ -280237,6 +280757,7 @@ var init_EffectTable = __esmMin((() => {
 			file: "windhawk/calamitygale/calumitygale_cast/calumitygale_cast",
 			texturePath: "windhawk/calamitygale/calumitygale_cast/",
 			min: "windhawk/calamitygale/calumitygale_cast/min_calumitygale_cast",
+			fallback: ["4wh_calumitygale/calumitygale_cast/calumitygale_cast"],
 			wav: "effect/wh_calamitygale"
 		}],
 		ef_wh_hawkboomerang: [{
@@ -303300,6 +303821,8 @@ function loadSkillTreeView(filename, callback, onEnd) {
 	}, onEnd);
 }
 function loadSkillTreeViewData(filename, callback, onEnd) {
+	resetSkillTree(SkillTreeView);
+	const fileJobs = /* @__PURE__ */ new Set();
 	Client.loadFile(filename, async function(file) {
 		try {
 			console.log("Loading file \"" + filename + "\"...");
@@ -303321,10 +303844,12 @@ function loadSkillTreeViewData(filename, callback, onEnd) {
 					list = 1;
 					console.error(`[loadSkillTreeViewData] Failed to find inherith list job: (${jobId})`);
 				}
-				SkillTreeView[jobId] = {
+				const entry = {
 					list,
 					beforeJob
 				};
+				fileJobs.add(jobId);
+				SkillTreeView[jobId] = entry;
 				return 1;
 			};
 			ctx.AddSkillToJob = function(jobId, pos, skillId) {
@@ -303386,6 +303911,7 @@ function loadSkillTreeViewData(filename, callback, onEnd) {
 						
 						main_skillTreeView()    
 					`);
+			keepBuiltInSkills(SkillTreeView, fileJobs);
 		} catch (error) {
 			console.error("[loadSkillTreeView] Error: ", error);
 		} finally {
@@ -304011,6 +304537,7 @@ var init_DBManager = __esmMin((() => {
 	init_SkillConst();
 	init_SkillInfo();
 	init_SkillTreeView();
+	init_SkillTreeMerge();
 	init_JobHitSoundTable();
 	init_WeaponTrailTable();
 	init_TownInfo();
@@ -304655,7 +305182,8 @@ var init_DBManager = __esmMin((() => {
 		*/
 		static getBodyPalPath(id, pal, sex) {
 			if (id === 0 || !(id in PalNameTable)) return null;
-			return "data/palette/¸ö/" + PalNameTable[id] + "_" + SexTable[sex] + "_" + pal + ".pal";
+			const costume = String(PalNameTable[id]).startsWith("costume_1/") ? "_1" : "";
+			return "data/palette/¸ö/" + PalNameTable[id] + "_" + SexTable[sex] + "_" + pal + costume + ".pal";
 		}
 		/**
 		* @return {string} path to head sprite/action
@@ -309339,6 +309867,7 @@ function UpdateBody(job) {
 	let baseJob;
 	const transformationSeq = this._transformationSeq || 0;
 	if (job < 0) return;
+	this._bodyStyleJob = null;
 	const isTransformation = hasTransformation.call(this);
 	for (baseJob in MountTable) if (MountTable[baseJob] === job) {
 		this.costume = job;
@@ -309571,6 +310100,8 @@ function UpdateBodyStyle(look) {
 			}
 		}
 		path = this.isAdmin ? DB.getAdminPath(this._sex) : DB.getBodyPath(job, this._sex, look, cashMountCostume);
+		const styled = !this.isAdmin && PacketVerManager_default.value > 20141022 && look > 0 && look !== job && !cashMountCostume;
+		this._bodyStyleJob = styled ? look : null;
 		Entity = this.constructor;
 		Client.loadFile(path + ".act");
 		Client.loadFile(path + ".spr", function() {
@@ -309594,7 +310125,8 @@ function UpdateBodyPalette(pal) {
 		return;
 	}
 	if (this._job === -1) return;
-	this.files.body.pal = DB.getBodyPalPath(this._job, this._bodypalette, this._sex);
+	const job = this._bodyStyleJob && !hasTransformation.call(this) ? this._bodyStyleJob : getEffectiveJob.call(this);
+	this.files.body.pal = DB.getBodyPalPath(job, this._bodypalette, this._sex);
 }
 /**
 * Update head
@@ -310502,28 +311034,6 @@ function render$6(modelView, projection) {
 	renderGUI(this, modelView, projection);
 }
 /**
-* Depth-only redraw of the body for entities standing in water, so the water
-* pass (drawn after entities, depth tested) covers only the submerged part.
-* Runs after every entity has been drawn, with colour writes disabled by the
-* caller, so the written depth cannot hide other sprites. Replays the exact
-* layers the colour pass drew this frame (`waterDepthFrame`), so no animation,
-* sound or trail state is touched. Only set for the non-player body pass;
-* entity types that already write depth never get a frame.
-*/
-function renderWaterDepth$1() {
-	const frame = this.waterDepthFrame;
-	if (!frame || this.hideEntity || !this.effectColor[3]) return;
-	if (!Water_default.isSubmerged(this.position[0], this.position[1])) return;
-	const self = this;
-	SpriteRenderer.position.set(this.position);
-	SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
-	SpriteRenderer.zIndex = 150;
-	SpriteRenderer.runWithDepth(true, true, false, function() {
-		for (let i = 0, count = frame.layers.length; i < count; ++i) self.renderLayer(frame.layers[i], frame.spr, frame.pal, frame.size, frame.position, "body", false);
-	});
-	SpriteRenderer.zIndex = 1;
-}
-/**
 * Render second body (BL_DOUBLE_BODY + EF_MAKEBLUR)
 * @param {Entity} entity
 * @param {Array} layers
@@ -310792,9 +311302,6 @@ function Init$3() {
 	this.render = render$6;
 	this.renderLayer = renderLayer;
 	this.renderEntity = renderEntity;
-	this.renderWaterDepth = renderWaterDepth$1;
-	this.waterDepthFrame = void 0;
-	this._waterDepthFrameBuffer = null;
 }
 var WALK_DIST_TO_MOTION, renderGUI, SPRITE_LIFT, calculateBoundingRect, renderEntity, renderElement;
 var init_EntityRender = __esmMin((() => {
@@ -311056,10 +311563,19 @@ var init_EntityRender = __esmMin((() => {
 						renderElement(self, self.files.body, "body", _position, true);
 					});
 					break;
+				case Entity.TYPE_NPC:
+				case Entity.TYPE_NPC2:
+					SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
+					SpriteRenderer.ignoreDepthMinCap = true;
+					SpriteRenderer.zIndex = 150;
+					SpriteRenderer.runWithDepth(true, true, false, function() {
+						renderElement(self, self.files.body, "body", _position, true);
+					});
+					SpriteRenderer.ignoreDepthMinCap = false;
+					break;
 				default:
 					SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
 					SpriteRenderer.zIndex = 150;
-					self.waterDepthFrame = null;
 					SpriteRenderer.runWithDepth(true, false, false, function() {
 						renderElement(self, self.files.body, "body", _position, true);
 					});
@@ -311134,15 +311650,6 @@ var init_EntityRender = __esmMin((() => {
 				blurType: isBUNSIN ? 5 : isHALLUCINATIONWALK ? 3 : entity._blurType || 1
 			});
 			for (let i = 0, count = layers.length; i < count; ++i) entity.renderLayer(layers[i], spr, pal, files.size, _position, type, isBlendModeOne);
-			if (is_main && type === "body" && entity.waterDepthFrame === null) {
-				const frame = entity._waterDepthFrameBuffer || (entity._waterDepthFrameBuffer = { position: /* @__PURE__ */ new Int32Array(2) });
-				frame.layers = layers;
-				frame.spr = spr;
-				frame.pal = pal;
-				frame.size = files.size;
-				frame.position.set(_position);
-				entity.waterDepthFrame = frame;
-			}
 			if (is_main && animation.pos.length) {
 				position[0] = animation.pos[0].x;
 				position[1] = animation.pos[0].y;
@@ -313034,25 +313541,6 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 	SpriteRenderer.unbind(gl);
 }
 /**
-* Depth-only pass for entities standing in water, run after all entities
-* are drawn and right before the water so it can hide their submerged part
-* without occluding other sprites.
-*
-* @param {object} gl context
-* @param {mat4} modelView
-* @param {mat4} projection
-* @param {object} fog
-*/
-function renderWaterDepth(gl, modelView, projection, fog) {
-	if (!_list.length || !Water_default.hasWater()) return;
-	const culling = getCulling();
-	SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
-	gl.colorMask(false, false, false, false);
-	for (let i = 0, count = _list.length; i < count; ++i) if (!isCulled(culling, _list[i])) _list[i].renderWaterDepth();
-	gl.colorMask(true, true, true, true);
-	SpriteRenderer.unbind(gl);
-}
-/**
 * Intersect Entities
 */
 function intersect() {
@@ -313224,7 +313712,6 @@ var init_EntityManager = __esmMin((() => {
 		removeLife,
 		clearLifeCache,
 		render: render$5,
-		renderWaterDepth,
 		intersect,
 		setSupportPicking,
 		pendingTransformations,
@@ -313243,6 +313730,7 @@ var CursorManager_exports = /* @__PURE__ */ __exportAll({ default: () => Cursor 
 */
 function bindMouseEvents() {
 	const cursorCSS = `
+		.custom-cursor { --ro-game-cursor: on; }
 		.custom-cursor * { cursor: none!important; }
 		.custom-cursor .cursor { display: block; }
 		.ro-touch-input .cursor { display: none !important; }
@@ -314012,7 +314500,58 @@ function _ensureDeps() {
 	if (!_depsPromise) _depsPromise = _loadHeavyDeps();
 	return _depsPromise;
 }
-var _Cursor, _DB, _Client, _Renderer, _EntityManager, _ScrollBar, _depsPromise, _snapCache, MouseMode, DENIED_SELECTOR, CSS_NUMBER, GUIComponent;
+function _supportsStyleQueries() {
+	const probe = document.createElement("div");
+	probe.innerHTML = "<style>@container style(--ro-probe: 1) { i { color: rgb(1, 2, 3); } }</style><i></i>";
+	probe.style.setProperty("--ro-probe", "1");
+	document.body.appendChild(probe);
+	const supported = getComputedStyle(probe.lastChild).color === "rgb(1, 2, 3)";
+	probe.remove();
+	return supported;
+}
+function _syncNoCursorStyles() {
+	const media = document.body.classList.contains("custom-cursor") ? "all" : "not all";
+	if (media === _noCursorMedia) return;
+	_noCursorMedia = media;
+	for (let i = 0; i < _noCursorStyles.length; i++) _noCursorStyles[i].media = media;
+}
+/**
+* Hides the native cursor in a shadow root where CSS style queries are
+* missing, following body.custom-cursor; null where Common.css handles it.
+* remove() lets go of it, so a closed window is not held.
+*
+* @param {ShadowRoot} shadow
+* @return {?HTMLStyleElement}
+*/
+function _addNoCursorFallback(shadow) {
+	if (_noCursorStyles === void 0) {
+		_noCursorStyles = _supportsStyleQueries() ? null : [];
+		if (_noCursorStyles) {
+			_syncNoCursorStyles();
+			new MutationObserver(_syncNoCursorStyles).observe(document.body, {
+				attributes: true,
+				attributeFilter: ["class"]
+			});
+		}
+	}
+	if (!_noCursorStyles) return null;
+	const style = document.createElement("style");
+	style.setAttribute("data-no-cursor", "");
+	style.media = _noCursorMedia;
+	style.textContent = "* { cursor: none !important; }";
+	shadow.appendChild(style);
+	_noCursorStyles.push(style);
+	return style;
+}
+function _trackNoCursorStyle(style) {
+	style.media = _noCursorMedia;
+	if (_noCursorStyles.indexOf(style) === -1) _noCursorStyles.push(style);
+}
+function _untrackNoCursorStyle(style) {
+	const index = _noCursorStyles.indexOf(style);
+	if (index !== -1) _noCursorStyles.splice(index, 1);
+}
+var _Cursor, _DB, _Client, _Renderer, _EntityManager, _ScrollBar, _depsPromise, _noCursorStyles, _noCursorMedia, _snapCache, MouseMode, DENIED_SELECTOR, CSS_NUMBER, GUIComponent;
 var init_GUIComponent = __esmMin((() => {
 	init_Common$1();
 	init_MouseEventHandler();
@@ -314028,6 +314567,7 @@ var init_GUIComponent = __esmMin((() => {
 	_EntityManager = null;
 	_ScrollBar = null;
 	_depsPromise = null;
+	_noCursorMedia = "not all";
 	_snapCache = [];
 	MouseMode = Object.freeze({
 		CROSS: 0,
@@ -314109,6 +314649,7 @@ var init_GUIComponent = __esmMin((() => {
 			const commonStyle = document.createElement("style");
 			commonStyle.textContent = Common_default$1;
 			this._shadow.appendChild(commonStyle);
+			this._noCursorStyle = _addNoCursorFallback(this._shadow);
 			const compStyle = document.createElement("style");
 			compStyle.setAttribute("data-component", this.name);
 			compStyle.textContent = this._cssText || "";
@@ -314143,6 +314684,7 @@ var init_GUIComponent = __esmMin((() => {
 				return;
 			}
 			parent.appendChild(this._host);
+			if (this._noCursorStyle) _trackNoCursorStyle(this._noCursorStyle);
 			if (this.onKeyDown) this._bindKeyDown();
 			if (this.mouseMode === MouseMode.FREEZE) {
 				Mouse.intersect = false;
@@ -314182,6 +314724,7 @@ var init_GUIComponent = __esmMin((() => {
 					node.dispatchEvent(new Event("x_remove"));
 				});
 				this._host.remove();
+				if (this._noCursorStyle) _untrackNoCursorStyle(this._noCursorStyle);
 				if (this.mouseMode === MouseMode.FREEZE) {
 					Mouse.intersect = true;
 					SessionStorage_default.FreezeUI = false;
@@ -346533,7 +347076,12 @@ function onServerClosed(pkt) {
 		case 110: msg_id = 1589;
 	}
 	UIManager.showMessageBox(DB.getMessage(msg_id), "ok", () => {
+		Renderer.stop();
+		MapRenderer.cancelLoad();
+		MapRenderer.free();
+		BGM.play("01.mp3");
 		UIManager.removeComponents();
+		Background.setLoginBackground();
 		Controller.getUI().append();
 	}, true);
 	Network.close();
@@ -346553,6 +347101,7 @@ var init_LoginEngine = __esmMin((() => {
 	init_PacketStructure();
 	init_PluginManager();
 	init_Renderer();
+	init_MapRenderer();
 	init_UIManager();
 	init_WinList();
 	init_WinPopup();
@@ -347501,6 +348050,7 @@ function onReload() {
 		WinList_default.setList(list);
 	}
 	Renderer.stop();
+	MapRenderer.cancelLoad();
 	MapRenderer.free();
 	BGM.play("01.mp3");
 }

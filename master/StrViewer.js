@@ -8,7 +8,7 @@
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropNames$1 = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __esmMin = (fn, res, err) => () => {
@@ -19,7 +19,7 @@ var __esmMin = (fn, res, err) => () => {
 		throw err = [e], e;
 	}
 };
-var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
+var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
 var __exportAll = (all, no_symbols) => {
 	let target = {};
 	for (var name in all) __defProp(target, name, {
@@ -30,7 +30,7 @@ var __exportAll = (all, no_symbols) => {
 	return target;
 };
 var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames$1(from), i = 0, n = keys.length, key; i < n; i++) {
 		key = keys[i];
 		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
 			get: ((k) => from[k]).bind(null, key),
@@ -10979,6 +10979,34 @@ var init_BinaryReader = __esmMin((() => {
 		type = type || 2;
 		this.offset = type === 1 ? this.offset + index : type === 3 ? this.length + index : index;
 	};
+	/**
+	* Reset BinaryReader in-place to read from a new buffer (or sub-range of one),
+	* avoiding a heap allocation per network message on the hot path.
+	*
+	* Accepts either:
+	*   - An ArrayBuffer / Uint8Array  →  wraps in a new DataView
+	*   - A DataView already sized to the desired range  →  reused directly
+	*
+	* @param {ArrayBuffer|Uint8Array|DataView} buffer
+	* @param {number} [start=0]  byte offset into buffer (ignored when DataView is passed)
+	* @param {number} [end]      exclusive end byte (ignored when DataView is passed)
+	*/
+	BinaryReader.prototype.reset = function reset(buffer, start, end) {
+		if (buffer instanceof DataView) {
+			this.view = buffer;
+			this.length = buffer.byteLength;
+		} else {
+			const u8 = buffer instanceof Uint8Array ? buffer : null;
+			const ab = u8 ? u8.buffer : buffer;
+			const base = u8 ? u8.byteOffset : 0;
+			const s = base + (start || 0);
+			const e = end !== void 0 ? base + end : base + (u8 ? u8.byteLength : ab.byteLength);
+			this.view = new DataView(ab, s, e - s);
+			this.length = e - s;
+		}
+		this.buffer = this.view.buffer;
+		this.offset = 0;
+	};
 	bf_byteBuff = /* @__PURE__ */ new ArrayBuffer(4);
 	bf_wba = new Int8Array(bf_byteBuff);
 	bf_wia = new Int32Array(bf_byteBuff);
@@ -11038,7 +11066,7 @@ var init_BinaryReader = __esmMin((() => {
 function getDate(executable, callback) {
 	const reader = new FileReader();
 	reader.onload = function(event) {
-		_fp = new BinaryReader(event.target.result);
+		_fp$1 = new BinaryReader(event.target.result);
 		callback(getDateSub());
 	};
 	reader.readAsArrayBuffer(executable);
@@ -11049,14 +11077,14 @@ function getDate(executable, callback) {
 * @return {number}
 */
 function getDateSub() {
-	if (!_fp) throw new Error("Executable::getDate() - Executable is not loaded yet, or not specified");
-	_fp.seek(60, SEEK_SET);
-	const offset = _fp.readULong();
-	if (offset > _fp.length) throw new Error("Executable::getDate() - Invalid executable specified.");
-	_fp.seek(offset, SEEK_SET);
-	if (_fp.readString(4) !== "PE") throw new Error("Executable::getDate() - Invalid executable specified.");
-	_fp.seek(4, SEEK_CUR);
-	const date = /* @__PURE__ */ new Date(_fp.readULong() * 1e3);
+	if (!_fp$1) throw new Error("Executable::getDate() - Executable is not loaded yet, or not specified");
+	_fp$1.seek(60, SEEK_SET);
+	const offset = _fp$1.readULong();
+	if (offset > _fp$1.length) throw new Error("Executable::getDate() - Invalid executable specified.");
+	_fp$1.seek(offset, SEEK_SET);
+	if (_fp$1.readString(4) !== "PE") throw new Error("Executable::getDate() - Invalid executable specified.");
+	_fp$1.seek(4, SEEK_CUR);
+	const date = /* @__PURE__ */ new Date(_fp$1.readULong() * 1e3);
 	return date.getFullYear() * 1e4 + (date.getMonth() + 1) * 100 + date.getDate();
 }
 /**
@@ -11070,7 +11098,7 @@ function isROExec(file) {
 	if (file.size < 3145728 || file.size > 7340032) return false;
 	return true;
 }
-var _fp, Executable_default;
+var _fp$1, Executable_default;
 var init_Executable = __esmMin((() => {
 	init_BinaryReader();
 	Executable_default = {
@@ -85053,13 +85081,13 @@ var init_PalNameTable = __esmMin((() => {
 	PalNameTable[JobConst_default.PIG_BLACKSMITH] = JobNameTable[JobConst_default.PIG_BLACKSMITH];
 	PalNameTable[JobConst_default.LION_KNIGHT] = JobNameTable[JobConst_default.LION_KNIGHT];
 	PalNameTable[JobConst_default.DOG_ASSASSIN] = JobNameTable[JobConst_default.DOG_ASSASSIN];
-	PalNameTable[JobConst_default.SHEEP_MONK] = JobNameTable[JobConst_default.MONK];
-	PalNameTable[JobConst_default.OSTRICH_BARD] = JobNameTable[JobConst_default.BARD];
-	PalNameTable[JobConst_default.OSTRICH_DANCER] = JobNameTable[JobConst_default.DANCER];
-	PalNameTable[JobConst_default.FOX_SAGE] = JobNameTable[JobConst_default.SAGE];
-	PalNameTable[JobConst_default.PIG_ALCHE] = JobNameTable[JobConst_default.ALCHEMIST];
-	PalNameTable[JobConst_default.LION_CRUSADER] = "Å©·ç";
-	PalNameTable[JobConst_default.DOG_ROGUE] = JobNameTable[JobConst_default.ROGUE];
+	PalNameTable[JobConst_default.SHEEP_MONK] = JobNameTable[JobConst_default.SHEEP_MONK];
+	PalNameTable[JobConst_default.OSTRICH_BARD] = JobNameTable[JobConst_default.OSTRICH_BARD];
+	PalNameTable[JobConst_default.OSTRICH_DANCER] = JobNameTable[JobConst_default.OSTRICH_DANCER];
+	PalNameTable[JobConst_default.FOX_SAGE] = JobNameTable[JobConst_default.FOX_SAGE];
+	PalNameTable[JobConst_default.PIG_ALCHE] = JobNameTable[JobConst_default.PIG_ALCHE];
+	PalNameTable[JobConst_default.LION_CRUSADER] = JobNameTable[JobConst_default.LION_CRUSADER];
+	PalNameTable[JobConst_default.DOG_ROGUE] = JobNameTable[JobConst_default.DOG_ROGUE];
 	PalNameTable[JobConst_default.SHEEP_ARCB] = JobNameTable[JobConst_default.SHEEP_ARCB];
 	PalNameTable[JobConst_default.OSTRICH_RANGER] = JobNameTable[JobConst_default.OSTRICH_RANGER];
 	PalNameTable[JobConst_default.FOX_WARLOCK] = JobNameTable[JobConst_default.FOX_WARLOCK];
@@ -85074,27 +85102,27 @@ var init_PalNameTable = __esmMin((() => {
 	PalNameTable[JobConst_default.LION_ROYAL_GUARD] = JobNameTable[JobConst_default.LION_ROYAL_GUARD];
 	PalNameTable[JobConst_default.DOG_CHASER] = JobNameTable[JobConst_default.DOG_CHASER];
 	PalNameTable[JobConst_default.PORING_SNOVICE] = JobNameTable[JobConst_default.PORING_SNOVICE];
-	PalNameTable[JobConst_default.FROG_NINJA] = JobNameTable[JobConst_default.FROG_NINJA];
+	PalNameTable[JobConst_default.FROG_NINJA] = "µÎ²¨ºñ´ÑÀÚ";
 	PalNameTable[JobConst_default.PECO_GUNNER] = JobNameTable[JobConst_default.PECO_GUNNER];
 	PalNameTable[JobConst_default.PORING_TAEKWON] = JobNameTable[JobConst_default.PORING_TAEKWON];
-	PalNameTable[JobConst_default.PORING_STAR] = JobNameTable[JobConst_default.STAR];
+	PalNameTable[JobConst_default.PORING_STAR] = JobNameTable[JobConst_default.PORING_STAR];
 	PalNameTable[JobConst_default.FROG_LINKER] = JobNameTable[JobConst_default.FROG_LINKER];
 	PalNameTable[JobConst_default.FROG_KAGEROU] = JobNameTable[JobConst_default.FROG_KAGEROU];
 	PalNameTable[JobConst_default.FROG_OBORO] = JobNameTable[JobConst_default.FROG_OBORO];
 	PalNameTable[JobConst_default.PECO_REBELLION] = JobNameTable[JobConst_default.PECO_REBELLION];
-	PalNameTable[JobConst_default.SHEEP_HPRIEST] = "ÇÏÀÌÇÁ¸®½ºÆ®";
-	PalNameTable[JobConst_default.OSTRICH_SNIPER] = JobNameTable[JobConst_default.HUNTER_H];
-	PalNameTable[JobConst_default.FOX_HWIZ] = JobNameTable[JobConst_default.WIZARD_H];
-	PalNameTable[JobConst_default.PIG_WHITESMITH] = JobNameTable[JobConst_default.BLACKSMITH_H];
+	PalNameTable[JobConst_default.SHEEP_HPRIEST] = JobNameTable[JobConst_default.SHEEP_HPRIEST];
+	PalNameTable[JobConst_default.OSTRICH_SNIPER] = JobNameTable[JobConst_default.OSTRICH_SNIPER];
+	PalNameTable[JobConst_default.FOX_HWIZ] = JobNameTable[JobConst_default.FOX_HWIZ];
+	PalNameTable[JobConst_default.PIG_WHITESMITH] = JobNameTable[JobConst_default.PIG_WHITESMITH];
 	PalNameTable[JobConst_default.LION_KNIGHT_H] = JobNameTable[JobConst_default.LION_KNIGHT_H];
-	PalNameTable[JobConst_default.DOG_ASSA_X] = "¾î¼¼½ÅÅ©·Î½º";
-	PalNameTable[JobConst_default.SHEEP_CHAMP] = JobNameTable[JobConst_default.MONK_H];
-	PalNameTable[JobConst_default.OSTRICH_CROWN] = "Å©¶ó¿î";
-	PalNameTable[JobConst_default.OSTRICH_ZIPSI] = "Áý½Ã";
-	PalNameTable[JobConst_default.FOX_PROF] = JobNameTable[JobConst_default.SAGE_H];
-	PalNameTable[JobConst_default.PIG_CREATOR] = JobNameTable[JobConst_default.ALCHEMIST_H];
-	PalNameTable[JobConst_default.LION_CRUSADER_H] = JobNameTable[JobConst_default.CRUSADER_H];
-	PalNameTable[JobConst_default.DOG_STALKER] = JobNameTable[JobConst_default.ROGUE_H];
+	PalNameTable[JobConst_default.DOG_ASSA_X] = JobNameTable[JobConst_default.DOG_ASSA_X];
+	PalNameTable[JobConst_default.SHEEP_CHAMP] = JobNameTable[JobConst_default.SHEEP_CHAMP];
+	PalNameTable[JobConst_default.OSTRICH_CROWN] = JobNameTable[JobConst_default.OSTRICH_CROWN];
+	PalNameTable[JobConst_default.OSTRICH_ZIPSI] = JobNameTable[JobConst_default.OSTRICH_ZIPSI];
+	PalNameTable[JobConst_default.FOX_PROF] = JobNameTable[JobConst_default.FOX_PROF];
+	PalNameTable[JobConst_default.PIG_CREATOR] = JobNameTable[JobConst_default.PIG_CREATOR];
+	PalNameTable[JobConst_default.LION_CRUSADER_H] = JobNameTable[JobConst_default.LION_CRUSADER_H];
+	PalNameTable[JobConst_default.DOG_STALKER] = JobNameTable[JobConst_default.DOG_STALKER];
 	PalNameTable[JobConst_default.DRAGON_KNIGHT] = JobNameTable[JobConst_default.DRAGON_KNIGHT];
 	PalNameTable[JobConst_default.MEISTER] = JobNameTable[JobConst_default.MEISTER];
 	PalNameTable[JobConst_default.SHADOW_CROSS] = JobNameTable[JobConst_default.SHADOW_CROSS];
@@ -85193,7 +85221,7 @@ var init_PalNameTable = __esmMin((() => {
 	duplicateEntry$5(JobConst_default.OSTRICH_DANCER, JobConst_default.OSTRICH_DANCER_B);
 	duplicateEntry$5(JobConst_default.FOX_SAGE, JobConst_default.FOX_SAGE_B);
 	duplicateEntry$5(JobConst_default.PIG_ALCHE, JobConst_default.PIG_ALCHE_B);
-	duplicateEntry$5(JobConst_default.LION_CRUSADER, JobConst_default.LION_CRUSADER_B);
+	PalNameTable[JobConst_default.LION_CRUSADER_B] = "Å©·ç";
 	duplicateEntry$5(JobConst_default.DOG_ROGUE, JobConst_default.DOG_ROGUE_B);
 	duplicateEntry$5(JobConst_default.SHEEP_ARCB, JobConst_default.SHEEP_ARCB_B);
 	duplicateEntry$5(JobConst_default.OSTRICH_RANGER, JobConst_default.OSTRICH_RANGER_B);
@@ -85209,7 +85237,7 @@ var init_PalNameTable = __esmMin((() => {
 	duplicateEntry$5(JobConst_default.LION_ROYAL_GUARD, JobConst_default.LION_ROYAL_GUARD_B);
 	duplicateEntry$5(JobConst_default.DOG_CHASER, JobConst_default.DOG_CHASER_B);
 	duplicateEntry$5(JobConst_default.PORING_SNOVICE, JobConst_default.PORING_SNOVICE_B, JobConst_default.PORING_SNOVICE2, JobConst_default.PORING_SNOVICE2_B);
-	duplicateEntry$5(JobConst_default.FROG_NINJA, JobConst_default.FROG_NINJA_B);
+	PalNameTable[JobConst_default.FROG_NINJA_B] = PalNameTable[JobConst_default.FROG_NINJA];
 	duplicateEntry$5(JobConst_default.PECO_GUNNER, JobConst_default.PECO_GUNNER_B);
 	duplicateEntry$5(JobConst_default.PORING_TAEKWON, JobConst_default.PORING_TAEKWON_B);
 	duplicateEntry$5(JobConst_default.PORING_STAR, JobConst_default.PORING_STAR_B);
@@ -161301,7 +161329,7 @@ var init_PacketStructure = __esmMin((() => {
 	PACKET.ZC.GUILD_EMBLEM_IMG = function PACKET_ZC_GUILD_EMBLEM_IMG(fp, end) {
 		this.GDID = fp.readLong();
 		this.emblemVersion = fp.readLong();
-		this.img = new Uint8Array(fp.buffer, fp.offset, end - fp.offset);
+		this.img = new Uint8Array(fp.view.buffer, fp.view.byteOffset + fp.offset, end - fp.offset);
 	};
 	PACKET.ZC.GUILD_EMBLEM_IMG.size = -1;
 	PACKET.ZC.MEMBERMGR_INFO = function PACKET_ZC_MEMBERMGR_INFO(fp, end) {
@@ -205766,6 +205794,41 @@ function defaultSocketFactory(host, port) {
 	if (Socket.isSupported()) return new Socket(host, port, proxy);
 	return new Socket$1(host, port, proxy);
 }
+function _scheduleLogCallback(cb) {
+	if (typeof window !== "undefined" && window.requestIdleCallback) requestIdleCallback(cb);
+	else setTimeout(() => cb({
+		timeRemaining: () => 0,
+		didTimeout: true
+	}));
+}
+function _processLogEntry(entry) {
+	if (entry.type === LOG_ENTRY_KNOWN) {
+		if (entry.dumpBytes) console.log("%c[Network] Dump Recv:\n%cPacket ID: 0x%s\nPacket Name: %s\nLength: %d\nContent:\n%s", "color:#900090", "color:inherit", entry.pktId.toString(16), entry.pktName, entry.pktLen, utilsBufferToHexString(entry.dumpBytes).toUpperCase());
+		console.log("%c[Network] Recv:", "color:#900090", entry.instance, entry.hasCallback ? "" : "(no callback)");
+	} else if (entry.type === LOG_ENTRY_UNKNOWN) {
+		if (entry.dumpBytes) console.log("%c[Network] Dump Recv:\n%cPacket ID: 0x%s\nPacket Name: [UNKNOWN]\nLength: %d\nContent:\n%s", "color:#900090", "color:inherit", entry.pktId.toString(16), entry.pktLen, utilsBufferToHexString(entry.dumpBytes).toUpperCase());
+		console.error("[Network] Packet \"%c0x%s%c\" not registered, skipping %d bytes.", "font-weight:bold", entry.pktId.toString(16), "font-weight:normal", entry.pktLen);
+	}
+	entry.reset();
+}
+function _runLogDrain(deadline) {
+	while (_logHead !== _logTail && (deadline.timeRemaining() > 0 || deadline.didTimeout)) {
+		const entry = _logPool[_logHead & LOG_QUEUE_MASK];
+		_logHead++;
+		_processLogEntry(entry);
+	}
+	if (_logHead !== _logTail) _scheduleLogCallback(_runLogDrain);
+	else {
+		_logHead = 0;
+		_logTail = 0;
+		_logScheduled = false;
+	}
+}
+function _flushLogs() {
+	if (_logScheduled) return;
+	_logScheduled = true;
+	_scheduleLogCallback(_runLogDrain);
+}
 /**
 * Packets definition
 *
@@ -205798,6 +205861,8 @@ function connect(host, port, callback, isZone) {
 			msg = "Success";
 			color = "green";
 			if (_socket && _socket.ping) clearInterval(_socket.ping);
+			_ring_head = 0;
+			_ring_tail = 0;
 			socket.onMessage = receive;
 			_sockets.push(_socket = socket);
 			if (isZone) PacketCrypt_default.init();
@@ -205861,67 +205926,144 @@ function read$1(callback) {
 	read$1.callback = callback;
 }
 /**
-* Received data from server
+* Grow the ring buffer to at least `minCapacity` bytes, preserving pending data.
+* New capacity is the next power of two >= minCapacity.
 *
-* @param {Uint8Array} buffer
+* @param {number} minCapacity
+*/
+function _ringGrow(minCapacity) {
+	let newCap = _ring.length;
+	while (newCap < minCapacity) newCap *= 2;
+	const pending = _ring_tail - _ring_head;
+	const newRing = new Uint8Array(newCap);
+	if (pending > 0) {
+		const physHead = _ring_head & _ring_mask;
+		const physTail = _ring_tail & _ring_mask;
+		if (physTail > physHead) newRing.set(_ring.subarray(physHead, physTail), 0);
+		else {
+			const firstChunk = _ring.length - physHead;
+			newRing.set(_ring.subarray(physHead), 0);
+			newRing.set(_ring.subarray(0, physTail), firstChunk);
+		}
+	}
+	_ring = newRing;
+	_ring_mask = newCap - 1;
+	_ring_head = 0;
+	_ring_tail = pending;
+}
+/**
+* Return a contiguous Uint8Array view of `len` bytes starting at ring logical
+* position `logicalStart`.  When the slice crosses the ring's physical
+* boundary a minimal temporary copy is made (slow path, very rare).
+*
+* @param {number} logicalStart  logical read position (ring_head-relative)
+* @param {number} len           number of bytes to view
+* @return {Uint8Array}
+*/
+function _ringSlice(logicalStart, len) {
+	const physStart = logicalStart & _ring_mask;
+	const physEnd = physStart + len;
+	if (physEnd <= _ring.length) return _ring.subarray(physStart, physEnd);
+	const tmp = new Uint8Array(len);
+	const firstChunk = _ring.length - physStart;
+	tmp.set(_ring.subarray(physStart), 0);
+	tmp.set(_ring.subarray(0, len - firstChunk), firstChunk);
+	return tmp;
+}
+/**
+* Read a little-endian uint16 from the ring at logical position `logPos`
+* without going through BinaryReader (avoids a DataView when in the fast
+* path — both bytes are within the same physical region).
+*
+* @param {number} logPos
+* @return {number}
+*/
+function _ringReadUShort(logPos) {
+	const p = logPos & _ring_mask;
+	if (p + 2 <= _ring.length) return _ring[p] | _ring[p + 1] << 8;
+	return _ring[p] | _ring[0] << 8;
+}
+/**
+* Received data from server.
+* Appends `buf` into the persistent ring buffer, then parses as many complete
+* packets as available.  Incomplete packet bytes remain in the ring and are
+* consumed on the next call — no allocation needed for the common case.
+*
+* @param {ArrayBuffer|Uint8Array} buf
 */
 function receive(buf) {
+	const incoming = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+	const inLen = incoming.length;
+	const needed = _ring_tail - _ring_head + inLen;
+	if (needed > _ring.length) _ringGrow(needed);
+	const physTail = _ring_tail & _ring_mask;
+	const spaceToEnd = _ring.length - physTail;
+	if (inLen <= spaceToEnd) _ring.set(incoming, physTail);
+	else {
+		_ring.set(incoming.subarray(0, spaceToEnd), physTail);
+		_ring.set(incoming.subarray(spaceToEnd), 0);
+	}
+	_ring_tail += inLen;
+	if (!_fp) _fp = new BinaryReader(/* @__PURE__ */ new ArrayBuffer(0));
+	if (read$1.callback) {
+		const cb = read$1.callback;
+		read$1.callback = null;
+		const start = _ring_head;
+		_fp.reset(_ringSlice(start, _ring_tail - start));
+		cb(_fp);
+		if (_ring_head === start) _ring_head += _fp.tell();
+	}
 	let id, packet;
 	let length = 0;
-	let offset = 0;
-	let buffer;
-	if (_save_buffer) {
-		const _data = new Uint8Array(_save_buffer.length + buf.byteLength);
-		_data.set(_save_buffer, 0);
-		_data.set(new Uint8Array(buf), _save_buffer.length);
-		buffer = _data.buffer;
-	} else buffer = buf;
-	const fp = new BinaryReader(buffer);
-	if (read$1.callback) {
-		read$1.callback(fp);
-		read$1.callback = null;
-	}
-	while (fp.tell() < fp.length) {
-		offset = fp.tell();
-		if (offset + 2 > fp.length) {
-			_save_buffer = new Uint8Array(buffer, offset, fp.length - offset);
-			return;
-		}
-		id = fp.readUShort();
+	while (_ring_tail - _ring_head >= 2) {
+		const pktStart = _ring_head;
+		const avail = _ring_tail - pktStart;
+		if (avail < 2) break;
+		id = _ringReadUShort(pktStart);
 		let packet_len = PacketLength_default.getPacketLength(id);
-		packet_len = packet_len ? packet_len : fp.length - offset;
+		packet_len = packet_len ? packet_len : avail;
 		if (packet_len < 0) {
-			if (offset + 4 > fp.length) {
-				_save_buffer = new Uint8Array(buffer, offset, fp.length - offset);
-				return;
-			}
-			length = fp.readUShort();
+			if (avail < 4) break;
+			length = _ringReadUShort(pktStart + 2);
 		} else length = packet_len;
-		offset += length;
-		if (offset > fp.length) {
-			offset = fp.tell() - (packet_len < 0 ? 4 : 2);
-			_save_buffer = new Uint8Array(buffer, offset, fp.length - offset);
-			return;
-		}
+		if (avail < length) break;
+		const pktBytes = _ringSlice(pktStart, length);
+		_ring_head += length || 2;
 		if (Packets.list[id]) {
 			packet = Packets.list[id];
-			if (packetDump) {
-				const buffer_console = new Uint8Array(buffer, offset - length, length);
-				console.log("%c[Network] Dump Recv:\n%cPacket ID: 0x%s\nPacket Name: %s\nLength: %d\nContent:\n%s", "color:#900090", "color:inherit", id.toString(16), packet.name, length, utilsBufferToHexString(buffer_console).toUpperCase());
-			}
-			packet.instance = new packet.Struct(fp, offset);
-			console.log("%c[Network] Recv:", "color:#900090", packet.instance, packet.callback ? "" : "(no callback)");
+			_fp.reset(pktBytes);
+			_fp.seek(packet_len < 0 ? 4 : 2, SEEK_SET);
+			packet.instance = new packet.Struct(_fp, length);
+			const entry = _logPool[_logTail & LOG_QUEUE_MASK];
+			_logTail++;
+			if (_logTail - _logHead > LOG_QUEUE_SIZE) _logHead = _logTail - LOG_QUEUE_SIZE;
+			entry.type = LOG_ENTRY_KNOWN;
+			entry.pktId = id;
+			entry.pktName = packet.name;
+			entry.pktLen = length;
+			entry.dumpBytes = packetDump ? pktBytes.slice() : null;
+			entry.instance = packet.instance;
+			entry.hasCallback = !!packet.callback;
+			_flushLogs();
 			if (packet.callback) packet.callback(packet.instance);
 		} else {
-			if (packetDump) {
-				const unknown_buffer = new Uint8Array(buffer, offset - length, length);
-				console.log("%c[Network] Dump Recv:\n%cPacket ID: 0x%s\nPacket Name: [UNKNOWN]\nLength: %d\nContent:\n%s", "color:#900090", "color:inherit", id.toString(16), length, utilsBufferToHexString(unknown_buffer).toUpperCase());
-			}
-			console.error("[Network] Packet \"%c0x%s%c\" not registered, skipping %d bytes.", "font-weight:bold", id.toString(16), "font-weight:normal", length);
+			const entry = _logPool[_logTail & LOG_QUEUE_MASK];
+			_logTail++;
+			if (_logTail - _logHead > LOG_QUEUE_SIZE) _logHead = _logTail - LOG_QUEUE_SIZE;
+			entry.type = LOG_ENTRY_UNKNOWN;
+			entry.pktId = id;
+			entry.pktName = "";
+			entry.pktLen = length;
+			entry.dumpBytes = packetDump ? pktBytes.slice() : null;
+			entry.instance = null;
+			entry.hasCallback = false;
+			_flushLogs();
 		}
-		if (length) fp.seek(offset, SEEK_SET);
 	}
-	_save_buffer = null;
+	if (_ring_head === _ring_tail) {
+		_ring_head = 0;
+		_ring_tail = 0;
+	}
 }
 /**
 * Communication end
@@ -205953,6 +206095,8 @@ function close() {
 		if (s.ping) clearInterval(s.ping);
 		idx = _sockets.indexOf(s);
 		if (idx !== -1) _sockets.splice(idx, 1);
+		_ring_head = 0;
+		_ring_tail = 0;
 	}
 }
 /**
@@ -206001,7 +206145,7 @@ function utilsLongToIP(long) {
 function utilsBufferToHexString(buffer) {
 	return [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, "0") + " ").join("");
 }
-var _sockets, _socketFactory, _socket, _save_buffer, _onDisconnect, packetDump, Network;
+var _sockets, _socketFactory, _socket, LOG_ENTRY_KNOWN, LOG_ENTRY_UNKNOWN, LOG_QUEUE_SIZE, LOG_QUEUE_MASK, LogEntry, _logPool, _logHead, _logTail, _logScheduled, _ring, _ring_mask, _ring_head, _ring_tail, _fp, _onDisconnect, packetDump, Network;
 var init_NetworkManager = __esmMin((() => {
 	init_Configs();
 	init_BinaryReader();
@@ -206016,7 +206160,37 @@ var init_NetworkManager = __esmMin((() => {
 	_sockets = [];
 	_socketFactory = null;
 	_socket = null;
-	_save_buffer = null;
+	LOG_ENTRY_KNOWN = 1;
+	LOG_ENTRY_UNKNOWN = 2;
+	LOG_QUEUE_SIZE = 1024;
+	LOG_QUEUE_MASK = 1023;
+	LogEntry = class {
+		type = 0;
+		pktId = 0;
+		pktName = "";
+		pktLen = 0;
+		dumpBytes = null;
+		instance = null;
+		hasCallback = false;
+		reset() {
+			this.type = 0;
+			this.pktId = 0;
+			this.pktName = "";
+			this.pktLen = 0;
+			this.dumpBytes = null;
+			this.instance = null;
+			this.hasCallback = false;
+		}
+	};
+	_logPool = Array.from({ length: LOG_QUEUE_SIZE }, () => new LogEntry());
+	_logHead = 0;
+	_logTail = 0;
+	_logScheduled = false;
+	_ring = /* @__PURE__ */ new Uint8Array(262144);
+	_ring_mask = _ring.length - 1;
+	_ring_head = 0;
+	_ring_tail = 0;
+	_fp = null;
 	_onDisconnect = null;
 	packetDump = Configs.get("packetDump", false);
 	/**
@@ -206199,7 +206373,7 @@ var init_HtmlHelper = __esmMin((() => {
 * Render background (or a black background if no image is loaded yet)
 */
 function render$15() {
-	_ctx$6.clearRect(0, 0, _canvas.width, _canvas.height);
+	_ctx$5.clearRect(0, 0, _canvas.width, _canvas.height);
 	if (Background._progress > -1) Background.setPercent(Background._progress);
 }
 /**
@@ -206219,7 +206393,7 @@ function transition(callback) {
 		});
 	});
 }
-var _overlay, _container, _canvas, _ctx$6, Background;
+var _overlay, _container, _canvas, _ctx$5, Background;
 var init_Background = __esmMin((() => {
 	init_DBManager();
 	init_Client();
@@ -206252,7 +206426,7 @@ var init_Background = __esmMin((() => {
 		left: "0",
 		zIndex: "2"
 	});
-	_ctx$6 = _canvas.getContext("2d");
+	_ctx$5 = _canvas.getContext("2d");
 	Background = class Background {
 		/**
 		* Background loading progress
@@ -206302,7 +206476,7 @@ var init_Background = __esmMin((() => {
 				width: width + "px",
 				height: height + "px"
 			});
-			_ctx$6.clearRect(0, 0, width, height);
+			_ctx$5.clearRect(0, 0, width, height);
 			render$15();
 		}
 		/**
@@ -206440,14 +206614,14 @@ var init_Background = __esmMin((() => {
 			const height = 15;
 			const x = Math.floor((_canvas.width - width) * .5);
 			const y = Math.floor(_canvas.height * .75);
-			_ctx$6.fillStyle = "rgb(0,255,255)";
-			_ctx$6.fillRect(x, y, width, height);
-			_ctx$6.fillStyle = "rgb(140,140,140)";
-			_ctx$6.fillRect(x + 1, y + 1, 238, 13);
-			_ctx$6.fillStyle = "rgb(66,99,165)";
-			_ctx$6.fillRect(x + 2, y + 2, Math.floor(percent * 236 * .01), 11);
-			_ctx$6.fillStyle = "rgb(255,255,0)";
-			_ctx$6.fillText(percent + "%", Math.floor((_canvas.width - _ctx$6.measureText(percent + "%").width) * .5), y + 11);
+			_ctx$5.fillStyle = "rgb(0,255,255)";
+			_ctx$5.fillRect(x, y, width, height);
+			_ctx$5.fillStyle = "rgb(140,140,140)";
+			_ctx$5.fillRect(x + 1, y + 1, 238, 13);
+			_ctx$5.fillStyle = "rgb(66,99,165)";
+			_ctx$5.fillRect(x + 2, y + 2, Math.floor(percent * 236 * .01), 11);
+			_ctx$5.fillStyle = "rgb(255,255,0)";
+			_ctx$5.fillText(percent + "%", Math.floor((_canvas.width - _ctx$5.measureText(percent + "%").width) * .5), y + 11);
 		}
 	};
 }));
@@ -207575,7 +207749,7 @@ function fillImageData(imageData, frame, pal, color) {
 		}
 	}
 }
-var mat4$23, RenderCanvas2D, _program$25, _buffer$18, _ctx$5, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$7, _size$7, _offset, SpriteRenderer;
+var mat4$23, RenderCanvas2D, _program$25, _buffer$18, _ctx$4, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$7, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -207640,17 +207814,17 @@ var init_SpriteRenderer = __esmMin((() => {
 				_size$7[1] *= -1;
 			}
 			const canvas = getFrameCanvas(frame, pal, this.color);
-			_ctx$5.save();
-			_ctx$5.translate(_x | 0, _y | 0);
-			_ctx$5.rotate(this.angle / 180 * Math.PI);
-			_ctx$5.scale(scale_x, scale_y);
-			_ctx$5.drawImage(canvas, 0, 0, width, height, -_size$7[0] >> 1, -_size$7[1] >> 1, _size$7[0] | 0, _size$7[1] | 0);
-			_ctx$5.restore();
+			_ctx$4.save();
+			_ctx$4.translate(_x | 0, _y | 0);
+			_ctx$4.rotate(this.angle / 180 * Math.PI);
+			_ctx$4.scale(scale_x, scale_y);
+			_ctx$4.drawImage(canvas, 0, 0, width, height, -_size$7[0] >> 1, -_size$7[1] >> 1, _size$7[0] | 0, _size$7[1] | 0);
+			_ctx$4.restore();
 		};
 	})();
 	_program$25 = null;
 	_buffer$18 = null;
-	_ctx$5 = null;
+	_ctx$4 = null;
 	_gl$2 = null;
 	_groupId = 0;
 	_lastGroupId = 0;
@@ -207820,7 +207994,7 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {number} y position
 		*/
 		static bind2DContext(ctx, x, y) {
-			_ctx$5 = ctx;
+			_ctx$4 = ctx;
 			_pos$8[0] = x;
 			_pos$8[1] = y;
 			this.render = RenderCanvas2D;
@@ -208433,7 +208607,7 @@ var init_Models = __esmMin((() => {
 //#region src/Renderer/Map/AnimatedModels.vs?raw
 var AnimatedModels_default$2;
 var init_AnimatedModels$2 = __esmMin((() => {
-	AnimatedModels_default$2 = "#version 300 es  \r\nprecision highp float;  \r\n  \r\nin vec3 aPosition;  \r\nin vec3 aNormal;  \r\nin vec2 aTextureCoord;  \r\nin float aAlpha;  \r\n  \r\nout vec2 vTextureCoord;  \r\nout float vLightWeighting;  \r\nout float vAlpha;  \r\nout float vFogFactor;  \r\nout vec3 vWorldPos;\r\n  \r\nuniform mat4 uModelViewMat;  \r\nuniform mat4 uProjectionMat;  \r\nuniform mat3 uNormalMat;  \r\n  \r\nuniform vec3 uLightDirection;  \r\nuniform float uLightOpacity;  \r\nuniform vec3 uLightAmbient;  \r\nuniform vec3 uLightDiffuse;  \r\n  \r\nuniform bool uFogUse;  \r\nuniform float uFogNear;  \r\nuniform float uFogFar;  \r\n  \r\nvoid main(void) {  \r\n    vec4 position = uModelViewMat * vec4(aPosition, 1.0);  \r\n    gl_Position = uProjectionMat * position;  \r\n  \r\n    vTextureCoord = aTextureCoord;  \r\n    vAlpha = aAlpha;  \r\n    vWorldPos = aPosition;\r\n  \r\n    vec3 normal = normalize(aNormal);  \r\n    float lightWeight = max(dot(normal, uLightDirection), 0.0);  \r\n    vLightWeighting = (1.0 - uLightOpacity) + lightWeight * uLightOpacity;  \r\n  \r\n    if (uFogUse) {  \r\n        float depth = length(position.xyz);  \r\n        vFogFactor = clamp((uFogFar - depth) / (uFogFar - uFogNear), 0.0, 1.0);  \r\n    } else {  \r\n        vFogFactor = 1.0;  \r\n    }  \r\n}";
+	AnimatedModels_default$2 = "#version 300 es  \r\nprecision highp float;  \r\n  \r\nin vec3 aPosition;  \r\nin vec3 aNormal;  \r\nin vec2 aTextureCoord;  \r\nin float aAlpha;  \r\nin float aMatrixIndex;  \r\n  \r\nout vec2 vTextureCoord;  \r\nout float vLightWeighting;  \r\nout float vAlpha;  \r\nout float vFogFactor;  \r\nout vec3 vWorldPos;  \r\n  \r\nuniform mat4 uModelViewMat;  \r\nuniform mat4 uProjectionMat;  \r\nuniform mat3 uNormalMat;  \r\n  \r\nuniform vec3 uLightDirection;  \r\nuniform float uLightOpacity;  \r\nuniform vec3 uLightAmbient;  \r\nuniform vec3 uLightDiffuse;  \r\n  \r\nuniform bool uFogUse;  \r\nuniform float uFogNear;  \r\nuniform float uFogFar;  \r\n  \r\nuniform highp sampler2D uMatrixTexture;  \r\n  \r\nmat4 fetchMatrix(int index) {  \r\n    int pixelIndex = index * 4;  \r\n    vec4 row0 = texelFetch(uMatrixTexture, ivec2(pixelIndex, 0), 0);  \r\n    vec4 row1 = texelFetch(uMatrixTexture, ivec2(pixelIndex + 1, 0), 0);  \r\n    vec4 row2 = texelFetch(uMatrixTexture, ivec2(pixelIndex + 2, 0), 0);  \r\n    vec4 row3 = texelFetch(uMatrixTexture, ivec2(pixelIndex + 3, 0), 0);  \r\n    return mat4(row0, row1, row2, row3);  \r\n}  \r\n  \r\nvoid main(void) {  \r\n    mat4 M = fetchMatrix(int(aMatrixIndex));  \r\n    vec4 worldPos = M * vec4(aPosition, 1.0);  \r\n    vec4 position = uModelViewMat * worldPos;  \r\n    gl_Position = uProjectionMat * position;  \r\n  \r\n    vTextureCoord = aTextureCoord;  \r\n    vAlpha = aAlpha;  \r\n    vWorldPos = worldPos.xyz;  \r\n  \r\n    vec3 c0 = normalize(M[0].xyz);  \r\n    vec3 c1 = normalize(M[1].xyz);  \r\n    vec3 c2 = normalize(M[2].xyz);  \r\n    mat3 rotMat = mat3(c0, c1, c2);  \r\n    vec3 normal = normalize(rotMat * aNormal);  \r\n  \r\n    float lightWeight = max(dot(normal, uLightDirection), 0.0);  \r\n    vLightWeighting = (1.0 - uLightOpacity) + lightWeight * uLightOpacity;  \r\n  \r\n    if (uFogUse) {  \r\n        float depth = length(position.xyz);  \r\n        vFogFactor = clamp((uFogFar - depth) / (uFogFar - uFogNear), 0.0, 1.0);  \r\n    } else {  \r\n        vFogFactor = 1.0;  \r\n    }  \r\n}";
 }));
 //#endregion
 //#region src/Renderer/Map/AnimatedModels.fs?raw
@@ -208462,6 +208636,7 @@ function init$9(gl) {
 		uFogFar: gl.getUniformLocation(_program$22, "uFogFar"),
 		uFogColor: gl.getUniformLocation(_program$22, "uFogColor"),
 		uDiffuse: gl.getUniformLocation(_program$22, "uDiffuse"),
+		uMatrixTexture: gl.getUniformLocation(_program$22, "uMatrixTexture"),
 		uOccluderFadeMode: gl.getUniformLocation(_program$22, "uOccluderFadeMode"),
 		uOccluderFadeEye: gl.getUniformLocation(_program$22, "uOccluderFadeEye"),
 		uOccluderFadeFocus: gl.getUniformLocation(_program$22, "uOccluderFadeFocus"),
@@ -208473,7 +208648,8 @@ function init$9(gl) {
 		aPosition: gl.getAttribLocation(_program$22, "aPosition"),
 		aNormal: gl.getAttribLocation(_program$22, "aNormal"),
 		aTextureCoord: gl.getAttribLocation(_program$22, "aTextureCoord"),
-		aAlpha: gl.getAttribLocation(_program$22, "aAlpha")
+		aAlpha: gl.getAttribLocation(_program$22, "aAlpha"),
+		aMatrixIndex: gl.getAttribLocation(_program$22, "aMatrixIndex")
 	};
 }
 /**
@@ -208484,9 +208660,90 @@ function free$4(gl) {
 		const model = _animatedModels[i];
 		if (model.vao) gl.deleteVertexArray(model.vao);
 		if (model.buffer) gl.deleteBuffer(model.buffer);
+		if (model.matrixTexture) gl.deleteTexture(model.matrixTexture);
 		for (const tex in model.textureObjects) if (model.textureObjects[tex]) gl.deleteTexture(model.textureObjects[tex]);
 	}
 	_animatedModels = [];
+}
+/**
+* Precompute face flat normals in node model-space
+*/
+function precalcFlatNormals(node) {
+	const faces = node.faces;
+	const vertices = node.vertices;
+	const normals = new Float32Array(faces.length * 3);
+	for (let f = 0; f < faces.length; f++) {
+		const face = faces[f];
+		const v0 = vertices[face.vertidx[0]];
+		const v1 = vertices[face.vertidx[1]];
+		const v2 = vertices[face.vertidx[2]];
+		const ax = v1[0] - v0[0];
+		const ay = v1[1] - v0[1];
+		const az = v1[2] - v0[2];
+		const bx = v2[0] - v0[0];
+		const by = v2[1] - v0[1];
+		const bz = v2[2] - v0[2];
+		let nx = ay * bz - az * by;
+		let ny = az * bx - ax * bz;
+		let nz = ax * by - ay * bx;
+		let len = nx * nx + ny * ny + nz * nz;
+		if (len > 0) {
+			len = 1 / Math.sqrt(len);
+			nx *= len;
+			ny *= len;
+			nz *= len;
+		}
+		const base = f * 3;
+		normals[base] = nx;
+		normals[base + 1] = ny;
+		normals[base + 2] = nz;
+	}
+	return normals;
+}
+/**
+* Precompute smooth normals per smoothGroup in node model-space
+*/
+function precalcSmoothNormals(node, flatNormals) {
+	const faces = node.faces;
+	const vertices = node.vertices;
+	const groupUsed = [];
+	for (let f = 0; f < faces.length; f++) {
+		const sg = faces[f].smoothGroup;
+		if (sg !== void 0 && sg >= 0 && sg < 32) groupUsed[sg] = true;
+	}
+	const groups = [];
+	const numVerts = vertices.length;
+	for (let j = 0; j < 32; j++) {
+		if (!groupUsed[j]) continue;
+		const norm = new Float32Array(numVerts * 3);
+		groups[j] = norm;
+		for (let v = 0; v < numVerts; v++) {
+			let x = 0;
+			let y = 0;
+			let z = 0;
+			for (let f = 0; f < faces.length; f++) {
+				const face = faces[f];
+				if (face.smoothGroup === j && (face.vertidx[0] === v || face.vertidx[1] === v || face.vertidx[2] === v)) {
+					const base = f * 3;
+					x += flatNormals[base];
+					y += flatNormals[base + 1];
+					z += flatNormals[base + 2];
+				}
+			}
+			let len = x * x + y * y + z * z;
+			if (len > 0) {
+				len = 1 / Math.sqrt(len);
+				x *= len;
+				y *= len;
+				z *= len;
+			}
+			const l = v * 3;
+			norm[l] = x;
+			norm[l + 1] = y;
+			norm[l + 2] = z;
+		}
+	}
+	return groups;
 }
 function isNodeStatic(node) {
 	return (!node.rotKeyframes || node.rotKeyframes.length === 0) && (!node.posKeyframes || node.posKeyframes.length === 0) && (!node.scaleKeyFrames || node.scaleKeyFrames.length === 0);
@@ -208559,6 +208816,11 @@ function add$2(gl, modelData) {
 			totalAnimationLength = Math.max(totalAnimationLength, kf.Frame || 0);
 			kf._vec = vec3$5.fromValues(kf.Scale[0], kf.Scale[1], kf.Scale[2]);
 		}
+		const suffixMat = mat4$21.create();
+		mat4$21.identity(suffixMat);
+		if (!node.is_only) mat4$21.translate(suffixMat, suffixMat, node.offset);
+		mat4$21.multiply(suffixMat, suffixMat, mat3$4.toMat4(node.mat3, _tempMat4Node));
+		node._cachedSuffix = suffixMat;
 		nodes.push(node);
 	}
 	let animLen = modelData.animLen || 0;
@@ -208575,6 +208837,11 @@ function add$2(gl, modelData) {
 	}
 	for (let n = 0; n < nodes.length; n++) {
 		const node = nodes[n];
+		node._flatNormals = precalcFlatNormals(node);
+		if (modelData.shadeType === 2) node._smoothGroups = precalcSmoothNormals(node, node._flatNormals);
+	}
+	for (let n = 0; n < nodes.length; n++) {
+		const node = nodes[n];
 		const facesPerTex = {};
 		for (let f = 0; f < node.faces.length; f++) {
 			const tid = node.textures[node.faces[f].texid];
@@ -208588,12 +208855,11 @@ function add$2(gl, modelData) {
 			};
 			for (let inst = 0; inst < instances.length; inst++) {
 				const vertCount = facesPerTex[tid] * 3;
-				const floatCount = vertCount * 9;
+				const floatCount = vertCount * 10;
 				textureGroups[tid].writePlan.push({
 					nodeIndex: n,
 					instanceIndex: inst,
 					faceCount: facesPerTex[tid],
-					startFaceIndex: 0,
 					targetOffset: 0
 				});
 				textureGroups[tid].count += vertCount;
@@ -208609,14 +208875,36 @@ function add$2(gl, modelData) {
 		for (let wp = 0; wp < group.writePlan.length; wp++) {
 			const plan = group.writePlan[wp];
 			plan.targetOffset = currentOffset;
-			currentOffset += plan.faceCount * 3 * 9;
+			currentOffset += plan.faceCount * 3 * 10;
 		}
 		meshInfos.push({
 			textureIdx: parseInt(tid),
-			vertOffset: startOffset / 9,
-			vertCount: (currentOffset - startOffset) / 9
+			vertOffset: startOffset / 10,
+			vertCount: (currentOffset - startOffset) / 10
 		});
 	}
+	const staticBuffer = new Float32Array(totalFloats);
+	const numInstances = instances.length;
+	for (const tid in textureGroups) {
+		const plans = textureGroups[tid].writePlan;
+		const textureId = parseInt(tid);
+		for (let p = 0; p < plans.length; p++) {
+			const plan = plans[p];
+			const node = nodes[plan.nodeIndex];
+			const matrixIndex = plan.nodeIndex * numInstances + plan.instanceIndex;
+			writeNodeGeometry(node, textureId, plan.targetOffset, staticBuffer, modelData.alpha, matrixIndex, modelData.shadeType);
+		}
+	}
+	const totalMatrices = nodes.length * numInstances;
+	const matrixData = new Float32Array(totalMatrices * 16);
+	const matrixTexture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, matrixTexture);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, totalMatrices * 4, 1, 0, gl.RGBA, gl.FLOAT, matrixData);
+	gl.bindTexture(gl.TEXTURE_2D, null);
 	const animModel = {
 		filename: modelData.filename,
 		animLen,
@@ -208635,27 +208923,35 @@ function add$2(gl, modelData) {
 		},
 		textureObjects: {},
 		buffer: gl.createBuffer(),
-		_gpuBuffer: new Float32Array(totalFloats),
+		matrixTexture,
+		matrixData,
+		totalMatrices,
 		meshInfos,
-		writePlans: textureGroups,
 		lastFrame: -1,
 		lastAnimFrame: -1,
 		staticModel: !hasAnyAnimation,
 		_nodeMap: {},
 		_globalMatrices: new Array(nodes.length)
 	};
+	animModel._boxMat = mat4$21.create();
+	mat4$21.identity(animModel._boxMat);
+	mat4$21.translate(animModel._boxMat, animModel._boxMat, [
+		-animModel.box.center[0],
+		-animModel.box.max[1],
+		-animModel.box.center[2]
+	]);
 	for (let n = 0; n < nodes.length; n++) {
 		animModel._nodeMap[nodes[n].name] = nodes[n];
 		animModel._globalMatrices[n] = mat4$21.create();
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, animModel._gpuBuffer.byteLength, gl.DYNAMIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, staticBuffer, gl.STATIC_DRAW);
 	for (let t = 0; t < modelData.textures.length; t++) loadTexture$1(gl, animModel, "data\\texture\\" + modelData.textures[t], t);
 	animModel.vao = gl.createVertexArray();
 	gl.bindVertexArray(animModel.vao);
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
 	const attribute = _program$22.attribute;
-	const stride = 36;
+	const stride = 40;
 	gl.enableVertexAttribArray(attribute.aPosition);
 	gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, stride, 0);
 	gl.enableVertexAttribArray(attribute.aNormal);
@@ -208664,6 +208960,8 @@ function add$2(gl, modelData) {
 	gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, stride, 24);
 	gl.enableVertexAttribArray(attribute.aAlpha);
 	gl.vertexAttribPointer(attribute.aAlpha, 1, gl.FLOAT, false, stride, 32);
+	gl.enableVertexAttribArray(attribute.aMatrixIndex);
+	gl.vertexAttribPointer(attribute.aMatrixIndex, 1, gl.FLOAT, false, stride, 36);
 	gl.bindVertexArray(null);
 	_animatedModels.push(animModel);
 	updateModelBuffer(gl, animModel, 0, true);
@@ -208728,59 +209026,51 @@ function getScaleAtFrame$2(keyframes, frame, out) {
 	return vec3$5.lerp(out, prev._vec, next._vec, t);
 }
 /**
-* Transform a specific node's geometry for a specific texture and instance
-* Writes directly to the monolithic buffer
+* Write static geometry (model space positions, precomputed normals, UVs, alpha, matrixIndex)
 */
-function transformAndWrite(node, finalMatrix, textureId, offset, buffer, alpha) {
-	const normalMat = node._cache.normalMat || mat4$21.create();
-	node._cache.normalMat = normalMat;
-	mat4$21.extractRotation(normalMat, finalMatrix);
-	const m = finalMatrix;
-	const n = normalMat;
-	const m0 = m[0], m1 = m[1], m2 = m[2], m4 = m[4], m5 = m[5], m6 = m[6], m8 = m[8], m9 = m[9], m10 = m[10], m12 = m[12], m13 = m[13], m14 = m[14];
-	const n0 = n[0], n1 = n[1], n2 = n[2], n4 = n[4], n5 = n[5], n6 = n[6], n8 = n[8], n9 = n[9], n10 = n[10];
+function writeNodeGeometry(node, textureId, offset, buffer, alpha, matrixIndex, shadeType) {
 	const faces = node.faces;
 	const vertices = node.vertices;
 	const tvertices = node.tvertices;
 	const textures = node.textures;
-	const output = buffer;
+	const flatNormals = node._flatNormals;
+	const smoothGroups = node._smoothGroups;
+	const isSmooth = shadeType === 2 && smoothGroups;
 	let o = offset;
 	for (let f = 0; f < faces.length; f++) {
 		const face = faces[f];
 		if (textures[face.texid] !== textureId) continue;
-		const v0 = vertices[face.vertidx[0]];
-		const v1 = vertices[face.vertidx[1]];
-		const v2 = vertices[face.vertidx[2]];
-		const ax = v1[0] - v0[0], ay = v1[1] - v0[1], az = v1[2] - v0[2];
-		const bx = v2[0] - v0[0], by = v2[1] - v0[1], bz = v2[2] - v0[2];
-		let nx = ay * bz - az * by;
-		let ny = az * bx - ax * bz;
-		let nz = ax * by - ay * bx;
-		let len = nx * nx + ny * ny + nz * nz;
-		if (len > 0) {
-			len = 1 / Math.sqrt(len);
-			nx *= len;
-			ny *= len;
-			nz *= len;
+		let fnx = 0;
+		let fny = 0;
+		let fnz = 0;
+		let smoothNorm = null;
+		if (isSmooth && face.smoothGroup !== void 0 && smoothGroups[face.smoothGroup]) smoothNorm = smoothGroups[face.smoothGroup];
+		else {
+			const fBase = f * 3;
+			fnx = flatNormals[fBase];
+			fny = flatNormals[fBase + 1];
+			fnz = flatNormals[fBase + 2];
 		}
-		const tnx = n0 * nx + n4 * ny + n8 * nz;
-		const tny = n1 * nx + n5 * ny + n9 * nz;
-		const tnz = n2 * nx + n6 * ny + n10 * nz;
 		for (let vi = 0; vi < 3; vi++) {
 			const vIdx = face.vertidx[vi];
 			const tIdx = face.tvertidx[vi];
-			const vx = vertices[vIdx][0];
-			const vy = vertices[vIdx][1];
-			const vz = vertices[vIdx][2];
-			output[o++] = m0 * vx + m4 * vy + m8 * vz + m12;
-			output[o++] = m1 * vx + m5 * vy + m9 * vz + m13;
-			output[o++] = m2 * vx + m6 * vy + m10 * vz + m14;
-			output[o++] = tnx;
-			output[o++] = tny;
-			output[o++] = tnz;
-			output[o++] = tvertices[tIdx * 6 + 4];
-			output[o++] = tvertices[tIdx * 6 + 5];
-			output[o++] = alpha;
+			buffer[o++] = vertices[vIdx][0];
+			buffer[o++] = vertices[vIdx][1];
+			buffer[o++] = vertices[vIdx][2];
+			if (smoothNorm) {
+				const nBase = vIdx * 3;
+				buffer[o++] = smoothNorm[nBase];
+				buffer[o++] = smoothNorm[nBase + 1];
+				buffer[o++] = smoothNorm[nBase + 2];
+			} else {
+				buffer[o++] = fnx;
+				buffer[o++] = fny;
+				buffer[o++] = fnz;
+			}
+			buffer[o++] = tvertices[tIdx * 6 + 4];
+			buffer[o++] = tvertices[tIdx * 6 + 5];
+			buffer[o++] = alpha;
+			buffer[o++] = matrixIndex;
 		}
 	}
 }
@@ -208794,7 +209084,7 @@ function updateModelBuffer(gl, model, frame, force) {
 	if (model.staticModel && model.lastAnimFrame !== -1 && !force) return;
 	model.lastAnimFrame = currentAnimFrame;
 	model.lastFrame = frame;
-	const box = model.box;
+	model.box;
 	const nodeMap = model._nodeMap;
 	const globalMatrices = model._globalMatrices;
 	for (let n = 0; n < model.nodes.length; n++) {
@@ -208817,35 +209107,25 @@ function updateModelBuffer(gl, model, frame, force) {
 			mat4$21.scale(globalMatrix, globalMatrix, animScale || node.scale);
 		}
 		const finalNodeMatrix = node._cache.final;
-		mat4$21.identity(finalNodeMatrix);
-		mat4$21.translate(finalNodeMatrix, finalNodeMatrix, [
-			-box.center[0],
-			-box.max[1],
-			-box.center[2]
-		]);
+		mat4$21.copy(finalNodeMatrix, model._boxMat);
 		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
-		if (!node.is_only) mat4$21.translate(finalNodeMatrix, finalNodeMatrix, node.offset);
-		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, mat3$4.toMat4(node.mat3));
+		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, node._cachedSuffix);
 		node.finalMatrix = finalNodeMatrix;
 	}
+	const matrixData = model.matrixData;
+	const numInstances = model.instances.length;
 	for (let n = 0; n < model.nodes.length; n++) {
 		const node = model.nodes[n];
-		for (let i = 0; i < model.instances.length; i++) mat4$21.multiply(node._cache.instances[i], model.instances[i], node.finalMatrix);
-	}
-	const buffer = model._gpuBuffer;
-	const writePlans = model.writePlans;
-	for (const tid in writePlans) {
-		const plans = writePlans[tid].writePlan;
-		const textureId = parseInt(tid);
-		for (let p = 0; p < plans.length; p++) {
-			const plan = plans[p];
-			const node = model.nodes[plan.nodeIndex];
-			const finalInstanceMatrix = node._cache.instances[plan.instanceIndex];
-			transformAndWrite(node, finalInstanceMatrix, textureId, plan.targetOffset, buffer, model.alpha);
+		for (let i = 0; i < numInstances; i++) {
+			const destMat = node._cache.instances[i];
+			mat4$21.multiply(destMat, model.instances[i], node.finalMatrix);
+			const matrixIndex = n * numInstances + i;
+			matrixData.set(destMat, matrixIndex * 16);
 		}
 	}
-	gl.bindBuffer(gl.ARRAY_BUFFER, model.buffer);
-	gl.bufferSubData(gl.ARRAY_BUFFER, 0, buffer);
+	gl.bindTexture(gl.TEXTURE_2D, model.matrixTexture);
+	gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, model.totalMatrices * 4, 1, gl.RGBA, gl.FLOAT, matrixData);
+	gl.bindTexture(gl.TEXTURE_2D, null);
 }
 /**
 * Bind program and per-frame uniforms shared by both model passes
@@ -208867,6 +209147,8 @@ function bind(gl, modelView, projection, normalMat, fog, light) {
 	gl.uniform3fv(uniform.uFogColor, fog.color);
 	gl.activeTexture(gl.TEXTURE0);
 	gl.uniform1i(uniform.uDiffuse, 0);
+	gl.activeTexture(gl.TEXTURE1);
+	gl.uniform1i(uniform.uMatrixTexture, 1);
 }
 /**
 * Issue the draw calls for every animated model
@@ -208875,6 +209157,9 @@ function drawModels(gl) {
 	for (let m = 0; m < _animatedModels.length; m++) {
 		const model = _animatedModels[m];
 		if (!model.buffer || model.meshInfos.length === 0) continue;
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, model.matrixTexture);
+		gl.activeTexture(gl.TEXTURE0);
 		gl.bindVertexArray(model.vao);
 		for (let i = 0; i < model.meshInfos.length; i++) {
 			const info = model.meshInfos[i];
@@ -208917,7 +209202,7 @@ function renderFaded(gl, modelView, projection, normalMat, fog, light) {
 function hasAnimatedModels() {
 	return _animatedModels.length > 0;
 }
-var mat3$4, mat4$21, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _program$22, _animatedModels, AnimatedModels_default;
+var mat3$4, mat4$21, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _tempMat4Node, _program$22, _animatedModels, AnimatedModels_default;
 var init_AnimatedModels = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -208934,6 +209219,7 @@ var init_AnimatedModels = __esmMin((() => {
 	_tempVec3Scale = vec3$5.create();
 	_tempQuat = quat$1.create();
 	_tempMat4 = mat4$21.create();
+	_tempMat4Node = mat4$21.create();
 	_program$22 = null;
 	_animatedModels = [];
 	AnimatedModels_default = {
@@ -212978,6 +213264,10 @@ function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 						}
 					}
 				}
+			}
+			if (inst.entity && inst.entity.culled) {
+				inst.screenRect = null;
+				continue;
 			}
 			worldAnchorToClip(inst.pos, modelView, projection, _clip);
 			if (frustumCullClip(_clip[0], _clip[1], _clip[3], CULL_MARGIN)) {
@@ -219742,7 +220032,7 @@ var init_ChatBox$2 = __esmMin((() => {
 //#region src/UI/Components/ChatBox/ChatBox.css?raw
 var ChatBox_default$1;
 var init_ChatBox$1 = __esmMin((() => {
-	ChatBox_default$1 = ":host {\r\n	position: absolute;\r\n}\r\n\r\n#chatbox {\r\n	position: relative;\r\n	left: 5px;\r\n	width: 595px;\r\n}\r\n\r\n/** Tabs **/\r\n#chatbox .header {\r\n	margin-left: 3px;\r\n	height: 17px;\r\n\r\n	max-width: 100%;\r\n}\r\n\r\n#chatbox .header .tab {\r\n	width: 75px;\r\n	color: white;\r\n	text-align: center;\r\n}\r\n\r\n#chatbox .header input {\r\n	border: none;\r\n	background-color: transparent;\r\n	color: white;\r\n	width: 75px;\r\n	height: 15px;\r\n	text-align: center;\r\n}\r\n\r\n#chatbox .header .tab div {\r\n	padding-top: 2px;\r\n	border-radius: 2px 2px 0px 0px;\r\n	background: rgba(0, 0, 0, 0.75);\r\n	border: 1px solid #959595;\r\n	border-bottom: 1px solid white;\r\n}\r\n\r\n#chatbox .header .tab div.on {\r\n	background: rgba(0, 0, 0, 0.5);\r\n	border: 1px solid white;\r\n	border-bottom: none;\r\n	border-right: none;\r\n	height: 18px;\r\n}\r\n\r\n#chatbox .header .options {\r\n	border-bottom: 1px solid white;\r\n	height: 18px;\r\n	margin-right: 4px;\r\n}\r\n\r\n/** Content **/\r\n#chatbox .body {\r\n	background: rgba(0, 0, 0, 0.5);\r\n	border-left: 1px solid white;\r\n	border-right: 1px solid white;\r\n	border-radius: 0px 3px 0px 0px;\r\n	padding: 0px 5px 5px 5px;\r\n	margin-left: 3px;\r\n	margin-right: -2px;\r\n	max-width: 100%;\r\n}\r\n#chatbox .contentwrapper {\r\n	height: 42px;\r\n}\r\n#chatbox .content {\r\n	text-shadow: 1px 1px 0px black;\r\n	height: 100%;\r\n	overflow-y: auto;\r\n	line-height: 14px;\r\n	display: none;\r\n}\r\n#chatbox .content.active {\r\n	display: block;\r\n}\r\n#chatbox .content a {\r\n	color: inherit;\r\n	text-decoration: underline;\r\n}\r\n\r\n#chatbox .content a,\r\n#chatbox .content .item-link {\r\n	cursor: pointer;\r\n}\r\n\r\n#chatbox .event_add_cursor {\r\n	height: 14px;\r\n	cursor: ns-resize;\r\n}\r\n\r\n#chatbox .battlemode {\r\n	width: 592px;\r\n	height: 25px;\r\n	position: relative;\r\n	border-left: 1px solid white;\r\n	border-right: 1px solid white;\r\n	border-top: 1px solid grey;\r\n	background-color: rgba(0, 0, 0, 0.5);\r\n	margin-left: 3px;\r\n	display: none;\r\n	max-width: 100%;\r\n}\r\n\r\n/** Input **/\r\n#chatbox .input {\r\n	width: 600px;\r\n	height: 25px;\r\n	position: relative;\r\n	max-width: 100%;\r\n}\r\n\r\n#chatbox .input.fix {\r\n	margin-top: 29px;\r\n}\r\n\r\n#chatbox .input input {\r\n	position: absolute;\r\n	top: 3px;\r\n	height: 18px;\r\n	background-color: transparent;\r\n	border: none;\r\n}\r\n\r\n#chatbox .input .username {\r\n	left: 4px;\r\n	width: 90px;\r\n	padding-left: 5px;\r\n}\r\n\r\n#chatbox .input .list {\r\n	width: 8px;\r\n	height: 18px;\r\n	border: none;\r\n	position: absolute;\r\n	top: 3px;\r\n	left: 97px;\r\n	background-repeat: no-repeat;\r\n	padding: 0;\r\n}\r\n#chatbox .input .wrapper {\r\n	display: flex;\r\n	align-items: center;\r\n	margin-left: 108px;\r\n	height: 100%;\r\n	overflow: hidden;\r\n	width: calc(100% - 140px);\r\n}\r\n\r\n#chatbox .input .message {\r\n	width: 100%;\r\n	padding-left: 5px;\r\n\r\n	line-height: 18px;\r\n	outline: none;\r\n	white-space: nowrap;\r\n	overflow-x: hidden;\r\n	overflow-y: hidden;\r\n	max-width: 100%;\r\n	vertical-align: middle;\r\n	display: inline-block;\r\n}\r\n#chatbox .input .message.party {\r\n	color: #840084;\r\n}\r\n#chatbox .input .message.guild {\r\n	color: #008484;\r\n}\r\n#chatbox .input .message.clan {\r\n	color: #ffa631;\r\n}\r\n\r\n#chatbox .input .filter,\r\n#chatbox .input .size {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	position: absolute;\r\n	right: 13px;\r\n	top: 8px;\r\n	background-color: transparent;\r\n}\r\n\r\n#chatbox .input .size {\r\n	right: 1px;\r\n}\r\n\r\n#chatbox .battlemode .bmtoggle {\r\n	height: 100%;\r\n}\r\n#chatbox .chat-function {\r\n	position: absolute;\r\n	right: 0px;\r\n	top: 0px;\r\n	/* Expand the \"no-walk\" header zone around buttons (but don't move them visually). */\r\n	padding: 6px;\r\n	margin: -6px;\r\n}\r\n#chatbox .chat-function button {\r\n	background-size: auto;\r\n	border: 0;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n#chatbox .chat-function .chatmode {\r\n	width: 15px;\r\n	height: 9px;\r\n}\r\n#chatbox .chat-function .battleopt {\r\n	width: 10px;\r\n	height: 10px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .stickfucn {\r\n	width: 14px;\r\n	height: 10px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .battleopt2 {\r\n	width: 9px;\r\n	height: 9px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .wndminib {\r\n	width: 9px;\r\n	height: 9px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .lockdragwnd {\r\n	width: 15px;\r\n	height: 10px;\r\n}\r\n";
+	ChatBox_default$1 = ":host {\r\n	position: absolute;\r\n}\r\n\r\n#chatbox {\r\n	position: relative;\r\n	left: 5px;\r\n	width: 595px;\r\n}\r\n\r\n/** Tabs **/\r\n#chatbox .header {\r\n	margin-left: 3px;\r\n	height: 17px;\r\n\r\n	max-width: 100%;\r\n}\r\n\r\n#chatbox .header .tab {\r\n	width: 75px;\r\n	color: white;\r\n	text-align: center;\r\n}\r\n\r\n#chatbox .header input {\r\n	border: none;\r\n	background-color: transparent;\r\n	color: white;\r\n	width: 75px;\r\n	height: 15px;\r\n	text-align: center;\r\n}\r\n\r\n#chatbox .header .tab div {\r\n	padding-top: 2px;\r\n	border-radius: 2px 2px 0px 0px;\r\n	background: rgba(0, 0, 0, 0.75);\r\n	border: 1px solid #959595;\r\n	border-bottom: 1px solid white;\r\n}\r\n\r\n#chatbox .header .tab div.on {\r\n	background: rgba(0, 0, 0, 0.5);\r\n	border: 1px solid white;\r\n	border-bottom: none;\r\n	border-right: none;\r\n	height: 18px;\r\n}\r\n\r\n#chatbox .header .options {\r\n	border-bottom: 1px solid white;\r\n	height: 18px;\r\n	margin-right: 4px;\r\n}\r\n\r\n/** Content **/\r\n#chatbox .body {\r\n	background: rgba(0, 0, 0, 0.5);\r\n	border-left: 1px solid white;\r\n	border-right: 1px solid white;\r\n	border-radius: 0px 3px 0px 0px;\r\n	padding: 0px 5px 5px 5px;\r\n	margin-left: 3px;\r\n	margin-right: -2px;\r\n	max-width: 100%;\r\n}\r\n#chatbox .contentwrapper {\r\n	height: 42px;\r\n}\r\n#chatbox .content {\r\n	text-shadow: 1px 1px 0px black;\r\n	height: 100%;\r\n	overflow-y: auto;\r\n	line-height: 14px;\r\n	/* A newline in a message is a line break. See docs/reference/chat/text-parsing.md */\r\n	white-space: pre-line;\r\n	display: none;\r\n}\r\n#chatbox .content.active {\r\n	display: block;\r\n}\r\n#chatbox .content a {\r\n	color: inherit;\r\n	text-decoration: underline;\r\n}\r\n\r\n#chatbox .content a,\r\n#chatbox .content .item-link {\r\n	cursor: pointer;\r\n}\r\n\r\n#chatbox .event_add_cursor {\r\n	height: 14px;\r\n	cursor: ns-resize;\r\n}\r\n\r\n#chatbox .battlemode {\r\n	width: 592px;\r\n	height: 25px;\r\n	position: relative;\r\n	border-left: 1px solid white;\r\n	border-right: 1px solid white;\r\n	border-top: 1px solid grey;\r\n	background-color: rgba(0, 0, 0, 0.5);\r\n	margin-left: 3px;\r\n	display: none;\r\n	max-width: 100%;\r\n}\r\n\r\n/** Input **/\r\n#chatbox .input {\r\n	width: 600px;\r\n	height: 25px;\r\n	position: relative;\r\n	max-width: 100%;\r\n}\r\n\r\n#chatbox .input.fix {\r\n	margin-top: 29px;\r\n}\r\n\r\n#chatbox .input input {\r\n	position: absolute;\r\n	top: 3px;\r\n	height: 18px;\r\n	background-color: transparent;\r\n	border: none;\r\n}\r\n\r\n#chatbox .input .username {\r\n	left: 4px;\r\n	width: 90px;\r\n	padding-left: 5px;\r\n}\r\n\r\n#chatbox .input .list {\r\n	width: 8px;\r\n	height: 18px;\r\n	border: none;\r\n	position: absolute;\r\n	top: 3px;\r\n	left: 97px;\r\n	background-repeat: no-repeat;\r\n	padding: 0;\r\n}\r\n#chatbox .input .wrapper {\r\n	display: flex;\r\n	align-items: center;\r\n	margin-left: 108px;\r\n	height: 100%;\r\n	overflow: hidden;\r\n	width: calc(100% - 140px);\r\n}\r\n\r\n#chatbox .input .message {\r\n	width: 100%;\r\n	padding-left: 5px;\r\n\r\n	line-height: 18px;\r\n	outline: none;\r\n	white-space: nowrap;\r\n	overflow-x: hidden;\r\n	overflow-y: hidden;\r\n	max-width: 100%;\r\n	vertical-align: middle;\r\n	display: inline-block;\r\n}\r\n#chatbox .input .message.party {\r\n	color: #840084;\r\n}\r\n#chatbox .input .message.guild {\r\n	color: #008484;\r\n}\r\n#chatbox .input .message.clan {\r\n	color: #ffa631;\r\n}\r\n\r\n#chatbox .input .filter,\r\n#chatbox .input .size {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	position: absolute;\r\n	right: 13px;\r\n	top: 8px;\r\n	background-color: transparent;\r\n}\r\n\r\n#chatbox .input .size {\r\n	right: 1px;\r\n}\r\n\r\n#chatbox .battlemode .bmtoggle {\r\n	height: 100%;\r\n}\r\n#chatbox .chat-function {\r\n	position: absolute;\r\n	right: 0px;\r\n	top: 0px;\r\n	/* Expand the \"no-walk\" header zone around buttons (but don't move them visually). */\r\n	padding: 6px;\r\n	margin: -6px;\r\n}\r\n#chatbox .chat-function button {\r\n	background-size: auto;\r\n	border: 0;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n#chatbox .chat-function .chatmode {\r\n	width: 15px;\r\n	height: 9px;\r\n}\r\n#chatbox .chat-function .battleopt {\r\n	width: 10px;\r\n	height: 10px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .stickfucn {\r\n	width: 14px;\r\n	height: 10px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .battleopt2 {\r\n	width: 9px;\r\n	height: 9px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .wndminib {\r\n	width: 9px;\r\n	height: 9px;\r\n	background-size: cover;\r\n}\r\n#chatbox .chat-function .lockdragwnd {\r\n	width: 15px;\r\n	height: 10px;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/ChatBoxSettings/ChatBoxSettings.html?raw
@@ -220175,7 +220465,7 @@ function makeResizableDiv() {
 		window.addEventListener("mouseup", stopResize);
 	});
 }
-var MAX_MSG, MAX_LENGTH, MAGIC_NUMBER, _historyMessage, _historyNickName, _heightIndex, _messageBuffer, _rafScheduled, _preferences$41, ChatBox, ChatBox_default;
+var MAX_MSG, MAX_LENGTH, MAGIC_NUMBER, _historyMessage, _historyNickName, _heightIndex, _messageBuffer, _rafScheduled, _preferences$41, ChatBox, ITEM_LINK, ChatBox_default;
 var init_ChatBox = __esmMin((() => {
 	init_DBManager();
 	init_Renderer();
@@ -220277,7 +220567,8 @@ var init_ChatBox = __esmMin((() => {
 	*/
 	ChatBox.PrivateMessageStorage = {
 		nick: "",
-		msg: ""
+		msg: "",
+		blockNicks: []
 	};
 	ChatBox.lastTabID = -1;
 	ChatBox.tabCount = 0;
@@ -220959,16 +221250,45 @@ var init_ChatBox = __esmMin((() => {
 		}
 		this.onRequestTalk(user, trimmedText, ChatBox.sendTo);
 	};
+	ITEM_LINK = /(<ITEMLINK>.*?<\/ITEMLINK>|<ITEML>.*?<\/ITEML>|<ITEM>.*?<\/ITEM>)/i;
+	/**
+	* Escape text for use in HTML content and quoted attributes.
+	* @param {string} text
+	* @returns {string}
+	*/
+	ChatBox.escapeHTML = function escapeHTML(text) {
+		return text.replace(/[&<>"]/g, (c) => ({
+			"&": "&amp;",
+			"<": "&lt;",
+			">": "&gt;",
+			"\"": "&quot;"
+		})[c]);
+	};
+	/**
+	* Render a received message as HTML: colour codes dropped, item links clickable, the rest as text.
+	*
+	* @param {string} text
+	* @returns {string}
+	* @see docs/reference/chat/text-parsing.md
+	*/
+	ChatBox.messageToHTML = function messageToHTML(text) {
+		return text.replace(/\^[0-9A-Fa-f]{6}/g, "").split(ITEM_LINK).map((part, i) => {
+			if (!(i % 2)) return ChatBox.escapeHTML(part);
+			const item = DB.parseItemLink(part);
+			return `<span data-item="${ChatBox.escapeHTML(part)}" class="item-link" style="color:#FFFF63; cursor:pointer;">&lt;${ChatBox.escapeHTML(item.name)}&gt;</span>`;
+		}).join("");
+	};
 	/**
 	* Add text to chatbox
+	*
+	* @see docs/reference/chat/text-parsing.md
 	*/
 	ChatBox.addText = function addText(text, colorType, filterType, color, override) {
-		text = text.replace(/<ITEMLINK>.*?<\/ITEMLINK>|<ITEML>.*?<\/ITEML>|<ITEM>.*?<\/ITEM>/gi, function(match) {
-			const span = `<span data-item="${match}" class="item-link" style="color:#FFFF63;">&lt;${DB.parseItemLink(match).name}&gt;</span>`;
+		text = text.replace(/\^[0-9A-Fa-f]{6}/g, "");
+		if (!override && ITEM_LINK.test(text)) {
+			text = ChatBox.messageToHTML(text);
 			override = true;
-			return span;
-		});
-		if (!override && /<span\s+class="nickname-link"/.test(text)) override = true;
+		}
 		if (isNaN(filterType)) filterType = ChatBox.FILTER.PUBLIC_LOG;
 		_messageBuffer.push({
 			text,
@@ -221548,13 +221868,13 @@ function eventsBooks$1() {
 	if (!event) return;
 	Client.getFiles(["data/sprite/book/Ã¥ÀÐ±â.spr", "data/sprite/book/Ã¥ÀÐ±â.act"], function(spr, act) {
 		try {
-			_sprite$4 = new SPR(spr);
-			_action$4 = new ACT(act);
+			_sprite$3 = new SPR(spr);
+			_action$3 = new ACT(act);
 		} catch (e) {
 			console.error("Book::init() - " + e.message);
 			return;
 		}
-		const canvas = _sprite$4.getCanvasFromFrame(0);
+		const canvas = _sprite$3.getCanvasFromFrame(0);
 		canvas.className = "book_open event_add_cursor";
 		event.appendChild(canvas);
 		const bookOpen = root.querySelector(".book_open");
@@ -221579,7 +221899,7 @@ function eventsBooks$1() {
 		readCanvas.height = 15;
 		readCanvas.className = "book_read event_add_cursor";
 		event.appendChild(readCanvas);
-		_ctx$4 = readCanvas.getContext("2d");
+		_ctx$3 = readCanvas.getContext("2d");
 		const bookRead = root.querySelector(".book_read");
 		if (bookRead) {
 			bookRead.addEventListener("mouseover", (e) => {
@@ -221612,7 +221932,7 @@ function validateFieldsExist$1(event) {
 	if (!event.querySelector("button")) event.insertAdjacentHTML("beforeend", "<button class=\"view\" data-background=\"btn_view.bmp\" data-down=\"btn_view_a.bmp\" data-hover=\"btn_view_b.bmp\"></button>");
 	return true;
 }
-var _sprite$4, _action$4, _ctx$4, _type$7, _start$2, ItemCompare, rendering$3, ItemCompare_default;
+var _sprite$3, _action$3, _ctx$3, _type$6, _start$1, ItemCompare, rendering$3, ItemCompare_default;
 var init_ItemCompare = __esmMin((() => {
 	init_DBManager();
 	init_ItemType();
@@ -221631,8 +221951,8 @@ var init_ItemCompare = __esmMin((() => {
 	init_ItemCompare$1();
 	init_ItemInfo();
 	init_Entity$1();
-	_type$7 = 0;
-	_start$2 = 0;
+	_type$6 = 0;
+	_start$1 = 0;
 	ItemCompare = new GUIComponent("ItemCompare", ItemCompare_default$1);
 	ItemCompare.render = () => ItemCompare_default$2;
 	/**
@@ -221751,14 +222071,14 @@ var init_ItemCompare = __esmMin((() => {
 		const position = new Uint16Array([0, 0]);
 		return function render() {
 			const _entity = new Entity();
-			const action = _action$4.actions[_type$7];
-			const anim = Math.floor((Renderer.tick - _start$2) / action.delay);
+			const action = _action$3.actions[_type$6];
+			const anim = Math.floor((Renderer.tick - _start$1) / action.delay);
 			const animation = action.animations[anim % action.animations.length];
 			let i, count;
 			count = animation.layers.length;
-			SpriteRenderer.bind2DContext(_ctx$4, 10, 25);
-			_ctx$4.clearRect(0, 0, _ctx$4.canvas.width, _ctx$4.canvas.height);
-			for (i = 0, count = animation.layers.length; i < count; ++i) _entity.renderLayer(animation.layers[i], _sprite$4, _sprite$4, 1, position, false);
+			SpriteRenderer.bind2DContext(_ctx$3, 10, 25);
+			_ctx$3.clearRect(0, 0, _ctx$3.canvas.width, _ctx$3.canvas.height);
+			for (i = 0, count = animation.layers.length; i < count; ++i) _entity.renderLayer(animation.layers[i], _sprite$3, _sprite$3, 1, position, false);
 		};
 	})();
 	ItemCompare_default = UIManager.addComponent(ItemCompare);
@@ -221831,7 +222151,7 @@ function applyPreviewItem(entity) {
 	if (_previewLocation & EquipmentLocation_default.COSTUME_HEAD_TOP) entity.accessory2 = _previewSpriteId;
 	if (_previewLocation & EquipmentLocation_default.COSTUME_ROBE) entity.robe = _previewSpriteId;
 }
-var ItemPreview, _ctx$3, _direction, _previewLocation, _previewSpriteId, _rendering, _remove, renderPreview, ItemPreview_default;
+var ItemPreview, _ctx$2, _direction, _previewLocation, _previewSpriteId, _rendering, _remove, renderPreview, ItemPreview_default;
 var init_ItemPreview = __esmMin((() => {
 	init_DBManager();
 	init_EquipmentLocation();
@@ -221865,7 +222185,7 @@ var init_ItemPreview = __esmMin((() => {
 	*/
 	ItemPreview.init = function init() {
 		const root = this.getRoot();
-		_ctx$3 = root.querySelector("canvas").getContext("2d");
+		_ctx$2 = root.querySelector("canvas").getContext("2d");
 		root.querySelector(".close").addEventListener("click", () => {
 			ItemPreview.remove();
 		});
@@ -221949,8 +222269,8 @@ var init_ItemPreview = __esmMin((() => {
 			save: false
 		};
 		return function render() {
-			if (!_ctx$3) return;
-			_ctx$3.clearRect(0, 0, _ctx$3.canvas.width, _ctx$3.canvas.height);
+			if (!_ctx$2) return;
+			_ctx$2.clearRect(0, 0, _ctx$2.canvas.width, _ctx$2.canvas.height);
 			if (!_previewSpriteId || !_previewLocation || !SessionStorage_default.Entity) return;
 			const previewCharacter = new Entity();
 			previewCharacter.set({
@@ -221976,8 +222296,8 @@ var init_ItemPreview = __esmMin((() => {
 			previewCharacter.headDir = 0;
 			previewCharacter.action = previewCharacter.ACTION.IDLE;
 			previewCharacter.animation = _animation;
-			SpriteRenderer.bind2DContext(_ctx$3, Math.floor(_ctx$3.canvas.width / 2), _ctx$3.canvas.height);
-			previewCharacter.renderEntity(_ctx$3);
+			SpriteRenderer.bind2DContext(_ctx$2, Math.floor(_ctx$2.canvas.width / 2), _ctx$2.canvas.height);
+			previewCharacter.renderEntity(_ctx$2);
 			previewCharacter.effectColor.set(_savedColor);
 		};
 	})();
@@ -223663,7 +223983,7 @@ function resetPathFindingWorker() {
 	terminatePathFindingWorker();
 	initializePathFindingWorker();
 }
-var Navigation, _arrow, _toolDealer, _weaponDealer, _armorDealer, _blacksmith, _guide, _inn, _kafra, _map, _ctx$2, _towninfo, _markers, _path, _lastPathUpdate, _pathUpdateThrottle, _pathUpdateLock, _pathFindingWorker, _mapData, _targetData, _finalTargetData, _isMapClickTarget, _blinking, _fadeInterval, _originalColor, _documentClickHandler, Navigation_default;
+var Navigation, _arrow, _toolDealer, _weaponDealer, _armorDealer, _blacksmith, _guide, _inn, _kafra, _map, _ctx$1, _towninfo, _markers, _path, _lastPathUpdate, _pathUpdateThrottle, _pathUpdateLock, _pathFindingWorker, _mapData, _targetData, _finalTargetData, _isMapClickTarget, _blinking, _fadeInterval, _originalColor, _documentClickHandler, Navigation_default;
 var init_Navigation = __esmMin((() => {
 	init_KeyEventHandler();
 	init_Renderer();
@@ -223689,7 +224009,7 @@ var init_Navigation = __esmMin((() => {
 	_inn = createAsyncImage();
 	_kafra = createAsyncImage();
 	_map = createAsyncImage();
-	_ctx$2 = null;
+	_ctx$1 = null;
 	_towninfo = [];
 	_markers = [];
 	_path = [];
@@ -223738,7 +224058,7 @@ var init_Navigation = __esmMin((() => {
 		const canvas = document.createElement("canvas");
 		canvas.width = 280;
 		canvas.height = 230;
-		_ctx$2 = canvas.getContext("2d");
+		_ctx$1 = canvas.getContext("2d");
 		const mapDisplay = root.querySelector(".map-display");
 		if (mapDisplay) mapDisplay.appendChild(canvas);
 		Client.loadFile(`${DB.INTERFACE_PATH}map/map_arrow.bmp`, (dataURI) => {
@@ -224017,7 +224337,7 @@ var init_Navigation = __esmMin((() => {
 		if ((this._host ? getComputedStyle(this._host).display : "none") === "none") return;
 		const width = 280;
 		const height = 230;
-		const ctx = _ctx$2;
+		const ctx = _ctx$1;
 		if (!ctx) return;
 		const currentMap = getCurrentMap();
 		const currentPos = getPlayerPosition();
@@ -225570,20 +225890,11 @@ var init_WhisperBox = __esmMin((() => {
 	* @param {string} color
 	*/
 	WhisperBox.addText = function addText(nickname, text, color) {
-		const instance = this.instances[nickname] || this.show(nickname, true);
-		let override = false;
-		text = text.replace(/<ITEMLINK>.*?<\/ITEMLINK>|<ITEML>.*?<\/ITEML>|<ITEM>.*?<\/ITEM>/gi, (match) => {
-			const item = DB.parseItemLink(match);
-			if (!item) return match;
-			override = true;
-			return `<span data-item="${match}" class="item-link" style="color:#FFFF63; cursor:pointer;">&lt;${item.name}&gt;</span>`;
-		});
-		const contentEl = instance._contentEl;
+		const contentEl = (this.instances[nickname] || this.show(nickname, true))._contentEl;
 		const isAtBottom = contentEl.scrollHeight - contentEl.scrollTop <= contentEl.offsetHeight + 10;
 		const div = document.createElement("div");
 		div.style.color = color || "#ffffff";
-		if (override) div.innerHTML = text;
-		else div.textContent = text;
+		div.innerHTML = ChatBox_default.messageToHTML(text);
 		contentEl.appendChild(div);
 		while (contentEl.childElementCount > 100) contentEl.firstElementChild.remove();
 		if (isAtBottom) contentEl.scrollTop = contentEl.scrollHeight;
@@ -225608,7 +225919,7 @@ function _root$18() {
 function onValidate$1() {
 	const root = _root$18();
 	const PartyFriends = UIManager.getComponent("PartyFriends");
-	switch (_type$6) {
+	switch (_type$5) {
 		case PartyHelper.Type.CREATE: {
 			const nameInput = root.querySelector(".content .name");
 			const name = nameInput ? nameInput.value : "";
@@ -225636,7 +225947,7 @@ function onValidate$1() {
 		}
 	}
 }
-var PartyHelper, _type$6, PartyHelper_default;
+var PartyHelper, _type$5, PartyHelper_default;
 var init_PartyHelper = __esmMin((() => {
 	init_UIManager();
 	init_GUIComponent();
@@ -225656,7 +225967,7 @@ var init_PartyHelper = __esmMin((() => {
 		INVITE: 2,
 		FRIEND_SETUP: 3
 	};
-	_type$6 = PartyHelper.Type.CREATE;
+	_type$5 = PartyHelper.Type.CREATE;
 	/**
 	* Render HTML
 	*/
@@ -225876,7 +226187,7 @@ var init_PartyHelper = __esmMin((() => {
 					el.style.display = "none";
 				});
 		}
-		_type$6 = type;
+		_type$5 = type;
 	};
 	/**
 	* Update party settings UI
@@ -225941,7 +226252,7 @@ var init_PartyHelper = __esmMin((() => {
 	* @returns {number}
 	*/
 	PartyHelper.getType = function getType() {
-		return _type$6;
+		return _type$5;
 	};
 	/**
 	* Hooks
@@ -238878,7 +239189,7 @@ function calculateAnimation(layer, keyIndex, result) {
 	}
 	return true;
 }
-var mat4$19, D3DBLEND, _program$20, _buffer$15, _bufferData, _matrix$6, _lastAngle, PIXEL_TO_WORLD_Z, anim, StrEffect;
+var mat4$19, D3DBLEND, _program$20, _buffer$15, _bufferData, _matrix$6, _spriteOffset, _lastAngle, PIXEL_TO_WORLD_Z, anim, StrEffect;
 var init_StrEffect = __esmMin((() => {
 	init_StrEffect$2();
 	init_StrEffect$1();
@@ -238891,6 +239202,7 @@ var init_StrEffect = __esmMin((() => {
 	_buffer$15 = null;
 	_bufferData = /* @__PURE__ */ new Float32Array(16);
 	_matrix$6 = mat4$19.create();
+	_spriteOffset = /* @__PURE__ */ new Float32Array(2);
 	_lastAngle = -1;
 	PIXEL_TO_WORLD_Z = 1 / 5;
 	anim = {
@@ -239024,18 +239336,17 @@ var init_StrEffect = __esmMin((() => {
 				mat4$19.rotateZ(_matrix$6, _matrix$6, -animat.angle / 180 * Math.PI);
 				_lastAngle = animat.angle;
 			}
-			const spriteOffset = /* @__PURE__ */ new Float32Array(2);
 			let verticalBase = .5;
 			if (this.ownerEntity) {
-				spriteOffset[0] = animat.pos[0] - 320 + (this.xOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
-				spriteOffset[1] = animat.pos[1] - 320 - (this.yOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
+				_spriteOffset[0] = animat.pos[0] - 320 + (this.xOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
+				_spriteOffset[1] = animat.pos[1] - 320 - (this.yOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
 				verticalBase = 0;
 			} else {
-				spriteOffset[0] = animat.pos[0] - 320;
-				spriteOffset[1] = animat.pos[1] - 320;
+				_spriteOffset[0] = animat.pos[0] - 320;
+				_spriteOffset[1] = animat.pos[1] - 320;
 			}
 			gl.uniform4fv(uniform.uSpriteColor, animat.color);
-			gl.uniform2fv(uniform.uSpriteOffset, spriteOffset);
+			gl.uniform2fv(uniform.uSpriteOffset, _spriteOffset);
 			gl.uniform1f(uniform.uVerticalBase, verticalBase);
 			gl.uniform3fv(uniform.uSpritePosition, this.position);
 			gl.uniformMatrix4fv(uniform.uSpriteAngle, false, _matrix$6);
@@ -241835,8 +242146,8 @@ function createInventory(config) {
 	function transferItemToOtherUI(item) {
 		if (transferInventoryItemStack(item, UIManager.components)) return true;
 		const storageUI = StorageController;
-		const isStorageOpen = storageUI._host ? storageUI._host.style.display !== "none" : false;
-		const isCartOpen = CartItems_default._host ? CartItems_default._host.style.display !== "none" : false;
+		const isStorageOpen = storageUI._host ? storageUI._host.isConnected && storageUI._host.style.display !== "none" : false;
+		const isCartOpen = CartItems_default._host ? CartItems_default._host.isConnected && CartItems_default._host.style.display !== "none" : false;
 		if (!item) return false;
 		const count = item.count || 1;
 		if (isStorageOpen) StorageController.reqAddItem(item.index, count);
@@ -243293,8 +243604,8 @@ function onItemInfo$13(event) {
 function transferItemToOtherUI(item) {
 	const storageUI = StorageController;
 	const inventoryUI = InventoryController;
-	const isStorageOpen = storageUI._host ? storageUI._host.style.display !== "none" : false;
-	const isInventoryOpen = inventoryUI._host ? inventoryUI._host.style.display !== "none" : false;
+	const isStorageOpen = storageUI._host ? storageUI._host.isConnected && storageUI._host.style.display !== "none" : false;
+	const isInventoryOpen = inventoryUI._host ? inventoryUI._host.isConnected && inventoryUI._host.style.display !== "none" : false;
 	if (!item) return false;
 	const count = item.count || 1;
 	if (isStorageOpen) StorageController.reqAddItemFromCart(item.index, count);
@@ -244735,13 +245046,13 @@ function eventsBooks() {
 	if (!event) return;
 	Client.getFiles(["data/sprite/book/Ã¥ÀÐ±â.spr", "data/sprite/book/Ã¥ÀÐ±â.act"], function(spr, act) {
 		try {
-			_sprite$3 = new SPR(spr);
-			_action$3 = new ACT(act);
+			_sprite$2 = new SPR(spr);
+			_action$2 = new ACT(act);
 		} catch (e) {
 			console.error("Book::init() - " + e.message);
 			return;
 		}
-		const canvas = _sprite$3.getCanvasFromFrame(0);
+		const canvas = _sprite$2.getCanvasFromFrame(0);
 		canvas.className = "book_open event_add_cursor";
 		event.appendChild(canvas);
 		const bookOpen = root.querySelector(".book_open");
@@ -244766,7 +245077,7 @@ function eventsBooks() {
 		readCanvas.height = 15;
 		readCanvas.className = "book_read event_add_cursor";
 		event.appendChild(readCanvas);
-		_ctx$1 = readCanvas.getContext("2d");
+		_ctx = readCanvas.getContext("2d");
 		const bookRead = root.querySelector(".book_read");
 		if (bookRead) {
 			bookRead.addEventListener("mouseover", (e) => {
@@ -244837,7 +245148,7 @@ function buildMoveInfoTooltip(moveInfo) {
 	for (const entry of MOVE_INFO_MESSAGES) if (moveInfo[entry.key] === true) lines.push(DB.getMessage(entry.msgId));
 	return lines.map((l) => `<div>${l}</div>`).join("");
 }
-var ItemInfo, _sprite$3, _action$3, _ctx$1, _type$5, _start$1, MOVE_INFO_MESSAGES, rendering$2, ItemInfo_default;
+var ItemInfo, _sprite$2, _action$2, _ctx, _type$4, _start, MOVE_INFO_MESSAGES, rendering$2, ItemInfo_default;
 var init_ItemInfo = __esmMin((() => {
 	init_DBManager();
 	init_ItemType();
@@ -244866,8 +245177,8 @@ var init_ItemInfo = __esmMin((() => {
 	init_Inventory();
 	ItemInfo = new GUIComponent("ItemInfo", ItemInfo_default$1);
 	ItemInfo.render = () => ItemInfo_default$2;
-	_type$5 = 0;
-	_start$1 = 0;
+	_type$4 = 0;
+	_start = 0;
 	/**
 	* @let {number} ItemInfo unique id
 	*/
@@ -245077,14 +245388,14 @@ var init_ItemInfo = __esmMin((() => {
 		const position = new Uint16Array([0, 0]);
 		return function render() {
 			const _entity = new Entity();
-			const action = _action$3.actions[_type$5];
-			const anim = Math.floor((Renderer.tick - _start$1) / action.delay);
+			const action = _action$2.actions[_type$4];
+			const anim = Math.floor((Renderer.tick - _start) / action.delay);
 			const animation = action.animations[anim % action.animations.length];
 			let i, count;
 			count = animation.layers.length;
-			SpriteRenderer.bind2DContext(_ctx$1, 10, 25);
-			_ctx$1.clearRect(0, 0, _ctx$1.canvas.width, _ctx$1.canvas.height);
-			for (i = 0, count = animation.layers.length; i < count; ++i) _entity.renderLayer(animation.layers[i], _sprite$3, _sprite$3, 1, position, false);
+			SpriteRenderer.bind2DContext(_ctx, 10, 25);
+			_ctx.clearRect(0, 0, _ctx.canvas.width, _ctx.canvas.height);
+			for (i = 0, count = animation.layers.length; i < count; ++i) _entity.renderLayer(animation.layers[i], _sprite$2, _sprite$2, 1, position, false);
 		};
 	})();
 	/**
@@ -251389,6 +251700,19 @@ function loadAliases() {
 	for (const cmd in CommandStore) if (CommandStore[cmd].aliases) for (let i = 0; i < CommandStore[cmd].aliases.length; i++) aliases[CommandStore[cmd].aliases[i]] = cmd;
 }
 /**
+* Block or allow whispers from a character
+*
+* @param {string} name
+* @param {number} type - 0 block, 1 allow
+*/
+function requestWhisperSetting(name, type) {
+	const pkt = new PACKET.CZ.SETTING_WHISPER_PC();
+	pkt.name = name;
+	pkt.type = type;
+	Network.sendPacket(pkt);
+	ChatBox_default.PrivateMessageStorage.blockNicks.push(name);
+}
+/**
 * Process command
 */
 function processCommand(text) {
@@ -251811,6 +252135,45 @@ var init_ProcessCommand = __esmMin((() => {
 			description: "Sends the specified message to everyone on your friend list",
 			callback: function() {
 				FriendEngine.sayHi();
+			}
+		},
+		ex: {
+			description: "Blocks whispers from <Character Name>, or lists the blocked characters",
+			callback: function(text) {
+				const matches = text.match(/^ex\s+(.*\S)/);
+				if (matches) {
+					requestWhisperSetting(matches[1], 0);
+					return;
+				}
+				const pkt = new PACKET.CZ.REQ_WHISPER_LIST();
+				Network.sendPacket(pkt);
+			}
+		},
+		in: {
+			description: "Allows whispers from <Character Name>",
+			callback: function(text) {
+				const matches = text.match(/^in\s+(.*\S)/);
+				if (matches) {
+					requestWhisperSetting(matches[1], 1);
+					return;
+				}
+				this.addText(DB.getMessage(44), this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
+			}
+		},
+		exall: {
+			description: "Blocks whispers from everyone",
+			callback: function() {
+				const pkt = new PACKET.CZ.SETTING_WHISPER_STATE();
+				pkt.type = 0;
+				Network.sendPacket(pkt);
+			}
+		},
+		inall: {
+			description: "Allows whispers from everyone",
+			callback: function() {
+				const pkt = new PACKET.CZ.SETTING_WHISPER_STATE();
+				pkt.type = 1;
+				Network.sendPacket(pkt);
 			}
 		},
 		guild: {
@@ -253751,17 +254114,15 @@ var init_Model = __esmMin((() => {
 * Interpolate between two quaternions using SLERP
 */
 function slerpQuat(q1, q2, t) {
-	const out = quat.create();
-	quat.slerp(out, q1, q2, t);
-	return out;
+	quat.slerp(_scratchQuat, q1, q2, t);
+	return _scratchQuat;
 }
 /**
 * Interpolate between two vec3 using linear interpolation
 */
 function lerpVec3(v1, v2, t) {
-	const out = vec3$3.create();
-	vec3$3.lerp(out, v1, v2, t);
-	return out;
+	vec3$3.lerp(_scratchVec3Scale, v1, v2, t);
+	return _scratchVec3Scale;
 }
 /**
 * Get rotation at a specific frame from keyframes
@@ -253796,11 +254157,12 @@ function getRotationAtFrame(rotKeyframes, frame, animLen) {
 */
 function getPositionAtFrame(posKeyframes, frame, animLen) {
 	if (!posKeyframes || posKeyframes.length === 0) return null;
-	if (posKeyframes.length === 1) return [
-		posKeyframes[0].px,
-		posKeyframes[0].py,
-		posKeyframes[0].pz
-	];
+	if (posKeyframes.length === 1) {
+		_scratchVec3Pos[0] = posKeyframes[0].px;
+		_scratchVec3Pos[1] = posKeyframes[0].py;
+		_scratchVec3Pos[2] = posKeyframes[0].pz;
+		return _scratchVec3Pos;
+	}
 	let prevIdx = 0;
 	let nextIdx = 0;
 	for (let i = 0; i < posKeyframes.length; i++) {
@@ -253816,11 +254178,10 @@ function getPositionAtFrame(posKeyframes, frame, animLen) {
 	}
 	if (prevIdx === nextIdx) {
 		const kf = posKeyframes[prevIdx];
-		return [
-			kf.px,
-			kf.py,
-			kf.pz
-		];
+		_scratchVec3Pos[0] = kf.px;
+		_scratchVec3Pos[1] = kf.py;
+		_scratchVec3Pos[2] = kf.pz;
+		return _scratchVec3Pos;
 	}
 	const prevFrame = posKeyframes[prevIdx].frame;
 	let nextFrame = posKeyframes[nextIdx].frame;
@@ -253830,15 +254191,10 @@ function getPositionAtFrame(posKeyframes, frame, animLen) {
 	t = Math.max(0, Math.min(1, t));
 	const p1 = posKeyframes[prevIdx];
 	const p2 = posKeyframes[nextIdx];
-	return lerpVec3([
-		p1.px,
-		p1.py,
-		p1.pz
-	], [
-		p2.px,
-		p2.py,
-		p2.pz
-	], t);
+	_scratchVec3Pos[0] = p1.px + (p2.px - p1.px) * t;
+	_scratchVec3Pos[1] = p1.py + (p2.py - p1.py) * t;
+	_scratchVec3Pos[2] = p1.pz + (p2.pz - p1.pz) * t;
+	return _scratchVec3Pos;
 }
 /**
 * Get scale at a specific frame from keyframes
@@ -253880,7 +254236,7 @@ function calcNormal_NONE(out) {
 function calcNormal_FLAT(node, out, normalMat, groupUsed) {
 	let i, j, count;
 	let face;
-	const temp_vec = vec3$3.create();
+	const temp_vec = _scratchTempVec;
 	const faces = node.faces;
 	const vertices = node.vertices;
 	for (i = 0, j = 0, count = faces.length; i < count; ++i, j += 3) {
@@ -254000,24 +254356,25 @@ function generate_mesh_SMOOTH(node, vert, shadeGroup, mesh) {
 * Compile a node at a specific animation frame
 */
 function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
-	const modelViewMat = mat4$16.create();
-	const normalMat = mat4$16.create();
+	const modelViewMat = _scratchModelViewMat;
+	const normalMat = _scratchNormalMat;
 	const textures = node.textures;
 	const faces = node.faces;
 	const vertices = node.vertices;
 	const mesh = {};
 	const mesh_size = [];
-	const shadeGroup = new Array(32);
-	const shadeGroupUsed = new Array(32);
+	for (let g = 0; g < 32; g++) {
+		_shadeGroup[g] = null;
+		_shadeGroupUsed[g] = false;
+	}
 	let i, x, y, z, count;
-	const matrix = mat4$16.create();
+	const matrix = _scratchMatrix;
 	mat4$16.identity(matrix);
-	mat4$16.translate(matrix, matrix, [
-		-node.main.box.center[0],
-		-node.main.box.max[1],
-		-node.main.box.center[2]
-	]);
-	const nodeMatrix = mat4$16.create();
+	_scratchVec3BoxCenter[0] = -node.main.box.center[0];
+	_scratchVec3BoxCenter[1] = -node.main.box.max[1];
+	_scratchVec3BoxCenter[2] = -node.main.box.center[2];
+	mat4$16.translate(matrix, matrix, _scratchVec3BoxCenter);
+	const nodeMatrix = _scratchNodeMatrix;
 	mat4$16.identity(nodeMatrix);
 	const animPos = getPositionAtFrame(node.posKeyframes, frame, animLen);
 	if (animPos) mat4$16.translate(nodeMatrix, nodeMatrix, animPos);
@@ -254031,7 +254388,7 @@ function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
 	else mat4$16.scale(nodeMatrix, nodeMatrix, node.scale);
 	mat4$16.multiply(matrix, matrix, nodeMatrix);
 	if (!node.is_only) mat4$16.translate(matrix, matrix, node.offset);
-	mat4$16.multiply(matrix, matrix, mat3$1.toMat4(node.mat3));
+	mat4$16.multiply(matrix, matrix, mat3$1.toMat4(node.mat3, _scratchMat4Node));
 	mat4$16.multiply(modelViewMat, instanceMatrix, matrix);
 	mat4$16.extractRotation(normalMat, modelViewMat);
 	count = vertices.length;
@@ -254055,13 +254412,13 @@ function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
 			generate_mesh_FLAT(node, vert, face_normal, mesh);
 			break;
 		case 1:
-			calcNormal_FLAT(node, face_normal, normalMat, shadeGroupUsed);
+			calcNormal_FLAT(node, face_normal, normalMat, _shadeGroupUsed);
 			generate_mesh_FLAT(node, vert, face_normal, mesh);
 			break;
 		case 2:
-			calcNormal_FLAT(node, face_normal, normalMat, shadeGroupUsed);
-			calcNormal_SMOOTH(node, face_normal, shadeGroupUsed, shadeGroup);
-			generate_mesh_SMOOTH(node, vert, shadeGroup, mesh);
+			calcNormal_FLAT(node, face_normal, normalMat, _shadeGroupUsed);
+			calcNormal_SMOOTH(node, face_normal, _shadeGroupUsed, _shadeGroup);
+			generate_mesh_SMOOTH(node, vert, _shadeGroup, mesh);
 	}
 	return mesh;
 }
@@ -254155,7 +254512,7 @@ function initModel(gl, data) {
 		WebGL_default.texture(gl, data.infos[i].texture, onTextureLoaded, i);
 	}
 }
-var _program$18, _normalMat, mat4$16, mat3$1, quat, vec3$3, _light, RsmEffect;
+var _program$18, _normalMat, mat4$16, mat3$1, quat, vec3$3, _light, _scratchModelViewMat, _scratchNormalMat, _scratchMatrix, _scratchNodeMatrix, _scratchMat4Node, _scratchTempVec, _scratchQuat, _scratchVec3Pos, _scratchVec3Scale, _scratchVec3BoxCenter, _shadeGroup, _shadeGroupUsed, RsmEffect;
 var init_RsmEffect = __esmMin((() => {
 	init_RsmEffect$2();
 	init_RsmEffect$1();
@@ -254187,6 +254544,18 @@ var init_RsmEffect = __esmMin((() => {
 			0
 		])
 	};
+	_scratchModelViewMat = mat4$16.create();
+	_scratchNormalMat = mat4$16.create();
+	_scratchMatrix = mat4$16.create();
+	_scratchNodeMatrix = mat4$16.create();
+	_scratchMat4Node = mat4$16.create();
+	_scratchTempVec = vec3$3.create();
+	_scratchQuat = quat.create();
+	_scratchVec3Pos = vec3$3.create();
+	_scratchVec3Scale = vec3$3.create();
+	_scratchVec3BoxCenter = vec3$3.create();
+	_shadeGroup = new Array(32);
+	_shadeGroupUsed = new Array(32);
 	RsmEffect = class {
 		constructor(params) {
 			this.position = params.Inst.position;
@@ -260594,6 +260963,7 @@ var init_MapRenderer = __esmMin((() => {
 			BGM.stop();
 			PostProcess.clean(gl);
 			Mouse.intersect = false;
+			Cursor.setType(Cursor.ACTION.DEFAULT);
 			this.light = null;
 			this.water = null;
 			this.sounds = null;
@@ -260645,6 +261015,7 @@ var init_MapRenderer = __esmMin((() => {
 			OccluderFade.beginFrame(gl, modelView, tick);
 			Models_default.render(gl, modelView, projection, normalMat, fog, light);
 			AnimatedModels_default.render(gl, modelView, projection, normalMat, fog, light, tick);
+			EntityManager.cull();
 			GR2ModelRenderer_default.render(gl, modelView, projection, normalMat, fog, light, tick);
 			ScreenEffectManager.render(gl, modelView, projection, fog, tick, true);
 			EffectManager.render(gl, modelView, projection, fog, tick, true);
@@ -261333,6 +261704,7 @@ var init_Renderer = __esmMin((() => {
 				}
 				this._lastFrameTime = 0;
 				this._renderBound = this._render.bind(this);
+				Cursor.setSceneDriven(true);
 				this.updateId = _requestAnimationFrame(this._renderBound);
 			}
 		}
@@ -261348,6 +261720,7 @@ var init_Renderer = __esmMin((() => {
 				} catch (e) {
 					console.error(e);
 				}
+				Cursor.setSceneDriven(false);
 				return;
 			}
 			const pos = this.renderCallbacks.indexOf(fn);
@@ -282455,7 +282828,7 @@ var init_liblua5_1 = __esmMin((() => {
 }));
 //#endregion
 //#region node_modules/lodash/lodash.js
-var require_lodash = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+var require_lodash = /* @__PURE__ */ __commonJSMin(((exports, module, this$2) => {
 	/**
 	* @license
 	* Lodash <https://lodash.com/>
@@ -297041,7 +297414,7 @@ var require_lodash = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			(freeModule.exports = _)._ = _;
 			freeExports._ = _;
 		} else root._ = _;
-	}).call(exports);
+	}).call(this$2);
 }));
 //#endregion
 //#region src/Vendors/wasmoon-lua5.1.js
@@ -304545,7 +304918,7 @@ function updateMapTable() {
 		else MapTable[key] = { name: MapInfo[key].displayName };
 	}
 }
-var lua, HO_AI, MER_AI, default_HO_AI, default_MER_AI, MsgStringTable, JokeTable, ScreamTable, MapTable, SkillDescription, SexTable, PetTalkTable, CheckAttendanceTable, buyingStoreItemList, LaphineSysTable, LaphineUpgTable, ItemDBNameTbl, ItemReformTable, EnchantListTable, SignBoardTranslatedTable, SignBoardTable, NaviMapTable, NaviMobTable, NaviNpcTable, NaviLinkTable, NaviLinkDistanceTable, NaviNpcDistanceTable, QuestInfo, TitleTable, PetDBTable, EggIDToJobID, ReputeGroup, ReputeInfo, AchievementTable, MsgEmotionCSV, HatEffectID, HatEffectInfo, FootPrintEffectInfo, CashShopBannerTable, Ez2streffect, unknownItem, servers, langType, userCharpage, userStringDecoder, DB, SUFFIX_TO_FIELD, HARDCODED_FIELD_MAPPING;
+var lua, HO_AI, MER_AI, default_HO_AI, default_MER_AI, mountPalettes, mountPalettesProbe, MsgStringTable, JokeTable, ScreamTable, MapTable, SkillDescription, SexTable, PetTalkTable, CheckAttendanceTable, buyingStoreItemList, LaphineSysTable, LaphineUpgTable, ItemDBNameTbl, ItemReformTable, EnchantListTable, SignBoardTranslatedTable, SignBoardTable, NaviMapTable, NaviMobTable, NaviNpcTable, NaviLinkTable, NaviLinkDistanceTable, NaviNpcDistanceTable, QuestInfo, TitleTable, PetDBTable, EggIDToJobID, ReputeGroup, ReputeInfo, AchievementTable, MsgEmotionCSV, HatEffectID, HatEffectInfo, FootPrintEffectInfo, CashShopBannerTable, Ez2streffect, unknownItem, servers, langType, userCharpage, userStringDecoder, DB, SUFFIX_TO_FIELD, HARDCODED_FIELD_MAPPING;
 var init_DBManager = __esmMin((() => {
 	init_Client();
 	init_Configs();
@@ -304594,6 +304967,7 @@ var init_DBManager = __esmMin((() => {
 	init_PacketVerManager();
 	init_MemoryManager();
 	init_preload_helper();
+	mountPalettesProbe = null;
 	MsgStringTable = [];
 	JokeTable = [];
 	ScreamTable = [];
@@ -304678,6 +305052,9 @@ var init_DBManager = __esmMin((() => {
 			DB.isLoaded = false;
 			DB.count = 0;
 			DB.index = 0;
+			mountPalettes = void 0;
+			if (mountPalettesProbe) mountPalettesProbe.stale = true;
+			else MemoryManager.remove(null, DB.getBodyPalPath(JobConst_default.PIG_CREATOR, 1, 0));
 			let index = 0, count = 0;
 			function onLoad() {
 				count++;
@@ -305211,6 +305588,30 @@ var init_DBManager = __esmMin((() => {
 		*/
 		static getAdminPath(sex) {
 			return "data/sprite/ÀÎ°£Á·/¸öÅë/" + SexTable[sex] + "/¿î¿µÀÚ_" + SexTable[sex];
+		}
+		/**
+		* Whether the archive ships the halter-lead mounts' own palettes, read off
+		* a file only those archives have: asked once per archive.
+		*
+		* @param {function} onAnswer - called once the archive answers, if it has not yet
+		* @return {boolean|undefined} undefined until the archive answers
+		*/
+		static hasMountPalettes(onAnswer) {
+			if (mountPalettes === void 0) {
+				const sentinel = DB.getBodyPalPath(JobConst_default.PIG_CREATOR, 1, 0);
+				if (!mountPalettesProbe) mountPalettesProbe = { stale: false };
+				const probe = mountPalettesProbe;
+				const answer = (present) => {
+					if (probe === mountPalettesProbe) {
+						mountPalettesProbe = null;
+						if (probe.stale) MemoryManager.remove(null, sentinel);
+						else mountPalettes = present;
+					}
+					onAnswer();
+				};
+				Client.loadFile(sentinel, () => answer(true), () => answer(false));
+			}
+			return mountPalettes;
 		}
 		/**
 		* @return {string} path to body palette
@@ -310155,6 +310556,7 @@ function UpdateBodyStyle(look) {
 * Update body palette
 *
 * @param {number} body palette number
+* @see docs/reference/renderer/body-palette.md
 */
 function UpdateBodyPalette(pal) {
 	this._bodypalette = pal;
@@ -310164,7 +310566,12 @@ function UpdateBodyPalette(pal) {
 	}
 	if (this._job === -1) return;
 	const job = this._bodyStyleJob && !hasTransformation.call(this) ? this._bodyStyleJob : getEffectiveJob.call(this);
-	this.files.body.pal = DB.getBodyPalPath(job, this._bodypalette, this._sex);
+	if (!AllMountJobs[job]) {
+		this.files.body.pal = DB.getBodyPalPath(job, this._bodypalette, this._sex);
+		return;
+	}
+	const own = DB.hasMountPalettes(() => UpdateBodyPalette.call(this, this._bodypalette));
+	if (own !== void 0) this.files.body.pal = DB.getBodyPalPath(own ? job : this._job, pal, this._sex);
 }
 /**
 * Update head
@@ -310380,7 +310787,7 @@ function Init$5() {
 	createTransformationProperty("active_monster_transform");
 	createTransformationProperty("job_transform");
 }
-var GR2_MODEL_ROOT, GR2_FALLBACK_JOB, HeadParts;
+var GR2_MODEL_ROOT, GR2_FALLBACK_JOB, HeadParts, AllMountJobs;
 var init_EntityView = __esmMin((() => {
 	init_Client();
 	init_DBManager();
@@ -310399,6 +310806,8 @@ var init_EntityView = __esmMin((() => {
 		"accessory2",
 		"accessory3"
 	];
+	AllMountJobs = {};
+	for (const baseJob in AllMountTable) AllMountJobs[AllMountTable[baseJob]] = true;
 }));
 //#endregion
 //#region src/Renderer/Entity/EntityWalk.js
@@ -310750,6 +311159,60 @@ function fastMoveTo(to_x, to_y, speed = 15, onEnd, keepDirection = false) {
 	return true;
 }
 /**
+* Compute segment duration based on diagonal movement
+*/
+function getSegmentDuration(dx, dy, baseSpeed) {
+	let duration = dx && dy ? baseSpeed * Math.SQRT2 : baseSpeed;
+	if (!duration || duration < 1) duration = 1;
+	return duration;
+}
+/**
+* Finish walking sequence for entity
+*/
+function finishWalk(entity, pos, walk, path, total) {
+	const cellHeight = entity.objecttype == entity.constructor.TYPE_FALCON ? Altitude.getCellHeight(path[total - 2], path[total - 1]) + 5 : Altitude.getCellHeight(path[total - 2], path[total - 1]);
+	pos[0] = path[total - 2];
+	pos[1] = path[total - 1];
+	pos[2] = cellHeight;
+	walk.lastPos.set(pos);
+	if (entity.isFastMoving) {
+		entity.isFastMoving = false;
+		entity._fastMoveTrail = false;
+		entity._preserveDirection = false;
+		if (typeof entity._normalSpeed === "number") {
+			entity.walk.speed = entity._normalSpeed;
+			delete entity._normalSpeed;
+		}
+	}
+	if (entity.objecttype == entity.constructor.TYPE_WUG && entity.isAttacking) entity.setAction({
+		action: entity.ACTION.ATTACK,
+		frame: 0,
+		repeat: false,
+		play: true,
+		next: {
+			delay: Date.now() + 432,
+			action: entity.ACTION.IDLE,
+			frame: 0,
+			repeat: false,
+			play: true,
+			next: false
+		}
+	});
+	else if (entity.action !== entity.ACTION.DIE) entity.setAction({
+		action: entity.ACTION.IDLE,
+		frame: 0,
+		play: true,
+		repeat: true
+	});
+	entity.onWalkEnd();
+	if (walk.onEnd) {
+		walk.onEnd();
+		walk.onEnd = null;
+	}
+	entity.resetRoute();
+	entity.isAttacking = false;
+}
+/**
 * Process walking
 */
 function walkProcess() {
@@ -310781,56 +311244,8 @@ function walkProcess() {
 		console.trace("Stack trace of debug:");
 	}
 	if (this.action === this.ACTION.WALK || this.isFastMoving || this.objecttype === this.constructor.TYPE_FALCON || this.objecttype === this.constructor.TYPE_WUG) {
-		const getSegmentDuration = function getSegmentDuration(dx, dy, baseSpeed) {
-			let duration = dx && dy ? baseSpeed * Math.SQRT2 : baseSpeed;
-			if (!duration || duration < 1) duration = 1;
-			return duration;
-		};
-		const finishWalk = () => {
-			const cellHeight = this.objecttype == this.constructor.TYPE_FALCON ? Altitude.getCellHeight(path[total - 2], path[total - 1]) + 5 : Altitude.getCellHeight(path[total - 2], path[total - 1]);
-			pos[0] = path[total - 2];
-			pos[1] = path[total - 1];
-			pos[2] = cellHeight;
-			walk.lastPos.set(pos);
-			if (this.isFastMoving) {
-				this.isFastMoving = false;
-				this._fastMoveTrail = false;
-				this._preserveDirection = false;
-				if (typeof this._normalSpeed === "number") {
-					this.walk.speed = this._normalSpeed;
-					delete this._normalSpeed;
-				}
-			}
-			if (this.objecttype == this.constructor.TYPE_WUG && this.isAttacking) this.setAction({
-				action: this.ACTION.ATTACK,
-				frame: 0,
-				repeat: false,
-				play: true,
-				next: {
-					delay: Date.now() + 432,
-					action: this.ACTION.IDLE,
-					frame: 0,
-					repeat: false,
-					play: true,
-					next: false
-				}
-			});
-			else if (this.action !== this.ACTION.DIE) this.setAction({
-				action: this.ACTION.IDLE,
-				frame: 0,
-				play: true,
-				repeat: true
-			});
-			this.onWalkEnd();
-			if (walk.onEnd) {
-				walk.onEnd();
-				walk.onEnd = null;
-			}
-			this.resetRoute();
-			this.isAttacking = false;
-		};
 		if (index >= total) {
-			finishWalk();
+			finishWalk(this, pos, walk, path, total);
 			return;
 		}
 		let startX = walk.pos[0];
@@ -310902,7 +311317,7 @@ function walkProcess() {
 		walk.tick = segmentStart;
 		walk.prevTick = TICK;
 		if (!(index >= total - 2 && t >= .999 && TICK >= segmentEnd)) return;
-		finishWalk();
+		finishWalk(this, pos, walk, path, total);
 	} else {
 		if (index < total) {
 			this.walk.tick += TICK - this.walk.prevTick;
@@ -310948,7 +311363,7 @@ function resetRoute(keepDistance) {
 	this.walk.tick = 0;
 	this.walk.prevTick = 0;
 	if (!keepDistance) this.walk.dist = 0;
-	this.walk.path = new Int16Array(PathFinding_default.MAX_WALKPATH * 2);
+	this.walk.path.fill(0);
 	if (this.walk.segmentDurations) this.walk.segmentDurations.fill(0);
 	this.walk.lastPos[0] = 0;
 	this.walk.lastPos[1] = 0;
@@ -311880,6 +312295,7 @@ var init_EntityRoom = __esmMin((() => {
 			this.node = EntityRoom_default.clone("EntityRoom", true);
 			this.node.init = init;
 			this.node.append();
+			if (this.owner.culled) this.node.ui[0].style.display = "none";
 		}
 		/**
 		* Remove Room
@@ -312927,6 +313343,7 @@ var init_Entity$1 = __esmMin((() => {
 			this.position = vec3.create();
 			this.gr2 = null;
 			this.gr2Model = null;
+			this.culled = false;
 			Init$11.call(this);
 			Init$10.call(this);
 			Init$9.call(this);
@@ -313412,6 +313829,7 @@ function free() {
 	});
 	_list.length = 0;
 	_gidMap.clear();
+	_over = null;
 	_pickList.length = 0;
 	_renderSortDirty = true;
 	_pickSortDirty = true;
@@ -313533,6 +313951,31 @@ function isCulled(culling, entity) {
 	return dx * dx + dy * dy > culling.viewAreaSq;
 }
 /**
+* Hide the entity overlays while culled, show them back once drawn
+*
+* @param {Entity} entity
+* @param {boolean} culled
+*/
+function setCulled(entity, culled) {
+	if (entity.culled === culled) return;
+	entity.culled = culled;
+	const display = culled ? "none" : "";
+	entity.life.canvas.style.display = display;
+	entity.emblem.canvas.style.display = display;
+	entity.display.canvas.style.display = display;
+	entity.dialog.canvas.style.display = display;
+	entity.cast.canvas.style.display = display;
+	if (entity.room.node) entity.room.node.ui[0].style.display = display;
+}
+/**
+* Decide, once per frame and before any pass draws, which entities are out of
+* the view area: their overlays are hidden and every pass skips them
+*/
+function cull() {
+	const culling = getCulling();
+	for (let i = 0, count = _list.length; i < count; ++i) setCulled(_list[i], isCulled(culling, _list[i]));
+}
+/**
 * Render all entities (picking or not)
 *
 * @param {object} gl webgl context
@@ -313555,7 +313998,6 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 		_pickSortDirty = true;
 	}
 	SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
-	const culling = getCulling();
 	for (i = 0, count = _list.length; i < count; ++i) if (_list[i].objecttype != _list[i].constructor.TYPE_EFFECT && !renderEffects || _list[i].objecttype == _list[i].constructor.TYPE_EFFECT && renderEffects) {
 		if (_list[i].remove_tick && _list[i].remove_tick + _list[i].remove_delay < tick) {
 			const entityFocus = getFocusEntity();
@@ -313572,7 +314014,7 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 			_pickSortDirty = true;
 			continue;
 		}
-		if (isCulled(culling, _list[i])) continue;
+		if (_list[i].culled) continue;
 		_list[i].render(modelView, projection);
 	}
 	SpriteRenderer.unbind(gl);
@@ -313748,6 +314190,7 @@ var init_EntityManager = __esmMin((() => {
 		getLife,
 		removeLife,
 		clearLifeCache,
+		cull,
 		render: render$5,
 		intersect,
 		setSupportPicking,
@@ -313858,6 +314301,13 @@ function bindMouseEvents() {
 	}, true);
 }
 /**
+* Keep the cursor animated while the scene render loop is stopped (login, server list)
+*/
+function renderLoop() {
+	Cursor.render(Date.now());
+	_loopId = requestAnimationFrame(renderLoop);
+}
+/**
 * Start pre-compiling animation to avoid building sprites
 * during the rendering loop
 */
@@ -313873,14 +314323,14 @@ function preCompiledAnimations() {
 	const dataURIList = [];
 	_compiledStyle = [];
 	const position = [0, 0];
-	for (i = 0, count = _action$2.actions.length; i < count; ++i) {
-		action = _action$2.actions[i];
+	for (i = 0, count = _action$1.actions.length; i < count; ++i) {
+		action = _action$1.actions[i];
 		info = ActionInformations[i] || ActionInformations[Cursor.ACTION.DEFAULT];
 		for (j = 0, size = action.animations.length; j < size; ++j) {
 			animation = action.animations[j];
 			SpriteRenderer.bind2DContext(ctx, info.drawX, info.drawY);
 			ctx.clearRect(0, 0, 50, 50);
-			for (k = 0, total = animation.layers.length; k < total; ++k) entity.renderLayer(animation.layers[k], _sprite$2, _sprite$2, 1, position, false);
+			for (k = 0, total = animation.layers.length; k < total; ++k) entity.renderLayer(animation.layers[k], _sprite$1, _sprite$1, 1, position, false);
 			dataURI = canvas.toDataURL("image/png");
 			pos = dataURIList.indexOf(dataURI);
 			if (pos > -1) {
@@ -313942,7 +314392,7 @@ function createSpriteSheet() {
 	}
 	for (let i = 0; i < totalSprites; i++) drawSprite(i);
 }
-var _tick, _norepeat, _animation, _play, _lastStyleId, _lastX, _lastY, _compiledStyle, _sprite$2, _action$2, _selector, Cursor, _type$4, ActionInformations;
+var _tick, _norepeat, _animation, _play, _lastStyleId, _lastX, _lastY, _compiledStyle, _sceneDriven, _loopId, _sprite$1, _action$1, _selector, Cursor, _type$3, ActionInformations;
 var init_CursorManager = __esmMin((() => {
 	init_Client();
 	init_MemoryManager();
@@ -313962,6 +314412,8 @@ var init_CursorManager = __esmMin((() => {
 	_lastX = 0;
 	_lastY = 0;
 	_compiledStyle = [];
+	_sceneDriven = false;
+	_loopId = 0;
 	Cursor = class Cursor {
 		/**
 		* Cursor animation Constant
@@ -314003,14 +314455,14 @@ var init_CursorManager = __esmMin((() => {
 		* Load cursor data (action, sprite)
 		*/
 		static init(fn) {
-			if (_sprite$2) {
+			if (_sprite$1) {
 				fn();
 				return;
 			}
 			Client.getFiles(["data/sprite/cursors.spr", "data/sprite/cursors.act"], (spr, act) => {
 				try {
-					_sprite$2 = new SPR(spr);
-					_action$2 = new ACT(act);
+					_sprite$1 = new SPR(spr);
+					_action$1 = new ACT(act);
 				} catch (e) {
 					console.error("Cursor::init() - " + e.message);
 					return;
@@ -314020,6 +314472,7 @@ var init_CursorManager = __esmMin((() => {
 				bindMouseEvents();
 				preCompiledAnimations();
 				createSpriteSheet();
+				Cursor.setSceneDriven(_sceneDriven);
 				fn();
 			});
 		}
@@ -314032,7 +314485,7 @@ var init_CursorManager = __esmMin((() => {
 		*/
 		static setType(type, norepeat, animation) {
 			if (Cursor.freeze) return;
-			_type$4 = type;
+			_type$3 = type;
 			_tick = Date.now();
 			_norepeat = !!norepeat;
 			if (typeof animation !== "undefined") {
@@ -314049,7 +314502,19 @@ var init_CursorManager = __esmMin((() => {
 		* @return {number} Cursor.ACTION.*
 		*/
 		static getActualType() {
-			return _type$4;
+			return _type$3;
+		}
+		/**
+		* Let the scene render loop draw the cursor after its frame, or draw it on its own while the scene is stopped
+		*
+		* @param {boolean} value
+		*/
+		static setSceneDriven(value) {
+			_sceneDriven = value;
+			if (value) {
+				cancelAnimationFrame(_loopId);
+				_loopId = 0;
+			} else if (!_loopId && _compiledStyle.length) _loopId = requestAnimationFrame(renderLoop);
 		}
 		/**
 		* Render the cursor (update)
@@ -314060,8 +314525,8 @@ var init_CursorManager = __esmMin((() => {
 				return;
 			}
 			if (_selector && _selector.style.display === "none") _selector.style.display = "block";
-			const info = ActionInformations[_type$4] || ActionInformations[Cursor.ACTION.DEFAULT];
-			const action = _action$2.actions[_type$4] || _action$2.actions[Cursor.ACTION.DEFAULT];
+			const info = ActionInformations[_type$3] || ActionInformations[Cursor.ACTION.DEFAULT];
+			const action = _action$1.actions[_type$3] || _action$1.actions[Cursor.ACTION.DEFAULT];
 			let anim = _animation;
 			const delay = action.delay * info.delayMult;
 			let x = info.startX;
@@ -314100,7 +314565,7 @@ var init_CursorManager = __esmMin((() => {
 			}
 		}
 	};
-	_type$4 = Cursor.ACTION.DEFAULT;
+	_type$3 = Cursor.ACTION.DEFAULT;
 	ActionInformations = {};
 	ActionInformations[Cursor.ACTION.DEFAULT] = {
 		drawX: 1,
@@ -314726,6 +315191,7 @@ var init_GUIComponent = __esmMin((() => {
 			if (this.mouseMode === MouseMode.FREEZE) {
 				Mouse.intersect = false;
 				SessionStorage_default.FreezeUI = true;
+				_EntityManager?.setOverEntity(null);
 				_Cursor?.setType(_Cursor?.ACTION?.DEFAULT ?? 0);
 			}
 			if (this.onAppend) this.onAppend();
@@ -319367,11 +319833,11 @@ function addItem$1(content, item, isinput) {
 		const price = prettyZeny$3(item.price, true);
 		const container = document.createElement("div");
 		container.className = "item-container";
-		const amountText = _type$3 === Vending.Type.BUYING_STORE ? item.total : item.IsStackable ? item.count : "";
-		const eaHtml = _type$3 === Vending.Type.BUYING_STORE ? `<div class="amount_">${item.count} ea</div>` : "";
+		const amountText = _type$2 === Vending.Type.BUYING_STORE ? item.total : item.IsStackable ? item.count : "";
+		const eaHtml = _type$2 === Vending.Type.BUYING_STORE ? `<div class="amount_">${item.count} ea</div>` : "";
 		container.innerHTML = `<div class="item output" draggable="true" data-index="${item.index}"><div class="icon"></div><div class="amount">${amountText}</div>` + eaHtml + `<div class="name">${escapeHtml(DB.getItemName(item))}</div><div class="price">${textPrice} ${price}</div></div>`;
 		itemObj = container;
-		if (_type$3 === Vending.Type.BUYING_STORE) {
+		if (_type$2 === Vending.Type.BUYING_STORE) {
 			const limitInput = Vending.getRoot().querySelector(".limitZeny");
 			let limit = parseInt(limitInput.value, 10);
 			limit += item.count * item.price;
@@ -319397,7 +319863,7 @@ function requestMoveItem$1(index, fromContent, toContent, isAdding) {
 		if (!(countSlotsUsed() < _slots)) return false;
 		count = _input$1[index].count;
 	} else count = _output$1[index].count;
-	if ((item.count === 1 || !item.IsStackable) && _type$3 === Vending.Type.VENDING_STORE) {
+	if ((item.count === 1 || !item.IsStackable) && _type$2 === Vending.Type.VENDING_STORE) {
 		if (isAdding) {
 			InputBox_default.append();
 			InputBox_default.setType("price", false, item_price);
@@ -319414,11 +319880,11 @@ function requestMoveItem$1(index, fromContent, toContent, isAdding) {
 	InputBox_default.onSubmitRequest = function(_count) {
 		InputBox_default.remove();
 		if (_count > 0) {
-			if (_count >= 9999 && _type$3 === Vending.Type.BUYING_STORE) {
+			if (_count >= 9999 && _type$2 === Vending.Type.BUYING_STORE) {
 				VendingModelMessage_default.setInit(1742);
 				return;
 			}
-			if (item.count + _count > 9999 && _type$3 === Vending.Type.BUYING_STORE) {
+			if (item.count + _count > 9999 && _type$2 === Vending.Type.BUYING_STORE) {
 				VendingModelMessage_default.setInit(1728);
 				return;
 			}
@@ -319463,7 +319929,7 @@ function onItemInfo$11(event) {
 	ItemInfo_default.setItem(item);
 }
 function onItemSelected$1() {
-	if (_type$3 === Vending.Type.BUY || _type$3 === Vending.Type.VENDING_STORE) return;
+	if (_type$2 === Vending.Type.BUY || _type$2 === Vending.Type.VENDING_STORE) return;
 	const root = Vending.getRoot();
 	const inputWin = root.querySelector(".InputWindow");
 	let from, to;
@@ -319540,7 +320006,7 @@ function submitNetworkPacket(pkt) {
 function onItemOver$8() {
 	if (!this.classList.contains("input")) return;
 	const idx = parseInt(this.getAttribute("data-index"), 10);
-	const item = _type$3 === Vending.Type.VENDING_STORE ? CartItems_default.getItemByIndex(idx) : InventoryController.getItemByIndex(idx);
+	const item = _type$2 === Vending.Type.VENDING_STORE ? CartItems_default.getItemByIndex(idx) : InventoryController.getItemByIndex(idx);
 	if (!item) return;
 	const overlay = Vending.getRoot().querySelector(".overlay");
 	overlay.style.display = "";
@@ -319552,7 +320018,7 @@ function onItemOut$9() {
 	const overlay = Vending.getRoot().querySelector(".overlay");
 	if (overlay) overlay.style.display = "none";
 }
-var Vending, _preferences$16, _input$1, _output$1, _slots, _type$3, transferItem$1, Vending_default;
+var Vending, _preferences$16, _input$1, _output$1, _slots, _type$2, transferItem$1, Vending_default;
 var init_Vending = __esmMin((() => {
 	init_DBManager();
 	init_NetworkManager();
@@ -319615,7 +320081,7 @@ var init_Vending = __esmMin((() => {
 			cancelBtn.addEventListener("click", (e) => {
 				e.stopImmediatePropagation();
 				let pkt;
-				if (_type$3 === Vending.Type.VENDING_STORE) pkt = new PACKET.CZ.REQ_OPENSTORE2();
+				if (_type$2 === Vending.Type.VENDING_STORE) pkt = new PACKET.CZ.REQ_OPENSTORE2();
 				else pkt = new PACKET.CZ.REQ_OPEN_BUYING_STORE();
 				submitNetworkPacket(pkt);
 				Vending.onRemove();
@@ -319727,7 +320193,7 @@ var init_Vending = __esmMin((() => {
 				root.querySelector(".weightSpan").textContent = `${BasicInfoController.weight}/${BasicInfoController.weight_max}`;
 				root.querySelector(".limitZeny").value = "0";
 		}
-		_type$3 = type;
+		_type$2 = type;
 	};
 	Vending.onRemove = function onRemove() {
 		VendingModelMessage_default.onRemove();
@@ -319790,17 +320256,17 @@ var init_Vending = __esmMin((() => {
 					VendingModelMessage_default.setInit(603);
 					return;
 				}
-				_output$1[index].count = _type$3 === Vending.Type.BUYING_STORE ? count : Math.min(_output$1[index].count + count, _input$1[index].count);
+				_output$1[index].count = _type$2 === Vending.Type.BUYING_STORE ? count : Math.min(_output$1[index].count + count, _input$1[index].count);
 				tmpItem = Object.assign({}, _input$1[index]);
-				tmpItem.count = _type$3 === Vending.Type.BUYING_STORE ? 0 : _input$1[index].count - _output$1[index].count;
+				tmpItem.count = _type$2 === Vending.Type.BUYING_STORE ? 0 : _input$1[index].count - _output$1[index].count;
 				addItem$1(fromContent, tmpItem, true);
 				addItem$1(toContent, _output$1[index], false);
 			} else {
 				count = Math.min(count, _output$1[index].count);
 				if (!count) return;
-				_output$1[index].count = _type$3 === Vending.Type.BUYING_STORE ? 0 : _output$1[index].count - count;
+				_output$1[index].count = _type$2 === Vending.Type.BUYING_STORE ? 0 : _output$1[index].count - count;
 				tmpItem = Object.assign({}, _input$1[index]);
-				tmpItem.count = _type$3 === Vending.Type.BUYING_STORE ? _input$1[index].total : _input$1[index].count + _output$1[index].count;
+				tmpItem.count = _type$2 === Vending.Type.BUYING_STORE ? _input$1[index].total : _input$1[index].count + _output$1[index].count;
 				addItem$1(fromContent, _output$1[index], false);
 				addItem$1(toContent, tmpItem, true);
 			}
@@ -319853,7 +320319,7 @@ var init_Vending = __esmMin((() => {
 			return;
 		}
 		let pkt;
-		if (_type$3 === Vending.Type.VENDING_STORE) pkt = new PACKET.CZ.REQ_OPENSTORE2();
+		if (_type$2 === Vending.Type.VENDING_STORE) pkt = new PACKET.CZ.REQ_OPENSTORE2();
 		else {
 			pkt = new PACKET.CZ.REQ_OPEN_BUYING_STORE();
 			limitZeny = parseInt(root.querySelector(".limitZeny").value, 10);
@@ -319967,7 +320433,7 @@ function onItemOver$7(itemEl, root) {
 	overlay.style.left = `${itemEl.offsetLeft + 35}px`;
 	overlay.textContent = `${DB.getItemName(item)} ${prettyZeny$2(item.price, false)} ${DB.getMessage(2328)}`;
 	if (item.IsIdentified) overlay.classList.remove("grey");
-	else if (_type$2 === VendingShop.Type.VENDING_LIST) overlay.classList.add("grey");
+	else if (_type$1 === VendingShop.Type.VENDING_LIST) overlay.classList.add("grey");
 }
 /**
 * Hide the item name
@@ -320012,7 +320478,7 @@ function onItemUsed(event, itemEl) {
 	event.stopImmediatePropagation();
 	event.preventDefault();
 }
-var VendingShop, _realSize, _type$2, _preferences$15, VendingShop_default;
+var VendingShop, _realSize, _type$1, _preferences$15, VendingShop_default;
 var init_VendingShop = __esmMin((() => {
 	init_DBManager();
 	init_NetworkManager();
@@ -320114,7 +320580,7 @@ var init_VendingShop = __esmMin((() => {
 	* @param {number} type (see NpcStore.Type.*)
 	*/
 	VendingShop.setType = function setType(type) {
-		_type$2 = type;
+		_type$1 = type;
 	};
 	/**
 	* Remove Inventory from window (and so clean up items)
@@ -320289,11 +320755,11 @@ var init_VendingShop = __esmMin((() => {
 	*/
 	VendingShop.onSubmit = function onSubmit() {
 		let pkt;
-		if (_type$2 === VendingShop.Type.VENDING_LIST) pkt = new PACKET.CZ.REQ_CLOSESTORE();
+		if (_type$1 === VendingShop.Type.VENDING_LIST) pkt = new PACKET.CZ.REQ_CLOSESTORE();
 		else pkt = new PACKET.CZ.REQ_CLOSE_BUYING_STORE();
 		Network.sendPacket(pkt);
 		this.onRemove();
-		if (_type$2 === VendingShop.Type.VENDING_LIST && PacketVerManager_default.value >= 20141016) VendingReport_default.append();
+		if (_type$1 === VendingShop.Type.VENDING_LIST && PacketVerManager_default.value >= 20141016) VendingReport_default.append();
 	};
 	VendingShop.mouseMode = GUIComponent.MouseMode.STOP;
 	VendingShop_default = UIManager.addComponent(VendingShop);
@@ -321026,16 +321492,16 @@ function refreshList(contentEl) {
 		const emo = Emotions_default.order[index];
 		canvas.setAttribute("data-index", emo);
 		canvas.title = "/" + Emotions_default.names[emo];
-		const animations = _action$1.actions[emo].animations;
+		const animations = _action.actions[emo].animations;
 		const layers = animations[Math.floor(animations.length / 5)].layers;
 		const count = layers.length;
 		SpriteRenderer.bind2DContext(ctx, 20 - layers[0].pos[0], 40 - layers[0].pos[1]);
-		for (let i = 0; i < count; ++i) _entity$1.renderLayer(layers[i], _sprite$1, _sprite$1, 1, pos, false);
+		for (let i = 0; i < count; ++i) _entity$1.renderLayer(layers[i], _sprite, _sprite, 1, pos, false);
 		contentEl.appendChild(canvas);
 		index++;
 	}
 }
-var Emoticons, _page, EMOTICONS_PER_PAGE, TOTAL_PAGES, EMOTICONS_COUNT, _action$1, _sprite$1, _entity$1, _preferences$13, Emoticons_default;
+var Emoticons, _page, EMOTICONS_PER_PAGE, TOTAL_PAGES, EMOTICONS_COUNT, _action, _sprite, _entity$1, _preferences$13, Emoticons_default;
 var init_Emoticons = __esmMin((() => {
 	init_Emotions();
 	init_Client();
@@ -321071,8 +321537,8 @@ var init_Emoticons = __esmMin((() => {
 		const root = this.getRoot();
 		const contentEl = root.querySelector(".content");
 		Client.loadFiles(["data/sprite/ÀÌÆÑÆ®/emotion.act", "data/sprite/ÀÌÆÑÆ®/emotion.spr"], (act, spr) => {
-			_action$1 = act;
-			_sprite$1 = spr;
+			_action = act;
+			_sprite = spr;
 			TOTAL_PAGES = Math.max(0, Math.ceil(EMOTICONS_COUNT / EMOTICONS_PER_PAGE) - 1);
 			const totalEl = root.querySelector(".total");
 			if (totalEl) totalEl.textContent = TOTAL_PAGES + 1;
@@ -332269,7 +332735,8 @@ function onPrivateMessage(pkt) {
 		ChatBox_default.saveNickName(pkt.sender);
 		return;
 	}
-	ChatBox_default.addText("[ " + prefix + " <span class=\"nickname-link\" data-nickname=\"" + pkt.sender + "\" style=\"cursor:pointer; text-decoration:underline;\">" + pkt.sender + "</span> ] : " + msg, ChatBox_default.TYPE.PRIVATE, ChatBox_default.FILTER.WHISPER);
+	const sender = ChatBox_default.escapeHTML(pkt.sender);
+	ChatBox_default.addText(`[ ${ChatBox_default.escapeHTML(prefix)} <span class="nickname-link" data-nickname="${sender}" style="cursor:pointer; text-decoration:underline;">${sender}</span> ] : ${ChatBox_default.messageToHTML(msg)}`, ChatBox_default.TYPE.PRIVATE, ChatBox_default.FILTER.WHISPER, null, true);
 	ChatBox_default.saveNickName(pkt.sender);
 }
 /**
@@ -332283,7 +332750,10 @@ function onPrivateMessageSent(pkt) {
 	if (pkt.result === 0) {
 		if (user && msg) {
 			if (getShouldOpenWhisperBox(user)) WhisperBox.addText(user, SessionStorage_default.Entity.display.name + " : " + msg, "#ffff00");
-			else ChatBox_default.addText("[ To <span class=\"nickname-link\" data-nickname=\"" + user + "\" style=\"cursor:pointer; text-decoration:underline;\">" + user + "</span> ] : " + msg, ChatBox_default.TYPE.PRIVATE, ChatBox_default.FILTER.WHISPER);
+			else {
+				const name = ChatBox_default.escapeHTML(user);
+				ChatBox_default.addText(`[ To <span class="nickname-link" data-nickname="${name}" style="cursor:pointer; text-decoration:underline;">${name}</span> ] : ${ChatBox_default.messageToHTML(msg)}`, ChatBox_default.TYPE.PRIVATE, ChatBox_default.FILTER.WHISPER, null, true);
+			}
 		}
 	} else {
 		const errorMsg = "(" + user + ") : " + DB.getMessage(147 + pkt.result);
@@ -332293,6 +332763,37 @@ function onPrivateMessageSent(pkt) {
 	ChatBox_default.PrivateMessageStorage.msg = "";
 }
 /**
+* Result of a /ex or /in request
+*
+* @param {object} pkt - PACKET.ZC.SETTING_WHISPER_PC
+*/
+function onWhisperSettingResult(pkt) {
+	const name = ChatBox_default.PrivateMessageStorage.blockNicks.shift() || "";
+	if (pkt.type > 1 || pkt.result > 2 || pkt.type === 0 && pkt.result === 0) return;
+	const msg = DB.getMessage(193 + pkt.type * 3 + pkt.result);
+	ChatBox_default.addText(`${name}${msg}`, ChatBox_default.TYPE.PRIVATE, ChatBox_default.FILTER.WHISPER);
+}
+/**
+* Result of a /exall or /inall request
+*
+* @param {object} pkt - PACKET.ZC.SETTING_WHISPER_STATE
+*/
+function onWhisperStateResult(pkt) {
+	if (pkt.type > 1 || pkt.result > 1) return;
+	ChatBox_default.addText(DB.getMessage(58 + pkt.type * 2 + pkt.result), ChatBox_default.TYPE.PRIVATE, ChatBox_default.FILTER.WHISPER);
+}
+/**
+* Received the whisper block list
+*
+* @param {object} pkt - PACKET.ZC.WHISPER_LIST
+*/
+function onWhisperList(pkt) {
+	const list = pkt.wisperList;
+	const count = list.length;
+	ChatBox_default.addText(DB.getMessage(count ? 63 : 62), ChatBox_default.TYPE.BLUE, ChatBox_default.FILTER.WHISPER);
+	for (let i = 0; i < count; ++i) ChatBox_default.addText(list[i].name, ChatBox_default.TYPE.BLUE, ChatBox_default.FILTER.WHISPER);
+}
+/**
 * Initialize
 */
 function PrivateMessageEngine() {
@@ -332300,6 +332801,9 @@ function PrivateMessageEngine() {
 	Network.hookPacket(PACKET.ZC.WHISPER2, onPrivateMessage);
 	Network.hookPacket(PACKET.ZC.ACK_WHISPER, onPrivateMessageSent);
 	Network.hookPacket(PACKET.ZC.ACK_WHISPER2, onPrivateMessageSent);
+	Network.hookPacket(PACKET.ZC.SETTING_WHISPER_PC, onWhisperSettingResult);
+	Network.hookPacket(PACKET.ZC.SETTING_WHISPER_STATE, onWhisperStateResult);
+	Network.hookPacket(PACKET.ZC.WHISPER_LIST, onWhisperList);
 	WhisperBox.onRequestTalk = function(nickname, text) {
 		const pkt = new PACKET.CZ.WHISPER();
 		pkt.receiver = nickname;
@@ -333904,7 +334408,7 @@ var init_SlotMachine$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/UI/Components/SlotMachine/SlotMachine.js
-var SlotMachine, _sprite, _action, _type$1, _result, _ctx, _entity, _start, rendering, SlotMachine_default;
+var SlotMachine, _entity, rendering, SlotMachine_default;
 var init_SlotMachine = __esmMin((() => {
 	init_GUIComponent();
 	init_UIManager();
@@ -333917,26 +334421,49 @@ var init_SlotMachine = __esmMin((() => {
 	init_SlotMachine$1();
 	SlotMachine = new GUIComponent("SlotMachine", SlotMachine_default$1);
 	SlotMachine.render = () => SlotMachine_default$2;
-	_type$1 = 0;
-	_result = false;
+	/**
+	* @var {Sprite,Action} objects
+	*/
+	SlotMachine._sprite = null;
+	SlotMachine._action = null;
+	/**
+	* @var {boolean} sprite and action ready to render
+	*/
+	SlotMachine._loaded = false;
+	/**
+	* @var {number} type
+	*/
+	SlotMachine._type = 0;
+	/**
+	* @var {boolean} result
+	*/
+	SlotMachine._result = false;
+	/**
+	* @var {CanvasRenderingContext2D}
+	*/
+	SlotMachine._ctx = null;
 	_entity = new Entity();
-	_start = 0;
+	/**
+	* @var {number} start tick
+	*/
+	SlotMachine._start = 0;
 	/**
 	* Initialize UI
 	*/
 	SlotMachine.init = function init() {
 		const canvas = this.getRoot().querySelector("canvas");
-		_ctx = canvas.getContext("2d");
+		SlotMachine._ctx = canvas.getContext("2d");
 		this._host.style.zIndex = "500";
 		Client.loadFiles(["data/sprite/slotmachine.spr", "data/sprite/slotmachine.act"], (spr, act) => {
-			_sprite = spr;
-			_action = act;
-			_type$1 = 0;
-			_start = Renderer.tick;
+			SlotMachine._sprite = spr;
+			SlotMachine._action = act;
+			SlotMachine._type = 0;
+			SlotMachine._loaded = true;
+			SlotMachine._start = Renderer.tick;
 			if (this._host.parentNode) Renderer.render(rendering);
 		});
 		canvas.addEventListener("mousedown", (event) => {
-			if (_type$1 === 0) {
+			if (SlotMachine._loaded && SlotMachine._type === 0) {
 				SlotMachine.onTry();
 				event.stopImmediatePropagation();
 				event.preventDefault();
@@ -333947,11 +334474,11 @@ var init_SlotMachine = __esmMin((() => {
 	* Once append to body
 	*/
 	SlotMachine.onAppend = function onAppend() {
-		_type$1 = 0;
-		_start = Renderer.tick;
+		SlotMachine._type = 0;
+		SlotMachine._start = Renderer.tick;
 		this._host.style.top = `${Renderer.height / 2 - 130}px`;
 		this._host.style.left = `${Renderer.width / 2 - 135}px`;
-		if (_sprite && _action) Renderer.render(rendering);
+		if (SlotMachine._sprite && SlotMachine._action) Renderer.render(rendering);
 	};
 	/**
 	* Once removed from body
@@ -333965,36 +334492,36 @@ var init_SlotMachine = __esmMin((() => {
 	* @param {boolean} result
 	*/
 	SlotMachine.setResult = function setResult(result) {
-		_type$1 = 1;
-		_result = result;
-		_start = Renderer.tick;
+		SlotMachine._type = 1;
+		SlotMachine._result = result;
+		SlotMachine._start = Renderer.tick;
 	};
 	rendering = (() => {
 		const position = new Uint16Array([0, 0]);
 		return () => {
 			let action, anim;
-			switch (_type$1) {
+			switch (SlotMachine._type) {
 				case 0:
-					action = _action.actions[0];
-					anim = Math.floor((Renderer.tick - _start) / action.delay * 2);
+					action = SlotMachine._action.actions[0];
+					anim = Math.floor((Renderer.tick - SlotMachine._start) / action.delay * 2);
 					break;
 				case 1: {
-					action = _action.actions[1];
-					const max = action.animations.length + (_result ? 7 : 3);
-					anim = Renderer.tick - _start;
+					action = SlotMachine._action.actions[1];
+					const max = action.animations.length + (SlotMachine._result ? 7 : 3);
+					anim = Renderer.tick - SlotMachine._start;
 					anim = Math.floor(anim / action.delay);
 					anim = Math.min(anim, max);
 					if (anim === max) {
-						_type$1 = _result ? 2 : 3;
-						_start = Renderer.tick;
+						SlotMachine._type = SlotMachine._result ? 2 : 3;
+						SlotMachine._start = Renderer.tick;
 					}
 					break;
 				}
 				case 2:
 				case 3: {
-					action = _action.actions[_type$1];
+					action = SlotMachine._action.actions[SlotMachine._type];
 					const max = action.animations.length;
-					anim = Renderer.tick - _start;
+					anim = Renderer.tick - SlotMachine._start;
 					anim = Math.floor(anim / action.delay);
 					if (anim >= max) {
 						Renderer.stop(rendering);
@@ -334006,9 +334533,9 @@ var init_SlotMachine = __esmMin((() => {
 				}
 			}
 			const animation = action.animations[anim % action.animations.length];
-			SpriteRenderer.bind2DContext(_ctx, 140, 165);
-			_ctx.clearRect(0, 0, _ctx.canvas.width, _ctx.canvas.height);
-			for (let i = 0, count = animation.layers.length; i < count; ++i) _entity.renderLayer(animation.layers[i], _sprite, _sprite, 1, position, false);
+			SpriteRenderer.bind2DContext(SlotMachine._ctx, 140, 165);
+			SlotMachine._ctx.clearRect(0, 0, SlotMachine._ctx.canvas.width, SlotMachine._ctx.canvas.height);
+			for (let i = 0, count = animation.layers.length; i < count; ++i) _entity.renderLayer(animation.layers[i], SlotMachine._sprite, SlotMachine._sprite, 1, position, false);
 		};
 	})();
 	/**
@@ -334315,12 +334842,12 @@ function onPetInformation(pkt) {
 	PetInformations_default.append();
 	PetInformations_default.setInformations(pkt);
 	if (SessionStorage_default.petId) {
+		SessionStorage_default.pet.name = pkt.szName;
 		const entity = EntityManager.get(SessionStorage_default.petId);
 		if (entity) {
 			const oldHungry = SessionStorage_default.pet.hungry || pkt.nFullness;
 			SessionStorage_default.pet.job = pkt.job;
 			SessionStorage_default.pet.clevel = pkt.nLevel;
-			SessionStorage_default.pet.name = pkt.szName;
 			SessionStorage_default.pet.friendly = pkt.nRelationship;
 			SessionStorage_default.pet.oldHungry = oldHungry;
 			SessionStorage_default.pet.hungry = pkt.nFullness;
@@ -334364,8 +334891,32 @@ function onFeedResult$1(pkt) {
 */
 function petTalk(GID, msg) {
 	const entity = EntityManager.get(GID);
-	ChatBox_default.addText(entity.display.name + " : " + msg, ChatBox_default.TYPE.PUBLIC, ChatBox_default.FILTER.PUBLIC_CHAT);
+	const name = getPetName(entity);
+	if (!name) return;
+	ChatBox_default.addText(`${name} : ${msg}`, ChatBox_default.TYPE.PUBLIC, ChatBox_default.FILTER.PUBLIC_CHAT);
 	entity.dialog.set(msg);
+}
+/**
+* Name to print in front of a pet's talk, empty while it is still unknown
+*
+* @see docs/reference/pet/talk-name.md
+* @param {object} entity
+* @return {string}
+*/
+function getPetName(entity) {
+	if (entity.display.name) return entity.display.name;
+	if (entity.GID === SessionStorage_default.petId && SessionStorage_default.pet.name) return SessionStorage_default.pet.name;
+	const now = Date.now();
+	if (entity.display.load === entity.display.TYPE.NONE || now - (_nameRequestTick[entity.GID] || 0) >= NAME_REQUEST_DELAY) {
+		_nameRequestTick[entity.GID] = now;
+		entity.display.load = entity.display.TYPE.LOADING;
+		let pkt;
+		if (PacketVerManager_default.value >= 20180307) pkt = new PACKET.CZ.REQNAME2();
+		else pkt = new PACKET.CZ.REQNAME();
+		pkt.AID = entity.GID;
+		Network.sendPacket(pkt);
+	}
+	return "";
 }
 /**
 * Update pet information
@@ -334462,10 +335013,12 @@ function NPCEngine$1() {
 	Network.hookPacket(PACKET.ZC.CHANGESTATE_PET, onPetInformationUpdate);
 	Network.hookPacket(PACKET.ZC.PET_ACT, onPetAction);
 }
+var _nameRequestTick, NAME_REQUEST_DELAY;
 var init_Pet = __esmMin((() => {
 	init_DBManager();
 	init_NetworkManager();
 	init_PacketStructure();
+	init_PacketVerManager();
 	init_Client();
 	init_SessionStorage();
 	init_EntityManager();
@@ -334478,6 +335031,8 @@ var init_Pet = __esmMin((() => {
 	init_Emotions();
 	init_PetMessageConst();
 	init_PetEvolution();
+	_nameRequestTick = {};
+	NAME_REQUEST_DELAY = 2500;
 	/**
 	* Client request to feed QPet.
 	*/
@@ -337977,6 +338532,7 @@ function onConnectionAccepted$2(pkt) {
 	SessionStorage_default.hasGuild = false;
 	SessionStorage_default.guildPermission = 0;
 	GuildEngine.resetForNewCharacter();
+	ChatBox_default.PrivateMessageStorage.blockNicks.length = 0;
 	SessionStorage_default.homunId = 0;
 	SessionStorage_default.mapState = {
 		property: 0,
@@ -338232,11 +338788,8 @@ function onRestartAnswer(pkt) {
 	if (!pkt.type) ChatBox_default.addText(DB.getMessage(502), ChatBox_default.TYPE.ERROR, ChatBox_default.FILTER.PUBLIC_LOG);
 	else {
 		GuildEngine.guild_id = 0;
-		cleanGameUI();
 		SessionStorage_default.Achievement = null;
 		Mouse.intersect = false;
-		MapRenderer.free();
-		Renderer.stop();
 		onRestart();
 	}
 }
@@ -338495,7 +339048,11 @@ function onConfigUpdate(type, val) {
 * Go back from map-server to char-server
 */
 function onRestart() {
-	__vitePreload(() => Promise.resolve().then(() => (init_CharEngine(), CharEngine_exports)).then((m) => m.default.reload()), void 0, import.meta.url);
+	__vitePreload(() => Promise.resolve().then(() => (init_CharEngine(), CharEngine_exports)).then((m) => m.default.reload(() => {
+		cleanGameUI();
+		MapRenderer.free();
+		Renderer.stop();
+	})), void 0, import.meta.url);
 }
 /**
 * Reply to reassembly auth packet
@@ -341949,10 +342506,13 @@ var init_CharEngine = __esmMin((() => {
 		}
 		/**
 		* Reload Char-Select
+		*
+		* @param {function} [onBlack] - run once the fade has covered the screen
 		*/
-		static reload() {
+		static reload(onBlack) {
 			Network.close();
 			Background.setLoginBackground(() => {
+				if (onBlack) onBlack();
 				UIManager.removeComponents();
 				CharEngine.init(_server$1);
 			});
@@ -344474,8 +345034,8 @@ var require_rijndael_precalculated = /* @__PURE__ */ __commonJSMin(((exports, mo
 }));
 //#endregion
 //#region node_modules/rijndael-js/lib/utils.js
-var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var root = typeof self === "object" && self.self === self && self || typeof global === "object" && global.global === global && global || exports;
+var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module, this$1) => {
+	var root = typeof self === "object" && self.self === self && self || typeof global === "object" && global.global === global && global || this$1;
 	var has = (type) => typeof root[type] !== "undefined";
 	var is = (value, type) => has(type) && value instanceof root[type];
 	module.exports.toArray = (data) => {
@@ -347095,6 +347655,7 @@ function onServerClosed(pkt) {
 			break;
 		case 110: msg_id = 1589;
 	}
+	SkillTargetSelection_default.remove();
 	UIManager.showMessageBox(DB.getMessage(msg_id), "ok", () => {
 		Renderer.stop();
 		MapRenderer.cancelLoad();
@@ -347125,6 +347686,7 @@ var init_LoginEngine = __esmMin((() => {
 	init_UIManager();
 	init_WinList();
 	init_WinPopup();
+	init_SkillTargetSelection();
 	init_Queue();
 	init_Background();
 	init_spark_md5_min();
@@ -348398,6 +348960,7 @@ var init_UIManager = __esmMin((() => {
 		* @param {string} error message
 		*/
 		static showErrorBox(text) {
+			this.components.SkillTargetSelection?.remove();
 			const WinError = this.getComponent("WinPopup").clone("WinError");
 			let overlay;
 			WinError.init = function Init() {

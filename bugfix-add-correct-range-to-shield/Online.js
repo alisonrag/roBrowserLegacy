@@ -330174,6 +330174,25 @@ var init_SkillAction = __esmMin((() => {
 	SkillAction[SkillConst_default.NV_BASIC] = SkillAction[SkillConst_default.TF_BACKSLIDING] = SkillAction[SkillConst_default.NV_TRICKDEAD] = SkillAction[SkillConst_default.TK_READYSTORM] = SkillAction[SkillConst_default.TK_READYDOWN] = SkillAction[SkillConst_default.TK_READYTURN] = SkillAction[SkillConst_default.TK_READYCOUNTER] = SkillAction[SkillConst_default.TK_HIGHJUMP] = SkillAction[SkillConst_default.TK_DODGE] = SkillAction[SkillConst_default.LK_TENSIONRELAX] = SkillAction[SkillConst_default.NC_F_SIDESLIDE] = SkillAction[SkillConst_default.NC_B_SIDESLIDE] = SkillAction[SkillConst_default.SU_HIDE] = SkillAction[SkillConst_default.SU_STOOP] = false;
 }));
 //#endregion
+//#region src/Engine/MapEngine/OffhandWeapon.js
+/**
+* Only resolvable for our own character. Other entities: server sends only
+* view IDs, so we return false (shield default).
+*/
+function isOwnOffhandWeapon(entity, sessionEntity, inventory) {
+	if (!entity || !sessionEntity || entity.GID !== sessionEntity.GID || !inventory) return false;
+	const indexes = inventory.equippedItems || [];
+	for (let i = 0; i < indexes.length; i++) {
+		const item = inventory.getItemByIndex(indexes[i]);
+		if ((item ? item.WearState || item.location || 0 : 0) & EquipmentLocation_default.SHIELD) return item.type === ItemType_default.WEAPON;
+	}
+	return false;
+}
+var init_OffhandWeapon = __esmMin((() => {
+	init_EquipmentLocation();
+	init_ItemType();
+}));
+//#endregion
 //#region src/DB/Monsters/AttackEffectTable.js
 var AE, JOB;
 var init_AttackEffectTable = __esmMin((() => {
@@ -330381,13 +330400,14 @@ function onEntitySpam(pkt) {
 		EntityManager.add(entity.wug);
 	}
 	if (entity.objecttype === Entity.TYPE_PC) {
-		if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield, entity.job)) {
+		const offhand = isOwnOffhandWeapon(entity, SessionStorage_default.Entity, InventoryController);
+		if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield, entity.job, offhand)) {
 			pkt.weapon = pkt.shield;
 			pkt.shield = 0;
 		}
 		const weaponType = DB.getWeaponType(pkt.weapon, true);
 		const viewId = DB.getWeaponViewID(pkt.weapon);
-		if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield, entity.job) && pkt.weapon !== 0) {
+		if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield, entity.job, offhand) && pkt.weapon !== 0) {
 			const secondaryWeaponType = DB.getWeaponType(pkt.shield, true);
 			entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
 			entity.shield = 0;
@@ -331064,13 +331084,14 @@ function onEntityViewChange(pkt) {
 			break;
 		case 2:
 			if (pkt instanceof PACKET.ZC.SPRITE_CHANGE2) {
-				if (pkt.value === 0 && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job)) {
+				const offhand = isOwnOffhandWeapon(entity, SessionStorage_default.Entity, InventoryController);
+				if (pkt.value === 0 && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job, offhand)) {
 					pkt.value = pkt.value2;
 					pkt.value2 = 0;
 				}
 				const weaponType = DB.getWeaponType(pkt.value, true);
 				const viewId = DB.getWeaponViewID(pkt.value);
-				if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job)) {
+				if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job, offhand)) {
 					const secondaryWeaponType = DB.getWeaponType(pkt.value2, true);
 					entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
 					entity.shield = 0;
@@ -332231,6 +332252,7 @@ var init_Entity = __esmMin((() => {
 	init_EffectConst();
 	init_PetMessageConst();
 	init_JobConst();
+	init_OffhandWeapon();
 	init_AttackEffectTable();
 	init_SoundManager();
 	init_Events();

@@ -307045,20 +307045,19 @@ var init_DBManager = __esmMin((() => {
 		* is shield checking
 		*
 		* The left-hand slot can hold either an item ID or a view ID (ClassNum, <= 500).
-		* Shield views and weapon views (WeaponType 1-102) share the same numeric range,
-		* so a view ID is resolved using the job: only dual-wield jobs (assassin line)
-		* can carry a weapon in the left hand, everyone else carries a shield there.
+		* View IDs (1-500) default to shields unless explicitly flagged as an offhand weapon.
 		*
 		* @param {integer} id item id or view id
-		* @param {integer} [job] job id of the owner, used to disambiguate view ids
+		* @param {integer} [job] job id of the owner
+		* @param {boolean} [isOffhandWeapon] explicitly marks the equipment as an offhand weapon
 		* @return {boolean} is shield?
 		*
 		* @author MrUnzO
 		*/
-		static isShield(id, job) {
+		static isShield(id, job, isOffhandWeapon = false) {
+			if (isOffhandWeapon) return false;
 			if (DB.isShieldItem(id)) return true;
 			if (id > 500) return false;
-			if (id > 0 && job !== void 0 && DB.isAssassin(job)) return false;
 			return id > 0;
 		}
 		static getPCAttackMotion(job, sex, itemID, isDualWeapon) {

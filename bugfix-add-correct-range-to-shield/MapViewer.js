@@ -307058,17 +307058,34 @@ var init_DBManager = __esmMin((() => {
 			return "data/texture/" + (PetIllustration_default[id] || PetIllustration_default[1002]);
 		}
 		/**
+		* Is the item ID a shield item?
+		* Only checks inventory item IDs, never view IDs.
+		*
+		* @param {integer} id item id
+		* @return {boolean}
+		*/
+		static isShieldItem(id) {
+			return id >= 2100 && id <= 2199 || id >= 28900 && id <= 28999 || id >= 46e4 && id <= 460099;
+		}
+		/**
 		* is shield checking
 		*
-		* @param {integer} id
+		* The left-hand slot can hold either an item ID or a view ID (ClassNum, <= 500).
+		* Shield views and weapon views (WeaponType 1-102) share the same numeric range,
+		* so a view ID is resolved using the job: only dual-wield jobs (assassin line)
+		* can carry a weapon in the left hand, everyone else carries a shield there.
+		*
+		* @param {integer} id item id or view id
+		* @param {integer} [job] job id of the owner, used to disambiguate view ids
 		* @return {boolean} is shield?
 		*
 		* @author MrUnzO
 		*/
-		static isShield(id) {
-			if (id > 0 && id <= 500) return true;
-			if (id >= 2100 && id <= 2199 || id >= 28900 && id <= 28999 || id >= 46e4 && id <= 460099) return true;
-			return false;
+		static isShield(id, job) {
+			if (DB.isShieldItem(id)) return true;
+			if (id > 500) return false;
+			if (id > 0 && job !== void 0 && DB.isAssassin(job)) return false;
+			return id > 0;
 		}
 		static getPCAttackMotion(job, sex, itemID, isDualWeapon) {
 			if (isDualWeapon) switch (job) {
@@ -307596,7 +307613,7 @@ var init_DBManager = __esmMin((() => {
 		*/
 		static getShieldPath(id, job, sex) {
 			if (id === 0) return null;
-			if (!DB.isShield(id)) return DB.getWeaponPath(id, job, sex);
+			if (!DB.isShield(id, job)) return DB.getWeaponPath(id, job, sex);
 			const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
 			if (id in ItemTable_default && "ClassNum" in ItemTable_default[id]) id = ItemTable_default[id].ClassNum;
 			return "data/sprite/¹æÆÐ/" + baseClass + "/" + baseClass + "_" + SexTable[sex] + "_" + (ShieldTable_default[id] || ShieldTable_default[1]);
@@ -329635,13 +329652,13 @@ function onEntitySpam(pkt) {
 		EntityManager.add(entity.wug);
 	}
 	if (entity.objecttype === Entity.TYPE_PC) {
-		if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield)) {
+		if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield, entity.job)) {
 			pkt.weapon = pkt.shield;
 			pkt.shield = 0;
 		}
 		const weaponType = DB.getWeaponType(pkt.weapon, true);
 		const viewId = DB.getWeaponViewID(pkt.weapon);
-		if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield) && pkt.weapon !== 0) {
+		if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield, entity.job) && pkt.weapon !== 0) {
 			const secondaryWeaponType = DB.getWeaponType(pkt.shield, true);
 			entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
 			entity.shield = 0;
@@ -330318,13 +330335,13 @@ function onEntityViewChange(pkt) {
 			break;
 		case 2:
 			if (pkt instanceof PACKET.ZC.SPRITE_CHANGE2) {
-				if (pkt.value === 0 && pkt.value2 !== 0 && !DB.isShield(pkt.value2)) {
+				if (pkt.value === 0 && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job)) {
 					pkt.value = pkt.value2;
 					pkt.value2 = 0;
 				}
 				const weaponType = DB.getWeaponType(pkt.value, true);
 				const viewId = DB.getWeaponViewID(pkt.value);
-				if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2)) {
+				if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job)) {
 					const secondaryWeaponType = DB.getWeaponType(pkt.value2, true);
 					entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
 					entity.shield = 0;

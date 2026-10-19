@@ -78960,7 +78960,7 @@ var init_Controls = __esmMin((() => {
 }));
 //#endregion
 //#region src/Vendors/gl-matrix.js
-var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$8, mat2$1, mat2d, mat3$6, mat4$26, quat$2;
+var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$8, mat2$1, mat2d, mat3$6, mat4$25, quat$2;
 var init_gl_matrix$1 = __esmMin((() => {
 	exports$3 = {};
 	if (!GLMAT_EPSILON) GLMAT_EPSILON = 1e-6;
@@ -80959,13 +80959,13 @@ var init_gl_matrix$1 = __esmMin((() => {
 		return "mat3(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ")";
 	};
 	if (typeof exports$3 !== "undefined") exports$3.mat3 = mat3$6;
-	mat4$26 = {};
+	mat4$25 = {};
 	/**
 	* Creates a new identity mat4
 	*
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$26.create = function() {
+	mat4$25.create = function() {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = 1;
 		out[1] = 0;
@@ -80991,7 +80991,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a matrix to clone
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$26.clone = function(a) {
+	mat4$25.clone = function(a) {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = a[0];
 		out[1] = a[1];
@@ -81018,7 +81018,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$26.copy = function(out, a) {
+	mat4$25.copy = function(out, a) {
 		out[0] = a[0];
 		out[1] = a[1];
 		out[2] = a[2];
@@ -81043,7 +81043,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} out the receiving matrix
 	* @returns {mat4} out
 	*/
-	mat4$26.identity = function(out) {
+	mat4$25.identity = function(out) {
 		out[0] = 1;
 		out[1] = 0;
 		out[2] = 0;
@@ -81069,7 +81069,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$26.transpose = function(out, a) {
+	mat4$25.transpose = function(out, a) {
 		if (out === a) {
 			var a01 = a[1], a02 = a[2], a03 = a[3], a12 = a[6], a13 = a[7], a23 = a[11];
 			out[1] = a[4];
@@ -81111,7 +81111,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$26.invert = function(out, a) {
+	mat4$25.invert = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31, b11 = a22 * a33 - a23 * a32, det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 		if (!det) return null;
 		det = 1 / det;
@@ -81140,7 +81140,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$26.adjoint = function(out, a) {
+	mat4$25.adjoint = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		out[0] = a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22);
 		out[1] = -(a01 * (a22 * a33 - a23 * a32) - a21 * (a02 * a33 - a03 * a32) + a31 * (a02 * a23 - a03 * a22));
@@ -81166,7 +81166,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {Number} determinant of a
 	*/
-	mat4$26.determinant = function(a) {
+	mat4$25.determinant = function(a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31;
 		return b00 * (a22 * a33 - a23 * a32) - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 	};
@@ -81178,7 +81178,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} b the second operand
 	* @returns {mat4} out
 	*/
-	mat4$26.multiply = function(out, a, b) {
+	mat4$25.multiply = function(out, a, b) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		var b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
 		out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
@@ -81215,7 +81215,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link mat4.multiply}
 	* @function
 	*/
-	mat4$26.mul = mat4$26.multiply;
+	mat4$25.mul = mat4$25.multiply;
 	/**
 	* Translate a mat4 by the given vector
 	*
@@ -81224,7 +81224,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v vector to translate by
 	* @returns {mat4} out
 	*/
-	mat4$26.translate = function(out, a, v) {
+	mat4$25.translate = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2], a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
 		if (a === out) {
 			out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
@@ -81271,7 +81271,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v the vec3 to scale the matrix by
 	* @returns {mat4} out
 	**/
-	mat4$26.scale = function(out, a, v) {
+	mat4$25.scale = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2];
 		out[0] = a[0] * x;
 		out[1] = a[1] * x;
@@ -81300,7 +81300,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} axis the axis to rotate around
 	* @returns {mat4} out
 	*/
-	mat4$26.rotate = function(out, a, rad, axis) {
+	mat4$25.rotate = function(out, a, rad, axis) {
 		var x = axis[0], y = axis[1], z = axis[2], len = Math.sqrt(x * x + y * y + z * z), s, c, t, a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, b00, b01, b02, b10, b11, b12, b20, b21, b22;
 		if (Math.abs(len) < GLMAT_EPSILON) return null;
 		len = 1 / len;
@@ -81359,7 +81359,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$26.rotateX = function(out, a, rad) {
+	mat4$25.rotateX = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[0] = a[0];
@@ -81389,7 +81389,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$26.rotateY = function(out, a, rad) {
+	mat4$25.rotateY = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[4] = a[4];
@@ -81419,7 +81419,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$26.rotateZ = function(out, a, rad) {
+	mat4$25.rotateZ = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
 		if (a !== out) {
 			out[8] = a[8];
@@ -81456,7 +81456,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v Translation vector
 	* @returns {mat4} out
 	*/
-	mat4$26.fromRotationTranslation = function(out, q, v) {
+	mat4$25.fromRotationTranslation = function(out, q, v) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81484,7 +81484,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	*
 	* @returns {mat4} out
 	*/
-	mat4$26.fromQuat = function(out, q) {
+	mat4$25.fromQuat = function(out, q) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81516,7 +81516,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$26.frustum = function(out, left, right, bottom, top, near, far) {
+	mat4$25.frustum = function(out, left, right, bottom, top, near, far) {
 		var rl = 1 / (right - left), tb = 1 / (top - bottom), nf = 1 / (near - far);
 		out[0] = near * 2 * rl;
 		out[1] = 0;
@@ -81546,7 +81546,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$26.perspective = function(out, fovy, aspect, near, far) {
+	mat4$25.perspective = function(out, fovy, aspect, near, far) {
 		var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
 		out[0] = f / aspect;
 		out[1] = 0;
@@ -81578,7 +81578,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$26.ortho = function(out, left, right, bottom, top, near, far) {
+	mat4$25.ortho = function(out, left, right, bottom, top, near, far) {
 		var lr = 1 / (left - right), bt = 1 / (bottom - top), nf = 1 / (near - far);
 		out[0] = -2 * lr;
 		out[1] = 0;
@@ -81607,9 +81607,9 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} up vec3 pointing up
 	* @returns {mat4} out
 	*/
-	mat4$26.lookAt = function(out, eye, center, up) {
+	mat4$25.lookAt = function(out, eye, center, up) {
 		var x0, x1, x2, y0, y1, y2, z0, z1, z2, len, eyex = eye[0], eyey = eye[1], eyez = eye[2], upx = up[0], upy = up[1], upz = up[2], centerx = center[0], centery = center[1], centerz = center[2];
-		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$26.identity(out);
+		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$25.identity(out);
 		z0 = eyex - centerx;
 		z1 = eyey - centery;
 		z2 = eyez - centerz;
@@ -81669,10 +81669,10 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} mat matrix to represent as a string
 	* @returns {String} string representation of the matrix
 	*/
-	mat4$26.str = function(a) {
+	mat4$25.str = function(a) {
 		return "mat4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + ", " + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + ")";
 	};
-	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$26;
+	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$25;
 	quat$2 = {};
 	/**
 	* Creates a new identity quat
@@ -83659,7 +83659,7 @@ var init_PostProcess = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/VerticalFlip.js
-var _program$29, _buffer$21, _active$3, VerticalFlip;
+var _program$28, _buffer$21, _active$3, VerticalFlip;
 var init_VerticalFlip = __esmMin((() => {
 	init_VerticalFlip$2();
 	init_VerticalFlip$1();
@@ -83668,9 +83668,9 @@ var init_VerticalFlip = __esmMin((() => {
 	_active$3 = false;
 	VerticalFlip = class {
 		static init(gl) {
-			if (_program$29) return;
+			if (_program$28) return;
 			try {
-				_program$29 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
+				_program$28 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
 			} catch (e) {
 				console.error("Error when compiling shader VerticalFlip.", e);
 				return;
@@ -83703,19 +83703,19 @@ var init_VerticalFlip = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$21 || !_program$29 || !_active$3) return;
+			if (!_buffer$21 || !_program$28 || !_active$3) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$29);
+			gl.useProgram(_program$28);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$21);
-			let posLoc = _program$29.attribute.aPosition;
+			let posLoc = _program$28.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 0);
-			posLoc = _program$29.attribute.aTextureCoord;
+			posLoc = _program$28.attribute.aTextureCoord;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 8);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$29.uniform.uTexture, 0);
+			gl.uniform1i(_program$28.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 			PostProcess.afterRenderPass(gl);
 		}
@@ -83723,13 +83723,13 @@ var init_VerticalFlip = __esmMin((() => {
 		* @returns {WebGLProgram} Shader program
 		*/
 		static program() {
-			return _program$29;
+			return _program$28;
 		}
 		/** Resets effect state */
 		static clean(gl) {
 			_active$3 = false;
 			if (_buffer$21) gl.deleteBuffer(_buffer$21);
-			_program$29 = _buffer$21 = null;
+			_program$28 = _buffer$21 = null;
 		}
 		/** @returns {boolean} Whether the effect is active */
 		static isActive() {
@@ -83743,7 +83743,7 @@ var init_VerticalFlip = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Map/Altitude.js
-var _cells, _types$1, mat4$25, vec3$7, vec4$7, _from, _to, _unit, _matrix$8, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
+var _cells, _types$1, mat4$24, vec3$7, vec4$7, _from, _to, _unit, _matrix$7, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
 var init_Altitude = __esmMin((() => {
 	init_gl_matrix$1();
 	init_PathFinding();
@@ -83751,11 +83751,11 @@ var init_Altitude = __esmMin((() => {
 	init_VerticalFlip();
 	_cells = null;
 	_types$1 = null;
-	({mat4: mat4$25, vec3: vec3$7, vec4: vec4$7} = exports$3);
+	({mat4: mat4$24, vec3: vec3$7, vec4: vec4$7} = exports$3);
 	_from = vec3$7.create();
 	_to = vec4$7.create();
 	_unit = vec3$7.create();
-	_matrix$8 = mat4$25.create();
+	_matrix$7 = mat4$24.create();
 	buffer1x1 = /* @__PURE__ */ new Float32Array(30);
 	buffer5x5 = /* @__PURE__ */ new Float32Array(750);
 	buffer7x7 = /* @__PURE__ */ new Float32Array(1470);
@@ -83852,18 +83852,18 @@ var init_Altitude = __esmMin((() => {
 		static intersect(modelView, projection, out) {
 			let i;
 			const count = Altitude.MAX_INTERSECT_COUNT;
-			mat4$25.invert(_matrix$8, modelView);
-			_from[0] = _matrix$8[12];
-			_from[1] = _matrix$8[13];
-			_from[2] = _matrix$8[14];
+			mat4$24.invert(_matrix$7, modelView);
+			_from[0] = _matrix$7[12];
+			_from[1] = _matrix$7[13];
+			_from[2] = _matrix$7[14];
 			_to[0] = Mouse.screen.x / Mouse.screen.width * 2 - 1;
 			_to[1] = -(Mouse.screen.y / Mouse.screen.height) * 2 + 1;
 			if (VerticalFlip.isActive()) _to[1] = -_to[1];
 			_to[2] = 1;
 			_to[3] = 1;
-			mat4$25.multiply(_matrix$8, projection, modelView);
-			mat4$25.invert(_matrix$8, _matrix$8);
-			vec4$7.transformMat4(_to, _to, _matrix$8);
+			mat4$24.multiply(_matrix$7, projection, modelView);
+			mat4$24.invert(_matrix$7, _matrix$7);
+			vec4$7.transformMat4(_to, _to, _matrix$7);
 			_to[0] /= _to[3];
 			_to[1] /= _to[3];
 			_to[2] /= _to[3];
@@ -206234,6 +206234,1327 @@ var init_NetworkManager = __esmMin((() => {
 	})();
 }));
 //#endregion
+//#region src/Core/LuaModuleLoader.js
+var DEFAULT_SEARCH_PATHS, OPTIONAL_RUNTIME_PATTERNS, _bufferCache, _inflight, _failureReasons, _vfsGeneration, _remoteGeneration, _lastClientLoadFile, _vmState, _config$1, LUA_BOOTSTRAP_SCRIPT, LuaModuleLoader;
+var init_LuaModuleLoader = __esmMin((() => {
+	init_Client();
+	init_Configs();
+	init_MemoryManager();
+	init_CodepageManager();
+	DEFAULT_SEARCH_PATHS = Object.freeze([
+		"./?.lua",
+		"./?.lub",
+		"./?/init.lua",
+		"./?/init.lub",
+		"AI/?.lua",
+		"AI/?.lub",
+		"AI/USER_AI/?.lua",
+		"AI/USER_AI/?.lub",
+		"System/?.lub",
+		"System/?.lua",
+		"SystemEN/?.lub",
+		"SystemEN/?.lua",
+		"data/luafiles514/lua files/?.lub",
+		"data/luafiles514/lua files/?.lua"
+	]);
+	OPTIONAL_RUNTIME_PATTERNS = Object.freeze(["Timeouts", "AggressiveRelogPath"]);
+	_bufferCache = /* @__PURE__ */ new Map();
+	_inflight = /* @__PURE__ */ new Map();
+	_failureReasons = /* @__PURE__ */ new Map();
+	_vfsGeneration = 0;
+	_remoteGeneration = 0;
+	_lastClientLoadFile = Client.loadFile;
+	_vmState = /* @__PURE__ */ new WeakMap();
+	_config$1 = {
+		searchPaths: [...DEFAULT_SEARCH_PATHS],
+		vfsLoader: null,
+		urlFetcher: null,
+		remoteBaseUrl: ""
+	};
+	LUA_BOOTSTRAP_SCRIPT = `
+do
+	local _raw_loadfile = _G.__ro_orig_loadfile or loadfile
+	local _raw_dofile = _G.__ro_orig_dofile or dofile
+	local _raw_pcall = _G.__ro_orig_pcall or pcall
+	local _raw_xpcall = _G.__ro_orig_xpcall or xpcall
+
+	_G.__ro_orig_loadfile = _raw_loadfile
+	_G.__ro_orig_dofile = _raw_dofile
+	_G.__ro_orig_pcall = _raw_pcall
+	_G.__ro_orig_xpcall = _raw_xpcall
+
+	package = package or {}
+	package.loaded = package.loaded or {}
+	package.preload = package.preload or {}
+	package.loaders = package.loaders or {}
+	package.searchers = package.loaders
+
+	local _sentinel = {}
+
+	local function pack_vararg(...)
+		return { n = select('#', ...), ... }
+	end
+
+	-- Coroutine-safe pcall so yielding a JS Promise inside an async thread works across pcall
+	pcall = function(fn, ...)
+		if coroutine.running() == nil then
+			return _raw_pcall(fn, ...)
+		end
+		if type(fn) ~= 'function' then
+			local mt = getmetatable(fn)
+			if not (mt and mt.__call) then
+				return _raw_pcall(fn, ...)
+			end
+			local callable = fn
+			fn = function(...)
+				return callable(...)
+			end
+		end
+		local co = coroutine.create(fn)
+		local args = pack_vararg(...)
+		while true do
+			local res = pack_vararg(coroutine.resume(co, unpack(args, 1, args.n)))
+			if not res[1] then
+				return false, res[2]
+			end
+			if coroutine.status(co) == 'dead' then
+				return unpack(res, 1, res.n)
+			end
+			args = pack_vararg(coroutine.yield(unpack(res, 2, res.n)))
+		end
+	end
+
+	xpcall = function(fn, errhandler)
+		if coroutine.running() == nil then
+			return _raw_xpcall(fn, errhandler)
+		end
+		local res = pack_vararg(pcall(fn))
+		if res[1] then
+			return unpack(res, 1, res.n)
+		end
+		if type(errhandler) == 'function' then
+			local ok, transformed = pcall(errhandler, res[2])
+			if ok then
+				return false, transformed
+			end
+			return false, transformed
+		end
+		return false, res[2]
+	end
+
+	-- Searcher 1: package.preload
+	local function preload_searcher(modname)
+		if type(package.preload) ~= 'table' then
+			return "\\n\\t'package.preload' must be a table"
+		end
+		local loader = package.preload[modname]
+		if loader == nil then
+			return "\\n\\tno field package.preload['" .. tostring(modname) .. "']"
+		end
+		return loader
+	end
+
+	-- Searcher 2: roBrowserLegacy VFS / MemoryManager / Remote URL / MEMFS searcher
+	local function vfs_searcher(modname)
+		local is_async = coroutine.running() ~= nil
+		local search_path = type(package.path) == 'string' and package.path or ''
+		local resolved = __ro_resolve_module(modname, search_path, is_async)
+		if (not resolved or not resolved.found) and is_async and (not resolved or resolved.needsAsync ~= false) then
+			local promise = __ro_fetch_module_async(modname, search_path)
+			if promise ~= nil then
+				coroutine.yield(promise)
+			end
+			resolved = __ro_resolve_module(modname, search_path, false)
+		end
+
+		if not resolved or not resolved.found then
+			if resolved and type(resolved.triedMessage) == 'string' and resolved.triedMessage ~= '' then
+				return resolved.triedMessage
+			end
+			return "\\n\\tno file '" .. tostring(modname) .. "'"
+		end
+
+		local chunk, load_err = _raw_loadfile(resolved.memfsPath)
+		if not chunk then
+			error(
+				"error loading module '" ..
+					tostring(modname) ..
+					"' from file '" ..
+					tostring(resolved.candidate or resolved.memfsPath) ..
+					"':\\n\\t" ..
+					tostring(load_err),
+				3
+			)
+		end
+		return chunk
+	end
+
+	-- Install searchers (replacing native filesystem .lua and .so/.dll C loaders on first init)
+	local existing_custom = {}
+	if _G.__ro_loaders_initialized then
+		for i = 3, #package.loaders do
+			if type(package.loaders[i]) == 'function' then
+				table.insert(existing_custom, package.loaders[i])
+			end
+		end
+	end
+	_G.__ro_loaders_initialized = true
+	for i = #package.loaders, 1, -1 do
+		package.loaders[i] = nil
+	end
+	package.loaders[1] = preload_searcher
+	package.loaders[2] = vfs_searcher
+	for i = 1, #existing_custom do
+		package.loaders[i + 2] = existing_custom[i]
+	end
+	package.searchers = package.loaders
+
+	-- Standard Lua 5.1 require() with circular-dependency detection and VFS/async support
+	require = function(modname)
+		if type(modname) ~= 'string' and type(modname) ~= 'number' then
+			error("bad argument #1 to 'require' (string expected, got " .. type(modname) .. ")", 2)
+		end
+		modname = tostring(modname)
+
+		local current = package.loaded[modname]
+		if current == _sentinel then
+			error("loop or previous error loading module '" .. modname .. "'", 2)
+		end
+		if current ~= nil and current ~= false then
+			return current
+		end
+
+		local searchers = package.loaders or package.searchers
+		if type(searchers) ~= 'table' then
+			error("'package.loaders' must be a table", 2)
+		end
+
+		local errors = {}
+		local loader = nil
+		for i = 1, #searchers do
+			local searcher = searchers[i]
+			if type(searcher) == 'function' then
+				local res = searcher(modname)
+				if type(res) == 'function' then
+					loader = res
+					break
+				elseif type(res) == 'string' then
+					table.insert(errors, res)
+				end
+			end
+		end
+
+		if loader == nil then
+			error("module '" .. modname .. "' not found:" .. table.concat(errors), 2)
+		end
+
+		package.loaded[modname] = _sentinel
+		local ok, result = pcall(loader, modname)
+		if not ok then
+			if package.loaded[modname] == _sentinel then
+				package.loaded[modname] = nil
+			end
+			error(result, 2)
+		end
+
+		if result ~= nil then
+			package.loaded[modname] = result
+		elseif package.loaded[modname] == nil or package.loaded[modname] == _sentinel then
+			package.loaded[modname] = true
+		end
+
+		return package.loaded[modname]
+	end
+
+	-- VFS-aware loadfile()
+	loadfile = function(filename)
+		if filename == nil then
+			return _raw_loadfile()
+		end
+		filename = tostring(filename)
+		local is_async = coroutine.running() ~= nil
+		local search_path = type(package.path) == 'string' and package.path or ''
+		local resolved = __ro_resolve_file(filename, search_path, is_async)
+		if (not resolved or not resolved.found) and is_async and (not resolved or resolved.needsAsync ~= false) then
+			local promise = __ro_fetch_file_async(filename, search_path)
+			if promise ~= nil then
+				coroutine.yield(promise)
+			end
+			resolved = __ro_resolve_file(filename, search_path, false)
+		end
+		if resolved and resolved.found then
+			return _raw_loadfile(resolved.memfsPath)
+		end
+		return _raw_loadfile(filename)
+	end
+
+	-- VFS-aware dofile()
+	dofile = function(filename)
+		local chunk, err = loadfile(filename)
+		if not chunk then
+			error(err, 2)
+		end
+		return chunk()
+	end
+end
+`;
+	LuaModuleLoader = class LuaModuleLoader {
+		/**
+		* Default search path templates.
+		*
+		* @type {ReadonlyArray<string>}
+		*/
+		static DEFAULT_SEARCH_PATHS = DEFAULT_SEARCH_PATHS;
+		/**
+		* Configure global module resolution behavior.
+		*
+		* @param {object} [options={}]
+		* @param {string|string[]} [options.searchPaths] - Replace global search paths
+		* @param {string|string[]} [options.prependSearchPaths] - Prepend search paths to existing list
+		* @param {string|string[]} [options.appendSearchPaths] - Append search paths to existing list
+		* @param {Function|null} [options.vfsLoader] - Custom VFS loader `(filename) => Promise<Uint8Array|ArrayBuffer|string>`
+		* @param {Function|null} [options.urlFetcher] - Custom URL fetcher `(url) => Promise<Uint8Array|ArrayBuffer|string>`
+		* @param {string} [options.remoteBaseUrl] - Optional remote base URL for fallback HTTP resolution
+		*/
+		static configure(options = {}) {
+			if (options.searchPaths !== void 0) _config$1.searchPaths = LuaModuleLoader.parseSearchPathsInput(options.searchPaths);
+			if (options.prependSearchPaths !== void 0) {
+				const prepended = LuaModuleLoader.parseSearchPathsInput(options.prependSearchPaths);
+				_config$1.searchPaths = LuaModuleLoader.dedupeArray([...prepended, ..._config$1.searchPaths]);
+			}
+			if (options.appendSearchPaths !== void 0) {
+				const appended = LuaModuleLoader.parseSearchPathsInput(options.appendSearchPaths);
+				_config$1.searchPaths = LuaModuleLoader.dedupeArray([..._config$1.searchPaths, ...appended]);
+			}
+			if (options.vfsLoader !== void 0) {
+				_config$1.vfsLoader = options.vfsLoader;
+				_vfsGeneration++;
+				for (const key of _failureReasons.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
+				for (const key of _inflight.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
+			}
+			if (options.urlFetcher !== void 0) {
+				_config$1.urlFetcher = options.urlFetcher;
+				_remoteGeneration++;
+				for (const key of _failureReasons.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
+				for (const key of _inflight.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
+			}
+			if (options.remoteBaseUrl !== void 0) {
+				_config$1.remoteBaseUrl = options.remoteBaseUrl || "";
+				_remoteGeneration++;
+				for (const key of _failureReasons.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
+			}
+		}
+		/**
+		* Reset global configuration to defaults.
+		*/
+		static resetConfig() {
+			_config$1.searchPaths = [...DEFAULT_SEARCH_PATHS];
+			_config$1.vfsLoader = null;
+			_config$1.urlFetcher = null;
+			_config$1.remoteBaseUrl = "";
+			_vfsGeneration++;
+			_remoteGeneration++;
+			_inflight.clear();
+			_failureReasons.clear();
+		}
+		/**
+		* Clear internal module buffer, in-flight, and negative-lookup caches.
+		* Increments the VFS and remote cache generation tokens so any pending in-flight requests
+		* from a previous client/archive or remote session cannot repopulate the cache.
+		*/
+		static clearCache() {
+			_vfsGeneration++;
+			_remoteGeneration++;
+			_bufferCache.clear();
+			_inflight.clear();
+			_failureReasons.clear();
+			_lastClientLoadFile = Client.loadFile;
+		}
+		/**
+		* Invalidate negative lookup cache and drop stale in-flight VFS requests
+		* if `Client.loadFile` reference has changed. Increments `_vfsGeneration` so
+		* an older in-flight VFS request's late failure cannot repopulate negative cache entries.
+		*/
+		static syncClientLoaderState() {
+			if (Client.loadFile !== _lastClientLoadFile) {
+				_lastClientLoadFile = Client.loadFile;
+				_vfsGeneration++;
+				for (const key of _failureReasons.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
+				for (const key of _inflight.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
+			}
+		}
+		static toLocalUint8Array(input) {
+			if (input instanceof Uint8Array) return input;
+			if (ArrayBuffer.isView(input)) {
+				const view = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+				const copy = new Uint8Array(view.length);
+				copy.set(view);
+				return copy;
+			}
+			if (input instanceof ArrayBuffer || Object.prototype.toString.call(input) === "[object ArrayBuffer]" || input && typeof input === "object" && typeof input.byteLength === "number" && typeof input.slice === "function") {
+				const view = new Uint8Array(input);
+				const copy = new Uint8Array(view.length);
+				copy.set(view);
+				return copy;
+			}
+			return null;
+		}
+		/**
+		* Decode a string value passed from Wasmoon Lua into JavaScript.
+		* In roBrowserLegacy's custom Wasmoon build, non-empty Lua strings arrive in JS callbacks
+		* as `Uint8Array` views into Wasm memory (`HEAPU8`).
+		*
+		* @param {Uint8Array|ArrayBuffer|string|number|null|undefined} value
+		* @returns {string}
+		*/
+		static decodeLuaString(value) {
+			if (typeof value === "string") return value;
+			if (value === null || value === void 0) return "";
+			const bytes = LuaModuleLoader.toLocalUint8Array(value);
+			if (bytes) return CodepageManager.decode(bytes, "utf-8");
+			return String(value);
+		}
+		/**
+		* Convert raw file content (`Uint8Array`, `ArrayBuffer`, view, or `string`) to a `Uint8Array`.
+		* Strips a 3-byte UTF-8 BOM (`0xEF 0xBB 0xBF`) if present on text scripts while preserving
+		* binary `.lub` bytecode (`\x1bLua...`) and non-UTF-8 (EUC-KR / Windows-1252) byte sequences.
+		*
+		* @param {Uint8Array|ArrayBuffer|ArrayBufferView|string} data
+		* @returns {Uint8Array}
+		*/
+		static normalizeBuffer(data) {
+			let bytes = LuaModuleLoader.toLocalUint8Array(data);
+			if (bytes) bytes = new Uint8Array(bytes);
+			else if (typeof data === "string") bytes = CodepageManager.encode(data, "utf-8");
+			else throw new Error(`Unsupported Lua module data type: ${typeof data}`);
+			if (bytes.length >= 3 && bytes[0] === 239 && bytes[1] === 187 && bytes[2] === 191) return bytes.subarray(3);
+			return bytes;
+		}
+		/**
+		* Check whether a buffer contains compiled Lua 5.1 binary bytecode (`\x1bLua`).
+		*
+		* @param {Uint8Array} bytes
+		* @returns {boolean}
+		*/
+		static isBinaryLub(bytes) {
+			const buf = LuaModuleLoader.toLocalUint8Array(bytes);
+			return Boolean(buf && buf.length >= 4 && buf[0] === 27 && buf[1] === 76 && buf[2] === 117 && buf[3] === 97);
+		}
+		/**
+		* Check if a target string is an HTTP(S) URL.
+		*
+		* @param {string} target
+		* @returns {boolean}
+		*/
+		static isRemoteUrl(target) {
+			return typeof target === "string" && /^https?:\/\//i.test(target.trim());
+		}
+		/**
+		* Deduplicate an array while preserving order.
+		*
+		* @template T
+		* @param {T[]} items
+		* @returns {T[]}
+		*/
+		static dedupeArray(items) {
+			const seen = /* @__PURE__ */ new Set();
+			const out = [];
+			for (const item of items) if (item && !seen.has(item)) {
+				seen.add(item);
+				out.push(item);
+			}
+			return out;
+		}
+		/**
+		* Parse search paths from a semicolon-delimited string or string array.
+		*
+		* @param {string|string[]} input
+		* @returns {string[]}
+		*/
+		static parseSearchPathsInput(input) {
+			if (!input) return [];
+			if (Array.isArray(input)) {
+				const expanded = [];
+				for (const entry of input) if (typeof entry === "string") for (const part of entry.split(";")) {
+					const trimmed = part.trim();
+					if (trimmed) expanded.push(trimmed);
+				}
+				return LuaModuleLoader.dedupeArray(expanded);
+			}
+			if (typeof input === "string") return LuaModuleLoader.dedupeArray(input.split(";").map((part) => part.trim()).filter(Boolean));
+			return [];
+		}
+		/**
+		* Format an array of search path templates into a Lua `package.path` string.
+		*
+		* @param {string[]} searchPaths
+		* @returns {string}
+		*/
+		static formatPackagePath(searchPaths) {
+			return LuaModuleLoader.parseSearchPathsInput(searchPaths).join(";");
+		}
+		/**
+		* Resolve effective search paths for a Lua VM.
+		* Distinguishes an omitted `overrideSearchPaths` (`undefined`/`null`) from an
+		* explicitly empty path (`''` or `[]`), which returns `[]` to disable path-template lookups.
+		*
+		* @param {object} [lua] - Wasmoon Lua instance
+		* @param {string|string[]|null} [overrideSearchPaths] - Explicit search paths override
+		* @returns {string[]}
+		*/
+		static getSearchPaths(lua = null, overrideSearchPaths = void 0) {
+			if (overrideSearchPaths !== void 0 && overrideSearchPaths !== null) return LuaModuleLoader.parseSearchPathsInput(overrideSearchPaths);
+			const configPaths = Configs.get("luaSearchPaths", null);
+			const fromConfigs = configPaths ? LuaModuleLoader.parseSearchPathsInput(configPaths) : [];
+			if (lua && _vmState.has(lua)) {
+				const state = _vmState.get(lua);
+				if (state && Array.isArray(state.searchPaths)) return LuaModuleLoader.dedupeArray([...fromConfigs, ...state.searchPaths]);
+			}
+			if (fromConfigs.length > 0) return LuaModuleLoader.dedupeArray([...fromConfigs, ..._config$1.searchPaths]);
+			return [..._config$1.searchPaths];
+		}
+		/**
+		* Read the live `package.path` from a Lua VM (or format an explicit override if provided).
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string|string[]} [overrideSearchPaths]
+		* @returns {string}
+		*/
+		static getCurrentPackagePath(lua, overrideSearchPaths = void 0) {
+			if (overrideSearchPaths !== void 0 && overrideSearchPaths !== null) return LuaModuleLoader.formatPackagePath(overrideSearchPaths);
+			if (lua && typeof lua.doStringSync === "function") {
+				const raw = lua.doStringSync("return (type(package) == \"table\" and type(package.path) == \"string\") and package.path or \"\"");
+				return LuaModuleLoader.decodeLuaString(raw);
+			}
+			return LuaModuleLoader.formatPackagePath(LuaModuleLoader.getSearchPaths(lua));
+		}
+		/**
+		* Normalize a VFS path (converting backslashes to forward slashes, collapsing duplicate
+		* slashes, and stripping leading `./` or `/`).
+		*
+		* @param {string} rawPath
+		* @returns {string}
+		*/
+		static normalizeVfsPath(rawPath) {
+			if (typeof rawPath !== "string") return "";
+			const trimmed = rawPath.trim();
+			if (!trimmed) return "";
+			if (LuaModuleLoader.isRemoteUrl(trimmed)) return trimmed;
+			return trimmed.replace(/\\/g, "/").replace(/\/+/g, "/").replace(/^(?:\.\/)+/, "").replace(/^\/+/, "");
+		}
+		/**
+		* Convert a canonical candidate path or remote URL into an Emscripten `MEMFS` path.
+		* Always returns an absolute POSIX path starting with `/`.
+		*
+		* @param {string} candidate
+		* @returns {string}
+		*/
+		static toMemfsPath(candidate) {
+			if (LuaModuleLoader.isRemoteUrl(candidate)) return `/__remote__/${candidate.trim().replace(/^https?:\/\//i, (match) => `${match.slice(0, -3).toLowerCase()}/`).replace(/[?#*:<>|"\\]/g, "_").replace(/\/+/g, "/")}`;
+			return `/${LuaModuleLoader.normalizeVfsPath(candidate)}`;
+		}
+		/**
+		* Translate a Lua module identifier (e.g., `"module.submodule"`, `"AI\\Const.lua"`,
+		* `"./AI/Util"`, or `"https://example.com/script.lua"`) into an ordered list of
+		* candidate VFS paths and/or remote URLs according to configured search paths.
+		*
+		* @param {string} modname - Module name passed to `require()`
+		* @param {string|string[]} [searchPaths] - Search path templates (`package.path`)
+		* @param {object} [lua] - Optional Lua VM instance for VM-scoped default search paths
+		* @returns {string[]} Ordered list of unique candidate paths/URLs
+		*/
+		static resolveCandidates(modname, searchPaths = void 0, lua = null) {
+			const raw = LuaModuleLoader.decodeLuaString(modname).trim();
+			if (!raw) return [];
+			const candidates = [];
+			if (LuaModuleLoader.isRemoteUrl(raw)) {
+				candidates.push(raw);
+				const withoutQuery = raw.split(/[?#]/)[0];
+				if (!/\.(lua|lub)$/i.test(withoutQuery) && raw === withoutQuery) {
+					candidates.push(`${raw}.lua`);
+					candidates.push(`${raw}.lub`);
+				}
+				return LuaModuleLoader.dedupeArray(candidates);
+			}
+			const templates = LuaModuleLoader.getSearchPaths(lua, searchPaths);
+			if (templates.length === 0) return [];
+			const normalized = LuaModuleLoader.normalizeVfsPath(raw);
+			if (!normalized) return [];
+			const extMatch = normalized.match(/\.(lua|lub)$/i);
+			const hasExplicitExt = Boolean(extMatch);
+			const explicitExt = hasExplicitExt ? extMatch[0].toLowerCase() : null;
+			const baseWithoutExt = hasExplicitExt ? normalized.slice(0, -extMatch[0].length) : normalized;
+			const dottedAsSlash = baseWithoutExt.replace(/\./g, "/").replace(/\/+/g, "/");
+			if (hasExplicitExt) {
+				candidates.push(normalized);
+				if (dottedAsSlash !== baseWithoutExt) candidates.push(`${dottedAsSlash}${explicitExt}`);
+				for (const tpl of templates) if (tpl.toLowerCase().endsWith(explicitExt)) {
+					candidates.push(LuaModuleLoader.applyTemplate(tpl, baseWithoutExt));
+					if (dottedAsSlash !== baseWithoutExt) candidates.push(LuaModuleLoader.applyTemplate(tpl, dottedAsSlash));
+				}
+			}
+			for (const tpl of templates) {
+				candidates.push(LuaModuleLoader.applyTemplate(tpl, dottedAsSlash));
+				if (baseWithoutExt !== dottedAsSlash && baseWithoutExt.includes("/")) candidates.push(LuaModuleLoader.applyTemplate(tpl, baseWithoutExt));
+			}
+			const remoteBase = _config$1.remoteBaseUrl || Configs.get("luaRemoteBaseUrl", "");
+			if (remoteBase && LuaModuleLoader.isRemoteUrl(remoteBase)) {
+				const baseClean = remoteBase.replace(/\/+$/, "");
+				if (hasExplicitExt) candidates.push(`${baseClean}/${normalized}`);
+				else {
+					candidates.push(`${baseClean}/${dottedAsSlash}.lua`);
+					candidates.push(`${baseClean}/${dottedAsSlash}.lub`);
+				}
+			}
+			return LuaModuleLoader.dedupeArray(candidates);
+		}
+		/**
+		* Resolve candidate paths for direct file operations (`loadfile` / `dofile`).
+		* Prioritizes the exact normalized file path before falling back to search paths.
+		*
+		* @param {string} filename
+		* @param {string|string[]} [searchPaths]
+		* @param {object} [lua]
+		* @returns {string[]}
+		*/
+		static resolveFileCandidates(filename, searchPaths = void 0, lua = null) {
+			const raw = LuaModuleLoader.decodeLuaString(filename).trim();
+			if (!raw) return [];
+			if (LuaModuleLoader.isRemoteUrl(raw)) return [raw];
+			const normalized = LuaModuleLoader.normalizeVfsPath(raw);
+			const candidates = [normalized];
+			if (!/\.(lua|lub)$/i.test(normalized)) {
+				candidates.push(`${normalized}.lua`);
+				candidates.push(`${normalized}.lub`);
+			}
+			const moduleCandidates = LuaModuleLoader.resolveCandidates(normalized, searchPaths, lua);
+			return LuaModuleLoader.dedupeArray([...candidates, ...moduleCandidates]);
+		}
+		/**
+		* Apply a single Lua `package.path` template (e.g. `"AI/?.lua"` or `"https://host/?.lua"`)
+		* to a normalized module path.
+		*
+		* @param {string} template
+		* @param {string} modPath
+		* @returns {string}
+		*/
+		static applyTemplate(template, modPath) {
+			const replaced = template.replace(/\?/g, modPath);
+			if (LuaModuleLoader.isRemoteUrl(replaced)) return replaced.replace(/^(https?:\/\/)(.*)$/i, (_, proto, rest) => `${proto}${rest.replace(/\/+/g, "/")}`);
+			return LuaModuleLoader.normalizeVfsPath(replaced);
+		}
+		/**
+		* Check if a file exists at `memfsPath` inside a Wasmoon Lua VM's Emscripten `MEMFS`.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string} memfsPath
+		* @returns {boolean}
+		*/
+		static hasMemfsFile(lua, memfsPath) {
+			const fs = lua && lua.luaApi && lua.luaApi.module && lua.luaApi.module.FS;
+			if (!fs || !memfsPath) return false;
+			try {
+				const stat = fs.stat(memfsPath);
+				return Boolean(stat && fs.isFile(stat.mode));
+			} catch (_err) {
+				return false;
+			}
+		}
+		/**
+		* Mount a `Uint8Array` buffer into a Wasmoon Lua VM's Emscripten `MEMFS`,
+		* creating parent directories as needed.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string} memfsPath - Target path in MEMFS
+		* @param {Uint8Array|ArrayBuffer|string} data - Raw file content
+		* @returns {string} Normalized MEMFS path
+		*/
+		static mountBuffer(lua, memfsPath, data) {
+			const fs = lua && lua.luaApi && lua.luaApi.module && lua.luaApi.module.FS;
+			if (!fs) throw new Error("Invalid Wasmoon Lua instance: missing Emscripten FS");
+			const bytes = LuaModuleLoader.normalizeBuffer(data);
+			const cleanPath = "/" + memfsPath.replace(/\\/g, "/").replace(/^(?:\.\/)+/, "").replace(/^\/+/, "");
+			const lastSlash = cleanPath.lastIndexOf("/");
+			if (lastSlash > 0) {
+				const dirSegments = cleanPath.slice(1, lastSlash).split("/").filter(Boolean);
+				let currentDir = "";
+				for (const segment of dirSegments) {
+					currentDir += `/${segment}`;
+					try {
+						fs.mkdir(currentDir);
+					} catch (_err) {}
+				}
+			}
+			fs.writeFile(cleanPath, bytes);
+			const normalizedCandidate = LuaModuleLoader.normalizeVfsPath(cleanPath);
+			if (normalizedCandidate) _failureReasons.delete(normalizedCandidate);
+			return cleanPath;
+		}
+		/**
+		* Register a module/file buffer directly in the shared cache (and optionally mount into a VM).
+		*
+		* @param {string} candidatePath - VFS path or URL
+		* @param {Uint8Array|ArrayBuffer|string} data - Module content (`.lua` source or `.lub` bytecode)
+		* @param {object} [lua] - Optional Lua VM to immediately mount into
+		* @returns {Uint8Array}
+		*/
+		static registerModuleBuffer(candidatePath, data, lua = null) {
+			const canonical = LuaModuleLoader.isRemoteUrl(candidatePath) ? candidatePath.trim() : LuaModuleLoader.normalizeVfsPath(candidatePath);
+			const bytes = LuaModuleLoader.normalizeBuffer(data);
+			_bufferCache.set(canonical, bytes);
+			_failureReasons.delete(canonical);
+			if (lua) {
+				const memfsPath = LuaModuleLoader.toMemfsPath(canonical);
+				LuaModuleLoader.mountBuffer(lua, memfsPath, bytes);
+			}
+			return bytes;
+		}
+		/**
+		* Check whether a candidate has already been probed and confirmed missing
+		* in the current archive generation.
+		*
+		* @param {object|null} lua - Wasmoon Lua instance
+		* @param {string} candidate - Canonical candidate path or URL
+		* @returns {boolean}
+		*/
+		static isKnownMissing(lua, candidate) {
+			LuaModuleLoader.syncClientLoaderState();
+			if (LuaModuleLoader.isRemoteUrl(candidate)) return false;
+			if (!_failureReasons.has(candidate)) return false;
+			const memfsPath = LuaModuleLoader.toMemfsPath(candidate);
+			if (lua && LuaModuleLoader.hasMemfsFile(lua, memfsPath) || _bufferCache.has(candidate)) {
+				_failureReasons.delete(candidate);
+				return false;
+			}
+			if (MemoryManager.exist(candidate) && MemoryManager.get(candidate) !== null && MemoryManager.get(candidate) !== void 0) {
+				_failureReasons.delete(candidate);
+				return false;
+			}
+			return true;
+		}
+		/**
+		* Attempt to resolve a single candidate synchronously from:
+		* 1. The Lua VM's Emscripten `MEMFS`
+		* 2. `LuaModuleLoader`'s shared `_bufferCache`
+		* 3. `MemoryManager` (if already loaded into roBrowserLegacy's asset memory cache)
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string} candidate - Candidate VFS path or remote URL
+		* @returns {{ found: boolean, memfsPath?: string, candidate: string, source?: string }}
+		*/
+		static resolveCandidateSync(lua, candidate) {
+			const memfsPath = LuaModuleLoader.toMemfsPath(candidate);
+			if (LuaModuleLoader.hasMemfsFile(lua, memfsPath)) return {
+				found: true,
+				memfsPath,
+				candidate,
+				source: "memfs"
+			};
+			if (!LuaModuleLoader.isRemoteUrl(candidate)) {
+				const relDotPath = `./${candidate}`;
+				if (LuaModuleLoader.hasMemfsFile(lua, relDotPath)) return {
+					found: true,
+					memfsPath: relDotPath,
+					candidate,
+					source: "memfs"
+				};
+			}
+			if (_bufferCache.has(candidate)) {
+				const cachedBytes = _bufferCache.get(candidate);
+				return {
+					found: true,
+					memfsPath: LuaModuleLoader.mountBuffer(lua, memfsPath, cachedBytes),
+					candidate,
+					source: "cache"
+				};
+			}
+			if (!LuaModuleLoader.isRemoteUrl(candidate) && MemoryManager.exist(candidate)) {
+				const memData = MemoryManager.get(candidate);
+				if (memData !== null && memData !== void 0) {
+					const bytes = LuaModuleLoader.normalizeBuffer(memData);
+					_bufferCache.set(candidate, bytes);
+					_failureReasons.delete(candidate);
+					return {
+						found: true,
+						memfsPath: LuaModuleLoader.mountBuffer(lua, memfsPath, bytes),
+						candidate,
+						source: "memory"
+					};
+				}
+			}
+			return {
+				found: false,
+				candidate
+			};
+		}
+		/**
+		* Format a standard Lua `package.loaders` diagnostic message for a list of tried candidates.
+		*
+		* @param {string[]} candidates
+		* @returns {string}
+		*/
+		static formatTriedMessage(candidates) {
+			if (!candidates || candidates.length === 0) return "\n	no file ''";
+			return candidates.map((candidate) => {
+				const reason = _failureReasons.get(candidate);
+				if (reason && LuaModuleLoader.isRemoteUrl(candidate)) return `\n\tno file '${candidate}' (${reason})`;
+				return `\n\tno file '${candidate}'`;
+			}).join("");
+		}
+		/**
+		* Synchronously resolve a module name across all configured candidate paths.
+		* When `options.asyncMode` is `true`, stops at the first uncached candidate that
+		* has not yet been checked asynchronously so a lower-priority cached candidate
+		* never overrides a higher-priority uncached `package.path` entry.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string|Uint8Array} modname - Module name
+		* @param {string|Uint8Array} [searchPathStr] - Current `package.path` from Lua
+		* @param {object} [options={}]
+		* @param {boolean} [options.asyncMode=false] - Whether caller can yield to fetch unchecked candidates
+		* @returns {{ found: boolean, needsAsync?: boolean, memfsPath?: string, candidate?: string, source?: string, candidates: string[], triedMessage?: string }}
+		*/
+		static resolveModuleSync(lua, modname, searchPathStr = void 0, options = {}) {
+			const decodedMod = LuaModuleLoader.decodeLuaString(modname);
+			const decodedSearch = searchPathStr === void 0 || searchPathStr === null ? void 0 : LuaModuleLoader.decodeLuaString(searchPathStr);
+			const candidates = LuaModuleLoader.resolveCandidates(decodedMod, decodedSearch, lua);
+			const asyncMode = Boolean(options && options.asyncMode);
+			for (const candidate of candidates) {
+				const res = LuaModuleLoader.resolveCandidateSync(lua, candidate);
+				if (res.found) return {
+					found: true,
+					needsAsync: false,
+					memfsPath: res.memfsPath,
+					candidate: res.candidate,
+					source: res.source,
+					candidates
+				};
+				if (asyncMode && !LuaModuleLoader.isKnownMissing(lua, candidate)) return {
+					found: false,
+					needsAsync: true,
+					candidates,
+					triedMessage: LuaModuleLoader.formatTriedMessage(candidates)
+				};
+			}
+			return {
+				found: false,
+				needsAsync: false,
+				candidates,
+				triedMessage: LuaModuleLoader.formatTriedMessage(candidates)
+			};
+		}
+		/**
+		* Synchronously resolve a direct file path (`loadfile` / `dofile`).
+		* When `options.asyncMode` is `true`, stops at the first uncached candidate that
+		* has not yet been checked asynchronously.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string|Uint8Array} filename - File path or URL
+		* @param {string|Uint8Array} [searchPathStr] - Current `package.path` from Lua
+		* @param {object} [options={}]
+		* @param {boolean} [options.asyncMode=false] - Whether caller can yield to fetch unchecked candidates
+		* @returns {{ found: boolean, needsAsync?: boolean, memfsPath?: string, candidate?: string, source?: string, candidates: string[], triedMessage?: string }}
+		*/
+		static resolveFileSync(lua, filename, searchPathStr = void 0, options = {}) {
+			const decodedFile = LuaModuleLoader.decodeLuaString(filename);
+			const decodedSearch = searchPathStr === void 0 || searchPathStr === null ? void 0 : LuaModuleLoader.decodeLuaString(searchPathStr);
+			const candidates = LuaModuleLoader.resolveFileCandidates(decodedFile, decodedSearch, lua);
+			const asyncMode = Boolean(options && options.asyncMode);
+			for (const candidate of candidates) {
+				const res = LuaModuleLoader.resolveCandidateSync(lua, candidate);
+				if (res.found) return {
+					found: true,
+					needsAsync: false,
+					memfsPath: res.memfsPath,
+					candidate: res.candidate,
+					source: res.source,
+					candidates
+				};
+				if (asyncMode && !LuaModuleLoader.isKnownMissing(lua, candidate)) return {
+					found: false,
+					needsAsync: true,
+					candidates,
+					triedMessage: LuaModuleLoader.formatTriedMessage(candidates)
+				};
+			}
+			return {
+				found: false,
+				needsAsync: false,
+				candidates,
+				triedMessage: LuaModuleLoader.formatTriedMessage(candidates)
+			};
+		}
+		/**
+		* Load a VFS candidate asynchronously through `Client.loadFile` (or configured `vfsLoader`).
+		*
+		* @param {string} candidate - Normalized VFS path
+		* @param {object} [options={}]
+		* @returns {Promise<Uint8Array>}
+		*/
+		static loadVfsCandidate(candidate, options = {}) {
+			LuaModuleLoader.syncClientLoaderState();
+			if (_bufferCache.has(candidate)) return Promise.resolve(_bufferCache.get(candidate));
+			if (_inflight.has(candidate)) return _inflight.get(candidate);
+			if (!options.vfsLoader && LuaModuleLoader.isKnownMissing(null, candidate)) return Promise.reject(new Error(_failureReasons.get(candidate)));
+			const vfsLoader = options.vfsLoader || _config$1.vfsLoader;
+			const generation = _vfsGeneration;
+			const promise = new Promise((resolve, reject) => {
+				if (typeof vfsLoader === "function") {
+					Promise.resolve().then(() => vfsLoader(candidate)).then((data) => {
+						if (data === null || data === void 0) throw new Error(`VFS file not found: ${candidate}`);
+						const bytes = LuaModuleLoader.normalizeBuffer(data);
+						if (_vfsGeneration === generation) {
+							_bufferCache.set(candidate, bytes);
+							_failureReasons.delete(candidate);
+						}
+						resolve(bytes);
+					}).catch((err) => {
+						const msg = err && err.message || String(err || "VFS load failed");
+						if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
+						reject(new Error(msg));
+					});
+					return;
+				}
+				if (MemoryManager.exist(candidate)) {
+					const existing = MemoryManager.get(candidate);
+					if (existing !== null && existing !== void 0) {
+						const bytes = LuaModuleLoader.normalizeBuffer(existing);
+						if (_vfsGeneration === generation) {
+							_bufferCache.set(candidate, bytes);
+							_failureReasons.delete(candidate);
+						}
+						resolve(bytes);
+						return;
+					}
+				}
+				let settled = false;
+				const onSuccess = (data) => {
+					if (settled) return;
+					settled = true;
+					try {
+						if (_vfsGeneration !== generation) MemoryManager.remove(null, candidate);
+						if (data === null || data === void 0) {
+							const msg = `Empty VFS response for "${candidate}"`;
+							if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
+							reject(new Error(msg));
+							return;
+						}
+						const bytes = LuaModuleLoader.normalizeBuffer(data);
+						if (_vfsGeneration === generation) {
+							_bufferCache.set(candidate, bytes);
+							_failureReasons.delete(candidate);
+						}
+						resolve(bytes);
+					} catch (err) {
+						const msg = err && err.message || String(err);
+						if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
+						reject(err);
+					}
+				};
+				const onError = (err) => {
+					if (settled) return;
+					settled = true;
+					const msg = err && err.message || String(err || `File not found in VFS: ${candidate}`);
+					if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
+					reject(new Error(msg));
+				};
+				try {
+					Client.loadFile(candidate, onSuccess, onError);
+				} catch (err) {
+					onError(err);
+				}
+			}).finally(() => {
+				if (_inflight.get(candidate) === promise) _inflight.delete(candidate);
+			});
+			_inflight.set(candidate, promise);
+			return promise;
+		}
+		/**
+		* Fetch a remote HTTP(S) URL candidate asynchronously using `fetch` (or configured `urlFetcher`).
+		* Validates HTTP status and rejects HTML error pages (e.g. SPA fallback index.html).
+		*
+		* @param {string} url - Remote HTTP(S) URL
+		* @param {object} [options={}]
+		* @returns {Promise<Uint8Array>}
+		*/
+		static fetchUrlCandidate(url, options = {}) {
+			if (_bufferCache.has(url)) return Promise.resolve(_bufferCache.get(url));
+			if (_inflight.has(url)) return _inflight.get(url);
+			const urlFetcher = options.urlFetcher || _config$1.urlFetcher;
+			const generation = _remoteGeneration;
+			const promise = Promise.resolve().then(async () => {
+				let rawData;
+				if (typeof urlFetcher === "function") {
+					rawData = await urlFetcher(url);
+					if (rawData === null || rawData === void 0) throw new Error(`Empty response from URL: ${url}`);
+				} else {
+					if (typeof fetch !== "function") throw new Error(`Global fetch is not available to load URL: ${url}`);
+					const response = await fetch(url, {
+						method: "GET",
+						headers: { Accept: "application/octet-stream, text/plain, */*" }
+					});
+					if (!response || !response.ok) {
+						const status = response ? `${response.status} ${response.statusText}`.trim() : "Network error";
+						throw new Error(`HTTP ${status}`);
+					}
+					rawData = await response.arrayBuffer();
+				}
+				const bytes = LuaModuleLoader.normalizeBuffer(rawData);
+				if (!LuaModuleLoader.isBinaryLub(bytes) && bytes.length > 0) {
+					const preview = CodepageManager.decode(bytes.subarray(0, Math.min(bytes.length, 256)), "utf-8").trimStart().toLowerCase();
+					if (preview.startsWith("<!doctype html") || preview.startsWith("<html")) throw new Error("Server returned HTML page instead of Lua/LUB module");
+				}
+				if (_remoteGeneration === generation) {
+					_bufferCache.set(url, bytes);
+					_failureReasons.delete(url);
+				}
+				return bytes;
+			}).catch((err) => {
+				const msg = err && err.message || String(err || "Remote fetch failed");
+				if (_remoteGeneration === generation) _failureReasons.set(url, msg);
+				throw new Error(msg);
+			}).finally(() => {
+				if (_inflight.get(url) === promise) _inflight.delete(url);
+			});
+			_inflight.set(url, promise);
+			return promise;
+		}
+		/**
+		* Load a single candidate from either a remote URL or VFS.
+		*
+		* @param {string} candidate
+		* @param {object} [options={}]
+		* @returns {Promise<Uint8Array>}
+		*/
+		static loadCandidateData(candidate, options = {}) {
+			if (LuaModuleLoader.isRemoteUrl(candidate)) return LuaModuleLoader.fetchUrlCandidate(candidate, options);
+			return LuaModuleLoader.loadVfsCandidate(candidate, options);
+		}
+		/**
+		* Asynchronously resolve and mount a module (or direct file) across its candidate list
+		* in strict search-path order (checking each candidate synchronously first, then asynchronously
+		* before advancing to the next candidate), and recursively preload any static dependencies
+		* discovered in `.lua` source text.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string|Uint8Array} target - Module name or file path
+		* @param {string|Uint8Array} [searchPathStr] - Lua `package.path` string
+		* @param {object} [options={}]
+		* @param {boolean} [options.isFile=false] - Whether `target` is a direct file (`loadfile`/`dofile`)
+		* @param {boolean} [options.preloadNested=true] - Whether to recursively preload static dependencies
+		* @param {Set<string>} [options.visited] - Internal cycle-prevention set for nested preloading
+		* @returns {Promise<{ found: boolean, memfsPath?: string, candidate?: string, source?: string, candidates: string[], triedMessage?: string }>}
+		*/
+		static async fetchModuleAsync(lua, target, searchPathStr = void 0, options = {}) {
+			const decodedTarget = LuaModuleLoader.decodeLuaString(target);
+			const decodedSearch = searchPathStr === void 0 || searchPathStr === null ? void 0 : LuaModuleLoader.decodeLuaString(searchPathStr);
+			const isFile = Boolean(options.isFile);
+			const preloadNested = options.preloadNested !== false;
+			const visited = options.visited || /* @__PURE__ */ new Set();
+			const candidates = isFile ? LuaModuleLoader.resolveFileCandidates(decodedTarget, decodedSearch, lua) : LuaModuleLoader.resolveCandidates(decodedTarget, decodedSearch, lua);
+			for (const candidate of candidates) {
+				const syncRes = LuaModuleLoader.resolveCandidateSync(lua, candidate);
+				if (syncRes.found) {
+					if (preloadNested && !visited.has(candidate)) {
+						visited.add(candidate);
+						let cachedBytes = _bufferCache.get(candidate);
+						if (!cachedBytes && lua?.luaApi?.module?.FS && syncRes.memfsPath) try {
+							cachedBytes = lua.luaApi.module.FS.readFile(syncRes.memfsPath);
+						} catch (_err) {
+							cachedBytes = null;
+						}
+						if (cachedBytes && !LuaModuleLoader.isBinaryLub(cachedBytes)) await LuaModuleLoader.preloadDependenciesFromBuffer(lua, cachedBytes, decodedSearch, {
+							...options,
+							visited
+						});
+					}
+					return {
+						found: true,
+						memfsPath: syncRes.memfsPath,
+						candidate: syncRes.candidate,
+						source: syncRes.source,
+						candidates
+					};
+				}
+				if (!options.vfsLoader && !LuaModuleLoader.isRemoteUrl(candidate) && LuaModuleLoader.isKnownMissing(lua, candidate)) continue;
+				try {
+					const bytes = await LuaModuleLoader.loadCandidateData(candidate, options);
+					const memfsPath = LuaModuleLoader.toMemfsPath(candidate);
+					const mountedPath = LuaModuleLoader.mountBuffer(lua, memfsPath, bytes);
+					if (Configs.get("debugAI", false)) console.log(`[LuaModuleLoader] Loaded "${candidate}" -> "${mountedPath}"`);
+					if (preloadNested && !visited.has(candidate)) {
+						visited.add(candidate);
+						if (!LuaModuleLoader.isBinaryLub(bytes)) await LuaModuleLoader.preloadDependenciesFromBuffer(lua, bytes, decodedSearch, {
+							...options,
+							visited
+						});
+					}
+					return {
+						found: true,
+						memfsPath: mountedPath,
+						candidate,
+						source: LuaModuleLoader.isRemoteUrl(candidate) ? "remote" : "vfs",
+						candidates
+					};
+				} catch (_err) {}
+			}
+			return {
+				found: false,
+				candidates,
+				triedMessage: LuaModuleLoader.formatTriedMessage(candidates)
+			};
+		}
+		/**
+		* Strip Lua block and single-line comments and extract static `require`, `dofile`,
+		* and `loadfile` string targets from Lua source code.
+		*
+		* @param {string} sourceText - Lua source code
+		* @returns {Array<{ type: 'require'|'dofile'|'loadfile', target: string }>}
+		*/
+		static extractDependencies(sourceText) {
+			if (typeof sourceText !== "string" || !sourceText) return [];
+			const withoutComments = sourceText.replace(/--\[(=*)\[[\s\S]*?\]\1\]/g, "").replace(/--[^\r\n]*/g, "");
+			const dependencies = [];
+			const seen = /* @__PURE__ */ new Set();
+			const addDep = (fnType, rawTarget) => {
+				const target = (rawTarget || "").trim();
+				if (!target) return;
+				if (OPTIONAL_RUNTIME_PATTERNS.some((opt) => target.includes(opt))) return;
+				const key = `${fnType}:${target}`;
+				if (!seen.has(key)) {
+					seen.add(key);
+					dependencies.push({
+						type: fnType,
+						target
+					});
+				}
+			};
+			const directPattern = /\b(require|dofile|loadfile)\s*(?:\(\s*(['"])([^'"\r\n]+)\2\s*\)|(['"])([^'"\r\n]+)\4|\(\s*\[\[([^\]]+)\]\s*\]\s*\)|\[\[([^\]]+)\]\])/g;
+			let match;
+			while ((match = directPattern.exec(withoutComments)) !== null) {
+				const fnType = match[1];
+				addDep(fnType, match[3] || match[5] || match[6] || match[7]);
+			}
+			const pcallPattern = /\bpcall\s*\(\s*(require|dofile|loadfile)\s*,\s*(['"])([^'"\r\n]+)\2\s*\)/g;
+			while ((match = pcallPattern.exec(withoutComments)) !== null) {
+				const fnType = match[1];
+				const target = match[3];
+				addDep(fnType, target);
+			}
+			return dependencies;
+		}
+		/**
+		* Recursively preload static dependencies discovered inside a `.lua` buffer.
+		* Missing optional/conditional dependencies do not reject preloading so that
+		* runtime `pcall(require, ...)` or conditional branches behave identically to standard Lua.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {Uint8Array} bytes - Raw `.lua` file buffer
+		* @param {string} [searchPathStr] - Lua `package.path` string
+		* @param {object} [options={}]
+		* @returns {Promise<void>}
+		*/
+		static async preloadDependenciesFromBuffer(lua, bytes, searchPathStr = void 0, options = {}) {
+			if (!bytes || LuaModuleLoader.isBinaryLub(bytes)) return;
+			const sourceText = CodepageManager.decode(bytes, "utf-8");
+			const deps = LuaModuleLoader.extractDependencies(sourceText);
+			if (deps.length === 0) return;
+			await Promise.all(deps.map((dep) => LuaModuleLoader.fetchModuleAsync(lua, dep.target, searchPathStr, {
+				...options,
+				isFile: dep.type === "dofile" || dep.type === "loadfile",
+				preloadNested: true
+			}).catch(() => null)));
+		}
+		/**
+		* Preload all static `require`, `dofile`, and `loadfile` dependencies referenced in a Lua script string.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string} luaCode - Lua source code string
+		* @param {object} [options={}]
+		* @returns {Promise<void>}
+		*/
+		static async preloadFromCode(lua, luaCode, options = {}) {
+			LuaModuleLoader.ensureSetup(lua, options);
+			const searchPathStr = LuaModuleLoader.getCurrentPackagePath(lua, options.searchPaths);
+			const bytes = LuaModuleLoader.normalizeBuffer(luaCode);
+			await LuaModuleLoader.preloadDependenciesFromBuffer(lua, bytes, searchPathStr, {
+				...options,
+				visited: /* @__PURE__ */ new Set()
+			});
+		}
+		/**
+		* Preload one or more module names or file paths (and their nested dependencies) into a Lua VM.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string|string[]} targets - Module name(s) or file path(s)
+		* @param {object} [options={}]
+		* @param {boolean} [options.isFile=false] - Treat targets as file paths
+		* @param {boolean} [options.strict=false] - Throw if any top-level target cannot be resolved
+		* @returns {Promise<Array<object>>}
+		*/
+		static async preload(lua, targets, options = {}) {
+			LuaModuleLoader.ensureSetup(lua, options);
+			const list = Array.isArray(targets) ? targets : [targets];
+			const searchPathStr = LuaModuleLoader.getCurrentPackagePath(lua, options.searchPaths);
+			const visited = /* @__PURE__ */ new Set();
+			const results = [];
+			for (const target of list) {
+				const res = await LuaModuleLoader.fetchModuleAsync(lua, target, searchPathStr, {
+					...options,
+					visited
+				});
+				if (!res.found && options.strict) {
+					const err = /* @__PURE__ */ new Error(`Failed to preload Lua resource "${target}":${res.triedMessage || ""}`);
+					err.code = "LUA_FILE_NOT_FOUND";
+					throw err;
+				}
+				results.push(res);
+			}
+			return results;
+		}
+		/**
+		* Set up a Wasmoon `Lua` instance with `LuaModuleLoader`'s `require()`, `package.loaders`,
+		* `package.searchers`, `package.path`, `loadfile()`, and `dofile()` pipeline.
+		*
+		* Safe and idempotent to call multiple times on the same VM (updates search paths if provided).
+		*
+		* @param {object} lua - Wasmoon `Lua` instance
+		* @param {object} [options={}]
+		* @param {string|string[]} [options.searchPaths] - VM-specific search paths
+		* @returns {object} The configured `lua` instance
+		*/
+		static setup(lua, options = {}) {
+			if (!lua || !lua.ctx || typeof lua.doStringSync !== "function") throw new Error("LuaModuleLoader.setup() requires a valid Wasmoon Lua instance");
+			const existingState = _vmState.get(lua);
+			const hasExplicitSearchPaths = options.searchPaths !== void 0 && options.searchPaths !== null;
+			const searchPaths = hasExplicitSearchPaths ? LuaModuleLoader.parseSearchPathsInput(options.searchPaths) : existingState && Array.isArray(existingState.searchPaths) ? existingState.searchPaths : LuaModuleLoader.getSearchPaths();
+			const configuredPackagePath = LuaModuleLoader.formatPackagePath(searchPaths);
+			_vmState.set(lua, {
+				initialized: true,
+				searchPaths,
+				configuredPackagePath,
+				options
+			});
+			const ctx = lua.ctx;
+			ctx.__ro_resolve_module = (modname, searchPath, isAsync) => {
+				return LuaModuleLoader.resolveModuleSync(lua, modname, searchPath, { asyncMode: Boolean(isAsync) });
+			};
+			ctx.__ro_fetch_module_async = (modname, searchPath) => {
+				const syncCheck = LuaModuleLoader.resolveModuleSync(lua, modname, searchPath, { asyncMode: true });
+				if (syncCheck.found || syncCheck.needsAsync === false) return null;
+				return LuaModuleLoader.fetchModuleAsync(lua, modname, searchPath, options).then(() => true);
+			};
+			ctx.__ro_resolve_file = (filename, searchPath, isAsync) => {
+				return LuaModuleLoader.resolveFileSync(lua, filename, searchPath, { asyncMode: Boolean(isAsync) });
+			};
+			ctx.__ro_fetch_file_async = (filename, searchPath) => {
+				const syncCheck = LuaModuleLoader.resolveFileSync(lua, filename, searchPath, { asyncMode: true });
+				if (syncCheck.found || syncCheck.needsAsync === false) return null;
+				return LuaModuleLoader.fetchModuleAsync(lua, filename, searchPath, {
+					...options,
+					isFile: true
+				}).then(() => true);
+			};
+			if (!existingState || !existingState.initialized || hasExplicitSearchPaths) {
+				ctx.__ro_initial_package_path = configuredPackagePath;
+				lua.doStringSync(`
+				package = package or {}
+				package.path = __ro_initial_package_path
+				__ro_initial_package_path = nil
+			`);
+			}
+			if (!existingState || !existingState.initialized) lua.doStringSync(LUA_BOOTSTRAP_SCRIPT);
+			return lua;
+		}
+		/**
+		* Ensure `LuaModuleLoader.setup(lua)` has been called on the given VM without overwriting
+		* any runtime changes a Lua script may have made to `package.path`.
+		*
+		* @param {object} lua
+		* @param {object} [options={}]
+		*/
+		static ensureSetup(lua, options = {}) {
+			const existingState = _vmState.get(lua);
+			if (!existingState || !existingState.initialized) {
+				LuaModuleLoader.setup(lua, options);
+				return;
+			}
+			if (options.searchPaths !== void 0 && options.searchPaths !== null) {
+				const requestedPath = LuaModuleLoader.formatPackagePath(options.searchPaths);
+				if (existingState.configuredPackagePath !== requestedPath) LuaModuleLoader.setup(lua, options);
+			}
+		}
+		/**
+		* Asynchronously preload and `require(modname)` in a Lua VM, returning the module export.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string} modname - Module name to require
+		* @param {object} [options={}]
+		* @returns {Promise<any>}
+		*/
+		static async requireAsync(lua, modname, options = {}) {
+			LuaModuleLoader.ensureSetup(lua, options);
+			const currentPackagePath = LuaModuleLoader.getCurrentPackagePath(lua);
+			await LuaModuleLoader.fetchModuleAsync(lua, modname, currentPackagePath, options);
+			lua.ctx.__ro_req_target = modname;
+			try {
+				return await lua.doString("local m = __ro_req_target; __ro_req_target = nil; return require(m)");
+			} finally {
+				lua.ctx.__ro_req_target = void 0;
+			}
+		}
+		/**
+		* Asynchronously preload a file (and its dependencies) from VFS or URL and execute it in a Lua VM.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string} filename - File path or URL
+		* @param {object} [options={}]
+		* @returns {Promise<any>}
+		*/
+		static async doFileAsync(lua, filename, options = {}) {
+			LuaModuleLoader.ensureSetup(lua, options);
+			const currentPackagePath = LuaModuleLoader.getCurrentPackagePath(lua);
+			const resolved = await LuaModuleLoader.fetchModuleAsync(lua, filename, currentPackagePath, {
+				...options,
+				isFile: true,
+				preloadNested: true
+			});
+			if (!resolved.found) {
+				const err = /* @__PURE__ */ new Error(`Cannot open file '${filename}':${resolved.triedMessage || " file not found"}`);
+				err.code = "LUA_FILE_NOT_FOUND";
+				throw err;
+			}
+			lua.ctx.__ro_dofile_target = resolved.memfsPath;
+			try {
+				return await lua.doString("local f = __ro_dofile_target; __ro_dofile_target = nil; return dofile(f)");
+			} finally {
+				lua.ctx.__ro_dofile_target = void 0;
+			}
+		}
+		/**
+		* Preload a list of files (and all nested `require`/`dofile`/`loadfile` dependencies)
+		* and execute them sequentially in the given Lua VM.
+		* Preserves any runtime modifications made to `package.path` by earlier files in `fileList`.
+		*
+		* @param {object} lua - Wasmoon Lua instance
+		* @param {string[]} fileList - Ordered list of files to preload and execute
+		* @param {object} [options={}]
+		* @returns {Promise<void>}
+		*/
+		static async loadAndExecuteFiles(lua, fileList, options = {}) {
+			LuaModuleLoader.ensureSetup(lua, options);
+			const runtimeOptions = { ...options };
+			delete runtimeOptions.searchPaths;
+			await LuaModuleLoader.preload(lua, fileList, {
+				...runtimeOptions,
+				isFile: true,
+				strict: true
+			});
+			for (const file of fileList) await LuaModuleLoader.doFileAsync(lua, file, runtimeOptions);
+		}
+	};
+}));
+//#endregion
 //#region src/Core/Events.js
 var _events, _tick$1, _uid, Events;
 var init_Events = __esmMin((() => {
@@ -207184,7 +208505,7 @@ function init$14(gl) {
 		});
 	});
 	_buffer$20 = gl.createBuffer();
-	_program$28 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
+	_program$27 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$20);
 	gl.bufferData(gl.ARRAY_BUFFER, _buffer_data.byteLength, gl.DYNAMIC_DRAW);
 }
@@ -207200,10 +208521,10 @@ function init$14(gl) {
 */
 function render$15(gl, modelView, projection, fog, x, y) {
 	if (!_texture$5) return;
-	const uniform = _program$28.uniform;
-	const attribute = _program$28.attribute;
+	const uniform = _program$27.uniform;
+	const attribute = _program$27.attribute;
 	let z;
-	gl.useProgram(_program$28);
+	gl.useProgram(_program$27);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -207249,12 +208570,12 @@ function free$9(gl) {
 		gl.deleteTexture(_texture$5);
 		_texture$5 = null;
 	}
-	if (_program$28) {
-		gl.deleteProgram(_program$28);
-		_program$28 = null;
+	if (_program$27) {
+		gl.deleteProgram(_program$27);
+		_program$27 = null;
 	}
 }
-var _program$28, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
+var _program$27, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
 var init_GridSelector = __esmMin((() => {
 	init_Altitude();
 	init_Client();
@@ -207263,7 +208584,7 @@ var init_GridSelector = __esmMin((() => {
 	init_Configs();
 	init_GridSelector$2();
 	init_GridSelector$1();
-	_program$28 = null;
+	_program$27 = null;
 	_buffer$20 = null;
 	_texture$5 = null;
 	_xy = null;
@@ -207376,9 +208697,9 @@ var init_Ground$1 = __esmMin((() => {
 * @param {object} light structure
 */
 function render$14(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$27.uniform;
-	const attribute = _program$27.attribute;
-	gl.useProgram(_program$27);
+	const uniform = _program$26.uniform;
+	const attribute = _program$26.attribute;
+	gl.useProgram(_program$26);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -207549,7 +208870,7 @@ function init$13(gl, data) {
 	data.height;
 	_shadowMap = data.shadowMap;
 	if (!_buffer$19) _buffer$19 = gl.createBuffer();
-	if (!_program$27) _program$27 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
+	if (!_program$26) _program$26 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$19);
 	gl.bufferData(gl.ARRAY_BUFFER, data.mesh, gl.STATIC_DRAW);
 	initLightmap(gl, data.lightmap, data.lightmapSize);
@@ -207600,7 +208921,7 @@ function getShadowFactor(x, y) {
 	for (y = -3; y < 3; ++y) for (x = -3; x < 3; ++x) factor += _shadowMap[_x + x + (_y + y) * _width * 8];
 	return factor / 36 / 255;
 }
-var procCanvas$2, procCtx$2, _program$27, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
+var procCanvas$2, procCtx$2, _program$26, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
 var init_Ground = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -207610,7 +208931,7 @@ var init_Ground = __esmMin((() => {
 	init_Ground$1();
 	procCanvas$2 = document.createElement("canvas");
 	procCtx$2 = procCanvas$2.getContext("2d", { willReadFrequently: true });
-	_program$27 = null;
+	_program$26 = null;
 	_buffer$19 = null;
 	_lightmap = null;
 	_tileColor = null;
@@ -207644,7 +208965,7 @@ var init_SpriteRenderer$1 = __esmMin((() => {
 */
 function RenderCanvas3D(isBlendModeOne) {
 	if (!this.image.texture || !this.color[3]) return;
-	const uniform = _program$26.uniform;
+	const uniform = _program$25.uniform;
 	const gl = _gl$2;
 	const use_pal = this.image.palette !== null;
 	if (isBlendModeOne) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -207668,9 +208989,9 @@ function RenderCanvas3D(isBlendModeOne) {
 	gl.uniform1f(uniform.uSpriteRendererZindex, this.zIndex++);
 	if (this.angle !== _angle) {
 		_angle = this.angle;
-		mat4$24.identity(_matrix$7);
-		if (_angle) mat4$24.rotateZ(_matrix$7, _matrix$7, -_angle / 180 * Math.PI);
-		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$7);
+		mat4$23.identity(_matrix$6);
+		if (_angle) mat4$23.rotateZ(_matrix$6, _matrix$6, -_angle / 180 * Math.PI);
+		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$6);
 	}
 	_offset[0] = this.offset[0] / 175 * this.xSize;
 	_offset[1] = this.offset[1] / 175 * this.ySize - .5;
@@ -207749,14 +209070,14 @@ function fillImageData(imageData, frame, pal, color) {
 		}
 	}
 }
-var mat4$24, RenderCanvas2D, _program$26, _buffer$18, _ctx$4, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$7, _size$7, _offset, SpriteRenderer;
+var mat4$23, RenderCanvas2D, _program$25, _buffer$18, _ctx$4, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
 	init_Camera();
 	init_SpriteRenderer$2();
 	init_SpriteRenderer$1();
-	mat4$24 = gl_matrix_default.mat4;
+	mat4$23 = gl_matrix_default.mat4;
 	RenderCanvas2D = (function RenderCanvas2DClosure() {
 		const _cache = /* @__PURE__ */ new WeakMap();
 		const MAX_COLORS_PER_PALETTE = 8;
@@ -207822,7 +209143,7 @@ var init_SpriteRenderer = __esmMin((() => {
 			_ctx$4.restore();
 		};
 	})();
-	_program$26 = null;
+	_program$25 = null;
 	_buffer$18 = null;
 	_ctx$4 = null;
 	_gl$2 = null;
@@ -207837,7 +209158,7 @@ var init_SpriteRenderer = __esmMin((() => {
 	_texture$4 = null;
 	_usepal = null;
 	_pos$8 = /* @__PURE__ */ new Int16Array(2);
-	_matrix$7 = /* @__PURE__ */ new Float32Array(16);
+	_matrix$6 = /* @__PURE__ */ new Float32Array(16);
 	_size$7 = /* @__PURE__ */ new Float32Array(2);
 	_offset = /* @__PURE__ */ new Float32Array(2);
 	SpriteRenderer = class {
@@ -207937,7 +209258,7 @@ var init_SpriteRenderer = __esmMin((() => {
 					1
 				]), gl.STATIC_DRAW);
 			}
-			if (!_program$26) _program$26 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
+			if (!_program$25) _program$25 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
 		}
 		/**
 		* Initialize 3D Context
@@ -207948,12 +209269,12 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {object} fog structure
 		*/
 		static bind3DContext(gl, modelView, projection, fog) {
-			const attribute = _program$26.attribute;
-			const uniform = _program$26.uniform;
-			gl.useProgram(_program$26);
+			const attribute = _program$25.attribute;
+			const uniform = _program$25.uniform;
+			gl.useProgram(_program$25);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
-			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$24.invert(_matrix$7, modelView));
+			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$23.invert(_matrix$6, modelView));
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -207982,7 +209303,7 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {object} gl context
 		*/
 		static unbind(gl) {
-			const attribute = _program$26.attribute;
+			const attribute = _program$25.attribute;
 			gl.disableVertexAttribArray(attribute.aPosition);
 			gl.disableVertexAttribArray(attribute.aTextureCoord);
 		}
@@ -208079,7 +209400,7 @@ function init$12(gl, water) {
 	_wavePitch = water.wavePitch;
 	_waterOpacity = water.type !== 4 && water.type !== 6 ? .8 : 1;
 	if (!_vertCount) return;
-	if (!_program$25) _program$25 = WebGL_default.createShaderProgram(gl, Water_default$2, Water_default$1);
+	if (!_program$24) _program$24 = WebGL_default.createShaderProgram(gl, Water_default$2, Water_default$1);
 	_buffer$17 = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$17);
 	gl.bufferData(gl.ARRAY_BUFFER, water.mesh, gl.STATIC_DRAW);
@@ -208100,10 +209421,10 @@ function init$12(gl, water) {
 */
 function render$13(gl, modelView, projection, fog, light, tick) {
 	if (!_vertCount) return;
-	const uniform = _program$25.uniform;
-	const attribute = _program$25.attribute;
+	const uniform = _program$24.uniform;
+	const attribute = _program$24.attribute;
 	const frame = tick / (1e3 / 60);
-	gl.useProgram(_program$25);
+	gl.useProgram(_program$24);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -208140,9 +209461,9 @@ function free$7(gl) {
 		gl.deleteBuffer(_buffer$17);
 		_buffer$17 = null;
 	}
-	if (_program$25) {
-		gl.deleteProgram(_program$25);
-		_program$25 = null;
+	if (_program$24) {
+		gl.deleteProgram(_program$24);
+		_program$24 = null;
 	}
 	for (i = 0; i < 32; ++i) if (_textures$2[i]) {
 		gl.deleteTexture(_textures$2[i]);
@@ -208150,13 +209471,13 @@ function free$7(gl) {
 	}
 	_vertCount = 0;
 }
-var _program$25, _buffer$17, _vertCount, _textures$2, _waveSpeed, _waveHeight, _wavePitch, _animSpeed, _waterOpacity, Water_default;
+var _program$24, _buffer$17, _vertCount, _textures$2, _waveSpeed, _waveHeight, _wavePitch, _animSpeed, _waterOpacity, Water_default;
 var init_Water = __esmMin((() => {
 	init_WebGL();
 	init_SpriteRenderer();
 	init_Water$2();
 	init_Water$1();
-	_program$25 = null;
+	_program$24 = null;
 	_buffer$17 = null;
 	_vertCount = 0;
 	_textures$2 = new Array(32);
@@ -208191,14 +209512,14 @@ var init_OccluderFade$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Map/OccluderFade.js
-var mat4$23, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick, OccluderFade;
+var mat4$22, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick, OccluderFade;
 var init_OccluderFade = __esmMin((() => {
 	init_OccluderFade$1();
 	init_Camera();
 	init_Graphics();
 	init_SpriteRenderer();
 	init_gl_matrix();
-	({mat4: mat4$23, vec3: vec3$6} = gl_matrix_default);
+	({mat4: mat4$22, vec3: vec3$6} = gl_matrix_default);
 	SHADER_INCLUDE = "// #include OccluderFade.glsl";
 	MODE = {
 		OFF: 0,
@@ -208219,7 +209540,7 @@ var init_OccluderFade = __esmMin((() => {
 	QUERY_RADIUS = .7;
 	FADE_IN_MS = 150;
 	FADE_OUT_MS = 300;
-	_inverse = mat4$23.create();
+	_inverse = mat4$22.create();
 	_eye = vec3$6.create();
 	_queries = [null, null];
 	_queryPending = [false, false];
@@ -208281,7 +209602,7 @@ var init_OccluderFade = __esmMin((() => {
 		* @param {number} tick
 		*/
 		static beginFrame(gl, modelView, tick) {
-			mat4$23.invert(_inverse, modelView);
+			mat4$22.invert(_inverse, modelView);
 			_eye[0] = _inverse[12];
 			_eye[1] = _inverse[13];
 			_eye[2] = _inverse[14];
@@ -208443,7 +209764,7 @@ function init$11(gl, data) {
 	_batchesReady = false;
 	_pendingTextures = count;
 	if (!_buffer$16) _buffer$16 = gl.createBuffer();
-	if (!_program$24) _program$24 = WebGL_default.createShaderProgram(gl, Models_default$2, OccluderFade.injectShader(Models_default$1));
+	if (!_program$23) _program$23 = WebGL_default.createShaderProgram(gl, Models_default$2, OccluderFade.injectShader(Models_default$1));
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$16);
 	gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
 	function onTextureLoaded(texture, index) {
@@ -208491,9 +209812,9 @@ function drawMeshes(gl) {
 * @param {object} light structure
 */
 function bind$1(gl, modelView, projection, fog, light) {
-	const uniform = _program$24.uniform;
-	const attribute = _program$24.attribute;
-	gl.useProgram(_program$24);
+	const uniform = _program$23.uniform;
+	const attribute = _program$23.attribute;
+	gl.useProgram(_program$23);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -208524,7 +209845,7 @@ function bind$1(gl, modelView, projection, fog, light) {
 * @param {object} gl context
 */
 function unbind(gl) {
-	const attribute = _program$24.attribute;
+	const attribute = _program$23.attribute;
 	gl.disableVertexAttribArray(attribute.aPosition);
 	gl.disableVertexAttribArray(attribute.aVertexNormal);
 	gl.disableVertexAttribArray(attribute.aTextureCoord);
@@ -208542,8 +209863,8 @@ function unbind(gl) {
 */
 function render$12(gl, modelView, projection, normalMat, fog, light) {
 	bind$1(gl, modelView, projection, fog, light);
-	OccluderFade.renderOpaque(gl, _program$24.uniform, () => drawMeshes(gl));
-	OccluderFade.renderQuery(gl, _program$24.uniform, () => drawMeshes(gl), OccluderFade.QUERY.MODELS);
+	OccluderFade.renderOpaque(gl, _program$23.uniform, () => drawMeshes(gl));
+	OccluderFade.renderQuery(gl, _program$23.uniform, () => drawMeshes(gl), OccluderFade.QUERY.MODELS);
 	unbind(gl);
 }
 /**
@@ -208560,7 +209881,7 @@ function render$12(gl, modelView, projection, normalMat, fog, light) {
 function renderFaded$1(gl, modelView, projection, normalMat, fog, light) {
 	if (!OccluderFade.needsBlendPass()) return;
 	bind$1(gl, modelView, projection, fog, light);
-	OccluderFade.renderBlend(gl, _program$24.uniform, () => drawMeshes(gl));
+	OccluderFade.renderBlend(gl, _program$23.uniform, () => drawMeshes(gl));
 	unbind(gl);
 }
 /**
@@ -208574,23 +209895,23 @@ function free$6(gl) {
 		gl.deleteBuffer(_buffer$16);
 		_buffer$16 = null;
 	}
-	if (_program$24) {
-		gl.deleteProgram(_program$24);
-		_program$24 = null;
+	if (_program$23) {
+		gl.deleteProgram(_program$23);
+		_program$23 = null;
 	}
 	for (i = 0, count = _objects.length; i < count; ++i) gl.deleteTexture(_objects[i].texture);
 	_objects.length = 0;
 	_batches.length = 0;
 	_batchesReady = false;
 }
-var _program$24, _buffer$16, _objects, _batches, _batchesReady, _pendingTextures, Models_default;
+var _program$23, _buffer$16, _objects, _batches, _batchesReady, _pendingTextures, Models_default;
 var init_Models = __esmMin((() => {
 	init_Models$2();
 	init_Models$1();
 	init_WebGL();
 	init_Map();
 	init_OccluderFade();
-	_program$24 = null;
+	_program$23 = null;
 	_buffer$16 = null;
 	_objects = [];
 	_batches = [];
@@ -208621,35 +209942,35 @@ var init_AnimatedModels$1 = __esmMin((() => {
 * Initialize shader program
 */
 function init$10(gl) {
-	_program$23 = WebGL_default.createShaderProgram(gl, AnimatedModels_default$2, OccluderFade.injectShader(AnimatedModels_default$1));
-	_program$23.uniform = {
-		uModelViewMat: gl.getUniformLocation(_program$23, "uModelViewMat"),
-		uProjectionMat: gl.getUniformLocation(_program$23, "uProjectionMat"),
-		uNormalMat: gl.getUniformLocation(_program$23, "uNormalMat"),
-		uLightDirection: gl.getUniformLocation(_program$23, "uLightDirection"),
-		uLightOpacity: gl.getUniformLocation(_program$23, "uLightOpacity"),
-		uLightAmbient: gl.getUniformLocation(_program$23, "uLightAmbient"),
-		uLightDiffuse: gl.getUniformLocation(_program$23, "uLightDiffuse"),
-		uLightEnv: gl.getUniformLocation(_program$23, "uLightEnv"),
-		uFogUse: gl.getUniformLocation(_program$23, "uFogUse"),
-		uFogNear: gl.getUniformLocation(_program$23, "uFogNear"),
-		uFogFar: gl.getUniformLocation(_program$23, "uFogFar"),
-		uFogColor: gl.getUniformLocation(_program$23, "uFogColor"),
-		uDiffuse: gl.getUniformLocation(_program$23, "uDiffuse"),
-		uMatrixTexture: gl.getUniformLocation(_program$23, "uMatrixTexture"),
-		uOccluderFadeMode: gl.getUniformLocation(_program$23, "uOccluderFadeMode"),
-		uOccluderFadeEye: gl.getUniformLocation(_program$23, "uOccluderFadeEye"),
-		uOccluderFadeFocus: gl.getUniformLocation(_program$23, "uOccluderFadeFocus"),
-		uOccluderFadeRadius: gl.getUniformLocation(_program$23, "uOccluderFadeRadius"),
-		uOccluderFadeOpacity: gl.getUniformLocation(_program$23, "uOccluderFadeOpacity"),
-		uOccluderFadeStrength: gl.getUniformLocation(_program$23, "uOccluderFadeStrength")
+	_program$22 = WebGL_default.createShaderProgram(gl, AnimatedModels_default$2, OccluderFade.injectShader(AnimatedModels_default$1));
+	_program$22.uniform = {
+		uModelViewMat: gl.getUniformLocation(_program$22, "uModelViewMat"),
+		uProjectionMat: gl.getUniformLocation(_program$22, "uProjectionMat"),
+		uNormalMat: gl.getUniformLocation(_program$22, "uNormalMat"),
+		uLightDirection: gl.getUniformLocation(_program$22, "uLightDirection"),
+		uLightOpacity: gl.getUniformLocation(_program$22, "uLightOpacity"),
+		uLightAmbient: gl.getUniformLocation(_program$22, "uLightAmbient"),
+		uLightDiffuse: gl.getUniformLocation(_program$22, "uLightDiffuse"),
+		uLightEnv: gl.getUniformLocation(_program$22, "uLightEnv"),
+		uFogUse: gl.getUniformLocation(_program$22, "uFogUse"),
+		uFogNear: gl.getUniformLocation(_program$22, "uFogNear"),
+		uFogFar: gl.getUniformLocation(_program$22, "uFogFar"),
+		uFogColor: gl.getUniformLocation(_program$22, "uFogColor"),
+		uDiffuse: gl.getUniformLocation(_program$22, "uDiffuse"),
+		uMatrixTexture: gl.getUniformLocation(_program$22, "uMatrixTexture"),
+		uOccluderFadeMode: gl.getUniformLocation(_program$22, "uOccluderFadeMode"),
+		uOccluderFadeEye: gl.getUniformLocation(_program$22, "uOccluderFadeEye"),
+		uOccluderFadeFocus: gl.getUniformLocation(_program$22, "uOccluderFadeFocus"),
+		uOccluderFadeRadius: gl.getUniformLocation(_program$22, "uOccluderFadeRadius"),
+		uOccluderFadeOpacity: gl.getUniformLocation(_program$22, "uOccluderFadeOpacity"),
+		uOccluderFadeStrength: gl.getUniformLocation(_program$22, "uOccluderFadeStrength")
 	};
-	_program$23.attribute = {
-		aPosition: gl.getAttribLocation(_program$23, "aPosition"),
-		aNormal: gl.getAttribLocation(_program$23, "aNormal"),
-		aTextureCoord: gl.getAttribLocation(_program$23, "aTextureCoord"),
-		aAlpha: gl.getAttribLocation(_program$23, "aAlpha"),
-		aMatrixIndex: gl.getAttribLocation(_program$23, "aMatrixIndex")
+	_program$22.attribute = {
+		aPosition: gl.getAttribLocation(_program$22, "aPosition"),
+		aNormal: gl.getAttribLocation(_program$22, "aNormal"),
+		aTextureCoord: gl.getAttribLocation(_program$22, "aTextureCoord"),
+		aAlpha: gl.getAttribLocation(_program$22, "aAlpha"),
+		aMatrixIndex: gl.getAttribLocation(_program$22, "aMatrixIndex")
 	};
 }
 /**
@@ -208753,11 +210074,11 @@ function isNodeStatic(node) {
 */
 function add$2(gl, modelData) {
 	if (!modelData || !modelData.nodes || modelData.nodes.length === 0) return;
-	if (!_program$23) init$10(gl);
+	if (!_program$22) init$10(gl);
 	const instances = [];
 	for (let i = 0; i < modelData.instances.length; i++) {
 		const instArray = modelData.instances[i];
-		const matrix = mat4$22.create();
+		const matrix = mat4$21.create();
 		for (let j = 0; j < 16; j++) matrix[j] = instArray[j];
 		instances.push(matrix);
 	}
@@ -208787,20 +210108,20 @@ function add$2(gl, modelData) {
 			_isStatic: !hasAnyAnimation,
 			_index: n,
 			_cache: {
-				local: mat4$22.create(),
-				final: mat4$22.create(),
+				local: mat4$21.create(),
+				final: mat4$21.create(),
 				instances: new Array(instances.length)
 			}
 		};
 		if (node._isStatic) {
-			const local = mat4$22.create();
-			mat4$22.identity(local);
-			mat4$22.translate(local, local, node.pos);
-			mat4$22.rotate(local, local, node.rotangle, node.rotaxis);
-			mat4$22.scale(local, local, node.scale);
+			const local = mat4$21.create();
+			mat4$21.identity(local);
+			mat4$21.translate(local, local, node.pos);
+			mat4$21.rotate(local, local, node.rotangle, node.rotaxis);
+			mat4$21.scale(local, local, node.scale);
 			node._staticLocalMatrix = local;
 		}
-		for (let k = 0; k < instances.length; k++) node._cache.instances[k] = mat4$22.create();
+		for (let k = 0; k < instances.length; k++) node._cache.instances[k] = mat4$21.create();
 		if (node.rotKeyframes) for (let rk = 0; rk < node.rotKeyframes.length; rk++) {
 			const kf = node.rotKeyframes[rk];
 			totalAnimationLength = Math.max(totalAnimationLength, kf.frame || 0);
@@ -208816,10 +210137,10 @@ function add$2(gl, modelData) {
 			totalAnimationLength = Math.max(totalAnimationLength, kf.Frame || 0);
 			kf._vec = vec3$5.fromValues(kf.Scale[0], kf.Scale[1], kf.Scale[2]);
 		}
-		const suffixMat = mat4$22.create();
-		mat4$22.identity(suffixMat);
-		if (!node.is_only) mat4$22.translate(suffixMat, suffixMat, node.offset);
-		mat4$22.multiply(suffixMat, suffixMat, mat3$5.toMat4(node.mat3, _tempMat4Node));
+		const suffixMat = mat4$21.create();
+		mat4$21.identity(suffixMat);
+		if (!node.is_only) mat4$21.translate(suffixMat, suffixMat, node.offset);
+		mat4$21.multiply(suffixMat, suffixMat, mat3$5.toMat4(node.mat3, _tempMat4Node));
 		node._cachedSuffix = suffixMat;
 		nodes.push(node);
 	}
@@ -208933,16 +210254,16 @@ function add$2(gl, modelData) {
 		_nodeMap: {},
 		_globalMatrices: new Array(nodes.length)
 	};
-	animModel._boxMat = mat4$22.create();
-	mat4$22.identity(animModel._boxMat);
-	mat4$22.translate(animModel._boxMat, animModel._boxMat, [
+	animModel._boxMat = mat4$21.create();
+	mat4$21.identity(animModel._boxMat);
+	mat4$21.translate(animModel._boxMat, animModel._boxMat, [
 		-animModel.box.center[0],
 		-animModel.box.max[1],
 		-animModel.box.center[2]
 	]);
 	for (let n = 0; n < nodes.length; n++) {
 		animModel._nodeMap[nodes[n].name] = nodes[n];
-		animModel._globalMatrices[n] = mat4$22.create();
+		animModel._globalMatrices[n] = mat4$21.create();
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, staticBuffer, gl.STATIC_DRAW);
@@ -208950,7 +210271,7 @@ function add$2(gl, modelData) {
 	animModel.vao = gl.createVertexArray();
 	gl.bindVertexArray(animModel.vao);
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
-	const attribute = _program$23.attribute;
+	const attribute = _program$22.attribute;
 	const stride = 40;
 	gl.enableVertexAttribArray(attribute.aPosition);
 	gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, stride, 0);
@@ -209092,24 +210413,24 @@ function updateModelBuffer(gl, model, frame, force) {
 		const globalMatrix = globalMatrices[n];
 		if (node.parentname && nodeMap[node.parentname] && node.parentname !== node.name) {
 			const parentIdx = nodeMap[node.parentname]._index;
-			mat4$22.copy(globalMatrix, globalMatrices[parentIdx]);
-		} else mat4$22.identity(globalMatrix);
-		if (node._isStatic) mat4$22.multiply(globalMatrix, globalMatrix, node._staticLocalMatrix);
+			mat4$21.copy(globalMatrix, globalMatrices[parentIdx]);
+		} else mat4$21.identity(globalMatrix);
+		if (node._isStatic) mat4$21.multiply(globalMatrix, globalMatrix, node._staticLocalMatrix);
 		else {
 			const animPos = getPositionAtFrame$2(node.posKeyframes, frame, _tempVec3);
-			mat4$22.translate(globalMatrix, globalMatrix, animPos || node.pos);
+			mat4$21.translate(globalMatrix, globalMatrix, animPos || node.pos);
 			const animRot = getRotationAtFrame$2(node.rotKeyframes, frame, _tempQuat);
 			if (animRot) {
-				mat4$22.fromQuat(_tempMat4, animRot);
-				mat4$22.multiply(globalMatrix, globalMatrix, _tempMat4);
-			} else mat4$22.rotate(globalMatrix, globalMatrix, node.rotangle, node.rotaxis);
+				mat4$21.fromQuat(_tempMat4, animRot);
+				mat4$21.multiply(globalMatrix, globalMatrix, _tempMat4);
+			} else mat4$21.rotate(globalMatrix, globalMatrix, node.rotangle, node.rotaxis);
 			const animScale = getScaleAtFrame$2(node.scaleKeyFrames, frame, _tempVec3Scale);
-			mat4$22.scale(globalMatrix, globalMatrix, animScale || node.scale);
+			mat4$21.scale(globalMatrix, globalMatrix, animScale || node.scale);
 		}
 		const finalNodeMatrix = node._cache.final;
-		mat4$22.copy(finalNodeMatrix, model._boxMat);
-		mat4$22.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
-		mat4$22.multiply(finalNodeMatrix, finalNodeMatrix, node._cachedSuffix);
+		mat4$21.copy(finalNodeMatrix, model._boxMat);
+		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
+		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, node._cachedSuffix);
 		node.finalMatrix = finalNodeMatrix;
 	}
 	const matrixData = model.matrixData;
@@ -209118,7 +210439,7 @@ function updateModelBuffer(gl, model, frame, force) {
 		const node = model.nodes[n];
 		for (let i = 0; i < numInstances; i++) {
 			const destMat = node._cache.instances[i];
-			mat4$22.multiply(destMat, model.instances[i], node.finalMatrix);
+			mat4$21.multiply(destMat, model.instances[i], node.finalMatrix);
 			const matrixIndex = n * numInstances + i;
 			matrixData.set(destMat, matrixIndex * 16);
 		}
@@ -209131,8 +210452,8 @@ function updateModelBuffer(gl, model, frame, force) {
 * Bind program and per-frame uniforms shared by both model passes
 */
 function bind(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$23.uniform;
-	gl.useProgram(_program$23);
+	const uniform = _program$22.uniform;
+	gl.useProgram(_program$22);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniformMatrix3fv(uniform.uNormalMat, false, normalMat);
@@ -209176,14 +210497,14 @@ function drawModels(gl) {
 */
 function render$11(gl, modelView, projection, normalMat, fog, light, tick) {
 	if (_animatedModels.length === 0) return;
-	if (!_program$23) init$10(gl);
+	if (!_program$22) init$10(gl);
 	bind(gl, modelView, projection, normalMat, fog, light);
 	for (let m = 0; m < _animatedModels.length; m++) {
 		const model = _animatedModels[m];
 		updateModelBuffer(gl, model, tick % (model.animLen || 1), false);
 	}
-	OccluderFade.renderOpaque(gl, _program$23.uniform, () => drawModels(gl));
-	OccluderFade.renderQuery(gl, _program$23.uniform, () => drawModels(gl), OccluderFade.QUERY.ANIMATED);
+	OccluderFade.renderOpaque(gl, _program$22.uniform, () => drawModels(gl));
+	OccluderFade.renderQuery(gl, _program$22.uniform, () => drawModels(gl), OccluderFade.QUERY.ANIMATED);
 	gl.bindVertexArray(null);
 }
 /**
@@ -209191,9 +210512,9 @@ function render$11(gl, modelView, projection, normalMat, fog, light, tick) {
 * Reuses the vertex data uploaded by render() this frame.
 */
 function renderFaded(gl, modelView, projection, normalMat, fog, light) {
-	if (_animatedModels.length === 0 || !_program$23 || !OccluderFade.needsBlendPass()) return;
+	if (_animatedModels.length === 0 || !_program$22 || !OccluderFade.needsBlendPass()) return;
 	bind(gl, modelView, projection, normalMat, fog, light);
-	OccluderFade.renderBlend(gl, _program$23.uniform, () => drawModels(gl));
+	OccluderFade.renderBlend(gl, _program$22.uniform, () => drawModels(gl));
 	gl.bindVertexArray(null);
 }
 /**
@@ -209202,7 +210523,7 @@ function renderFaded(gl, modelView, projection, normalMat, fog, light) {
 function hasAnimatedModels() {
 	return _animatedModels.length > 0;
 }
-var mat3$5, mat4$22, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _tempMat4Node, _program$23, _animatedModels, AnimatedModels_default;
+var mat3$5, mat4$21, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _tempMat4Node, _program$22, _animatedModels, AnimatedModels_default;
 var init_AnimatedModels = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -209212,15 +210533,15 @@ var init_AnimatedModels = __esmMin((() => {
 	init_AnimatedModels$1();
 	init_OccluderFade();
 	mat3$5 = gl_matrix_default.mat3;
-	mat4$22 = gl_matrix_default.mat4;
+	mat4$21 = gl_matrix_default.mat4;
 	vec3$5 = gl_matrix_default.vec3;
 	quat$1 = gl_matrix_default.quat;
 	_tempVec3 = vec3$5.create();
 	_tempVec3Scale = vec3$5.create();
 	_tempQuat = quat$1.create();
-	_tempMat4 = mat4$22.create();
-	_tempMat4Node = mat4$22.create();
-	_program$23 = null;
+	_tempMat4 = mat4$21.create();
+	_tempMat4Node = mat4$21.create();
+	_program$22 = null;
 	_animatedModels = [];
 	AnimatedModels_default = {
 		init: init$10,
@@ -212932,31 +214253,31 @@ function grayBroadcast(src, out) {
 * Initialize the shader program.
 */
 function init$9(gl) {
-	_program$22 = WebGL_default.createShaderProgram(gl, GR2Model_default$1, GR2Model_default);
-	_program$22.uniform = {
-		uModelViewMat: gl.getUniformLocation(_program$22, "uModelViewMat"),
-		uProjectionMat: gl.getUniformLocation(_program$22, "uProjectionMat"),
-		uNormalMat: gl.getUniformLocation(_program$22, "uNormalMat"),
-		uBones: gl.getUniformLocation(_program$22, "uBones[0]"),
-		uLightDirection: gl.getUniformLocation(_program$22, "uLightDirection"),
-		uLightOpacity: gl.getUniformLocation(_program$22, "uLightOpacity"),
-		uLightAmbient: gl.getUniformLocation(_program$22, "uLightAmbient"),
-		uLightDiffuse: gl.getUniformLocation(_program$22, "uLightDiffuse"),
-		uLightEnv: gl.getUniformLocation(_program$22, "uLightEnv"),
-		uAlphaRef: gl.getUniformLocation(_program$22, "uAlphaRef"),
-		uAlpha: gl.getUniformLocation(_program$22, "uAlpha"),
-		uFogUse: gl.getUniformLocation(_program$22, "uFogUse"),
-		uFogNear: gl.getUniformLocation(_program$22, "uFogNear"),
-		uFogFar: gl.getUniformLocation(_program$22, "uFogFar"),
-		uFogColor: gl.getUniformLocation(_program$22, "uFogColor"),
-		uDiffuse: gl.getUniformLocation(_program$22, "uDiffuse")
+	_program$21 = WebGL_default.createShaderProgram(gl, GR2Model_default$1, GR2Model_default);
+	_program$21.uniform = {
+		uModelViewMat: gl.getUniformLocation(_program$21, "uModelViewMat"),
+		uProjectionMat: gl.getUniformLocation(_program$21, "uProjectionMat"),
+		uNormalMat: gl.getUniformLocation(_program$21, "uNormalMat"),
+		uBones: gl.getUniformLocation(_program$21, "uBones[0]"),
+		uLightDirection: gl.getUniformLocation(_program$21, "uLightDirection"),
+		uLightOpacity: gl.getUniformLocation(_program$21, "uLightOpacity"),
+		uLightAmbient: gl.getUniformLocation(_program$21, "uLightAmbient"),
+		uLightDiffuse: gl.getUniformLocation(_program$21, "uLightDiffuse"),
+		uLightEnv: gl.getUniformLocation(_program$21, "uLightEnv"),
+		uAlphaRef: gl.getUniformLocation(_program$21, "uAlphaRef"),
+		uAlpha: gl.getUniformLocation(_program$21, "uAlpha"),
+		uFogUse: gl.getUniformLocation(_program$21, "uFogUse"),
+		uFogNear: gl.getUniformLocation(_program$21, "uFogNear"),
+		uFogFar: gl.getUniformLocation(_program$21, "uFogFar"),
+		uFogColor: gl.getUniformLocation(_program$21, "uFogColor"),
+		uDiffuse: gl.getUniformLocation(_program$21, "uDiffuse")
 	};
-	_program$22.attribute = {
-		aPosition: gl.getAttribLocation(_program$22, "aPosition"),
-		aNormal: gl.getAttribLocation(_program$22, "aNormal"),
-		aTextureCoord: gl.getAttribLocation(_program$22, "aTextureCoord"),
-		aBoneIndex: gl.getAttribLocation(_program$22, "aBoneIndex"),
-		aBoneWeight: gl.getAttribLocation(_program$22, "aBoneWeight")
+	_program$21.attribute = {
+		aPosition: gl.getAttribLocation(_program$21, "aPosition"),
+		aNormal: gl.getAttribLocation(_program$21, "aNormal"),
+		aTextureCoord: gl.getAttribLocation(_program$21, "aTextureCoord"),
+		aBoneIndex: gl.getAttribLocation(_program$21, "aBoneIndex"),
+		aBoneWeight: gl.getAttribLocation(_program$21, "aBoneWeight")
 	};
 }
 /**
@@ -213114,7 +214435,7 @@ function acquire(path) {
 */
 function buildTypeGL(gl, type) {
 	type.textures = makeTypeTextures(gl, type.parsed);
-	const attr = _program$22.attribute;
+	const attr = _program$21.attribute;
 	type.submeshes = type.meshes.map(function(mesh) {
 		const vao = gl.createVertexArray();
 		gl.bindVertexArray(vao);
@@ -213234,13 +214555,13 @@ function normalize3(v) {
 function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 	_gl$1 = gl;
 	if (_instances.length === 0 || !light) return;
-	if (!_program$22) init$9(gl);
+	if (!_program$21) init$9(gl);
 	for (const path in _types) {
 		const type = _types[path];
 		if (type.cpuReady && !type.glReady) buildTypeGL(gl, type);
 	}
-	const uniform = _program$22.uniform;
-	gl.useProgram(_program$22);
+	const uniform = _program$21.uniform;
+	gl.useProgram(_program$21);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1f(uniform.uLightOpacity, light.opacity != null ? light.opacity : 1);
 	gl.uniform3fv(uniform.uLightEnv, light.env || _phaseEnv);
@@ -213307,8 +214628,8 @@ function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 				bones = flattenPose(_r(type.parsed, idx, sampleT), type.boneCount);
 			}
 			seen[key] = bones;
-			mat4$21.multiply(_mv$1, modelView, inst.world);
-			mat4$21.toInverseMat3(_mv$1, _nmat$1);
+			mat4$20.multiply(_mv$1, modelView, inst.world);
+			mat4$20.toInverseMat3(_mv$1, _nmat$1);
 			mat3$4.transpose(_nmat$1, _nmat$1);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, _mv$1);
 			gl.uniformMatrix3fv(uniform.uNormalMat, false, _nmat$1);
@@ -213331,7 +214652,7 @@ function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 					x2: 0,
 					y2: 0
 				});
-				mat4$21.multiply(_mvp, projection, _mv$1);
+				mat4$20.multiply(_mvp, projection, _mv$1);
 				if (!computeBaseSphereRect(_mvp, projection, box)) inst.screenRect = null;
 			}
 			let alpha = 1;
@@ -213589,7 +214910,7 @@ function clear() {
 	for (let i = 0; i < insts.length; i++) detach(insts[i]);
 	_poseCache = {};
 }
-var mat3$4, mat4$21, ALPHA_REF$1, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$22, _gl$1, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv$1, _mvp, _nmat$1, _lightView$1, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX$1, TEX_GREY_PX$1, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE$1, GR2_VERTEX_LAYOUT$1, GR2ModelRenderer_default;
+var mat3$4, mat4$20, ALPHA_REF$1, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$21, _gl$1, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv$1, _mvp, _nmat$1, _lightView$1, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX$1, TEX_GREY_PX$1, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE$1, GR2_VERTEX_LAYOUT$1, GR2ModelRenderer_default;
 var init_GR2ModelRenderer = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -213607,7 +214928,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 	init_GR2Model$1();
 	init_GR2Model();
 	mat3$4 = gl_matrix_default.mat3;
-	mat4$21 = gl_matrix_default.mat4;
+	mat4$20 = gl_matrix_default.mat4;
 	ALPHA_REF$1 = 207 / 255;
 	_phaseDiffuse = new Float32Array([
 		128 / 255,
@@ -213648,7 +214969,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 		sguardian90_9: "emp",
 		treasurebox_2: "emp"
 	};
-	_program$22 = null;
+	_program$21 = null;
 	_gl$1 = null;
 	_types = {};
 	_missing = {};
@@ -213669,8 +214990,8 @@ var init_GR2ModelRenderer = __esmMin((() => {
 	_debugCell = false;
 	BASE_SPHERE_HALF_EXTENT = Math.sqrt(2);
 	_readyPromise = null;
-	_mv$1 = mat4$21.create();
-	_mvp = mat4$21.create();
+	_mv$1 = mat4$20.create();
+	_mvp = mat4$20.create();
 	_nmat$1 = mat3$4.create();
 	_lightView$1 = /* @__PURE__ */ new Float32Array(3);
 	_clip = /* @__PURE__ */ new Float32Array(4);
@@ -239098,7 +240419,7 @@ var init_EnchantGrade = __esmMin((() => {
 //#region src/Renderer/Effects/StrEffect.vs?raw
 var StrEffect_default$1;
 var init_StrEffect$2 = __esmMin((() => {
-	StrEffect_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform mat4 uSpriteAngle;\r\nuniform vec3 uSpritePosition;\r\nuniform vec2 uSpriteOffset;\r\nuniform float uVerticalBase;\r\n\r\nconst float pixelRatio = 1.0 / 35.0;\r\n\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n	// xyz = x(-z)y + middle of cell (0.5)\r\n	float x =  pos.x + 0.5;\r\n	float y = -pos.z;\r\n	float z =  pos.y + 0.5;\r\n\r\n	// Matrix translation\r\n	mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n	mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n	mat[3].z += mat[0].z * x + mat[1].z * y + mat[2].z * z;\r\n	mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n	// Spherical billboard\r\n	mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n	mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n	mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n	return mat;\r\n}\r\n\r\nvoid main(void) {\r\n	vTextureCoord = aTextureCoord;\r\n\r\n	// Calculate position base on angle and sprite offset/size\r\n	vec4 position = uSpriteAngle * vec4( aPosition.x * pixelRatio, -aPosition.y * pixelRatio, 0.0, 1.0 );\r\n	position.x   += uSpriteOffset.x * pixelRatio;\r\n	position.y   -= uSpriteOffset.y * pixelRatio + uVerticalBase;\r\n\r\n	// Project to camera plane\r\n	gl_Position    = uProjectionMat * Project(uModelViewMat, uSpritePosition) * position;\r\n	gl_Position.z -= 0.1;\r\n}";
+	StrEffect_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aPosition;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform float uSpriteAngle;\r\nuniform vec4 uCornerX;\r\nuniform vec4 uCornerY;\r\nuniform vec3 uSpritePosition;\r\nuniform vec2 uSpriteOffset;\r\nuniform float uVerticalBase;\r\n\r\nconst float pixelRatio = 1.0 / 35.0;\r\n\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n	// xyz = x(-z)y + middle of cell (0.5)\r\n	float x =  pos.x + 0.5;\r\n	float y = -pos.z;\r\n	float z =  pos.y + 0.5;\r\n\r\n	// Matrix translation\r\n	mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n	mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n	mat[3].z += mat[0].z * x + mat[1].z * y + mat[2].z * z;\r\n	mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n	// Spherical billboard\r\n	mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n	mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n	mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n	return mat;\r\n}\r\n\r\nvoid main(void) {\r\n	vTextureCoord = aPosition;\r\n\r\n	int corner = int(aPosition.x + aPosition.y * 2.0);\r\n	float r = radians(-uSpriteAngle);\r\n	vec2 p = vec2(uCornerX[corner] * pixelRatio, -uCornerY[corner] * pixelRatio);\r\n	vec4 position = vec4(p.x * cos(r) - p.y * sin(r), p.x * sin(r) + p.y * cos(r), 0.0, 1.0);\r\n	position.x   += uSpriteOffset.x * pixelRatio;\r\n	position.y   -= uSpriteOffset.y * pixelRatio + uVerticalBase;\r\n\r\n	// Project to camera plane\r\n	gl_Position    = uProjectionMat * Project(uModelViewMat, uSpritePosition) * position;\r\n	gl_Position.z -= 0.1;\r\n}";
 }));
 //#endregion
 //#region src/Renderer/Effects/StrEffect.fs?raw
@@ -239200,21 +240521,18 @@ function calculateAnimation(layer, keyIndex, result) {
 	}
 	return true;
 }
-var mat4$20, D3DBLEND, _program$21, _buffer$15, _bufferData, _matrix$6, _spriteOffset, _lastAngle, PIXEL_TO_WORLD_Z, anim, StrEffect;
+var D3DBLEND, _program$20, _buffer$15, _spriteOffset, _cornerX, _cornerY, PIXEL_TO_WORLD_Z, anim, StrEffect;
 var init_StrEffect = __esmMin((() => {
 	init_StrEffect$2();
 	init_StrEffect$1();
 	init_WebGL();
-	init_gl_matrix();
 	init_Client();
-	mat4$20 = gl_matrix_default.mat4;
 	D3DBLEND = {};
-	_program$21 = null;
+	_program$20 = null;
 	_buffer$15 = null;
-	_bufferData = /* @__PURE__ */ new Float32Array(16);
-	_matrix$6 = mat4$20.create();
 	_spriteOffset = /* @__PURE__ */ new Float32Array(2);
-	_lastAngle = -1;
+	_cornerX = /* @__PURE__ */ new Float32Array(4);
+	_cornerY = /* @__PURE__ */ new Float32Array(4);
 	PIXEL_TO_WORLD_Z = 1 / 5;
 	anim = {
 		frame: 0,
@@ -239322,31 +240640,19 @@ var init_StrEffect = __esmMin((() => {
 		* @param {StrAnimation} animation object
 		*/
 		renderAnimation(gl, material, animat) {
-			const uniform = _program$21.uniform;
-			const attribute = _program$21.attribute;
+			const uniform = _program$20.uniform;
 			let sizeScale = 1;
 			if (this.ownerEntity) sizeScale = (this.ownerEntity.xSize + this.ownerEntity.ySize) / 2 / 5;
-			_bufferData[0] = animat.xy[0] * sizeScale;
-			_bufferData[1] = animat.xy[4] * sizeScale;
-			_bufferData[2] = 0;
-			_bufferData[3] = 0;
-			_bufferData[4] = animat.xy[1] * sizeScale;
-			_bufferData[5] = animat.xy[5] * sizeScale;
-			_bufferData[6] = 1;
-			_bufferData[7] = 0;
-			_bufferData[8] = animat.xy[3] * sizeScale;
-			_bufferData[9] = animat.xy[7] * sizeScale;
-			_bufferData[10] = 0;
-			_bufferData[11] = 1;
-			_bufferData[12] = animat.xy[2] * sizeScale;
-			_bufferData[13] = animat.xy[6] * sizeScale;
-			_bufferData[14] = 1;
-			_bufferData[15] = 1;
-			if (animat.angle !== _lastAngle) {
-				mat4$20.identity(_matrix$6);
-				mat4$20.rotateZ(_matrix$6, _matrix$6, -animat.angle / 180 * Math.PI);
-				_lastAngle = animat.angle;
-			}
+			_cornerX[0] = animat.xy[0] * sizeScale;
+			_cornerY[0] = animat.xy[4] * sizeScale;
+			_cornerX[1] = animat.xy[1] * sizeScale;
+			_cornerY[1] = animat.xy[5] * sizeScale;
+			_cornerX[2] = animat.xy[3] * sizeScale;
+			_cornerY[2] = animat.xy[7] * sizeScale;
+			_cornerX[3] = animat.xy[2] * sizeScale;
+			_cornerY[3] = animat.xy[6] * sizeScale;
+			gl.uniform4fv(uniform.uCornerX, _cornerX);
+			gl.uniform4fv(uniform.uCornerY, _cornerY);
 			let verticalBase = .5;
 			if (this.ownerEntity) {
 				_spriteOffset[0] = animat.pos[0] - 320 + (this.xOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
@@ -239360,11 +240666,7 @@ var init_StrEffect = __esmMin((() => {
 			gl.uniform2fv(uniform.uSpriteOffset, _spriteOffset);
 			gl.uniform1f(uniform.uVerticalBase, verticalBase);
 			gl.uniform3fv(uniform.uSpritePosition, this.position);
-			gl.uniformMatrix4fv(uniform.uSpriteAngle, false, _matrix$6);
-			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$15);
-			gl.bufferSubData(gl.ARRAY_BUFFER, 0, _bufferData);
-			gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 16, 0);
-			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 16, 8);
+			gl.uniform1f(uniform.uSpriteAngle, animat.angle);
 			gl.blendFunc(D3DBLEND[animat.srcalpha], D3DBLEND[animat.destalpha]);
 			gl.bindTexture(gl.TEXTURE_2D, material);
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -239378,9 +240680,18 @@ var init_StrEffect = __esmMin((() => {
 			if (!_buffer$15) {
 				_buffer$15 = gl.createBuffer();
 				gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$15);
-				gl.bufferData(gl.ARRAY_BUFFER, _bufferData.byteLength, gl.DYNAMIC_DRAW);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+					0,
+					0,
+					1,
+					0,
+					0,
+					1,
+					1,
+					1
+				]), gl.STATIC_DRAW);
 			}
-			if (!_program$21) _program$21 = WebGL_default.createShaderProgram(gl, StrEffect_default$1, StrEffect_default);
+			if (!_program$20) _program$20 = WebGL_default.createShaderProgram(gl, StrEffect_default$1, StrEffect_default);
 			D3DBLEND[1] = gl.ZERO;
 			D3DBLEND[2] = gl.ONE;
 			D3DBLEND[3] = gl.SRC_COLOR;
@@ -239402,9 +240713,9 @@ var init_StrEffect = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$21) {
-				gl.deleteProgram(_program$21);
-				_program$21 = null;
+			if (_program$20) {
+				gl.deleteProgram(_program$20);
+				_program$20 = null;
 			}
 			if (_buffer$15) {
 				gl.deleteBuffer(_buffer$15);
@@ -239422,10 +240733,12 @@ var init_StrEffect = __esmMin((() => {
 		* @param {number} tick
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$21.uniform;
-			const attribute = _program$21.attribute;
+			const uniform = _program$20.uniform;
+			const attribute = _program$20.attribute;
 			gl.depthMask(false);
-			gl.useProgram(_program$21);
+			gl.useProgram(_program$20);
+			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$15);
+			gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 0, 0);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1f(uniform.uFogNear, fog.near * 100);
@@ -239433,7 +240746,6 @@ var init_StrEffect = __esmMin((() => {
 			gl.uniform3fv(uniform.uFogColor, fog.color);
 			gl.uniform1i(uniform.uDiffuse, 0);
 			gl.enableVertexAttribArray(attribute.aPosition);
-			gl.enableVertexAttribArray(attribute.aTextureCoord);
 			gl.activeTexture(gl.TEXTURE0);
 		}
 		/**
@@ -239443,8 +240755,7 @@ var init_StrEffect = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.depthMask(true);
-			gl.disableVertexAttribArray(_program$21.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$21.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$20.attribute.aPosition);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -241357,7 +242668,8 @@ function createInventory(config) {
 	Component.newItems = [];
 	Component.equippedItems = [];
 	if (equipSwitch) Component.equipswitchlist = [];
-	let _realSize = 0;
+	let _reduced = false;
+	let _height = 0;
 	let lockOverlayTimeout;
 	const prefDefaults = {
 		x: 0,
@@ -241535,9 +242847,7 @@ function createInventory(config) {
 		this.magnet.BOTTOM = _preferences.magnet_bottom;
 		this.magnet.LEFT = _preferences.magnet_left;
 		this.magnet.RIGHT = _preferences.magnet_right;
-		_realSize = _preferences.reduce ? 0 : this._host.getBoundingClientRect().height;
-		const miniBtnAppend = root.querySelector(".titlebar .mini");
-		if (miniBtnAppend) miniBtnAppend.dispatchEvent(new Event("mousedown"));
+		if (root.querySelector(".titlebar .mini")) setReduced(!!_preferences.reduce);
 	};
 	/**
 	* Remove Inventory from window (and so clean up items)
@@ -241550,12 +242860,12 @@ function createInventory(config) {
 		Component.newItems.length = 0;
 		document.querySelectorAll(".ItemInfo").forEach((el) => el.remove());
 		_preferences.show = this._host.style.display !== "none";
-		_preferences.reduce = !!_realSize;
+		_preferences.reduce = _reduced;
 		_preferences.y = parseInt(this._host.style.top, 10);
 		_preferences.x = parseInt(this._host.style.left, 10);
 		const hostRect = this._host.getBoundingClientRect();
 		_preferences.width = Math.floor((hostRect.width - 25) / 32);
-		if (resizableHeight) _preferences.height = Math.floor((hostRect.height - 20) / 32);
+		if (resizableHeight) _preferences.height = _height;
 		_preferences.magnet_top = this.magnet.TOP;
 		_preferences.magnet_bottom = this.magnet.BOTTOM;
 		_preferences.magnet_left = this.magnet.LEFT;
@@ -241625,9 +242935,9 @@ function createInventory(config) {
 		const content = Component.getRoot().querySelector(".container .content");
 		if (content) content.style.width = `${width * 32}px`;
 		if (resizableHeight) {
-			height = Math.min(Math.max(height, 2), 5);
+			_height = Math.min(Math.max(height, 2), 5);
 			this._host.style.width = `${59 + width * 32}px`;
-			this._host.style.height = `${62 + height * 32}px`;
+			this._host.style.height = expandedHeight();
 		} else this._host.style.width = `${55 + width * 32}px`;
 		this.updateScroll();
 	};
@@ -241836,14 +243146,12 @@ function createInventory(config) {
 		const item = this.getItemByIndex(index);
 		const root = Component.getRoot();
 		if (!item || count <= 0) return null;
-		if (item.count) {
+		if (item.count > count) {
 			item.count -= count;
-			if (item.count > 0) {
-				const countEl = root.querySelector(`.item[data-index="${item.index}"] .count`);
-				if (countEl) countEl.textContent = item.count;
-				this.onUpdateItem(item.ITID, item.count);
-				return item;
-			}
+			const countEl = root.querySelector(`.item[data-index="${item.index}"] .count`);
+			if (countEl) countEl.textContent = item.count;
+			this.onUpdateItem(item.ITID, item.count);
+			return item;
 		}
 		this.list.splice(this.list.indexOf(item), 1);
 		const el = root.querySelector(`.item[data-index="${item.index}"]`);
@@ -241989,16 +243297,26 @@ function createInventory(config) {
 	* Hide/show inventory's content
 	*/
 	function onToggleReduction() {
+		setReduced(!_reduced);
+	}
+	/**
+	* Collapse the window to its titlebar, or give it back its full height
+	*
+	* @param {boolean} reduced
+	*/
+	function setReduced(reduced) {
 		const panel = Component.getRoot().querySelector(".panel");
-		if (_realSize) {
-			if (panel) panel.style.display = "flex";
-			Component._host.style.height = `${_realSize}px`;
-			_realSize = 0;
-		} else {
-			_realSize = Component._host.getBoundingClientRect().height;
-			Component._host.style.height = "17px";
-			if (panel) panel.style.display = "none";
-		}
+		_reduced = reduced;
+		if (panel) panel.style.display = reduced ? "none" : "flex";
+		Component._host.style.height = reduced ? "17px" : expandedHeight();
+	}
+	/**
+	* Full height of the window: V0 sizes it from its rows, the others from their CSS
+	*
+	* @returns {string}
+	*/
+	function expandedHeight() {
+		return resizableHeight ? `${62 + _height * 32}px` : "";
 	}
 	/**
 	* Update tab, reset inventory content
@@ -244415,10 +245733,10 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 				const removeOpt = root.querySelector(".removeOption");
 				const cartBtn = root.querySelector(".cartitems");
 				if (_lastState & HasAttachmentState || _hasCart) {
-					if (removeOpt) removeOpt.style.display = "";
+					if (removeOpt) removeOpt.style.display = "block";
 				} else if (removeOpt) removeOpt.style.display = "none";
 				if (_lastState & HasCartState || _hasCart) {
-					if (cartBtn) cartBtn.style.display = "";
+					if (cartBtn) cartBtn.style.display = "block";
 				} else if (cartBtn) cartBtn.style.display = "none";
 			}
 		}
@@ -244734,7 +246052,7 @@ var init_EquipmentV0$2 = __esmMin((() => {
 //#region src/UI/Components/Equipment/EquipmentV0/EquipmentV0.css?raw
 var EquipmentV0_default$1;
 var init_EquipmentV0$1 = __esmMin((() => {
-	EquipmentV0_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV0 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV0 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV0 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV0 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV0 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV0 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV0 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV0 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV0 .panel {\r\n	background-color: white;\r\n}\r\n#EquipmentV0.equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV0 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV0 .col1,\r\n#EquipmentV0 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV0 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV0 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV0 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV0 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV0 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV0 .col3 .item button,\r\n#EquipmentV0 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV0 .col1 .item button,\r\n#EquipmentV0 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV0 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV0 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV0 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV0 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV0 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV0 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV0 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV0 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV0 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV0 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV0 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n}\r\n#EquipmentV0 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV0 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV0 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV0 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n";
+	EquipmentV0_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV0 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV0 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV0 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV0 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV0 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV0 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV0 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV0 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV0 .panel {\r\n	background-color: white;\r\n}\r\n#EquipmentV0.equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV0 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV0 .col1,\r\n#EquipmentV0 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV0 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV0 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV0 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV0 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV0 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV0 .col3 .item button,\r\n#EquipmentV0 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV0 .col1 .item button,\r\n#EquipmentV0 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV0 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV0 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV0 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV0 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV0 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV0 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV0 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV0 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV0 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 30px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV0 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV0 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n}\r\n#EquipmentV0 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV0 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV0 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV0 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/Equipment/EquipmentV0/EquipmentV0.js
@@ -244761,7 +246079,7 @@ var init_EquipmentV1$2 = __esmMin((() => {
 //#region src/UI/Components/Equipment/EquipmentV1/EquipmentV1.css?raw
 var EquipmentV1_default$1;
 var init_EquipmentV1$1 = __esmMin((() => {
-	EquipmentV1_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV1 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV1 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV1 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV1 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV1 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV1 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV1 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV1 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV1 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV1 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV1 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV1 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV1 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n}\r\n#EquipmentV1 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV1 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV1 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV1 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV1 .col1,\r\n#EquipmentV1 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV1 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV1 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV1 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV1 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV1 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV1 .col3 .item button,\r\n#EquipmentV1 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV1 .col1 .item button,\r\n#EquipmentV1 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV1 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV1 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV1 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV1 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV1 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV1 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV1 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV1 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV1 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV1 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV1 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n}\r\n#EquipmentV1 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV1 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV1 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV1 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n";
+	EquipmentV1_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV1 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV1 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV1 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV1 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV1 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV1 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV1 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV1 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV1 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV1 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV1 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV1 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV1 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n}\r\n#EquipmentV1 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV1 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV1 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV1 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV1 .col1,\r\n#EquipmentV1 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV1 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV1 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV1 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV1 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV1 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV1 .col3 .item button,\r\n#EquipmentV1 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV1 .col1 .item button,\r\n#EquipmentV1 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV1 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV1 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV1 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV1 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV1 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV1 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV1 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV1 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV1 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 30px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV1 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV1 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n}\r\n#EquipmentV1 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV1 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV1 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV1 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/Equipment/EquipmentV1/EquipmentV1.js
@@ -244786,7 +246104,7 @@ var init_EquipmentV2$2 = __esmMin((() => {
 //#region src/UI/Components/Equipment/EquipmentV2/EquipmentV2.css?raw
 var EquipmentV2_default$1;
 var init_EquipmentV2$1 = __esmMin((() => {
-	EquipmentV2_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV2 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV2 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV2 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV2 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV2 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV2 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV2 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV2 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV2 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV2 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV2 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV2 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV2 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n}\r\n#EquipmentV2 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV2 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV2 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV2 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV2 .col1,\r\n#EquipmentV2 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV2 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV2 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV2 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV2 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV2 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV2 .col3 .item button,\r\n#EquipmentV2 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV2 .col1 .item button,\r\n#EquipmentV2 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV2 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV2 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV2 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV2 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV2 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV2 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV2 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV2 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV2 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV2 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV2 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n}\r\n#EquipmentV2 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV2 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV2 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV2 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n";
+	EquipmentV2_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV2 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV2 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV2 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV2 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV2 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV2 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV2 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV2 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV2 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV2 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV2 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV2 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV2 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n}\r\n#EquipmentV2 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV2 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV2 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV2 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV2 .col1,\r\n#EquipmentV2 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV2 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV2 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV2 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV2 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV2 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV2 .col3 .item button,\r\n#EquipmentV2 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV2 .col1 .item button,\r\n#EquipmentV2 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV2 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV2 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV2 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV2 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV2 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV2 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV2 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV2 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV2 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 30px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV2 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV2 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n}\r\n#EquipmentV2 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV2 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV2 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV2 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/Equipment/EquipmentV2/EquipmentV2.js
@@ -244811,7 +246129,7 @@ var init_EquipmentV3$2 = __esmMin((() => {
 //#region src/UI/Components/Equipment/EquipmentV3/EquipmentV3.css?raw
 var EquipmentV3_default$1;
 var init_EquipmentV3$1 = __esmMin((() => {
-	EquipmentV3_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV3 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV3 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV3 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV3 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV3 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV3 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV3 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV3 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV3 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV3 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV3 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV3 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV3 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n	height: 150px;\r\n}\r\n#EquipmentV3 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV3 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV3 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV3 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV3 .col1,\r\n#EquipmentV3 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV3 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV3 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV3 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV3 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV3 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV3 .col3 .item button,\r\n#EquipmentV3 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV3 .col1 .item button,\r\n#EquipmentV3 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV3 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV3 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV3 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV3 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV3 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV3 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV3 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV3 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV3 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV3 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV3 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n	background-position: 0px -130px;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV3 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV3 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV3 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV3 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV3 .footer .switch_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV3 .footer .remove_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV3 .item .grade {\r\n	position: relative;\r\n	width: 12px;\r\n	height: 12px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	pointer-events: none;\r\n	z-index: 2;\r\n	top: 5px;\r\n}\r\n\r\n#EquipmentV3 #title .title-list {\r\n	height: 125px;\r\n	width: 280px;\r\n	overflow-y: auto;\r\n	overflow-x: hidden;\r\n	padding: 8px 8px;\r\n	border: 1px solid #c0c0c0;\r\n	background-color: #f8f8f8;\r\n}\r\n\r\n#EquipmentV3 .title-option {\r\n	padding: 1px;\r\n	margin: 1px 0;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	border: 1px solid transparent;\r\n	white-space: nowrap;\r\n	width: 100%;\r\n}\r\n\r\n#EquipmentV3 .title-option.selected {\r\n	background-color: #e0e0e0;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV3 .title-option:hover {\r\n	background-color: #e0e0e0;\r\n}\r\n";
+	EquipmentV3_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV3 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV3 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV3 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV3 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV3 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV3 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV3 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV3 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV3 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV3 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV3 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV3 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV3 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n	height: 150px;\r\n}\r\n#EquipmentV3 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV3 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV3 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV3 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV3 .col1,\r\n#EquipmentV3 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV3 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV3 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV3 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV3 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV3 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV3 .col3 .item button,\r\n#EquipmentV3 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV3 .col1 .item button,\r\n#EquipmentV3 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV3 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV3 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV3 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV3 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV3 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV3 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV3 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV3 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV3 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 30px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV3 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV3 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n	background-position: 0px -130px;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV3 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV3 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV3 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV3 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV3 .footer .switch_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV3 .footer .remove_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV3 .item .grade {\r\n	position: relative;\r\n	width: 12px;\r\n	height: 12px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	pointer-events: none;\r\n	z-index: 2;\r\n	top: 5px;\r\n}\r\n\r\n#EquipmentV3 #title .title-list {\r\n	height: 125px;\r\n	width: 280px;\r\n	overflow-y: auto;\r\n	overflow-x: hidden;\r\n	padding: 8px 8px;\r\n	border: 1px solid #c0c0c0;\r\n	background-color: #f8f8f8;\r\n}\r\n\r\n#EquipmentV3 .title-option {\r\n	padding: 1px;\r\n	margin: 1px 0;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	border: 1px solid transparent;\r\n	white-space: nowrap;\r\n	width: 100%;\r\n}\r\n\r\n#EquipmentV3 .title-option.selected {\r\n	background-color: #e0e0e0;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV3 .title-option:hover {\r\n	background-color: #e0e0e0;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/Equipment/EquipmentV3/EquipmentV3.js
@@ -244839,7 +246157,7 @@ var init_EquipmentV4$2 = __esmMin((() => {
 //#region src/UI/Components/Equipment/EquipmentV4/EquipmentV4.css?raw
 var EquipmentV4_default$1;
 var init_EquipmentV4$1 = __esmMin((() => {
-	EquipmentV4_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV4 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV4 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV4 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV4 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV4 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV4 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV4 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV4 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV4 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV4 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV4 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV4 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV4 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n	height: 150px;\r\n}\r\n#EquipmentV4 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV4 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV4 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV4 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV4 .col1,\r\n#EquipmentV4 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV4 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV4 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV4 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV4 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV4 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV4 .col3 .item button,\r\n#EquipmentV4 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV4 .col1 .item button,\r\n#EquipmentV4 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV4 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV4 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV4 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV4 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV4 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV4 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV4 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV4 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV4 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV4 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV4 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n	background-position: 0px -130px;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV4 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV4 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV4 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV4 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV4 .footer .show_costume {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV4 .footer .switch_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV4 .footer .remove_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV4 #damageskin .damageskin-selector {\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	width: 280px;\r\n	margin: 0 auto;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-option {\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	width: 64px;\r\n	height: 92px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	margin-top: 3px;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-option span {\r\n	position: relative;\r\n	top: -9px;\r\n	font-weight: bold;\r\n	text-align: center;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-option .icon {\r\n	width: 36px;\r\n	height: 36px;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-wrapper {\r\n	width: 64px;\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	justify-content: center;\r\n	gap: 0;\r\n	padding: 0;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-wrapper > div:first-child {\r\n	margin-top: 8px;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-wrapper .label {\r\n	margin-top: 6px;\r\n	text-align: center;\r\n}\r\n\r\n#EquipmentV4 .motion-check {\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n	cursor: pointer;\r\n	width: 10px;\r\n	height: 12px;\r\n	margin-right: 4px;\r\n}\r\n\r\n#EquipmentV4 .item .grade {\r\n	position: relative;\r\n	width: 12px;\r\n	height: 12px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	pointer-events: none;\r\n	z-index: 2;\r\n	top: 5px;\r\n}\r\n\r\n#EquipmentV4 #title .title-list {\r\n	height: 125px;\r\n	width: 280px;\r\n	overflow-y: auto;\r\n	overflow-x: hidden;\r\n	padding: 8px 8px;\r\n	border: 1px solid #c0c0c0;\r\n	background-color: #f8f8f8;\r\n}\r\n\r\n#EquipmentV4 .title-option {\r\n	padding: 1px;\r\n	margin: 1px 0;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	border: 1px solid transparent;\r\n	white-space: nowrap;\r\n	width: 100%;\r\n}\r\n\r\n#EquipmentV4 .title-option.selected {\r\n	background-color: #e0e0e0;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV4 .title-option:hover {\r\n	background-color: #e0e0e0;\r\n}\r\n";
+	EquipmentV4_default$1 = ":host {\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n#EquipmentV4 {\r\n	position: relative;\r\n	width: 280px;\r\n}\r\n\r\n#EquipmentV4 .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV4 .titlebar {\r\n	width: 280px;\r\n	height: 17px;\r\n	background-color: white;\r\n	background-repeat: repeat-x;\r\n	border-radius: 3px 3px 0px 0px;\r\n}\r\n#EquipmentV4 .titlebar .base {\r\n	width: 11px;\r\n	height: 11px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n}\r\n#EquipmentV4 .titlebar .text {\r\n	text-shadow: 1px 1px white;\r\n	vertical-align: -2px;\r\n	white-space: nowrap;\r\n	/* chrome bug */\r\n	display: inline-block;\r\n	width: 32px;\r\n	height: 13px;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV4 .titlebar .left {\r\n	margin-left: 3px;\r\n	float: left;\r\n}\r\n#EquipmentV4 .titlebar .right {\r\n	float: right;\r\n	margin-right: 3px;\r\n}\r\n#EquipmentV4 .titlebar .clear {\r\n	clear: both;\r\n}\r\n\r\n#EquipmentV4 .tab-manager {\r\n	position: relative;\r\n	width: inherit;\r\n	background-color: white;\r\n	height: 15px;\r\n	display: flex;\r\n}\r\n\r\n#EquipmentV4 .tab a {\r\n	width: 60px;\r\n	height: 100%;\r\n	color: #42454a;\r\n	border: 1px solid #c9c3ba;\r\n	border-bottom: none;\r\n	text-decoration: none;\r\n	display: inline-block;\r\n	vertical-align: bottom;\r\n	border-radius: 3px 3px 0 0;\r\n	text-align: center;\r\n}\r\n#EquipmentV4 .tab a.selected {\r\n	color: #000;\r\n	font-weight: bold;\r\n	border-bottom: 1px solid white;\r\n	position: relative;\r\n	z-index: 100;\r\n	background-color: white;\r\n}\r\n#EquipmentV4 .tab a.selected:after {\r\n	content: '';\r\n	display: block;\r\n	height: 1px;\r\n	width: 1px;\r\n	position: absolute;\r\n	bottom: -1px;\r\n	left: -1px;\r\n}\r\n\r\n#EquipmentV4 .panel {\r\n	background-color: white;\r\n	border-top: 1px solid gray;\r\n	height: 150px;\r\n}\r\n#EquipmentV4 .equipmentV0 .panel {\r\n	background-color: inherit;\r\n}\r\n#EquipmentV4 table.content {\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV4 table.content.hide {\r\n	display: none;\r\n}\r\n#EquipmentV4 .content {\r\n	display: inline-block;\r\n	width: 280px;\r\n	height: 130px;\r\n	border-spacing: 0;\r\n}\r\n#EquipmentV4 .col1,\r\n#EquipmentV4 .col3 {\r\n	width: 115px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV4 .col1 {\r\n	background-position: 5% 50%;\r\n	min-width: 110px;\r\n}\r\n#EquipmentV4 .col3 {\r\n	background-position: 95% 50%;\r\n	min-width: 110px;\r\n}\r\n\r\n#EquipmentV4 .overlay {\r\n	position: absolute;\r\n	display: none;\r\n	white-space: nowrap;\r\n	z-index: 900;\r\n	height: 13px;\r\n	padding: 5px;\r\n	background: rgba(0, 0, 0, 0.7);\r\n	color: white;\r\n	text-shadow: 1px 1px black;\r\n}\r\n\r\n#EquipmentV4 .item button {\r\n	width: 24px;\r\n	height: 24px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	border: none;\r\n}\r\n#EquipmentV4 .item span {\r\n	width: 80px;\r\n	height: 24px;\r\n	display: inline-block;\r\n	line-height: 12px;\r\n	word-break: break-all;\r\n	overflow: hidden;\r\n	text-shadow: 1px 1px white;\r\n}\r\n\r\n#EquipmentV4 .col3 .item button,\r\n#EquipmentV4 .col3 .item span {\r\n	float: right;\r\n}\r\n#EquipmentV4 .col1 .item button,\r\n#EquipmentV4 .col1 .item span {\r\n	float: left;\r\n}\r\n#EquipmentV4 .col1 .item {\r\n	padding-left: 4px;\r\n}\r\n#EquipmentV4 .col3 .item {\r\n	padding-right: 4px;\r\n}\r\n#EquipmentV4 .col1 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n#EquipmentV4 .col3 .item .itemName {\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n#EquipmentV4 .ammo_container {\r\n	position: relative;\r\n}\r\n#EquipmentV4 .ammo {\r\n	position: absolute;\r\n	top: 30px;\r\n}\r\n#EquipmentV4 .ammo .item {\r\n	text-align: center;\r\n}\r\n#EquipmentV4 .ammo .item span {\r\n	width: 45px;\r\n}\r\n#EquipmentV4 .cartitems {\r\n	position: absolute;\r\n	top: 65px;\r\n	left: 14px;\r\n	width: 30px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n#EquipmentV4 .removeOption {\r\n	position: absolute;\r\n	top: 90px;\r\n	left: 12px;\r\n	width: 36px;\r\n	height: 36px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	display: none;\r\n}\r\n\r\n#EquipmentV4 .footer {\r\n	height: 20px;\r\n	border-bottom: 1px solid #c0c0c0;\r\n	background-position: 0px -130px;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV4 .footer .left {\r\n	float: left;\r\n	text-align: left;\r\n	margin-left: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV4 .footer .right {\r\n	float: right;\r\n	text-align: right;\r\n	margin-right: 5px;\r\n	margin-top: 3px;\r\n}\r\n#EquipmentV4 .footer .view_status {\r\n	width: 9px;\r\n	height: 14px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV4 .footer .show_equip {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n#EquipmentV4 .footer .show_costume {\r\n	width: 10px;\r\n	height: 12px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV4 .footer .switch_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n#EquipmentV4 .footer .remove_equip {\r\n	width: 40px;\r\n	height: 20px;\r\n	border: none;\r\n	position: relative;\r\n	top: -3px;\r\n}\r\n\r\n#lvlup_base {\r\n	z-index: 51;\r\n	position: absolute;\r\n	left: 0px;\r\n	bottom: 0px;\r\n	width: 43px;\r\n	height: 43px;\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n#EquipmentV4 #damageskin .damageskin-selector {\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: center;\r\n	width: 280px;\r\n	margin: 0 auto;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-option {\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	width: 64px;\r\n	height: 92px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	margin-top: 3px;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-option span {\r\n	position: relative;\r\n	top: -9px;\r\n	font-weight: bold;\r\n	text-align: center;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-option .icon {\r\n	width: 36px;\r\n	height: 36px;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-wrapper {\r\n	width: 64px;\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	justify-content: center;\r\n	gap: 0;\r\n	padding: 0;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-wrapper > div:first-child {\r\n	margin-top: 8px;\r\n}\r\n\r\n#EquipmentV4 #damageskin .skin-wrapper .label {\r\n	margin-top: 6px;\r\n	text-align: center;\r\n}\r\n\r\n#EquipmentV4 .motion-check {\r\n	border: none;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	vertical-align: middle;\r\n	cursor: pointer;\r\n	width: 10px;\r\n	height: 12px;\r\n	margin-right: 4px;\r\n}\r\n\r\n#EquipmentV4 .item .grade {\r\n	position: relative;\r\n	width: 12px;\r\n	height: 12px;\r\n	background-color: transparent;\r\n	background-repeat: no-repeat;\r\n	pointer-events: none;\r\n	z-index: 2;\r\n	top: 5px;\r\n}\r\n\r\n#EquipmentV4 #title .title-list {\r\n	height: 125px;\r\n	width: 280px;\r\n	overflow-y: auto;\r\n	overflow-x: hidden;\r\n	padding: 8px 8px;\r\n	border: 1px solid #c0c0c0;\r\n	background-color: #f8f8f8;\r\n}\r\n\r\n#EquipmentV4 .title-option {\r\n	padding: 1px;\r\n	margin: 1px 0;\r\n	cursor: pointer;\r\n	background-color: transparent;\r\n	border: 1px solid transparent;\r\n	white-space: nowrap;\r\n	width: 100%;\r\n}\r\n\r\n#EquipmentV4 .title-option.selected {\r\n	background-color: #e0e0e0;\r\n	font-weight: bold;\r\n}\r\n\r\n#EquipmentV4 .title-option:hover {\r\n	background-color: #e0e0e0;\r\n}\r\n";
 }));
 //#endregion
 //#region src/UI/Components/Equipment/EquipmentV4/EquipmentV4.js
@@ -249289,8 +250607,8 @@ var init_AIDriver = __esmMin((() => {
 	init_PacketVerManager();
 	init_SkillInfo();
 	init_EntityManager();
-	init_Client();
 	init_Configs();
+	init_LuaModuleLoader();
 	init_UIManager();
 	init_CodepageManager();
 	msg = {};
@@ -249520,120 +250838,74 @@ var init_AIDriver = __esmMin((() => {
 			addCTX(AIDriver.MER_AI, false);
 		}
 		static initAI = async (onEnd) => {
-			let loadedFiles = {};
-			let loadPromises = [];
 			AIDriver.ready = false;
-			function preloadFiles(fileList, lua) {
-				const ctx = lua.ctx;
-				function customRequire(modulePath, isJS = false) {
-					return new Promise((resolve, reject) => {
-						let filename;
-						if (!isJS) filename = CodepageManager.decode(modulePath);
-						else filename = modulePath;
-						filename = filename.replaceAll("\\\\", "/").replaceAll("\\", "/").replace("./", "").replace("pcall", "").replace("function", "").replace(".lua", "").trim();
-						if (filename.endsWith("end")) filename = filename.replace("end", "").trim();
-						filename = filename + ".lua";
-						if (filename.includes("Timeouts") || filename.includes("AggressiveRelogPath") || filename.startsWith("--")) {
-							resolve();
-							return;
-						}
-						if (loadedFiles[filename]) {
-							resolve();
-							return;
-						}
-						loadedFiles[filename] = filename;
-						Client.loadFile(filename, function(file) {
-							try {
-								if (Configs.get("debugAI", false)) console.log(`Loading file "${filename}"...`);
-								const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
-								const str = CodepageManager.decode(buffer);
-								const nestedPromises = [];
-								for (const line of str.split("\n")) if (line.includes("dofile")) {
-									const nestedPromise = customRequire(line.replace("dofile", "").replaceAll("(", "").replaceAll(")", "").replace(/['"]/g, "").trim(), true);
-									nestedPromises.push(nestedPromise);
-								}
-								Promise.all(nestedPromises).then(() => {
-									lua.mountFile("./" + filename, buffer);
-									resolve();
-								}).catch(reject);
-							} catch (error) {
-								console.error("[require] : ", error);
-								reject(error);
-							}
-						}, reject);
-					});
-				}
-				ctx.require = customRequire;
-				for (const filename of fileList) if (!loadedFiles[filename]) {
-					loadedFiles[filename] = filename;
-					const promise = new Promise((resolve, reject) => {
-						Client.loadFile(filename, function(file) {
-							try {
-								if (Configs.get("debugAI", false)) console.log("Loading file \"" + filename + "\"...");
-								const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
-								const text = CodepageManager.decode(buffer);
-								const nestedPromises = [];
-								for (const line of text.split("\n")) if (line.includes("dofile")) {
-									const nestedPromise = customRequire(line.replace("dofile", "").replaceAll("(", "").replaceAll(")", "").replace(/['"]/g, "").trim(), true);
-									nestedPromises.push(nestedPromise);
-								}
-								Promise.all(nestedPromises).then(() => {
-									lua.mountFile("./" + filename, buffer);
-									resolve();
-								}).catch(reject);
-							} catch (error) {
-								console.error("[prepareAIFiles] : ", error);
-								reject(error);
-							}
-						}, reject);
-					});
-					loadPromises.push(promise);
-				}
-			}
-			async function doFiles(fileList, lua) {
-				await Promise.all(loadPromises);
-				for (const key in fileList) await lua.doFileSync(fileList[key]);
-			}
+			const defaultAISearchPaths = [
+				"./?.lua",
+				"./?.lub",
+				"AI/?.lua",
+				"AI/?.lub",
+				"AI/USER_AI/?.lua",
+				"AI/USER_AI/?.lub",
+				...LuaModuleLoader.DEFAULT_SEARCH_PATHS
+			];
+			const customAISearchPaths = [
+				"./?.lua",
+				"./?.lub",
+				"AI/USER_AI/?.lua",
+				"AI/USER_AI/?.lub",
+				"AI/?.lua",
+				"AI/?.lub",
+				...LuaModuleLoader.DEFAULT_SEARCH_PATHS
+			];
 			try {
 				AIDriver.HO_AI = DB.getHOAI_VM();
 				AIDriver.MER_AI = DB.getMERAI_VM();
 				AIDriver.default_HO_AI = DB.getDefaultHOAI_VM();
 				AIDriver.default_MER_AI = DB.getDefaultMERAI_VM();
+				LuaModuleLoader.setup(AIDriver.default_HO_AI, { searchPaths: defaultAISearchPaths });
+				LuaModuleLoader.setup(AIDriver.default_MER_AI, { searchPaths: defaultAISearchPaths });
+				LuaModuleLoader.setup(AIDriver.HO_AI, { searchPaths: customAISearchPaths });
+				LuaModuleLoader.setup(AIDriver.MER_AI, { searchPaths: customAISearchPaths });
 				AIDriver.addCTX();
 				console.log("Loading Default HOAI...");
-				let files = [
+				await LuaModuleLoader.loadAndExecuteFiles(AIDriver.default_HO_AI, [
 					"AI/Util.lua",
 					"AI/Const.lua",
 					"AI/AI.lua"
-				];
-				let AI_M = "AI/AI_M.lua";
-				preloadFiles(files, AIDriver.default_HO_AI);
-				await doFiles(files, AIDriver.default_HO_AI);
+				], { searchPaths: defaultAISearchPaths });
 				console.log("Loading Default MERAI...");
-				loadedFiles = {};
-				loadPromises = [];
-				files.pop();
-				files.push(AI_M);
-				preloadFiles(files, AIDriver.default_MER_AI);
-				await doFiles(files, AIDriver.default_MER_AI);
-				files = [
-					"AI/USER_AI/Util.lua",
-					"AI/USER_AI/Const.lua",
-					"AI/USER_AI/AI.lua"
-				];
-				AI_M = "AI/USER_AI/AI_M.lua";
-				console.log("Loading Custom HOAI...");
-				preloadFiles(files, AIDriver.HO_AI);
-				await doFiles(files, AIDriver.HO_AI);
-				console.log("Loading Custom MERAI...");
-				loadedFiles = {};
-				loadPromises = [];
-				files.pop();
-				files.push(AI_M);
-				preloadFiles(files, AIDriver.MER_AI);
-				await doFiles(files, AIDriver.MER_AI);
+				await LuaModuleLoader.loadAndExecuteFiles(AIDriver.default_MER_AI, [
+					"AI/Util.lua",
+					"AI/Const.lua",
+					"AI/AI_M.lua"
+				], { searchPaths: defaultAISearchPaths });
+				try {
+					console.log("Loading Custom HOAI...");
+					await LuaModuleLoader.loadAndExecuteFiles(AIDriver.HO_AI, [
+						"AI/USER_AI/Util.lua",
+						"AI/USER_AI/Const.lua",
+						"AI/USER_AI/AI.lua"
+					], { searchPaths: customAISearchPaths });
+				} catch (customHoError) {
+					if (customHoError && customHoError.code === "LUA_FILE_NOT_FOUND") console.warn("[AIDriver] Custom HO USER_AI files not available, falling back to default HO AI:", customHoError.message || customHoError);
+					else console.error("[AIDriver] Custom HO USER_AI failed to initialize, falling back to default HO AI:", customHoError.message || customHoError);
+					AIDriver.HO_AI = AIDriver.default_HO_AI;
+				}
+				try {
+					console.log("Loading Custom MERAI...");
+					await LuaModuleLoader.loadAndExecuteFiles(AIDriver.MER_AI, [
+						"AI/USER_AI/Util.lua",
+						"AI/USER_AI/Const.lua",
+						"AI/USER_AI/AI_M.lua"
+					], { searchPaths: customAISearchPaths });
+				} catch (customMerError) {
+					if (customMerError && customMerError.code === "LUA_FILE_NOT_FOUND") console.warn("[AIDriver] Custom MER USER_AI files not available, falling back to default MER AI:", customMerError.message || customMerError);
+					else console.error("[AIDriver] Custom MER USER_AI failed to initialize, falling back to default MER AI:", customMerError.message || customMerError);
+					AIDriver.MER_AI = AIDriver.default_MER_AI;
+				}
 			} catch (error) {
-				console.warn("[AIDriver] AI files not available, skipping AI initialization:", error.message || error);
+				if (error && error.code === "LUA_FILE_NOT_FOUND") console.warn("[AIDriver] AI files not available, skipping AI initialization:", error.message || error);
+				else console.error("[AIDriver] Failed to initialize AI:", error.message || error);
 				if (typeof onEnd === "function") onEnd();
 				return;
 			}
@@ -252716,7 +253988,7 @@ function generateCylinder(totalCircleSides, circleSides, repeatTextureX) {
 	}
 	return new Float32Array(mesh);
 }
-var _program$20, blendMode$3, mat4$19, _matrix$5, Cylinder;
+var _program$19, blendMode$3, mat4$19, _matrix$5, Cylinder;
 var init_Cylinder = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -252820,8 +254092,8 @@ var init_Cylinder = __esmMin((() => {
 		render(gl, tick) {
 			const renderCount = tick - this.startTick;
 			const duration = this.endTick - this.startTick;
-			const uniform = _program$20.uniform;
-			const attribute = _program$20.attribute;
+			const uniform = _program$19.uniform;
+			const attribute = _program$19.attribute;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			if (this.repeatTextureX > 1) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 			gl.enableVertexAttribArray(attribute.aPosition);
@@ -252941,7 +254213,7 @@ var init_Cylinder = __esmMin((() => {
 			blendMode$3[13] = gl.CONSTANT_ALPHA;
 			blendMode$3[14] = gl.ONE_MINUS_CONSTANT_ALPHA;
 			blendMode$3[15] = gl.SRC_ALPHA_SATURATE;
-			_program$20 = WebGL_default.createShaderProgram(gl, Cylinder_default$1, Cylinder_default);
+			_program$19 = WebGL_default.createShaderProgram(gl, Cylinder_default$1, Cylinder_default);
 			this.ready = true;
 			this.renderBeforeEntities = false;
 		}
@@ -252951,9 +254223,9 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$20) {
-				gl.deleteProgram(_program$20);
-				_program$20 = null;
+			if (_program$19) {
+				gl.deleteProgram(_program$19);
+				_program$19 = null;
 			}
 			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
@@ -252964,8 +254236,8 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$20.uniform;
-			gl.useProgram(_program$20);
+			const uniform = _program$19.uniform;
+			gl.useProgram(_program$19);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -252981,8 +254253,8 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$20.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$20.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$19.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$19.attribute.aTextureCoord);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -252999,7 +254271,7 @@ var init_Cylinder = __esmMin((() => {
 //#region src/Renderer/Effects/RsmEffect.vs?raw
 var RsmEffect_default$1;
 var init_RsmEffect$2 = __esmMin((() => {
-	RsmEffect_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec3 aVertexNormal;\r\nin vec2 aTextureCoord;\r\nin float aAlpha;\r\n\r\nout vec2 vTextureCoord;\r\nout float vLightWeighting;\r\nout float vAlpha;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform vec3 uLightDirection;\r\nuniform mat3 uNormalMat;\r\n\r\nuniform vec3 uPosition;\r\nuniform float uSize;\r\n\r\nvoid main(void) {\r\n\r\n	vec4 position  = vec4(uPosition.x + 0.5, -uPosition.z, uPosition.y + 0.5, 1.0);\r\n	position += vec4(aPosition.x * uSize, aPosition.y * -uSize, aPosition.z * uSize, 0.0);\r\n\r\n	gl_Position	 = uProjectionMat * uModelViewMat * position;\r\n\r\n	vTextureCoord   = aTextureCoord;\r\n	vAlpha		  = aAlpha;\r\n\r\n	vec4 lDirection  = uModelViewMat * vec4( uLightDirection, 0.0);\r\n	vec3 dirVector   = normalize(lDirection.xyz);\r\n	float dotProduct = dot( uNormalMat * aVertexNormal, dirVector );\r\n	vLightWeighting  = max( dotProduct, 0.5 );\r\n}";
+	RsmEffect_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec3 aVertexNormal;\r\nin vec2 aTextureCoord;\r\nin float aAlpha;\r\n\r\nout vec2 vTextureCoord;\r\nout float vLightWeighting;\r\nout float vAlpha;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\nuniform mat4 uModelMat;\r\nuniform mat3 uNodeNormalMat;\r\nuniform float uApplyNodeNormal;\r\n\r\nuniform vec3 uLightDirection;\r\nuniform mat3 uNormalMat;\r\n\r\nuniform vec3 uPosition;\r\nuniform float uSize;\r\n\r\nvoid main(void) {\r\n\r\n	vec4 position  = vec4(uPosition.x + 0.55, -uPosition.z - 0.5, uPosition.y, 1.0);\r\n	vec3 wp = (uModelMat * vec4(aPosition, 1.0)).xyz;  \r\n	position += vec4(wp.x * uSize, wp.y * -uSize, wp.z * uSize, 0.0);\r\n\r\n	gl_Position	 = uProjectionMat * uModelViewMat * position;\r\n\r\n	vTextureCoord   = aTextureCoord;\r\n	vAlpha		  = aAlpha;\r\n\r\n	vec4 lDirection  = uModelViewMat * vec4( uLightDirection, 0.0);\r\n	vec3 dirVector   = normalize(lDirection.xyz);\r\n	vec3 worldNormal = uApplyNodeNormal > 0.5 ? (uNodeNormalMat * aVertexNormal) : aVertexNormal;\r\n	vec3 viewNormal  = uNormalMat * worldNormal;\r\n	float dotProduct = dot( viewNormal, dirVector );\r\n	vLightWeighting  = max( dotProduct, 0.5 );\r\n}";
 }));
 //#endregion
 //#region src/Renderer/Effects/RsmEffect.fs?raw
@@ -254122,23 +255394,40 @@ var init_Model = __esmMin((() => {
 //#endregion
 //#region src/Renderer/Effects/RsmEffect.js
 /**
+* Create a per-effect scratchpad context to avoid shared mutable state
+* across effect instances.
+*/
+function createScratch() {
+	return {
+		matrix: mat4$17.create(),
+		nodeMatrix: mat4$17.create(),
+		mat4Node: mat4$17.create(),
+		quat: quat.create(),
+		vec3Pos: vec3$3.create(),
+		vec3Scale: vec3$3.create(),
+		vec3BoxCenter: vec3$3.create(),
+		normalMat: mat4$17.create(),
+		tempVec: vec3$3.create()
+	};
+}
+/**
 * Interpolate between two quaternions using SLERP
 */
-function slerpQuat(q1, q2, t) {
-	quat.slerp(_scratchQuat, q1, q2, t);
-	return _scratchQuat;
+function slerpQuat(ctx, q1, q2, t) {
+	quat.slerp(ctx.quat, q1, q2, t);
+	return ctx.quat;
 }
 /**
 * Interpolate between two vec3 using linear interpolation
 */
-function lerpVec3(v1, v2, t) {
-	vec3$3.lerp(_scratchVec3Scale, v1, v2, t);
-	return _scratchVec3Scale;
+function lerpVec3(ctx, v1, v2, t) {
+	vec3$3.lerp(ctx.vec3Scale, v1, v2, t);
+	return ctx.vec3Scale;
 }
 /**
 * Get rotation at a specific frame from keyframes
 */
-function getRotationAtFrame(rotKeyframes, frame, animLen) {
+function getRotationAtFrame(ctx, rotKeyframes, frame, animLen) {
 	if (!rotKeyframes || rotKeyframes.length === 0) return null;
 	if (rotKeyframes.length === 1) return rotKeyframes[0].q;
 	let prevIdx = 0;
@@ -254161,18 +255450,18 @@ function getRotationAtFrame(rotKeyframes, frame, animLen) {
 	if (frame < prevFrame) frame += animLen;
 	let t = nextFrame - prevFrame > 0 ? (frame - prevFrame) / (nextFrame - prevFrame) : 0;
 	t = Math.max(0, Math.min(1, t));
-	return slerpQuat(rotKeyframes[prevIdx].q, rotKeyframes[nextIdx].q, t);
+	return slerpQuat(ctx, rotKeyframes[prevIdx].q, rotKeyframes[nextIdx].q, t);
 }
 /**
 * Get position at a specific frame from keyframes
 */
-function getPositionAtFrame(posKeyframes, frame, animLen) {
+function getPositionAtFrame(ctx, posKeyframes, frame, animLen) {
 	if (!posKeyframes || posKeyframes.length === 0) return null;
 	if (posKeyframes.length === 1) {
-		_scratchVec3Pos[0] = posKeyframes[0].px;
-		_scratchVec3Pos[1] = posKeyframes[0].py;
-		_scratchVec3Pos[2] = posKeyframes[0].pz;
-		return _scratchVec3Pos;
+		ctx.vec3Pos[0] = posKeyframes[0].px;
+		ctx.vec3Pos[1] = posKeyframes[0].py;
+		ctx.vec3Pos[2] = posKeyframes[0].pz;
+		return ctx.vec3Pos;
 	}
 	let prevIdx = 0;
 	let nextIdx = 0;
@@ -254189,10 +255478,10 @@ function getPositionAtFrame(posKeyframes, frame, animLen) {
 	}
 	if (prevIdx === nextIdx) {
 		const kf = posKeyframes[prevIdx];
-		_scratchVec3Pos[0] = kf.px;
-		_scratchVec3Pos[1] = kf.py;
-		_scratchVec3Pos[2] = kf.pz;
-		return _scratchVec3Pos;
+		ctx.vec3Pos[0] = kf.px;
+		ctx.vec3Pos[1] = kf.py;
+		ctx.vec3Pos[2] = kf.pz;
+		return ctx.vec3Pos;
 	}
 	const prevFrame = posKeyframes[prevIdx].frame;
 	let nextFrame = posKeyframes[nextIdx].frame;
@@ -254202,15 +255491,15 @@ function getPositionAtFrame(posKeyframes, frame, animLen) {
 	t = Math.max(0, Math.min(1, t));
 	const p1 = posKeyframes[prevIdx];
 	const p2 = posKeyframes[nextIdx];
-	_scratchVec3Pos[0] = p1.px + (p2.px - p1.px) * t;
-	_scratchVec3Pos[1] = p1.py + (p2.py - p1.py) * t;
-	_scratchVec3Pos[2] = p1.pz + (p2.pz - p1.pz) * t;
-	return _scratchVec3Pos;
+	ctx.vec3Pos[0] = p1.px + (p2.px - p1.px) * t;
+	ctx.vec3Pos[1] = p1.py + (p2.py - p1.py) * t;
+	ctx.vec3Pos[2] = p1.pz + (p2.pz - p1.pz) * t;
+	return ctx.vec3Pos;
 }
 /**
 * Get scale at a specific frame from keyframes
 */
-function getScaleAtFrame(scaleKeyFrames, frame, animLen) {
+function getScaleAtFrame(ctx, scaleKeyFrames, frame, animLen) {
 	if (!scaleKeyFrames || scaleKeyFrames.length === 0) return null;
 	if (scaleKeyFrames.length === 1) return scaleKeyFrames[0].Scale;
 	let prevIdx = 0;
@@ -254233,7 +255522,7 @@ function getScaleAtFrame(scaleKeyFrames, frame, animLen) {
 	if (frame < prevFrame) frame += animLen;
 	let t = nextFrame - prevFrame > 0 ? (frame - prevFrame) / (nextFrame - prevFrame) : 0;
 	t = Math.max(0, Math.min(1, t));
-	return lerpVec3(scaleKeyFrames[prevIdx].Scale, scaleKeyFrames[nextIdx].Scale, t);
+	return lerpVec3(ctx, scaleKeyFrames[prevIdx].Scale, scaleKeyFrames[nextIdx].Scale, t);
 }
 /**
 * Calculate normals (NONE type)
@@ -254242,20 +255531,19 @@ function calcNormal_NONE(out) {
 	for (let i = 1, count = out.length; i < count; i += 3) out[i] = -1;
 }
 /**
-* Calculate normals (FLAT type)
+* Calculate normals (FLAT type) - uses identity normalMat (local space)
 */
-function calcNormal_FLAT(node, out, normalMat, groupUsed) {
+function calcNormal_FLAT(node, out, groupUsed, tempVec) {
 	let i, j, count;
 	let face;
-	const temp_vec = _scratchTempVec;
 	const faces = node.faces;
 	const vertices = node.vertices;
 	for (i = 0, j = 0, count = faces.length; i < count; ++i, j += 3) {
 		face = faces[i];
-		vec3$3.calcNormal(vertices[face.vertidx[0]], vertices[face.vertidx[1]], vertices[face.vertidx[2]], temp_vec);
-		out[j] = normalMat[0] * temp_vec[0] + normalMat[4] * temp_vec[1] + normalMat[8] * temp_vec[2] + normalMat[12];
-		out[j + 1] = normalMat[1] * temp_vec[0] + normalMat[5] * temp_vec[1] + normalMat[9] * temp_vec[2] + normalMat[13];
-		out[j + 2] = normalMat[2] * temp_vec[0] + normalMat[6] * temp_vec[1] + normalMat[10] * temp_vec[2] + normalMat[14];
+		vec3$3.calcNormal(vertices[face.vertidx[0]], vertices[face.vertidx[1]], vertices[face.vertidx[2]], tempVec);
+		out[j] = tempVec[0];
+		out[j + 1] = tempVec[1];
+		out[j + 2] = tempVec[2];
 		if (face.smoothGroup !== void 0) groupUsed[face.smoothGroup] = true;
 	}
 }
@@ -254364,53 +255652,57 @@ function generate_mesh_SMOOTH(node, vert, shadeGroup, mesh) {
 	}
 }
 /**
-* Compile a node at a specific animation frame
+* Get node matrix at a specific animation frame (world space, no camera view)
 */
-function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
-	const modelViewMat = _scratchModelViewMat;
-	const normalMat = _scratchNormalMat;
+function getNodeMatrixAtFrame(ctx, node, instanceMatrix, frame, animLen, outMat, outNormalMat) {
+	const matrix = ctx.matrix;
+	mat4$17.identity(matrix);
+	ctx.vec3BoxCenter[0] = -node.main.box.center[0];
+	ctx.vec3BoxCenter[1] = -node.main.box.max[1];
+	ctx.vec3BoxCenter[2] = -node.main.box.center[2];
+	mat4$17.translate(matrix, matrix, ctx.vec3BoxCenter);
+	const nodeMatrix = ctx.nodeMatrix;
+	if (node._parentMatrix) mat4$17.copy(nodeMatrix, node._parentMatrix);
+	else mat4$17.identity(nodeMatrix);
+	if (node.baseMatrix) mat4$17.multiply(nodeMatrix, nodeMatrix, node.baseMatrix);
+	const animPos = getPositionAtFrame(ctx, node.posKeyframes, frame, animLen);
+	if (animPos) mat4$17.translate(nodeMatrix, nodeMatrix, animPos);
+	else mat4$17.translate(nodeMatrix, nodeMatrix, node.pos);
+	const animRot = getRotationAtFrame(ctx, node.rotKeyframes, frame, animLen);
+	if (animRot) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, animRot);
+	else if (node.rotKeyframes && node.rotKeyframes.length > 0) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, node.rotKeyframes[0].q);
+	else mat4$17.rotate(nodeMatrix, nodeMatrix, node.rotangle, node.rotaxis);
+	const animScale = getScaleAtFrame(ctx, node.scaleKeyFrames, frame, animLen);
+	if (animScale) mat4$17.scale(nodeMatrix, nodeMatrix, animScale);
+	else mat4$17.scale(nodeMatrix, nodeMatrix, node.scale);
+	mat4$17.multiply(matrix, matrix, nodeMatrix);
+	if (!node.is_only) mat4$17.translate(matrix, matrix, node.offset);
+	mat4$17.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, ctx.mat4Node));
+	mat4$17.multiply(outMat, instanceMatrix, matrix);
+	mat4$17.extractRotation(ctx.normalMat, outMat);
+	mat3$2.fromMat4(outNormalMat, ctx.normalMat);
+}
+/**
+* Compile a node in LOCAL space (no modelViewMat, no instance matrix)
+*/
+function compileNodeLocal(ctx, node) {
 	const textures = node.textures;
 	const faces = node.faces;
 	const vertices = node.vertices;
 	const mesh = {};
 	const mesh_size = [];
-	for (let g = 0; g < 32; g++) {
-		_shadeGroup[g] = null;
-		_shadeGroupUsed[g] = false;
-	}
+	const shadeGroup = new Array(32).fill(null);
+	const shadeGroupUsed = new Array(32).fill(false);
 	let i, x, y, z, count;
-	const matrix = _scratchMatrix;
-	mat4$17.identity(matrix);
-	_scratchVec3BoxCenter[0] = -node.main.box.center[0];
-	_scratchVec3BoxCenter[1] = -node.main.box.max[1];
-	_scratchVec3BoxCenter[2] = -node.main.box.center[2];
-	mat4$17.translate(matrix, matrix, _scratchVec3BoxCenter);
-	const nodeMatrix = _scratchNodeMatrix;
-	mat4$17.identity(nodeMatrix);
-	const animPos = getPositionAtFrame(node.posKeyframes, frame, animLen);
-	if (animPos) mat4$17.translate(nodeMatrix, nodeMatrix, animPos);
-	else mat4$17.translate(nodeMatrix, nodeMatrix, node.pos);
-	const animRot = getRotationAtFrame(node.rotKeyframes, frame, animLen);
-	if (animRot) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, animRot);
-	else if (node.rotKeyframes && node.rotKeyframes.length > 0) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, node.rotKeyframes[0].q);
-	else mat4$17.rotate(nodeMatrix, nodeMatrix, node.rotangle, node.rotaxis);
-	const animScale = getScaleAtFrame(node.scaleKeyFrames, frame, animLen);
-	if (animScale) mat4$17.scale(nodeMatrix, nodeMatrix, animScale);
-	else mat4$17.scale(nodeMatrix, nodeMatrix, node.scale);
-	mat4$17.multiply(matrix, matrix, nodeMatrix);
-	if (!node.is_only) mat4$17.translate(matrix, matrix, node.offset);
-	mat4$17.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, _scratchMat4Node));
-	mat4$17.multiply(modelViewMat, instanceMatrix, matrix);
-	mat4$17.extractRotation(normalMat, modelViewMat);
 	count = vertices.length;
 	const vert = new Float32Array(count * 3);
 	for (i = 0; i < count; ++i) {
 		x = vertices[i][0];
 		y = vertices[i][1];
 		z = vertices[i][2];
-		vert[i * 3 + 0] = modelViewMat[0] * x + modelViewMat[4] * y + modelViewMat[8] * z + modelViewMat[12];
-		vert[i * 3 + 1] = modelViewMat[1] * x + modelViewMat[5] * y + modelViewMat[9] * z + modelViewMat[13];
-		vert[i * 3 + 2] = modelViewMat[2] * x + modelViewMat[6] * y + modelViewMat[10] * z + modelViewMat[14];
+		vert[i * 3 + 0] = x;
+		vert[i * 3 + 1] = y;
+		vert[i * 3 + 2] = z;
 	}
 	const face_normal = new Float32Array(faces.length * 3);
 	for (i = 0, count = textures.length; i < count; ++i) mesh_size[textures[i]] = 0;
@@ -254423,85 +255715,32 @@ function compileNodeAtFrame(node, instanceMatrix, frame, animLen) {
 			generate_mesh_FLAT(node, vert, face_normal, mesh);
 			break;
 		case 1:
-			calcNormal_FLAT(node, face_normal, normalMat, _shadeGroupUsed);
+			calcNormal_FLAT(node, face_normal, shadeGroupUsed, ctx.tempVec);
 			generate_mesh_FLAT(node, vert, face_normal, mesh);
 			break;
 		case 2:
-			calcNormal_FLAT(node, face_normal, normalMat, _shadeGroupUsed);
-			calcNormal_SMOOTH(node, face_normal, _shadeGroupUsed, _shadeGroup);
-			generate_mesh_SMOOTH(node, vert, _shadeGroup, mesh);
+			calcNormal_FLAT(node, face_normal, shadeGroupUsed, ctx.tempVec);
+			calcNormal_SMOOTH(node, face_normal, shadeGroupUsed, shadeGroup);
+			generate_mesh_SMOOTH(node, vert, shadeGroup, mesh);
 	}
 	return mesh;
 }
 /**
-* Rebuild mesh buffer at current frame
+* Get node matrix for non-animated model (mirrors Node.compile in Loaders/Model.js)
 */
-function rebuildMeshAtFrame(self, gl, frame) {
-	const model = self.model;
-	const nodes = model.nodes;
-	const instances = model.instances;
-	const objects = [];
-	const infos = [];
-	let total = 0;
-	for (let ni = 0; ni < nodes.length; ni++) for (let ii = 0; ii < instances.length; ii++) {
-		const mesh = compileNodeAtFrame(nodes[ni], instances[ii], frame, model.animLen);
-		const textureKeys = Object.keys(mesh);
-		for (let ki = 0; ki < textureKeys.length; ki++) {
-			const texIdx = textureKeys[ki];
-			objects.push({
-				texture: model.textures[texIdx],
-				alpha: model.alpha,
-				mesh: mesh[texIdx]
-			});
-			total += mesh[texIdx].length;
-		}
-	}
-	const buffer = new Float32Array(total);
-	let offset = 0;
-	let i = 0;
-	for (; i < objects.length; i++) {
-		const obj = objects[i];
-		const length = obj.mesh.length;
-		infos[i] = {
-			texture: "data/texture/" + obj.texture,
-			vertOffset: offset / 9,
-			vertCount: length / 9
-		};
-		buffer.set(obj.mesh, offset);
-		offset += length;
-	}
-	if (!self.buffer) self.buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, self.buffer);
-	if (self._bufferSize === buffer.byteLength) gl.bufferSubData(gl.ARRAY_BUFFER, 0, buffer);
-	else {
-		gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.DYNAMIC_DRAW);
-		self._bufferSize = buffer.byteLength;
-	}
-	if (self.objects.length !== infos.length) {
-		for (i = 0; i < self.objects.length; i++) if (self.objects[i] && self.objects[i].texture) gl.deleteTexture(self.objects[i].texture);
-		self.objects = new Array(infos.length);
-		for (i = 0; i < infos.length; i++) {
-			self.objects[i] = {
-				vertCount: infos[i].vertCount,
-				vertOffset: infos[i].vertOffset,
-				complete: false,
-				texture: null
-			};
-			(function(idx, texturePath) {
-				Client.loadFile(texturePath, function(data) {
-					WebGL_default.texture(gl, data, function(texture) {
-						self.objects[idx].texture = texture;
-						self.objects[idx].complete = true;
-					});
-				}, function() {
-					self.objects[idx].complete = true;
-				});
-			})(i, infos[i].texture);
-		}
-	} else for (i = 0; i < infos.length; i++) {
-		self.objects[i].vertCount = infos[i].vertCount;
-		self.objects[i].vertOffset = infos[i].vertOffset;
-	}
+function getNodeMatrixStatic(ctx, node, instanceMatrix, outMat, outNormalMat) {
+	const matrix = ctx.matrix;
+	mat4$17.identity(matrix);
+	ctx.vec3BoxCenter[0] = -node.main.box.center[0];
+	ctx.vec3BoxCenter[1] = -node.main.box.max[1];
+	ctx.vec3BoxCenter[2] = -node.main.box.center[2];
+	mat4$17.translate(matrix, matrix, ctx.vec3BoxCenter);
+	mat4$17.multiply(matrix, matrix, node.matrix);
+	if (!node.is_only) mat4$17.translate(matrix, matrix, node.offset);
+	mat4$17.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, ctx.mat4Node));
+	mat4$17.multiply(outMat, instanceMatrix, matrix);
+	mat4$17.extractRotation(ctx.normalMat, outMat);
+	mat3$2.fromMat4(outNormalMat, ctx.normalMat);
 }
 function initModel(gl, data) {
 	const self = this;
@@ -254509,21 +255748,60 @@ function initModel(gl, data) {
 	this.objects.length = count;
 	if (!this.buffer) this.buffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, data.buffer, this.isAnimated ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW);
-	this._bufferSize = data.buffer.byteLength;
-	function onTextureLoaded(texture, i) {
-		self.objects[i].texture = texture;
-		self.objects[i].complete = true;
-	}
+	gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
+	const glTextureCache = /* @__PURE__ */ new Map();
+	const pending = /* @__PURE__ */ new Map();
 	for (let i = 0; i < count; ++i) {
 		if (!this.objects[i]) this.objects[i] = {};
-		this.objects[i].vertCount = data.infos[i].vertCount;
-		this.objects[i].vertOffset = data.infos[i].vertOffset;
-		this.objects[i].complete = false;
-		WebGL_default.texture(gl, data.infos[i].texture, onTextureLoaded, i);
+		const info = data.infos[i];
+		const obj = this.objects[i];
+		obj.vertCount = info.vertCount;
+		obj.vertOffset = info.vertOffset;
+		obj.complete = false;
+		obj.modelMat = info.modelMat;
+		obj.normalMat = info.normalMat;
+		obj.nodeIndex = info.nodeIndex;
+		obj.instIndex = info.instIndex;
+		obj.applyNodeNormal = info.shadeType === 1 || info.shadeType === 2;
+		if (!info.textureData) continue;
+		const texPath = info.texPath;
+		if (glTextureCache.has(texPath)) {
+			obj.texture = glTextureCache.get(texPath);
+			obj.complete = true;
+			continue;
+		}
+		if (pending.has(texPath)) {
+			pending.get(texPath).push(i);
+			continue;
+		}
+		const waiting = [i];
+		pending.set(texPath, waiting);
+		WebGL_default.texture(gl, info.textureData, function(texture) {
+			glTextureCache.set(texPath, texture);
+			pending.delete(texPath);
+			for (let k = 0; k < waiting.length; ++k) {
+				self.objects[waiting[k]].texture = texture;
+				self.objects[waiting[k]].complete = true;
+			}
+		});
 	}
 }
-var _program$19, _normalMat, mat4$17, mat3$2, quat, vec3$3, _light$1, _scratchModelViewMat, _scratchNormalMat, _scratchMatrix, _scratchNodeMatrix, _scratchMat4Node, _scratchTempVec, _scratchQuat, _scratchVec3Pos, _scratchVec3Scale, _scratchVec3BoxCenter, _shadeGroup, _shadeGroupUsed, RsmEffect;
+/**
+* Update node matrices for current animation frame
+*/
+function updateNodeMatrices(self, frame) {
+	const ctx = self._scratch;
+	const model = self.model;
+	const nodes = model.nodes;
+	const instances = model.instances;
+	for (let i = 0, count = self.objects.length; i < count; ++i) {
+		const obj = self.objects[i];
+		const node = nodes[obj.nodeIndex];
+		const instanceMatrix = instances[obj.instIndex];
+		getNodeMatrixAtFrame(ctx, node, instanceMatrix, frame, model.animLen, obj.modelMat, obj.normalMat);
+	}
+}
+var _program$18, _normalMat, mat4$17, mat3$2, quat, vec3$3, _light$1, RsmEffect;
 var init_RsmEffect = __esmMin((() => {
 	init_RsmEffect$2();
 	init_RsmEffect$1();
@@ -254531,7 +255809,7 @@ var init_RsmEffect = __esmMin((() => {
 	init_gl_matrix();
 	init_Client();
 	init_Model();
-	_program$19 = null;
+	_program$18 = null;
 	_normalMat = /* @__PURE__ */ new Float32Array(9);
 	mat4$17 = gl_matrix_default.mat4;
 	mat3$2 = gl_matrix_default.mat3;
@@ -254555,18 +255833,6 @@ var init_RsmEffect = __esmMin((() => {
 			0
 		])
 	};
-	_scratchModelViewMat = mat4$17.create();
-	_scratchNormalMat = mat4$17.create();
-	_scratchMatrix = mat4$17.create();
-	_scratchNodeMatrix = mat4$17.create();
-	_scratchMat4Node = mat4$17.create();
-	_scratchTempVec = vec3$3.create();
-	_scratchQuat = quat.create();
-	_scratchVec3Pos = vec3$3.create();
-	_scratchVec3Scale = vec3$3.create();
-	_scratchVec3BoxCenter = vec3$3.create();
-	_shadeGroup = new Array(32);
-	_shadeGroupUsed = new Array(32);
 	RsmEffect = class {
 		constructor(params) {
 			this.position = params.Inst.position;
@@ -254591,14 +255857,15 @@ var init_RsmEffect = __esmMin((() => {
 				filename: null
 			};
 			this._Params = params;
+			this._scratch = createScratch();
 		}
 		static init(gl) {
-			_program$19 = WebGL_default.createShaderProgram(gl, RsmEffect_default$1, RsmEffect_default);
+			_program$18 = WebGL_default.createShaderProgram(gl, RsmEffect_default$1, RsmEffect_default);
 			this.ready = true;
 		}
 		init(gl, tick) {
 			const self = this;
-			let i, count, j, size, total, offset, length;
+			let count, total, offset, length;
 			Client.getFile(this.filename, function(buf) {
 				self.model = new RSM(buf);
 				self.isAnimated = false;
@@ -254611,60 +255878,110 @@ var init_RsmEffect = __esmMin((() => {
 						break;
 					}
 				}
-				const objects = [], infos = [];
-				let meshes, index, object;
+				const objects = [];
+				let object;
 				self.globalParameters.filename = self.filename.replace("data/model/", "") + Math.floor(Math.random() * 15);
 				self.model.createInstance(self.globalParameters, 0, 0);
-				const data = self.model.compile();
-				count = data.meshes.length;
-				total = 0;
-				for (i = 0, count = data.meshes.length; i < count; ++i) {
-					meshes = data.meshes[i];
-					index = Object.keys(meshes);
-					for (j = 0, size = index.length; j < size; ++j) {
-						objects.push({
-							texture: data.textures[index[j]],
-							alpha: self.model.alpha,
-							mesh: meshes[index[j]]
-						});
-						total += meshes[index[j]].length;
+				const nodes = self.model.nodes;
+				const instances = self.model.instances;
+				if (self.animLen <= 0) for (let ni = 0; ni < nodes.length; ni++) {
+					const node = nodes[ni];
+					node._parentMatrix = null;
+					if (node.parentname && node.parentname !== node.name) {
+						const parent = nodes.find((n) => n.name === node.parentname);
+						if (parent && !parent.absoluteTransform) node._parentMatrix = parent.matrix;
 					}
 				}
-				const buffer = new Float32Array(total);
-				count = objects.length;
-				offset = 0;
-				for (i = 0; i < count; ++i) {
+				for (let ni = 0; ni < nodes.length; ni++) {
+					const localMesh = compileNodeLocal(self._scratch, nodes[ni]);
+					const textureKeys = Object.keys(localMesh);
+					for (let ki = 0; ki < textureKeys.length; ki++) {
+						const texIdx = textureKeys[ki];
+						objects.push({
+							texture: self.model.textures[texIdx],
+							alpha: self.model.alpha,
+							mesh: localMesh[texIdx],
+							nodeIndex: ni
+						});
+					}
+				}
+				total = 0;
+				const objCount = objects.length;
+				for (let i = 0; i < objCount; ++i) {
 					object = objects[i];
 					length = object.mesh.length;
-					infos[i] = {
-						texture: "data/texture/" + object.texture,
-						vertOffset: offset / 9,
-						vertCount: length / 9
-					};
+					object.vertOffset = total / 9;
+					object.vertCount = length / 9;
+					total += length;
+				}
+				const buffer = new Float32Array(total);
+				offset = 0;
+				for (let i = 0; i < objCount; ++i) {
+					object = objects[i];
+					length = object.mesh.length;
 					buffer.set(object.mesh, offset);
 					offset += length;
 				}
-				i = -1;
+				const drawInfos = [];
+				for (let ii = 0; ii < instances.length; ii++) for (let oi = 0; oi < objCount; oi++) {
+					const obj = objects[oi];
+					drawInfos.push({
+						texPath: `data/texture/${obj.texture}`,
+						textureData: null,
+						vertOffset: obj.vertOffset,
+						vertCount: obj.vertCount,
+						nodeIndex: obj.nodeIndex,
+						instIndex: ii,
+						modelMat: mat4$17.create(),
+						normalMat: mat3$2.create(),
+						shadeType: nodes[obj.nodeIndex].main.shadeType
+					});
+				}
+				count = drawInfos.length;
+				const textureDataCache = /* @__PURE__ */ new Map();
+				let i = -1;
 				function loadNextTexture() {
 					if (++i === count) {
 						initModel.call(self, gl, {
 							buffer,
-							infos
+							infos: drawInfos
 						});
+						if (self.isAnimated) updateNodeMatrices(self, 0);
+						else for (let k = 0; k < count; ++k) {
+							const obj = self.objects[k];
+							getNodeMatrixStatic(self._scratch, nodes[obj.nodeIndex], instances[obj.instIndex], obj.modelMat, obj.normalMat);
+						}
 						self.ready = true;
 						return;
 					}
-					Client.loadFile(infos[i].texture, (_data) => {
-						infos[i].texture = _data;
+					const info = drawInfos[i];
+					const texPath = info.texPath;
+					if (textureDataCache.has(texPath)) {
+						info.textureData = textureDataCache.get(texPath);
 						loadNextTexture();
-					}, loadNextTexture);
+						return;
+					}
+					Client.loadFile(texPath, (_data) => {
+						textureDataCache.set(texPath, _data);
+						info.textureData = _data;
+						loadNextTexture();
+					}, () => {
+						loadNextTexture();
+					});
 				}
 				loadNextTexture();
 			});
 			this.needInit = false;
 		}
 		free(gl) {
-			for (let i = 0, count = this.objects.length; i < count; ++i) if (this.objects[i] && this.objects[i].texture) gl.deleteTexture(this.objects[i].texture);
+			const deletedTextures = /* @__PURE__ */ new Set();
+			for (let i = 0, count = this.objects.length; i < count; ++i) {
+				const obj = this.objects[i];
+				if (obj && obj.texture && !deletedTextures.has(obj.texture)) {
+					deletedTextures.add(obj.texture);
+					gl.deleteTexture(obj.texture);
+				}
+			}
 			if (this.buffer) {
 				gl.deleteBuffer(this.buffer);
 				this.buffer = null;
@@ -254673,18 +255990,18 @@ var init_RsmEffect = __esmMin((() => {
 			this.ready = false;
 		}
 		static free(gl) {
-			if (_program$19) {
-				gl.deleteProgram(_program$19);
-				_program$19 = null;
+			if (_program$18) {
+				gl.deleteProgram(_program$18);
+				_program$18 = null;
 			}
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
 			mat4$17.toInverseMat3(modelView, _normalMat);
 			mat3$2.transpose(_normalMat, _normalMat);
-			const uniform = _program$19.uniform;
-			const attribute = _program$19.attribute;
-			gl.useProgram(_program$19);
+			const uniform = _program$18.uniform;
+			const attribute = _program$18.attribute;
+			gl.useProgram(_program$18);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix3fv(uniform.uNormalMat, false, _normalMat);
@@ -254704,30 +256021,36 @@ var init_RsmEffect = __esmMin((() => {
 			gl.uniform1i(uniform.uDiffuse, 0);
 		}
 		render(gl, tick) {
-			const uniform = _program$19.uniform;
+			const uniform = _program$18.uniform;
 			if (this.isAnimated && this.model && this.animLen > 0) {
 				const elapsed = tick - this.startTick;
 				const frame = Math.floor(elapsed * this.fps / 1e3 % this.animLen);
 				if (frame !== this.lastFrame) {
-					rebuildMeshAtFrame(this, gl, frame);
+					updateNodeMatrices(this, frame);
 					this.lastFrame = frame;
 				}
 			}
 			gl.uniform3fv(uniform.uPosition, this.position);
 			gl.uniform1f(uniform.uSize, this.size);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-			const attribute = _program$19.attribute;
+			const attribute = _program$18.attribute;
 			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 36, 0);
 			gl.vertexAttribPointer(attribute.aVertexNormal, 3, gl.FLOAT, false, 36, 12);
 			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 36, 24);
 			gl.vertexAttribPointer(attribute.aAlpha, 1, gl.FLOAT, false, 36, 32);
-			for (let i = 0, count = this.objects.length; i < count; ++i) if (this.objects[i] && this.objects[i].complete) {
-				gl.bindTexture(gl.TEXTURE_2D, this.objects[i].texture);
-				gl.drawArrays(gl.TRIANGLES, this.objects[i].vertOffset, this.objects[i].vertCount);
+			for (let i = 0, count = this.objects.length; i < count; ++i) {
+				const obj = this.objects[i];
+				if (obj && obj.complete) {
+					gl.bindTexture(gl.TEXTURE_2D, obj.texture);
+					gl.uniformMatrix4fv(uniform.uModelMat, false, obj.modelMat);
+					gl.uniformMatrix3fv(uniform.uNodeNormalMat, false, obj.normalMat);
+					gl.uniform1f(uniform.uApplyNodeNormal, obj.applyNodeNormal ? 1 : 0);
+					gl.drawArrays(gl.TRIANGLES, obj.vertOffset, obj.vertCount);
+				}
 			}
 		}
 		static afterRender(gl) {
-			const attribute = _program$19.attribute;
+			const attribute = _program$18.attribute;
 			gl.disableVertexAttribArray(attribute.aPosition);
 			gl.disableVertexAttribArray(attribute.aVertexNormal);
 			gl.disableVertexAttribArray(attribute.aTextureCoord);
@@ -255751,7 +257074,7 @@ var init_QuadHorn$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/QuadHorn.js
-var _program$18, mat4$16, blendMode, vertices, texCoords, rand$1, QuadHorn;
+var _program$17, mat4$16, blendMode, vertices, texCoords, rand$1, QuadHorn;
 var init_QuadHorn = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -255887,8 +257210,8 @@ var init_QuadHorn = __esmMin((() => {
 			this.ready = false;
 		}
 		render(gl, tick) {
-			const uniform = _program$18.uniform;
-			const attribute = _program$18.attribute;
+			const uniform = _program$17.uniform;
+			const attribute = _program$17.attribute;
 			const deltaStart = (tick - this.startTick) / 1e3;
 			const deltaEnd = (tick - this.endTick) / 1e3;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -255975,7 +257298,7 @@ var init_QuadHorn = __esmMin((() => {
 			gl.flush();
 		}
 		static init(gl) {
-			_program$18 = WebGL_default.createShaderProgram(gl, QuadHorn_default$1, QuadHorn_default);
+			_program$17 = WebGL_default.createShaderProgram(gl, QuadHorn_default$1, QuadHorn_default);
 			blendMode[1] = gl.ZERO;
 			blendMode[2] = gl.ONE;
 			blendMode[3] = gl.SRC_COLOR;
@@ -255995,16 +257318,16 @@ var init_QuadHorn = __esmMin((() => {
 			this.renderBeforeEntities = true;
 		}
 		static free(gl) {
-			if (_program$18) {
-				gl.deleteProgram(_program$18);
-				_program$18 = null;
+			if (_program$17) {
+				gl.deleteProgram(_program$17);
+				_program$17 = null;
 			}
 			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$18.uniform;
-			gl.useProgram(_program$18);
+			const uniform = _program$17.uniform;
+			gl.useProgram(_program$17);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -256015,9 +257338,9 @@ var init_QuadHorn = __esmMin((() => {
 			gl.uniform1i(uniform.uDiffuse, 0);
 		}
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$18.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$18.attribute.aTextureCoord);
-			gl.disableVertexAttribArray(_program$18.attribute.aColor);
+			gl.disableVertexAttribArray(_program$17.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$17.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$17.attribute.aColor);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -256232,7 +257555,7 @@ function setVertex(index, x, y, z, u, v) {
 	_vertices[offset + 3] = u;
 	_vertices[offset + 4] = v;
 }
-var mat4$15, _matrix$4, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$17, _particleProgram, _textureCache, _vertices, WaterfallEffect;
+var mat4$15, _matrix$4, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$16, _particleProgram, _textureCache, _vertices, WaterfallEffect;
 var init_WaterfallEffect = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -256305,8 +257628,8 @@ var init_WaterfallEffect = __esmMin((() => {
 			this.textureCache = loadTextures(gl, this.textureSet, this);
 		}
 		render(gl, tick) {
-			const uniform = _program$17.uniform;
-			const attribute = _program$17.attribute;
+			const uniform = _program$16.uniform;
+			const attribute = _program$16.attribute;
 			mat4$15.identity(_matrix$4);
 			mat4$15.translate(_matrix$4, _matrix$4, [
 				this.position[0] + .5,
@@ -256377,9 +257700,9 @@ var init_WaterfallEffect = __esmMin((() => {
 			gl.disableVertexAttribArray(attribute.aCorner);
 			gl.disableVertexAttribArray(attribute.aSeed);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.useProgram(_program$17);
-			gl.enableVertexAttribArray(_program$17.attribute.aPosition);
-			gl.enableVertexAttribArray(_program$17.attribute.aTextureCoord);
+			gl.useProgram(_program$16);
+			gl.enableVertexAttribArray(_program$16.attribute.aPosition);
+			gl.enableVertexAttribArray(_program$16.attribute.aTextureCoord);
 		}
 		/**
 		* Free WebGL resources
@@ -256424,9 +257747,9 @@ var init_WaterfallEffect = __esmMin((() => {
 			gl.uniform1f(_particleProgram.uniform.uFogFar, fog.far);
 			gl.uniform1i(_particleProgram.uniform.uTexture, 0);
 			gl.uniform3fv(_particleProgram.uniform.uColor, PARTICLE_COLOR);
-			const uniform = _program$17.uniform;
-			const attribute = _program$17.attribute;
-			gl.useProgram(_program$17);
+			const uniform = _program$16.uniform;
+			const attribute = _program$16.attribute;
+			gl.useProgram(_program$16);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fogUse);
@@ -256449,8 +257772,8 @@ var init_WaterfallEffect = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.depthMask(true);
-			gl.disableVertexAttribArray(_program$17.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$17.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$16.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$16.attribute.aTextureCoord);
 		}
 		/**
 		* Initialize the effect type
@@ -256458,7 +257781,7 @@ var init_WaterfallEffect = __esmMin((() => {
 		* @param {WebGLRenderingContext} gl
 		*/
 		static init(gl) {
-			_program$17 = WebGL_default.createShaderProgram(gl, WaterfallEffect_default$1, WaterfallEffect_default);
+			_program$16 = WebGL_default.createShaderProgram(gl, WaterfallEffect_default$1, WaterfallEffect_default);
 			_particleProgram = WebGL_default.createShaderProgram(gl, WaterfallParticle_default$1, WaterfallParticle_default);
 			this.ready = true;
 		}
@@ -256476,9 +257799,9 @@ var init_WaterfallEffect = __esmMin((() => {
 				cache.waiters.clear();
 			});
 			_textureCache.clear();
-			if (_program$17) gl.deleteProgram(_program$17);
+			if (_program$16) gl.deleteProgram(_program$16);
 			if (_particleProgram) gl.deleteProgram(_particleProgram);
-			_program$17 = null;
+			_program$16 = null;
 			_particleProgram = null;
 			this.ready = false;
 			this.needInit = true;
@@ -257823,7 +259146,7 @@ var init_Blind$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/Blind.js
-var _program$16, _buffer$14, _active, Blind;
+var _program$15, _buffer$14, _active, Blind;
 var init_Blind = __esmMin((() => {
 	init_WebGL();
 	init_Camera();
@@ -257839,31 +259162,31 @@ var init_Blind = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target buffer
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$14 || !_program$16 || !Blind.isActive()) return;
+			if (!_buffer$14 || !_program$15 || !Blind.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$16);
+			gl.useProgram(_program$15);
 			const baseRadius = .2;
 			const baseFalloff = .5;
 			const zoom = Camera.zoomFinal;
 			const focusRadius = baseRadius + (63 - zoom) / 1e3;
 			const focusFalloff = baseFalloff + (63 - zoom) / 1e3;
-			gl.uniform1f(_program$16.uniform.uFocusRadius, focusRadius);
-			gl.uniform1f(_program$16.uniform.uFocusFalloff, focusFalloff);
-			gl.uniform2f(_program$16.uniform.uAspectRatio, gl.canvas.width / gl.canvas.height, 1);
+			gl.uniform1f(_program$15.uniform.uFocusRadius, focusRadius);
+			gl.uniform1f(_program$15.uniform.uFocusFalloff, focusFalloff);
+			gl.uniform2f(_program$15.uniform.uAspectRatio, gl.canvas.width / gl.canvas.height, 1);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$14);
-			const posLoc = _program$16.attribute.aPosition;
+			const posLoc = _program$15.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$16.uniform.uTexture, 0);
+			gl.uniform1i(_program$15.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$16 = WebGL_default.createShaderProgram(gl, Common_default, Blind_default);
+				_program$15 = WebGL_default.createShaderProgram(gl, Common_default, Blind_default);
 			} catch (e) {
 				console.error("Error compiling Blind shader.", e);
 				return;
@@ -257893,11 +259216,11 @@ var init_Blind = __esmMin((() => {
 			_active = bool;
 		}
 		static program() {
-			return _program$16;
+			return _program$15;
 		}
 		static clean(gl) {
 			if (_buffer$14) gl.deleteBuffer(_buffer$14);
-			_program$16 = _buffer$14 = null;
+			_program$15 = _buffer$14 = null;
 		}
 	};
 }));
@@ -260184,7 +261507,7 @@ var init_GaussianBlur$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/GaussianBlur.js
-var _program$15, _buffer$12, GaussianBlur;
+var _program$14, _buffer$12, GaussianBlur;
 var init_GaussianBlur = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -260199,29 +261522,29 @@ var init_GaussianBlur = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target buffer
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$12 || !_program$15 || !GaussianBlur.isActive()) return;
+			if (!_buffer$12 || !_program$14 || !GaussianBlur.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$15);
+			gl.useProgram(_program$14);
 			const focusRadius = GraphicsSettings.blurArea / 100;
 			const focusFalloff = .5;
-			gl.uniform1f(_program$15.uniform.uFocusRadius, focusRadius);
-			gl.uniform1f(_program$15.uniform.uFocusFalloff, focusFalloff);
+			gl.uniform1f(_program$14.uniform.uFocusRadius, focusRadius);
+			gl.uniform1f(_program$14.uniform.uFocusFalloff, focusFalloff);
 			const boxsampleFactor = GraphicsSettings.blurIntensity;
-			gl.uniform2f(_program$15.uniform.uTexelSize, 1 / gl.canvas.width * boxsampleFactor, 1 / gl.canvas.height * boxsampleFactor);
+			gl.uniform2f(_program$14.uniform.uTexelSize, 1 / gl.canvas.width * boxsampleFactor, 1 / gl.canvas.height * boxsampleFactor);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$12);
-			const posLoc = _program$15.attribute.aPosition;
+			const posLoc = _program$14.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$15.uniform.uTexture, 0);
+			gl.uniform1i(_program$14.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$15 = WebGL_default.createShaderProgram(gl, Common_default, GaussianBlur_default);
+				_program$14 = WebGL_default.createShaderProgram(gl, Common_default, GaussianBlur_default);
 			} catch (e) {
 				console.error("Error compiling Lens Blur shader.", e);
 				return;
@@ -260248,11 +261571,11 @@ var init_GaussianBlur = __esmMin((() => {
 			return GraphicsSettings.blur;
 		}
 		static program() {
-			return _program$15;
+			return _program$14;
 		}
 		static clean(gl) {
 			if (_buffer$12) gl.deleteBuffer(_buffer$12);
-			_program$15 = _buffer$12 = null;
+			_program$14 = _buffer$12 = null;
 		}
 	};
 }));
@@ -260264,7 +261587,7 @@ var init_CAS$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/CAS.js
-var _program$14, _buffer$11, CAS;
+var _program$13, _buffer$11, CAS;
 var init_CAS = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -260273,26 +261596,26 @@ var init_CAS = __esmMin((() => {
 	init_CAS$1();
 	CAS = class CAS {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$11 || !_program$14 || !CAS.isActive()) return;
+			if (!_buffer$11 || !_program$13 || !CAS.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$14);
-			gl.uniform1f(_program$14.uniform.uContrast, GraphicsSettings.casContrast || 0);
-			gl.uniform1f(_program$14.uniform.uSharpening, GraphicsSettings.casSharpening || 1);
-			gl.uniform2f(_program$14.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
+			gl.useProgram(_program$13);
+			gl.uniform1f(_program$13.uniform.uContrast, GraphicsSettings.casContrast || 0);
+			gl.uniform1f(_program$13.uniform.uSharpening, GraphicsSettings.casSharpening || 1);
+			gl.uniform2f(_program$13.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$11);
-			const posLoc = _program$14.attribute.aPosition;
+			const posLoc = _program$13.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$14.uniform.uTexture, 0);
+			gl.uniform1i(_program$13.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$14 = WebGL_default.createShaderProgram(gl, Common_default, CAS_default);
+				_program$13 = WebGL_default.createShaderProgram(gl, Common_default, CAS_default);
 			} catch (e) {
 				console.error("Error compiling CAS shader.", e);
 				return;
@@ -260319,11 +261642,11 @@ var init_CAS = __esmMin((() => {
 			return GraphicsSettings.casEnabled;
 		}
 		static program() {
-			return _program$14;
+			return _program$13;
 		}
 		static clean(gl) {
 			if (_buffer$11) gl.deleteBuffer(_buffer$11);
-			_program$14 = _buffer$11 = null;
+			_program$13 = _buffer$11 = null;
 		}
 	};
 }));
@@ -260335,7 +261658,7 @@ var init_FXAA$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/FXAA.js
-var _program$13, _buffer$10, FXAA;
+var _program$12, _buffer$10, FXAA;
 var init_FXAA = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -260344,27 +261667,27 @@ var init_FXAA = __esmMin((() => {
 	init_FXAA$1();
 	FXAA = class FXAA {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$10 || !_program$13 || !FXAA.isActive()) return;
+			if (!_buffer$10 || !_program$12 || !FXAA.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$13);
-			gl.uniform1f(_program$13.uniform.uSubpix, GraphicsSettings.fxaaSubpix || .25);
-			gl.uniform1f(_program$13.uniform.uEdgeThreshold, GraphicsSettings.fxaaEdgeThreshold || .125);
-			gl.uniform1f(_program$13.uniform.uEdgeThresholdMin, 0);
-			gl.uniform2f(_program$13.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
+			gl.useProgram(_program$12);
+			gl.uniform1f(_program$12.uniform.uSubpix, GraphicsSettings.fxaaSubpix || .25);
+			gl.uniform1f(_program$12.uniform.uEdgeThreshold, GraphicsSettings.fxaaEdgeThreshold || .125);
+			gl.uniform1f(_program$12.uniform.uEdgeThresholdMin, 0);
+			gl.uniform2f(_program$12.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$10);
-			const posLoc = _program$13.attribute.aPosition;
+			const posLoc = _program$12.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$13.uniform.uTexture, 0);
+			gl.uniform1i(_program$12.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$13 = WebGL_default.createShaderProgram(gl, Common_default, FXAA_default);
+				_program$12 = WebGL_default.createShaderProgram(gl, Common_default, FXAA_default);
 			} catch (e) {
 				console.error("Error compiling FXAA shader.", e);
 				return;
@@ -260391,11 +261714,11 @@ var init_FXAA = __esmMin((() => {
 			return GraphicsSettings.fxaaEnabled;
 		}
 		static program() {
-			return _program$13;
+			return _program$12;
 		}
 		static clean(gl) {
 			if (_buffer$10) gl.deleteBuffer(_buffer$10);
-			_program$13 = _buffer$10 = null;
+			_program$12 = _buffer$10 = null;
 		}
 	};
 }));
@@ -260407,7 +261730,7 @@ var init_Vibrance$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/Vibrance.js
-var _program$12, _buffer$9, Vibrance;
+var _program$11, _buffer$9, Vibrance;
 var init_Vibrance = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -260416,25 +261739,25 @@ var init_Vibrance = __esmMin((() => {
 	init_Vibrance$1();
 	Vibrance = class Vibrance {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$9 || !_program$12 || !Vibrance.isActive()) return;
+			if (!_buffer$9 || !_program$11 || !Vibrance.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$12);
-			gl.uniform1f(_program$12.uniform.uVibrance, GraphicsSettings.vibrance || .15);
-			gl.uniform3f(_program$12.uniform.uVibranceRGBBalance, 1, 1, 1);
+			gl.useProgram(_program$11);
+			gl.uniform1f(_program$11.uniform.uVibrance, GraphicsSettings.vibrance || .15);
+			gl.uniform3f(_program$11.uniform.uVibranceRGBBalance, 1, 1, 1);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$9);
-			const posLoc = _program$12.attribute.aPosition;
+			const posLoc = _program$11.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$12.uniform.uTexture, 0);
+			gl.uniform1i(_program$11.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$12 = WebGL_default.createShaderProgram(gl, Common_default, Vibrance_default);
+				_program$11 = WebGL_default.createShaderProgram(gl, Common_default, Vibrance_default);
 			} catch (e) {
 				console.error("Error compiling Vibrance shader.", e);
 				return;
@@ -260461,11 +261784,11 @@ var init_Vibrance = __esmMin((() => {
 			return GraphicsSettings.vibranceEnabled;
 		}
 		static program() {
-			return _program$12;
+			return _program$11;
 		}
 		static clean(gl) {
 			if (_buffer$9) gl.deleteBuffer(_buffer$9);
-			_program$12 = _buffer$9 = null;
+			_program$11 = _buffer$9 = null;
 		}
 	};
 }));
@@ -260477,7 +261800,7 @@ var init_Cartoon$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/Cartoon.js
-var _program$11, _buffer$8, Cartoon;
+var _program$10, _buffer$8, Cartoon;
 var init_Cartoon = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -260486,26 +261809,26 @@ var init_Cartoon = __esmMin((() => {
 	init_Cartoon$1();
 	Cartoon = class Cartoon {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$8 || !_program$11 || !Cartoon.isActive()) return;
+			if (!_buffer$8 || !_program$10 || !Cartoon.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$11);
-			gl.uniform1f(_program$11.uniform.uPower, GraphicsSettings.cartoonPower || 1.5);
-			gl.uniform1f(_program$11.uniform.uEdgeSlope, GraphicsSettings.cartoonEdgeSlope || 1.5);
-			gl.uniform2f(_program$11.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
+			gl.useProgram(_program$10);
+			gl.uniform1f(_program$10.uniform.uPower, GraphicsSettings.cartoonPower || 1.5);
+			gl.uniform1f(_program$10.uniform.uEdgeSlope, GraphicsSettings.cartoonEdgeSlope || 1.5);
+			gl.uniform2f(_program$10.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$8);
-			const posLoc = _program$11.attribute.aPosition;
+			const posLoc = _program$10.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$11.uniform.uTexture, 0);
+			gl.uniform1i(_program$10.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$11 = WebGL_default.createShaderProgram(gl, Common_default, Cartoon_default);
+				_program$10 = WebGL_default.createShaderProgram(gl, Common_default, Cartoon_default);
 			} catch (e) {
 				console.error("Error compiling Cartoon shader.", e);
 				return;
@@ -260532,11 +261855,11 @@ var init_Cartoon = __esmMin((() => {
 			return GraphicsSettings.cartoonEnabled;
 		}
 		static program() {
-			return _program$11;
+			return _program$10;
 		}
 		static clean(gl) {
 			if (_buffer$8) gl.deleteBuffer(_buffer$8);
-			_program$11 = _buffer$8 = null;
+			_program$10 = _buffer$8 = null;
 		}
 	};
 }));
@@ -260548,7 +261871,7 @@ var init_CommonUpsampling = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/Upsampling.js
-var _program$10, _buffer$7, Upsampling;
+var _program$9, _buffer$7, Upsampling;
 var init_Upsampling = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -260563,18 +261886,18 @@ var init_Upsampling = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFramebuffer - Destination (Screen or next effect)
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$7 || !_program$10 || !Upsampling.isActive()) return;
+			if (!_buffer$7 || !_program$9 || !Upsampling.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$10);
+			gl.useProgram(_program$9);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$7);
-			const posLoc = _program$10.attribute.aPosition;
+			const posLoc = _program$9.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-			gl.uniform1i(_program$10.uniform.uSceneTexture, 0);
+			gl.uniform1i(_program$9.uniform.uSceneTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
@@ -260584,7 +261907,7 @@ var init_Upsampling = __esmMin((() => {
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$10 = WebGL_default.createShaderProgram(gl, Common_default, CommonUpsampling_default);
+				_program$9 = WebGL_default.createShaderProgram(gl, Common_default, CommonUpsampling_default);
 			} catch (e) {
 				console.error("Error compiling Upsampling shader.", e);
 				return;
@@ -260613,11 +261936,11 @@ var init_Upsampling = __esmMin((() => {
 		}
 		/** @returns {WebGLProgram} The loaded shader program (returning one for validation check) */
 		static program() {
-			return _program$10;
+			return _program$9;
 		}
 		/** Clears memory references */
 		static clean(gl) {
-			_program$10 = null;
+			_program$9 = null;
 			if (_buffer$7) gl.deleteBuffer(_buffer$7);
 			_buffer$7 = null;
 		}
@@ -262576,7 +263899,7 @@ var init_RainWeather = __esmMin((() => {
 //#region src/Renderer/Effects/SwirlingAura.vs?raw
 var SwirlingAura_default$1;
 var init_SwirlingAura$2 = __esmMin((() => {
-	SwirlingAura_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\nuniform mat4 uModelMat;\r\nuniform float uZIndex;\r\n\r\nvoid main(void) {\r\n	vec4 worldPos = uModelMat * vec4(aPosition, 1.0);\r\n	gl_Position = uProjectionMat * uModelViewMat * worldPos;\r\n	gl_Position.z -= uZIndex;\r\n	vTextureCoord = aTextureCoord;\r\n}";
+	SwirlingAura_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 aParam; // x: k / 20.0 (u parameter along ribbon), y: side (0.0 = base/inner, 1.0 = top/outer)\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\nuniform mat4 uModelMat;\r\nuniform float uZIndex;\r\n\r\n// Band dynamic parameters\r\nuniform float uProcess;\r\nuniform float uRotStart;\r\nuniform float uBasicAngle;\r\nuniform float uDistance;\r\nuniform float uMaxHeight;\r\nuniform float uRiseAngle;\r\n\r\nconst float DEG_TO_RAD = 3.1415926535897932384626433832795 / 180.0;\r\nconst float MIDDLE = 10.0;\r\nconst float STEP = 9.0;\r\n\r\nvoid main(void) {\r\n	float k = aParam.x * 20.0;\r\n	float side = aParam.y;\r\n\r\n	// Height profile calculation (equivalent to updateHeightProfile)\r\n	float sinLimit = (90.0 + (k - MIDDLE) * STEP) * DEG_TO_RAD;\r\n	float sinLimitValue = sin(sinLimit);\r\n	float maxPossible = uMaxHeight * sinLimitValue;\r\n\r\n	float h;\r\n	if (uProcess <= 90.0) {\r\n		float sinProcess = sin(uProcess * DEG_TO_RAD);\r\n		h = clamp(uMaxHeight * sinLimitValue * sinProcess, 0.0, maxPossible);\r\n	} else {\r\n		h = maxPossible;\r\n	}\r\n\r\n	// Angle and base position calculation\r\n	float angle = (uRotStart + k * uBasicAngle) * DEG_TO_RAD;\r\n	float cosAngle = cos(angle);\r\n	float sinAngle = sin(angle);\r\n\r\n	float baseX = uDistance * cosAngle;\r\n	float baseZ = uDistance * sinAngle;\r\n\r\n	// Top position calculation\r\n	float cosRise = cos(uRiseAngle);\r\n	float sinRise = sin(uRiseAngle);\r\n	float Rx = cosRise * h;\r\n	float Ry = sinRise * h;\r\n\r\n	vec3 pos;\r\n	if (side > 0.5) {\r\n		// Top vertex\r\n		pos = vec3(baseX + Rx * cosAngle, -Ry, baseZ + Rx * sinAngle);\r\n	} else {\r\n		// Base vertex\r\n		pos = vec3(baseX, 0.0, baseZ);\r\n	}\r\n\r\n	vec4 worldPos = uModelMat * vec4(pos, 1.0);\r\n	gl_Position = uProjectionMat * uModelViewMat * worldPos;\r\n	gl_Position.z -= uZIndex;\r\n	vTextureCoord = aTextureCoord;\r\n}\r";
 }));
 //#endregion
 //#region src/Renderer/Effects/SwirlingAura.fs?raw
@@ -262586,7 +263909,7 @@ var init_SwirlingAura$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/SwirlingAura.js
-var mat4$10, _program$9, _modelMatrix, E_DIVISION, FULL_DISPLAY_ANGLE, DEG_TO_RAD$1, SwirlingAura;
+var mat4$10, E_DIVISION, FULL_DISPLAY_ANGLE, DEG_TO_RAD$1, SwirlingAura;
 var init_SwirlingAura = __esmMin((() => {
 	init_SwirlingAura$2();
 	init_SwirlingAura$1();
@@ -262596,11 +263919,12 @@ var init_SwirlingAura = __esmMin((() => {
 	init_Altitude();
 	init_SpriteRenderer();
 	mat4$10 = gl_matrix_default.mat4;
-	_modelMatrix = mat4$10.create();
 	E_DIVISION = 21;
 	FULL_DISPLAY_ANGLE = 315;
 	DEG_TO_RAD$1 = Math.PI / 180;
-	SwirlingAura = class {
+	SwirlingAura = class SwirlingAura {
+		static program = null;
+		static modelMatrix = mat4$10.create();
 		constructor(position, textureName, tick, sizeType) {
 			this.position = position;
 			this.textureName = textureName;
@@ -262627,64 +263951,33 @@ var init_SwirlingAura = __esmMin((() => {
 				maxHeight: (15 - 2 * ec) * GAME_TO_WORLD,
 				distance: (3.9 + .2 * ec) * GAME_TO_WORLD * INNER_CIRCLE_SCALE,
 				riseAngle: (55 - 5 * ec) * DEG_TO_RAD$1,
-				spinSpeed: ec + 3,
-				height: new Float32Array(E_DIVISION)
+				spinSpeed: ec + 3
 			});
 			this.basicAngle = FULL_DISPLAY_ANGLE / 20;
-			this.vertices = /* @__PURE__ */ new Float32Array(210);
-			this.buffers = null;
+			this.vertexBuffer = null;
 			this.indexBuffer = null;
 			this.indexCount = 0;
 			this.ready = false;
 		}
 		/**
-		* Update height profile for a band
+		* Build static parametric series for ribbon mesh
+		* Attributes per vertex: [u, side, texU, texV]
 		*/
-		updateHeightProfile(band, process) {
-			const middle = 10;
-			const step = 9;
-			for (let i = 0; i < E_DIVISION; i++) {
-				const sinLimit = (90 + (i - middle) * step) * DEG_TO_RAD$1;
-				const sinLimitValue = Math.sin(sinLimit);
-				const maxPossible = band.maxHeight * sinLimitValue;
-				if (process <= 90) {
-					const sinProcess = Math.sin(process * DEG_TO_RAD$1);
-					band.height[i] = Math.max(0, Math.min(band.maxHeight * sinLimitValue * sinProcess, maxPossible));
-				} else band.height[i] = maxPossible;
-			}
-		}
-		/**
-		* fill mesh for a single band
-		*/
-		fillBandMesh(band) {
-			const verts = this.vertices;
-			const cosRise = Math.cos(band.riseAngle);
-			const sinRise = Math.sin(band.riseAngle);
+		buildParametricVertices() {
+			const verts = /* @__PURE__ */ new Float32Array(168);
 			let offset = 0;
 			for (let k = 0; k < E_DIVISION; k++) {
-				const angle = (band.rotStart + k * this.basicAngle) * DEG_TO_RAD$1;
-				const cosAngle = Math.cos(angle);
-				const sinAngle = Math.sin(angle);
-				const baseX = band.distance * cosAngle;
-				const baseZ = band.distance * sinAngle;
-				const h = band.height[k];
-				const Rx = cosRise * h;
-				const Ry = sinRise * h;
-				const topX = baseX + Rx * cosAngle;
-				const topY = -Ry;
-				const topZ = baseZ + Rx * sinAngle;
 				const u = k / 20;
-				verts[offset++] = baseX;
+				verts[offset++] = u;
 				verts[offset++] = 0;
-				verts[offset++] = baseZ;
 				verts[offset++] = u;
 				verts[offset++] = 1;
-				verts[offset++] = topX;
-				verts[offset++] = topY;
-				verts[offset++] = topZ;
+				verts[offset++] = u;
+				verts[offset++] = 1;
 				verts[offset++] = u;
 				verts[offset++] = 0;
 			}
+			return verts;
 		}
 		/**
 		* Generate index buffer
@@ -262704,13 +263997,10 @@ var init_SwirlingAura = __esmMin((() => {
 		* Initialize instance
 		*/
 		init(gl) {
-			this.buffers = [];
-			for (let i = 0; i < this.bands.length; i++) {
-				const buf = gl.createBuffer();
-				gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-				gl.bufferData(gl.ARRAY_BUFFER, this.vertices.byteLength, gl.DYNAMIC_DRAW);
-				this.buffers.push(buf);
-			}
+			const vertices = this.buildParametricVertices();
+			this.vertexBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 			const indices = this.generateIndices();
 			this.indexBuffer = gl.createBuffer();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
@@ -262727,9 +264017,9 @@ var init_SwirlingAura = __esmMin((() => {
 		* Free instance resources
 		*/
 		free(gl) {
-			if (this.buffers) {
-				for (let i = 0; i < this.buffers.length; i++) gl.deleteBuffer(this.buffers[i]);
-				this.buffers = null;
+			if (this.vertexBuffer) {
+				gl.deleteBuffer(this.vertexBuffer);
+				this.vertexBuffer = null;
 			}
 			if (this.indexBuffer) {
 				gl.deleteBuffer(this.indexBuffer);
@@ -262741,36 +264031,40 @@ var init_SwirlingAura = __esmMin((() => {
 		* Render all three bands
 		*/
 		render(gl, tick) {
-			const uniform = _program$9.uniform;
-			const attribute = _program$9.attribute;
+			const program = SwirlingAura.program;
+			const uniform = program.uniform;
+			const attribute = program.attribute;
+			const modelMatrix = SwirlingAura.modelMatrix;
 			const groundZ = Altitude.getCellHeight(this.position[0], this.position[1]);
-			mat4$10.identity(_modelMatrix);
-			mat4$10.translate(_modelMatrix, _modelMatrix, [
+			mat4$10.identity(modelMatrix);
+			mat4$10.translate(modelMatrix, modelMatrix, [
 				this.position[0] + .5,
 				-groundZ,
 				this.position[1] + .5
 			]);
-			gl.uniformMatrix4fv(uniform.uModelMat, false, _modelMatrix);
+			gl.uniformMatrix4fv(uniform.uModelMat, false, modelMatrix);
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
-			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+			gl.enableVertexAttribArray(attribute.aParam);
+			gl.vertexAttribPointer(attribute.aParam, 2, gl.FLOAT, false, 16, 0);
 			gl.enableVertexAttribArray(attribute.aTextureCoord);
-			const self = this;
+			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 16, 8);
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 			const process = (tick - this.tick) / 25;
-			SpriteRenderer.runWithDepth(true, false, false, function() {
-				for (let ec = 0; ec < self.bands.length; ec++) {
-					const band = self.bands[ec];
+			gl.uniform1f(uniform.uProcess, process);
+			gl.uniform1f(uniform.uBasicAngle, this.basicAngle);
+			gl.uniform4f(uniform.uColor, this.color.r, this.color.g, this.color.b, this.alphaB);
+			SpriteRenderer.runWithDepth(true, false, false, () => {
+				for (let ec = 0; ec < this.bands.length; ec++) {
+					const band = this.bands[ec];
 					if (!band.life) continue;
 					band.rotStart = (band.initialRotStart + process * band.spinSpeed) % 360;
-					self.updateHeightProfile(band, process);
-					self.fillBandMesh(band);
-					gl.bindBuffer(gl.ARRAY_BUFFER, self.buffers[ec]);
-					gl.bufferSubData(gl.ARRAY_BUFFER, 0, self.vertices);
-					gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
-					gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
-					gl.uniform4f(uniform.uColor, self.color.r, self.color.g, self.color.b, self.alphaB);
+					gl.uniform1f(uniform.uRotStart, band.rotStart);
+					gl.uniform1f(uniform.uDistance, band.distance);
+					gl.uniform1f(uniform.uMaxHeight, band.maxHeight);
+					gl.uniform1f(uniform.uRiseAngle, band.riseAngle);
 					gl.uniform1f(uniform.uZIndex, .01 + ec * .001);
-					gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.indexBuffer);
-					gl.drawElements(gl.TRIANGLES, self.indexCount, gl.UNSIGNED_SHORT, 0);
+					gl.drawElements(gl.TRIANGLES, this.indexCount, gl.UNSIGNED_SHORT, 0);
 				}
 			});
 		}
@@ -262778,7 +264072,7 @@ var init_SwirlingAura = __esmMin((() => {
 		* Initialize static resources
 		*/
 		static init(gl) {
-			_program$9 = WebGL_default.createShaderProgram(gl, SwirlingAura_default$1, SwirlingAura_default);
+			SwirlingAura.program = WebGL_default.createShaderProgram(gl, SwirlingAura_default$1, SwirlingAura_default);
 			this.ready = true;
 			this.renderBeforeEntities = true;
 		}
@@ -262786,9 +264080,9 @@ var init_SwirlingAura = __esmMin((() => {
 		* Free static resources
 		*/
 		static free(gl) {
-			if (_program$9) {
-				gl.deleteProgram(_program$9);
-				_program$9 = null;
+			if (SwirlingAura.program) {
+				gl.deleteProgram(SwirlingAura.program);
+				SwirlingAura.program = null;
 			}
 			this.ready = false;
 		}
@@ -262796,9 +264090,9 @@ var init_SwirlingAura = __esmMin((() => {
 		* Before render setup
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$9.uniform;
+			const uniform = SwirlingAura.program.uniform;
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-			gl.useProgram(_program$9);
+			gl.useProgram(SwirlingAura.program);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -262813,8 +264107,8 @@ var init_SwirlingAura = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.disableVertexAttribArray(_program$9.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$9.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(SwirlingAura.program.attribute.aParam);
+			gl.disableVertexAttribArray(SwirlingAura.program.attribute.aTextureCoord);
 		}
 	};
 }));
@@ -302281,6 +303575,7 @@ var init_wasmoon_lua5_1 = __esmMin((() => {
 //#region src/DB/DBManager.js
 var DBManager_exports = /* @__PURE__ */ __exportAll({ default: () => DB });
 async function startLua() {
+	LuaModuleLoader.clearCache();
 	const wasmUrl = (await __vitePreload(async () => {
 		const { default: __vite_default__ } = await Promise.resolve().then(() => (init_liblua5_1(), liblua5_1_exports));
 		return { default: __vite_default__ };
@@ -302296,11 +303591,43 @@ async function startLua() {
 		CLua.Lua.create({ customWasmUri: wasmUrl }),
 		CLua.Lua.create({ customWasmUri: wasmUrl })
 	]);
-	lua = l;
-	HO_AI = ha;
-	MER_AI = ma;
-	default_HO_AI = dha;
-	default_MER_AI = dma;
+	lua = LuaModuleLoader.setup(l);
+	HO_AI = LuaModuleLoader.setup(ha, { searchPaths: [
+		"./?.lua",
+		"./?.lub",
+		"AI/USER_AI/?.lua",
+		"AI/USER_AI/?.lub",
+		"AI/?.lua",
+		"AI/?.lub",
+		...LuaModuleLoader.DEFAULT_SEARCH_PATHS
+	] });
+	MER_AI = LuaModuleLoader.setup(ma, { searchPaths: [
+		"./?.lua",
+		"./?.lub",
+		"AI/USER_AI/?.lua",
+		"AI/USER_AI/?.lub",
+		"AI/?.lua",
+		"AI/?.lub",
+		...LuaModuleLoader.DEFAULT_SEARCH_PATHS
+	] });
+	default_HO_AI = LuaModuleLoader.setup(dha, { searchPaths: [
+		"./?.lua",
+		"./?.lub",
+		"AI/?.lua",
+		"AI/?.lub",
+		"AI/USER_AI/?.lua",
+		"AI/USER_AI/?.lub",
+		...LuaModuleLoader.DEFAULT_SEARCH_PATHS
+	] });
+	default_MER_AI = LuaModuleLoader.setup(dma, { searchPaths: [
+		"./?.lua",
+		"./?.lub",
+		"AI/?.lua",
+		"AI/?.lub",
+		"AI/USER_AI/?.lua",
+		"AI/USER_AI/?.lub",
+		...LuaModuleLoader.DEFAULT_SEARCH_PATHS
+	] });
 }
 function loadFontFromClient(fontPath) {
 	console.log("Loading file \"" + fontPath + "SCDream4.otf\"...");
@@ -304977,6 +306304,7 @@ var init_DBManager = __esmMin((() => {
 	init_PacketStructure();
 	init_PacketVerManager();
 	init_MemoryManager();
+	init_LuaModuleLoader();
 	init_preload_helper();
 	mountPalettesProbe = null;
 	MsgStringTable = [];
@@ -305063,6 +306391,7 @@ var init_DBManager = __esmMin((() => {
 			DB.isLoaded = false;
 			DB.count = 0;
 			DB.index = 0;
+			LuaModuleLoader.clearCache();
 			mountPalettes = void 0;
 			if (mountPalettesProbe) mountPalettesProbe.stale = true;
 			else MemoryManager.remove(null, DB.getBodyPalPath(JobConst_default.PIG_CREATOR, 1, 0));
@@ -311465,6 +312794,22 @@ var init_EntityWalk = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Entity/EntityRender.js
+function acquireSnapshotBuffers() {
+	const buf = _snapshotPool.pop();
+	if (buf) return buf;
+	return {
+		position: /* @__PURE__ */ new Float32Array(3),
+		_position: /* @__PURE__ */ new Int32Array(2),
+		color: /* @__PURE__ */ new Float32Array(4)
+	};
+}
+function releaseSnapshotBuffers(snapshot) {
+	if (_snapshotPool.length < 64) _snapshotPool.push({
+		position: snapshot.position,
+		_position: snapshot._position,
+		color: snapshot.color
+	});
+}
 /**
 * Render an Entity
 *
@@ -311496,6 +312841,9 @@ function render$7(modelView, projection) {
 		this.attachments.render(Date.now());
 	}
 	renderGUI(this, modelView, projection);
+}
+function isLookingBack(direction) {
+	return direction > 2 && direction < 6;
 }
 /**
 * Render second body (BL_DOUBLE_BODY + EF_MAKEBLUR)
@@ -311562,22 +312910,26 @@ function renderSecondBody(entity, layers, spr, pal, files, type, _position, opti
 			entity.ACTION.SKILL
 		].includes(entity.action) || entity.isFastMoving) && now - trail.lastTick > interval;
 		if (shouldCapture) {
+			const buffers = acquireSnapshotBuffers();
+			buffers.position.set(entity.position);
+			buffers._position.set(_position);
+			buffers.color.set(entity.effectColor);
 			trail.snapshots.unshift({
-				position: gl_matrix_default.vec3.clone(entity.position),
+				position: buffers.position,
+				_position: buffers._position,
+				color: buffers.color,
 				tick: now,
 				layers,
 				spr,
-				pal,
-				_position: new Int32Array(_position),
-				color: [...entity.effectColor]
+				pal
 			});
 			trail.lastTick = now;
-			if (trail.snapshots.length > maxLen) trail.snapshots.pop();
+			if (trail.snapshots.length > maxLen) releaseSnapshotBuffers(trail.snapshots.pop());
 		}
 		if (trail.snapshots.length) {
-			const originalPos = gl_matrix_default.vec3.clone(SpriteRenderer.position);
+			_scratchPosition.set(SpriteRenderer.position);
 			const originalZ = SpriteRenderer.zIndex;
-			const originalColor = new Float32Array(entity.effectColor);
+			_scratchColor.set(entity.effectColor);
 			SpriteRenderer.runWithDepth(true, false, false, function() {
 				const duration = blurType === 4 || blurType === 3 ? 800 : 400;
 				for (let idx = 0; idx < trail.snapshots.length; idx++) {
@@ -311598,9 +312950,9 @@ function renderSecondBody(entity, layers, spr, pal, files, type, _position, opti
 					for (let i = 0; i < snp.layers.length; ++i) entity.renderLayer(snp.layers[i], snp.spr, snp.pal, files.size, snp._position, type, false);
 				}
 			});
-			SpriteRenderer.position.set(originalPos);
+			SpriteRenderer.position.set(_scratchPosition);
 			SpriteRenderer.zIndex = originalZ;
-			entity.effectColor.set(originalColor);
+			entity.effectColor.set(_scratchColor);
 		}
 	}
 }
@@ -311767,7 +313119,7 @@ function Init$3() {
 	this.renderLayer = renderLayer;
 	this.renderEntity = renderEntity;
 }
-var WALK_DIST_TO_MOTION, renderGUI, SPRITE_LIFT, calculateBoundingRect, renderEntity, renderElement;
+var WALK_DIST_TO_MOTION, _snapshotPool, _scratchPosition, _scratchColor, renderGUI, SPRITE_LIFT, calculateBoundingRect, renderEntity, renderElement;
 var init_EntityRender = __esmMin((() => {
 	init_gl_matrix();
 	init_Camera();
@@ -311781,6 +313133,9 @@ var init_EntityRender = __esmMin((() => {
 	init_Graphics();
 	init_GR2ModelRenderer();
 	WALK_DIST_TO_MOTION = 170.2;
+	_snapshotPool = [];
+	_scratchPosition = /* @__PURE__ */ new Float32Array(3);
+	_scratchColor = /* @__PURE__ */ new Float32Array(4);
 	renderGUI = (function renderGUIClosure() {
 		const mat4 = gl_matrix_default.mat4;
 		const vec4 = gl_matrix_default.vec4;
@@ -311939,6 +313294,7 @@ var init_EntityRender = __esmMin((() => {
 						function robeCorrection(lookingFront) {
 							if (self.robe > 0 && self.robeHeight && self.bodyHeight) {
 								if (self.robeHeight + (self.action === self.ACTION.SIT ? 0 : RIDING_STATUS && lookingFront ? 50 : 25) > self.bodyHeight + 64) {
+									if ((self.action === self.ACTION.ATTACK || self.action === self.ACTION.ATTACK1 || self.action === self.ACTION.ATTACK2 || self.action === self.ACTION.ATTACK3) && !lookingFront) return -450;
 									if (self.action === self.ACTION.SIT) return lookingFront ? -450 : RIDING_STATUS ? 1 : -100;
 									return lookingFront ? -300 : RIDING_STATUS ? 100 : 1;
 								}
@@ -311950,7 +313306,7 @@ var init_EntityRender = __esmMin((() => {
 							SpriteRenderer.zIndex = -1;
 							renderElement(self, self.files.shield, "shield", _position, true);
 						});
-						if (!(direction > 2 && direction < 6)) {
+						if (!isLookingBack(direction)) {
 							if (SessionStorage_default.Playing == true && self.hasCart == true) {
 								cartidx = DB.isSuperNovice(self._job) ? 0 : self.CartNum;
 								SpriteRenderer.runWithDepth(true, false, false, function() {
@@ -311966,7 +313322,7 @@ var init_EntityRender = __esmMin((() => {
 							}
 						}
 						SpriteRenderer.zIndex = 150;
-						if (RIDING_STATUS && !(direction > 2 && direction < 6) && (self.action === self.ACTION.SIT || self.action === self.ACTION.WALK)) SpriteRenderer.zIndex *= 2;
+						if (RIDING_STATUS && !isLookingBack(direction) && (self.action === self.ACTION.SIT || self.action === self.ACTION.WALK)) SpriteRenderer.zIndex *= 2;
 						renderElement(self, self.files.body, "body", _position, true);
 						let bodyZOffset = 250;
 						if (RIDING_STATUS) {
@@ -311987,7 +313343,7 @@ var init_EntityRender = __esmMin((() => {
 							SpriteRenderer.zIndex = bodyZOffset + 300;
 							renderElement(self, self.files.accessory, "head", _position, false);
 						}
-						if (direction > 2 && direction < 6) {
+						if (isLookingBack(direction)) {
 							if (self.robe > 0) {
 								SpriteRenderer.zIndex = bodyZOffset + robeCorrection(false);
 								renderElement(self, self.files.robe, "robe", _position, true);
@@ -312026,6 +313382,7 @@ var init_EntityRender = __esmMin((() => {
 						renderElement(self, self.files.body, "body", _position, true);
 					});
 					break;
+				case Entity.TYPE_MOB:
 				case Entity.TYPE_NPC:
 				case Entity.TYPE_NPC2:
 					SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;

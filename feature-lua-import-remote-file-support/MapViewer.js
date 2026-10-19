@@ -206564,14 +206564,19 @@ end
 			}
 			if (options.vfsLoader !== void 0) {
 				_config$1.vfsLoader = options.vfsLoader;
+				_cacheGeneration++;
 				_failureReasons.clear();
+				for (const key of _inflight.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
 			}
 			if (options.urlFetcher !== void 0) {
 				_config$1.urlFetcher = options.urlFetcher;
+				_cacheGeneration++;
 				_failureReasons.clear();
+				for (const key of _inflight.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
 			}
 			if (options.remoteBaseUrl !== void 0) {
 				_config$1.remoteBaseUrl = options.remoteBaseUrl || "";
+				_cacheGeneration++;
 				_failureReasons.clear();
 			}
 		}
@@ -206583,6 +206588,8 @@ end
 			_config$1.vfsLoader = null;
 			_config$1.urlFetcher = null;
 			_config$1.remoteBaseUrl = "";
+			_cacheGeneration++;
+			_inflight.clear();
 			_failureReasons.clear();
 		}
 		/**
@@ -206598,12 +206605,16 @@ end
 			_lastClientLoadFile = Client.loadFile;
 		}
 		/**
-		* Invalidate negative lookup cache if `Client.loadFile` reference has changed.
+		* Invalidate negative lookup cache and drop stale in-flight VFS requests
+		* if `Client.loadFile` reference has changed. Increments `_cacheGeneration` so
+		* an older in-flight request's late failure cannot repopulate negative cache entries.
 		*/
 		static syncClientLoaderState() {
 			if (Client.loadFile !== _lastClientLoadFile) {
 				_lastClientLoadFile = Client.loadFile;
+				_cacheGeneration++;
 				_failureReasons.clear();
+				for (const key of _inflight.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
 			}
 		}
 		static toLocalUint8Array(input) {
@@ -206942,13 +206953,14 @@ end
 		*/
 		static isKnownMissing(lua, candidate) {
 			LuaModuleLoader.syncClientLoaderState();
+			if (LuaModuleLoader.isRemoteUrl(candidate)) return false;
 			if (!_failureReasons.has(candidate)) return false;
 			const memfsPath = LuaModuleLoader.toMemfsPath(candidate);
 			if (lua && LuaModuleLoader.hasMemfsFile(lua, memfsPath) || _bufferCache.has(candidate)) {
 				_failureReasons.delete(candidate);
 				return false;
 			}
-			if (!LuaModuleLoader.isRemoteUrl(candidate) && MemoryManager.exist(candidate) && MemoryManager.get(candidate) !== null && MemoryManager.get(candidate) !== void 0) {
+			if (MemoryManager.exist(candidate) && MemoryManager.get(candidate) !== null && MemoryManager.get(candidate) !== void 0) {
 				_failureReasons.delete(candidate);
 				return false;
 			}
@@ -207202,7 +207214,6 @@ end
 		static fetchUrlCandidate(url, options = {}) {
 			if (_bufferCache.has(url)) return Promise.resolve(_bufferCache.get(url));
 			if (_inflight.has(url)) return _inflight.get(url);
-			if (!options.urlFetcher && _failureReasons.has(url)) return Promise.reject(new Error(_failureReasons.get(url)));
 			const urlFetcher = options.urlFetcher || _config$1.urlFetcher;
 			const generation = _cacheGeneration;
 			const promise = Promise.resolve().then(async () => {
@@ -207299,6 +207310,7 @@ end
 						candidates
 					};
 				}
+				if (!options.vfsLoader && !LuaModuleLoader.isRemoteUrl(candidate) && LuaModuleLoader.isKnownMissing(lua, candidate)) continue;
 				try {
 					const bytes = await LuaModuleLoader.loadCandidateData(candidate, options);
 					const memfsPath = LuaModuleLoader.toMemfsPath(candidate);
@@ -207338,13 +207350,10 @@ end
 			const withoutComments = sourceText.replace(/--\[(=*)\[[\s\S]*?\]\1\]/g, "").replace(/--[^\r\n]*/g, "");
 			const dependencies = [];
 			const seen = /* @__PURE__ */ new Set();
-			const pattern = /\b(require|dofile|loadfile)\s*(?:\(\s*(['"])([^'"\r\n]+)\2\s*\)|(['"])([^'"\r\n]+)\4|\(\s*\[\[([^\]]+)\]\s*\]\s*\)|\[\[([^\]]+)\]\])/g;
-			let match;
-			while ((match = pattern.exec(withoutComments)) !== null) {
-				const fnType = match[1];
-				const target = (match[3] || match[5] || match[6] || match[7] || "").trim();
-				if (!target) continue;
-				if (OPTIONAL_RUNTIME_PATTERNS.some((opt) => target.includes(opt))) continue;
+			const addDep = (fnType, rawTarget) => {
+				const target = (rawTarget || "").trim();
+				if (!target) return;
+				if (OPTIONAL_RUNTIME_PATTERNS.some((opt) => target.includes(opt))) return;
 				const key = `${fnType}:${target}`;
 				if (!seen.has(key)) {
 					seen.add(key);
@@ -207353,6 +207362,18 @@ end
 						target
 					});
 				}
+			};
+			const directPattern = /\b(require|dofile|loadfile)\s*(?:\(\s*(['"])([^'"\r\n]+)\2\s*\)|(['"])([^'"\r\n]+)\4|\(\s*\[\[([^\]]+)\]\s*\]\s*\)|\[\[([^\]]+)\]\])/g;
+			let match;
+			while ((match = directPattern.exec(withoutComments)) !== null) {
+				const fnType = match[1];
+				addDep(fnType, match[3] || match[5] || match[6] || match[7]);
+			}
+			const pcallPattern = /\bpcall\s*\(\s*(require|dofile|loadfile)\s*,\s*(['"])([^'"\r\n]+)\2\s*\)/g;
+			while ((match = pcallPattern.exec(withoutComments)) !== null) {
+				const fnType = match[1];
+				const target = match[3];
+				addDep(fnType, target);
 			}
 			return dependencies;
 		}

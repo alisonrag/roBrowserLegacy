@@ -206268,7 +206268,7 @@ var init_NetworkManager = __esmMin((() => {
 }));
 //#endregion
 //#region src/Core/LuaModuleLoader.js
-var DEFAULT_SEARCH_PATHS, OPTIONAL_RUNTIME_PATTERNS, _bufferCache, _inflight, _failureReasons, _cacheGeneration, _lastClientLoadFile, _vmState, _config$1, LUA_BOOTSTRAP_SCRIPT, LuaModuleLoader;
+var DEFAULT_SEARCH_PATHS, OPTIONAL_RUNTIME_PATTERNS, _bufferCache, _inflight, _failureReasons, _vfsGeneration, _remoteGeneration, _lastClientLoadFile, _vmState, _config$1, LUA_BOOTSTRAP_SCRIPT, LuaModuleLoader;
 var init_LuaModuleLoader = __esmMin((() => {
 	init_Client();
 	init_Configs();
@@ -206294,7 +206294,8 @@ var init_LuaModuleLoader = __esmMin((() => {
 	_bufferCache = /* @__PURE__ */ new Map();
 	_inflight = /* @__PURE__ */ new Map();
 	_failureReasons = /* @__PURE__ */ new Map();
-	_cacheGeneration = 0;
+	_vfsGeneration = 0;
+	_remoteGeneration = 0;
 	_lastClientLoadFile = Client.loadFile;
 	_vmState = /* @__PURE__ */ new WeakMap();
 	_config$1 = {
@@ -206560,20 +206561,20 @@ end
 			}
 			if (options.vfsLoader !== void 0) {
 				_config$1.vfsLoader = options.vfsLoader;
-				_cacheGeneration++;
-				_failureReasons.clear();
+				_vfsGeneration++;
+				for (const key of _failureReasons.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
 				for (const key of _inflight.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
 			}
 			if (options.urlFetcher !== void 0) {
 				_config$1.urlFetcher = options.urlFetcher;
-				_cacheGeneration++;
-				_failureReasons.clear();
+				_remoteGeneration++;
+				for (const key of _failureReasons.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
 				for (const key of _inflight.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
 			}
 			if (options.remoteBaseUrl !== void 0) {
 				_config$1.remoteBaseUrl = options.remoteBaseUrl || "";
-				_cacheGeneration++;
-				_failureReasons.clear();
+				_remoteGeneration++;
+				for (const key of _failureReasons.keys()) if (LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
 			}
 		}
 		/**
@@ -206584,17 +206585,19 @@ end
 			_config$1.vfsLoader = null;
 			_config$1.urlFetcher = null;
 			_config$1.remoteBaseUrl = "";
-			_cacheGeneration++;
+			_vfsGeneration++;
+			_remoteGeneration++;
 			_inflight.clear();
 			_failureReasons.clear();
 		}
 		/**
 		* Clear internal module buffer, in-flight, and negative-lookup caches.
-		* Increments the cache generation token so any pending in-flight requests
-		* from a previous client/archive cannot repopulate the cache.
+		* Increments the VFS and remote cache generation tokens so any pending in-flight requests
+		* from a previous client/archive or remote session cannot repopulate the cache.
 		*/
 		static clearCache() {
-			_cacheGeneration++;
+			_vfsGeneration++;
+			_remoteGeneration++;
 			_bufferCache.clear();
 			_inflight.clear();
 			_failureReasons.clear();
@@ -206602,14 +206605,14 @@ end
 		}
 		/**
 		* Invalidate negative lookup cache and drop stale in-flight VFS requests
-		* if `Client.loadFile` reference has changed. Increments `_cacheGeneration` so
-		* an older in-flight request's late failure cannot repopulate negative cache entries.
+		* if `Client.loadFile` reference has changed. Increments `_vfsGeneration` so
+		* an older in-flight VFS request's late failure cannot repopulate negative cache entries.
 		*/
 		static syncClientLoaderState() {
 			if (Client.loadFile !== _lastClientLoadFile) {
 				_lastClientLoadFile = Client.loadFile;
-				_cacheGeneration++;
-				_failureReasons.clear();
+				_vfsGeneration++;
+				for (const key of _failureReasons.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _failureReasons.delete(key);
 				for (const key of _inflight.keys()) if (!LuaModuleLoader.isRemoteUrl(key)) _inflight.delete(key);
 			}
 		}
@@ -207127,20 +207130,20 @@ end
 			if (_inflight.has(candidate)) return _inflight.get(candidate);
 			if (!options.vfsLoader && LuaModuleLoader.isKnownMissing(null, candidate)) return Promise.reject(new Error(_failureReasons.get(candidate)));
 			const vfsLoader = options.vfsLoader || _config$1.vfsLoader;
-			const generation = _cacheGeneration;
+			const generation = _vfsGeneration;
 			const promise = new Promise((resolve, reject) => {
 				if (typeof vfsLoader === "function") {
 					Promise.resolve().then(() => vfsLoader(candidate)).then((data) => {
 						if (data === null || data === void 0) throw new Error(`VFS file not found: ${candidate}`);
 						const bytes = LuaModuleLoader.normalizeBuffer(data);
-						if (_cacheGeneration === generation) {
+						if (_vfsGeneration === generation) {
 							_bufferCache.set(candidate, bytes);
 							_failureReasons.delete(candidate);
 						}
 						resolve(bytes);
 					}).catch((err) => {
 						const msg = err && err.message || String(err || "VFS load failed");
-						if (_cacheGeneration === generation) _failureReasons.set(candidate, msg);
+						if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
 						reject(new Error(msg));
 					});
 					return;
@@ -207149,7 +207152,7 @@ end
 					const existing = MemoryManager.get(candidate);
 					if (existing !== null && existing !== void 0) {
 						const bytes = LuaModuleLoader.normalizeBuffer(existing);
-						if (_cacheGeneration === generation) {
+						if (_vfsGeneration === generation) {
 							_bufferCache.set(candidate, bytes);
 							_failureReasons.delete(candidate);
 						}
@@ -207162,22 +207165,22 @@ end
 					if (settled) return;
 					settled = true;
 					try {
-						if (_cacheGeneration !== generation) MemoryManager.remove(null, candidate);
+						if (_vfsGeneration !== generation) MemoryManager.remove(null, candidate);
 						if (data === null || data === void 0) {
 							const msg = `Empty VFS response for "${candidate}"`;
-							if (_cacheGeneration === generation) _failureReasons.set(candidate, msg);
+							if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
 							reject(new Error(msg));
 							return;
 						}
 						const bytes = LuaModuleLoader.normalizeBuffer(data);
-						if (_cacheGeneration === generation) {
+						if (_vfsGeneration === generation) {
 							_bufferCache.set(candidate, bytes);
 							_failureReasons.delete(candidate);
 						}
 						resolve(bytes);
 					} catch (err) {
 						const msg = err && err.message || String(err);
-						if (_cacheGeneration === generation) _failureReasons.set(candidate, msg);
+						if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
 						reject(err);
 					}
 				};
@@ -207185,7 +207188,7 @@ end
 					if (settled) return;
 					settled = true;
 					const msg = err && err.message || String(err || `File not found in VFS: ${candidate}`);
-					if (_cacheGeneration === generation) _failureReasons.set(candidate, msg);
+					if (_vfsGeneration === generation) _failureReasons.set(candidate, msg);
 					reject(new Error(msg));
 				};
 				try {
@@ -207211,7 +207214,7 @@ end
 			if (_bufferCache.has(url)) return Promise.resolve(_bufferCache.get(url));
 			if (_inflight.has(url)) return _inflight.get(url);
 			const urlFetcher = options.urlFetcher || _config$1.urlFetcher;
-			const generation = _cacheGeneration;
+			const generation = _remoteGeneration;
 			const promise = Promise.resolve().then(async () => {
 				let rawData;
 				if (typeof urlFetcher === "function") {
@@ -207234,14 +207237,14 @@ end
 					const preview = CodepageManager.decode(bytes.subarray(0, Math.min(bytes.length, 256)), "utf-8").trimStart().toLowerCase();
 					if (preview.startsWith("<!doctype html") || preview.startsWith("<html")) throw new Error("Server returned HTML page instead of Lua/LUB module");
 				}
-				if (_cacheGeneration === generation) {
+				if (_remoteGeneration === generation) {
 					_bufferCache.set(url, bytes);
 					_failureReasons.delete(url);
 				}
 				return bytes;
 			}).catch((err) => {
 				const msg = err && err.message || String(err || "Remote fetch failed");
-				if (_cacheGeneration === generation) _failureReasons.set(url, msg);
+				if (_remoteGeneration === generation) _failureReasons.set(url, msg);
 				throw new Error(msg);
 			}).finally(() => {
 				if (_inflight.get(url) === promise) _inflight.delete(url);

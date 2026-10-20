@@ -245632,12 +245632,12 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 	else Component.setCostumeConfig = function setCostumeConfig(_on) {};
 	Component.equip = function equip(item, location) {
 		const it = DB.getItemInfo(item.ITID);
-		if (entityRender) item.equipped = location;
-		_list[item.index] = item;
-		if (!entityRender && arguments.length === 1) {
+		if (!location && arguments.length === 1) {
 			if ("WearState" in item) location = item.WearState;
 			else if ("location" in item) location = item.location;
 		}
+		item.equipped = location;
+		_list[item.index] = item;
 		function add3Dots(string, limit) {
 			function stripHTML(str) {
 				const div = document.createElement("div");
@@ -245686,6 +245686,16 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 	};
 	Component.onLevelUp = function onLevelUp() {
 		if (UIVersionManager.getEquipmentVersion() > 0 && _btnLevelUp) document.body.appendChild(_btnLevelUp);
+	};
+	Component.getEquippedItem = function getEquippedItem(index) {
+		return _list[index] || null;
+	};
+	Component.getEquippedItemByLocation = function getEquippedItemByLocation(location) {
+		for (const key in _list) {
+			const item = _list[key];
+			if ((item ? item.equipped || item.WearState || item.location || item.WearLocation || 0 : 0) & location) return item;
+		}
+		return null;
 	};
 	Component.checkEquipLoc = function checkEquipLoc(location) {
 		if (!entityRender) return 0;
@@ -307071,19 +307081,26 @@ var init_DBManager = __esmMin((() => {
 		* is shield checking
 		*
 		* The left-hand slot can hold either an item ID or a view ID (ClassNum, <= 500).
-		* View IDs (1-500) default to shields unless explicitly flagged as an offhand weapon.
+		* Shield views and weapon views share the same numeric range (1-500).
+		*
+		* When reliable offhand information is known (isOffhandWeapon === true/false),
+		* that flag distinguishes weapons from shields.
+		* When unknown (isOffhandWeapon === undefined), job-based dual-wield fallback is used:
+		* assassins with ambiguous view IDs (<= 500) fall back to offhand weapon.
 		*
 		* @param {integer} id item id or view id
 		* @param {integer} [job] job id of the owner
-		* @param {boolean} [isOffhandWeapon] explicitly marks the equipment as an offhand weapon
+		* @param {boolean} [isOffhandWeapon] explicitly marks whether the equipment is an offhand weapon
 		* @return {boolean} is shield?
 		*
 		* @author MrUnzO
 		*/
-		static isShield(id, job, isOffhandWeapon = false) {
-			if (isOffhandWeapon) return false;
+		static isShield(id, job, isOffhandWeapon) {
+			if (isOffhandWeapon === true) return false;
 			if (DB.isShieldItem(id)) return true;
 			if (id > 500) return false;
+			if (isOffhandWeapon === false) return id > 0;
+			if (id > 0 && job !== void 0 && DB.isAssassin(job)) return false;
 			return id > 0;
 		}
 		static getPCAttackMotion(job, sex, itemID, isDualWeapon) {
@@ -307612,7 +307629,7 @@ var init_DBManager = __esmMin((() => {
 		*/
 		static getShieldPath(id, job, sex) {
 			if (id === 0) return null;
-			if (!DB.isShield(id, job)) return DB.getWeaponPath(id, job, sex);
+			if (!DB.isShield(id, job, false)) return DB.getWeaponPath(id, job, sex);
 			const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
 			if (id in ItemTable_default && "ClassNum" in ItemTable_default[id]) id = ItemTable_default[id].ClassNum;
 			return "data/sprite/¹æÆÐ/" + baseClass + "/" + baseClass + "_" + SexTable[sex] + "_" + (ShieldTable_default[id] || ShieldTable_default[1]);
@@ -329446,21 +329463,85 @@ var init_SkillAction = __esmMin((() => {
 //#endregion
 //#region src/Engine/MapEngine/OffhandWeapon.js
 /**
-* Only resolvable for our own character. Other entities: server sends only
-* view IDs, so we return false (shield default).
+* Check whether the local player is currently holding an offhand weapon.
+*
+* Resolvable only for our own character (entity.GID === sessionEntity.GID).
+* For other entities, the server transmits only view IDs without equipment
+* type metadata, so we return undefined (unknown) so callers can apply the
+* job-based dual-wield fallback.
+*
+* @param {object} entity - Target entity
+* @param {object} sessionEntity - Local player entity (Session.Entity)
+* @param {object} [inventory] - Inventory component
+* @param {object} [equipment] - Equipment component
+* @returns {boolean|undefined} true if own offhand is weapon, false if own offhand is not weapon, undefined if unknown/other entity
 */
-function isOwnOffhandWeapon(entity, sessionEntity, inventory) {
-	if (!entity || !sessionEntity || entity.GID !== sessionEntity.GID || !inventory) return false;
-	const indexes = inventory.equippedItems || [];
-	for (let i = 0; i < indexes.length; i++) {
-		const item = inventory.getItemByIndex(indexes[i]);
-		if ((item ? item.WearState || item.location || 0 : 0) & EquipmentLocation_default.SHIELD) return item.type === ItemType_default.WEAPON;
+function isOwnOffhandWeapon(entity, sessionEntity, inventory, equipment) {
+	if (!entity || !sessionEntity || entity.GID !== sessionEntity.GID) return;
+	if (equipment) {
+		if (typeof equipment.getEquippedItemByLocation === "function") {
+			const item = equipment.getEquippedItemByLocation(EquipmentLocation_default.SHIELD);
+			if (item) return item.type === ItemType_default.WEAPON;
+		}
+		if (typeof equipment.getEquippedItem === "function" && inventory) {
+			const indexes = inventory.equippedItems || [];
+			for (let i = 0; i < indexes.length; i++) {
+				const item = equipment.getEquippedItem(indexes[i]);
+				if ((item ? item.equipped || item.WearState || item.location || item.WearLocation || 0 : 0) & EquipmentLocation_default.SHIELD) return item.type === ItemType_default.WEAPON;
+			}
+		}
+	}
+	if (inventory) {
+		const indexes = inventory.equippedItems || [];
+		for (let i = 0; i < indexes.length; i++) {
+			const item = typeof inventory.getItemByIndex === "function" ? inventory.getItemByIndex(indexes[i]) : null;
+			if ((item ? item.equipped || item.WearState || item.location || item.WearLocation || 0 : 0) & EquipmentLocation_default.SHIELD) return item.type === ItemType_default.WEAPON;
+		}
 	}
 	return false;
+}
+/**
+* Resolve weapon and shield values for an entity given packet values.
+* Used by both spawn (onEntitySpam) and view change (onEntityViewChange) handling.
+*
+* @param {number} weaponVal - Weapon ID or view ID from packet
+* @param {number} shieldVal - Shield / offhand ID or view ID from packet
+* @param {object} entity - Entity being updated
+* @param {object} sessionEntity - Local player entity (Session.Entity)
+* @param {object} [inventory] - Inventory component
+* @param {object} [equipment] - Equipment component
+* @returns {{ weapon: number, shield: number }}
+*/
+function resolveEntityWeapons(weaponVal, shieldVal, entity, sessionEntity, inventory, equipment) {
+	let weapon = weaponVal;
+	let shield = shieldVal;
+	const offhand = isOwnOffhandWeapon(entity, sessionEntity, inventory, equipment);
+	if (weapon == 0 && shield != 0 && !DB.isShield(shield, entity.job, offhand)) {
+		weapon = shield;
+		shield = 0;
+	}
+	const weaponType = DB.getWeaponType(weapon, true);
+	const viewId = DB.getWeaponViewID(weapon);
+	if (DB.isAssassin(entity.job) && shield !== 0 && !DB.isShield(shield, entity.job, offhand) && weapon !== 0) {
+		const secondaryWeaponType = DB.getWeaponType(shield, true);
+		return {
+			weapon: DB.mountWeapon(weaponType, secondaryWeaponType),
+			shield: 0
+		};
+	}
+	if (DB.isKatar(weaponType)) return {
+		weapon: viewId,
+		shield: viewId
+	};
+	return {
+		weapon: viewId,
+		shield
+	};
 }
 var init_OffhandWeapon = __esmMin((() => {
 	init_EquipmentLocation();
 	init_ItemType();
+	init_DBManager();
 }));
 //#endregion
 //#region src/DB/Monsters/AttackEffectTable.js
@@ -329670,24 +329751,9 @@ function onEntitySpam(pkt) {
 		EntityManager.add(entity.wug);
 	}
 	if (entity.objecttype === Entity.TYPE_PC) {
-		const offhand = isOwnOffhandWeapon(entity, SessionStorage_default.Entity, InventoryController);
-		if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield, entity.job, offhand)) {
-			pkt.weapon = pkt.shield;
-			pkt.shield = 0;
-		}
-		const weaponType = DB.getWeaponType(pkt.weapon, true);
-		const viewId = DB.getWeaponViewID(pkt.weapon);
-		if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield, entity.job, offhand) && pkt.weapon !== 0) {
-			const secondaryWeaponType = DB.getWeaponType(pkt.shield, true);
-			entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
-			entity.shield = 0;
-		} else if (DB.isKatar(weaponType)) {
-			entity.weapon = viewId;
-			entity.shield = viewId;
-		} else {
-			entity.weapon = viewId;
-			entity.shield = pkt.shield;
-		}
+		const resolved = resolveEntityWeapons(pkt.weapon, pkt.shield, entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+		entity.weapon = resolved.weapon;
+		entity.shield = resolved.shield;
 		if (PacketVerManager_default.value > 20150513) {
 			if (entity.body !== pkt.body) entity.body = pkt.body;
 		}
@@ -330354,24 +330420,9 @@ function onEntityViewChange(pkt) {
 			break;
 		case 2:
 			if (pkt instanceof PACKET.ZC.SPRITE_CHANGE2) {
-				const offhand = isOwnOffhandWeapon(entity, SessionStorage_default.Entity, InventoryController);
-				if (pkt.value === 0 && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job, offhand)) {
-					pkt.value = pkt.value2;
-					pkt.value2 = 0;
-				}
-				const weaponType = DB.getWeaponType(pkt.value, true);
-				const viewId = DB.getWeaponViewID(pkt.value);
-				if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2, entity.job, offhand)) {
-					const secondaryWeaponType = DB.getWeaponType(pkt.value2, true);
-					entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
-					entity.shield = 0;
-				} else if (DB.isKatar(weaponType)) {
-					entity.weapon = viewId;
-					entity.shield = viewId;
-				} else {
-					entity.weapon = viewId;
-					entity.shield = pkt.value2;
-				}
+				const resolved = resolveEntityWeapons(pkt.value, pkt.value2, entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+				entity.weapon = resolved.weapon;
+				entity.shield = resolved.shield;
 			} else {
 				entity.weapon = pkt.value;
 				entity.shield = pkt.value2;

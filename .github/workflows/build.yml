@@ -1,4 +1,4 @@
-name: "Build roBrowserLegacy"
+name: "Build and Test roBrowserLegacy"
 
 concurrency:
   group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}

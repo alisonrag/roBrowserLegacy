@@ -17982,6 +17982,99 @@ function getScaleAtFrame(keyframes, frame, animLen) {
 	];
 }
 //#endregion
+//#region src/Loaders/wasm/paletteConvert.js
+/**
+* Loaders/wasm/paletteConvert.js
+*
+* WebAssembly module for converting indexed 8-bit palette images to 32-bit RGBA
+* with vertical flip (dest row = height - y - 1).
+*
+* Embedded as Base64 to avoid requiring a separate wasm toolchain/loader during Vite build.
+*/
+var PALETTE_CONVERT_WASM_BASE64 = "AGFzbQEAAAABCQFgBX9/f39/AAMCAQAFAwEAAQcXAgZtZW1vcnkCAApjb252ZXJ0UGFsAAAKdwF1AQV/IANBAnQhCUEAIQUCQANAIAUgBE8NASABIAUgA2xqIQcgAiAEIAVrQQFrIAlsaiEIQQAhBgJAA0AgBiADTw0BIAggBkECdGogACAHIAZqLQAAQQJ0aigCADYCACAGQQFqIQYMAAsLIAVBAWohBQwACwsL";
+/**
+* Decode base64 string to Uint8Array in browser / desktop environments
+*/
+var base64ToUint8Array$1 = (base64) => {
+	const binaryString = atob(base64);
+	const len = binaryString.length;
+	const bytes = new Uint8Array(len);
+	for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
+	return bytes;
+};
+var _wasmInstance$1 = null;
+var _wasmFailed$1 = false;
+/**
+* Lazily loads and returns the compiled WASM converter instance.
+* Returns null if WebAssembly is not supported or instantiation fails.
+* @returns {object|null}
+*/
+var getPaletteConvertWasm = () => {
+	if (_wasmInstance$1) return _wasmInstance$1;
+	if (_wasmFailed$1) return null;
+	if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
+		_wasmFailed$1 = true;
+		return null;
+	}
+	try {
+		const wasmBytes = base64ToUint8Array$1(PALETTE_CONVERT_WASM_BASE64);
+		const module = new WebAssembly.Module(wasmBytes);
+		_wasmInstance$1 = new WebAssembly.Instance(module);
+		return _wasmInstance$1;
+	} catch (e) {
+		_wasmFailed$1 = true;
+		console.warn("Loaders/wasm/paletteConvert - Failed to instantiate WASM module:", e);
+		return null;
+	}
+};
+//#endregion
+//#region src/Loaders/wasm/spriteCompile.js
+/**
+* Loaders/wasm/spriteCompile.js
+*
+* WebAssembly module for compiling SPR frames to Power-of-Two textures:
+* - compilePal: copies 8-bit palette indices with magenta (0xFFFF00FF) transparency zeroing into centered Power-of-Two buffer
+* - compileRgba: copies 32-bit RGBA with vertical flip, zeroing when alpha is 0, and channel swizzle (a<<24)|(b<<16)|(g<<8)|r
+*
+* Embedded as Base64 to avoid requiring a separate wasm toolchain/loader during Vite build.
+*/
+var SPRITE_COMPILE_WASM_BASE64 = "AGFzbQEAAAABJgRgCX9/f39/f39/fwBgB39/f39/f38AYAR/f39/AGAFf39/f38AAwUEAAECAwUDAQABB0wFBm1lbW9yeQIACmNvbXBpbGVQYWwAAAtjb21waWxlUmdiYQABEWZyYW1lUmdiYVRvQ2FudmFzAAIQZnJhbWVQYWxUb0NhbnZhcwADCqcEBIQBAQV/QQAhCQJAA0AgCSAETw0BIAEgCSADbGohCyACIAkgCGogBWwgB2pqIQxBACEKAkADQCAKIANPDQEgCyAKai0AACENIAAgDUECdGooAgBB/4F8RgRAIAwgCmpBADoAAAUgDCAKaiANOgAACyAKQQFqIQoMAAsLIAlBAWohCQwACwsLsQEBCX8gAkECdCEJQQAhBwJAA0AgByADTw0BIAAgAyAHa0EBayAJbGohCiABIAcgBmogBGwgBWpBAnRqIQtBACEIAkADQCAIIAJPDQEgCiAIQQJ0aiEMIAsgCEECdGohDSAMLQAAIQ4gDkUEQCANQQA2AgAFIA5BGHQgDC0AAUEQdHIgDC0AAkEIdCAMLQADcnIhDyANIA82AgALIAhBAWohCAwACwsgB0EBaiEHDAALCwuhAQEHfyACQQJ0IQZBACEEAkADQCAEIANPDQEgACAEIAZsaiEHIAEgAyAEa0EBayAGbGohCEEAIQUCQANAIAUgAk8NASAHIAVBAnRqKAIAIQkgCUH/AXFBGHQgCUGA/gNxQQh0ciAJQYCA/AdxQQh2IAlBgICAeHFBGHZyciEKIAggBUECdGogCjYCACAFQQFqIQUMAAsLIARBAWohBAwACwsLSQEEfyADIARsIQZBACEFAkADQCAFIAZPDQEgASAFai0AACEHIAAgB0ECdGooAgAhCCACIAVBAnRqIAg2AgAgBUEBaiEFDAALCws=";
+/**
+* Decode base64 string to Uint8Array in browser / desktop environments
+*/
+var base64ToUint8Array = (base64) => {
+	const binaryString = atob(base64);
+	const len = binaryString.length;
+	const bytes = new Uint8Array(len);
+	for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
+	return bytes;
+};
+var _wasmInstance = null;
+var _wasmFailed = false;
+/**
+* Lazily loads and returns the compiled WASM converter instance.
+* Returns null if WebAssembly is not supported or instantiation fails.
+* @returns {object|null}
+*/
+var getSpriteCompileWasm = () => {
+	if (_wasmInstance) return _wasmInstance;
+	if (_wasmFailed) return null;
+	if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
+		_wasmFailed = true;
+		return null;
+	}
+	try {
+		const wasmBytes = base64ToUint8Array(SPRITE_COMPILE_WASM_BASE64);
+		const module = new WebAssembly.Module(wasmBytes);
+		_wasmInstance = new WebAssembly.Instance(module);
+		return _wasmInstance;
+	} catch (e) {
+		_wasmFailed = true;
+		console.warn("Loaders/wasm/spriteCompile - Failed to instantiate WASM module:", e);
+		return null;
+	}
+};
+//#endregion
 //#region src/Loaders/Sprite.js
 /**
 * Loaders/Sprite.js
@@ -18017,6 +18110,7 @@ var SPR = class SPR {
 	rgba_count = 0;
 	rgba_index = 0;
 	palette = null;
+	_pal32Canvas = null;
 	frames = null;
 	/**
 	* Load a Sprite data
@@ -18024,6 +18118,7 @@ var SPR = class SPR {
 	* @param {ArrayBuffer} data - file content
 	*/
 	load(data) {
+		this._pal32Canvas = null;
 		this.fp = new BinaryReader(data);
 		this.header = this.fp.readBinaryString(2);
 		this.version = this.fp.readUByte() / 10 + this.fp.readUByte();
@@ -18141,22 +18236,42 @@ var SPR = class SPR {
 	switchToRGBA() {
 		const frames = this.frames, pal = this.palette;
 		const pal32 = this.convert32bPal(pal, false);
-		for (let i = 0; i < this.indexed_count; ++i) {
+		const wasmInstance = getPaletteConvertWasm();
+		if (wasmInstance) {
+			const memory = wasmInstance.exports.memory;
+			const convertPal = wasmInstance.exports.convertPal;
+			const palPtr = 0;
+			const srcPtr = 1024;
+			new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+			for (let i = 0; i < this.indexed_count; ++i) {
+				const frame = frames[i];
+				if (frame.type !== SPR.TYPE_PAL) continue;
+				const width = frame.width, height = frame.height;
+				const pixelCount = width * height;
+				if (pixelCount <= 0) {
+					frame.data = /* @__PURE__ */ new Uint8Array(0);
+					frame.type = SPR.TYPE_RGBA;
+					continue;
+				}
+				const dstPtr = srcPtr + pixelCount;
+				const totalBytesNeeded = dstPtr + pixelCount * 4;
+				if (memory.buffer.byteLength < totalBytesNeeded) {
+					const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
+					memory.grow(additionalPages);
+					new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+				}
+				new Uint8Array(memory.buffer, srcPtr, pixelCount).set(frame.data);
+				convertPal(palPtr, srcPtr, dstPtr, width, height);
+				frame.data = new Uint8Array(new Uint8Array(memory.buffer, dstPtr, pixelCount * 4));
+				frame.type = SPR.TYPE_RGBA;
+			}
+		} else for (let i = 0; i < this.indexed_count; ++i) {
 			const frame = frames[i];
 			if (frame.type !== SPR.TYPE_PAL) continue;
 			const width = frame.width, height = frame.height;
 			const data = frame.data;
 			const out = new Uint8Array(width * height * 4);
 			const out32 = new Uint32Array(out.buffer);
-			/**
-			* OLD LOGIC:
-			* - READ: Accessed data[x + y * width] every iteration (redundant multiplication).
-			* - WRITE: Performed 4 separate byte assignments (out[ idx2 + 3 ] = pal[ idx1 + 0 ]...out[ idx2 + 1 ] = pal[ idx1 + 2 ]).
-			* NEW LOGIC:
-			* - READ: Pre-calculates row offsets per line to minimize arithmetic overhead.
-			* - WRITE: Uses a single 32-bit integer assignment to write all 4 channels (RGBA) at once.
-			* COORDINATES: Vertical flip logic (height - y - 1) is maintained for correct visual orientation.
-			*/
 			for (let y = 0; y < height; ++y) {
 				const srcRowStart = y * width;
 				const dstRowStart = (height - y - 1) * width;
@@ -18193,30 +18308,71 @@ var SPR = class SPR {
 		const width = canvas.width = frame.width;
 		const height = canvas.height = frame.height;
 		const imageData = ctx.createImageData(width, height);
-		const data32 = new Uint32Array(imageData.data.buffer);
+		const wasmInstance = getSpriteCompileWasm();
 		if (frame.type === SPR.TYPE_RGBA) {
-			const frameData32 = new Uint32Array(frame.data.buffer);
-			for (let y = 0; y < height; ++y) {
-				const srcRow = y * width;
-				const dstRow = (height - y - 1) * width;
-				for (let x = 0; x < width; ++x) {
-					const pixel = frameData32[srcRow + x];
-					/**
-					* OLD LOGIC: Manual assignments for each channel (ImageData.data[j+0] = ...).
-					* NEW LOGIC: Reads the source pixel as a 32-bit integer and performs bitwise operations
-					* WHY: The source RGBA order in .spr files might not match the Canvas [R,G,B,A] layout.
-					* Manipulating the full 32-bit word with shifts and masks is faster than 4 separate array writes.
-					*/
-					data32[dstRow + x] = (pixel & 255) << 24 | (pixel & 65280) << 8 | (pixel & 16711680) >> 8 | (pixel & 4278190080) >> 24;
+			const pixelCount = width * height;
+			const srcBytes = pixelCount * 4;
+			const dstBytes = pixelCount * 4;
+			if (wasmInstance && wasmInstance.exports.frameRgbaToCanvas) {
+				const memory = wasmInstance.exports.memory;
+				const srcPtr = 1024;
+				const dstPtr = srcPtr + srcBytes;
+				const totalBytesNeeded = dstPtr + dstBytes;
+				if (memory.buffer.byteLength < totalBytesNeeded) {
+					const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
+					memory.grow(additionalPages);
+				}
+				const frameBytes = new Uint8Array(frame.data.buffer, frame.data.byteOffset, srcBytes);
+				new Uint8Array(memory.buffer, srcPtr, srcBytes).set(frameBytes);
+				wasmInstance.exports.frameRgbaToCanvas(srcPtr, dstPtr, width, height);
+				new Uint8Array(imageData.data.buffer).set(new Uint8Array(memory.buffer, dstPtr, dstBytes));
+			} else {
+				const data32 = new Uint32Array(imageData.data.buffer);
+				let frameData32;
+				if ((frame.data.byteOffset & 3) === 0) frameData32 = new Uint32Array(frame.data.buffer, frame.data.byteOffset, pixelCount);
+				else {
+					frameData32 = new Uint32Array(pixelCount);
+					new Uint8Array(frameData32.buffer).set(new Uint8Array(frame.data.buffer, frame.data.byteOffset, pixelCount * 4));
+				}
+				for (let y = 0; y < height; ++y) {
+					const srcRow = y * width;
+					const dstRow = (height - y - 1) * width;
+					for (let x = 0; x < width; ++x) {
+						const pixel = frameData32[srcRow + x];
+						data32[dstRow + x] = (pixel & 255) << 24 | (pixel & 65280) << 8 | (pixel & 16711680) >> 8 | (pixel & 4278190080) >>> 24;
+					}
 				}
 			}
 		} else {
-			const pal32 = this.convert32bPal(this.palette, true);
-			for (let y = 0; y < height; ++y) {
-				const rowStart = y * width;
-				for (let x = 0; x < width; ++x) {
-					const idx = frame.data[rowStart + x];
-					data32[rowStart + x] = pal32[idx];
+			if (!this._pal32Canvas && this.palette) this._pal32Canvas = this.convert32bPal(this.palette, true);
+			const pal32 = this._pal32Canvas || this.convert32bPal(this.palette, true);
+			const pixelCount = width * height;
+			const srcBytes = pixelCount;
+			const dstBytes = pixelCount * 4;
+			if (wasmInstance && wasmInstance.exports.framePalToCanvas) {
+				const memory = wasmInstance.exports.memory;
+				const palPtr = 0;
+				const srcPtr = 1024;
+				const dstPtr = srcPtr + srcBytes;
+				const totalBytesNeeded = dstPtr + dstBytes;
+				if (memory.buffer.byteLength < totalBytesNeeded) {
+					const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
+					memory.grow(additionalPages);
+				}
+				new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+				const frameBytes = new Uint8Array(frame.data.buffer, frame.data.byteOffset, srcBytes);
+				new Uint8Array(memory.buffer, srcPtr, srcBytes).set(frameBytes);
+				wasmInstance.exports.framePalToCanvas(palPtr, srcPtr, dstPtr, width, height);
+				new Uint8Array(imageData.data.buffer).set(new Uint8Array(memory.buffer, dstPtr, dstBytes));
+			} else {
+				const data32 = new Uint32Array(imageData.data.buffer);
+				const frameIndices = new Uint8Array(frame.data.buffer, frame.data.byteOffset, pixelCount);
+				for (let y = 0; y < height; ++y) {
+					const rowStart = y * width;
+					for (let x = 0; x < width; ++x) {
+						const idx = frameIndices[rowStart + x];
+						data32[rowStart + x] = pal32[idx];
+					}
 				}
 			}
 		}
@@ -18234,6 +18390,18 @@ var SPR = class SPR {
 		let data, width, height, gl_width, gl_height, start_x, start_y;
 		let out;
 		const output = new Array(count);
+		let pal32 = null;
+		const MAGENTA = 4294902015;
+		const wasmInstance = getSpriteCompileWasm();
+		let wasmMem = null;
+		let wasmPalPtr = 0;
+		let wasmSrcPtr = 0;
+		let wasmPalInitialized = false;
+		if (wasmInstance) {
+			wasmMem = wasmInstance.exports.memory;
+			wasmPalPtr = 0;
+			wasmSrcPtr = 1024;
+		}
 		for (i = 0; i < count; ++i) {
 			frame = frames[i];
 			data = frame.data;
@@ -18244,18 +18412,51 @@ var SPR = class SPR {
 			start_x = Math.floor((gl_width - width) * .5);
 			start_y = Math.floor((gl_height - height) * .5);
 			if (frame.type === SPR.TYPE_PAL) {
-				const pal32 = this.convert32bPal(this.palette, true);
-				const MAGENTA = 4294902015;
-				out = new Uint8Array(gl_width * gl_height);
-				for (let y = 0; y < height; ++y) {
-					const srcRow = y * width;
-					const dstRow = (y + start_y) * gl_width + start_x;
-					for (let x = 0; x < width; ++x) {
-						const idx = data[srcRow + x];
-						if (pal32[idx] === MAGENTA) out[dstRow + x] = 0;
-						else out[dstRow + x] = idx;
+				if (!pal32) pal32 = this.convert32bPal(this.palette, true);
+				if (width <= 0 || height <= 0) out = new Uint8Array(gl_width * gl_height);
+				else if (wasmInstance) {
+					const srcBytes = width * height;
+					const dstBytes = gl_width * gl_height;
+					const dstPtr = wasmSrcPtr + srcBytes;
+					const totalBytesNeeded = dstPtr + dstBytes;
+					if (wasmMem.buffer.byteLength < totalBytesNeeded) {
+						const additionalPages = Math.ceil((totalBytesNeeded - wasmMem.buffer.byteLength) / 65536);
+						wasmMem.grow(additionalPages);
+					}
+					if (!wasmPalInitialized) {
+						new Uint32Array(wasmMem.buffer, wasmPalPtr, 256).set(pal32);
+						wasmPalInitialized = true;
+					}
+					new Uint8Array(wasmMem.buffer, dstPtr, dstBytes).fill(0);
+					new Uint8Array(wasmMem.buffer, wasmSrcPtr, srcBytes).set(data);
+					wasmInstance.exports.compilePal(wasmPalPtr, wasmSrcPtr, dstPtr, width, height, gl_width, gl_height, start_x, start_y);
+					out = new Uint8Array(new Uint8Array(wasmMem.buffer, dstPtr, dstBytes));
+				} else {
+					out = new Uint8Array(gl_width * gl_height);
+					for (let y = 0; y < height; ++y) {
+						const srcRow = y * width;
+						const dstRow = (y + start_y) * gl_width + start_x;
+						for (let x = 0; x < width; ++x) {
+							const idx = data[srcRow + x];
+							if (pal32[idx] === MAGENTA) out[dstRow + x] = 0;
+							else out[dstRow + x] = idx;
+						}
 					}
 				}
+			} else if (width <= 0 || height <= 0) out = new Uint8Array(gl_width * gl_height * 4);
+			else if (wasmInstance) {
+				const srcBytes = width * height * 4;
+				const dstBytes = gl_width * gl_height * 4;
+				const dstPtr = wasmSrcPtr + srcBytes;
+				const totalBytesNeeded = dstPtr + dstBytes;
+				if (wasmMem.buffer.byteLength < totalBytesNeeded) {
+					const additionalPages = Math.ceil((totalBytesNeeded - wasmMem.buffer.byteLength) / 65536);
+					wasmMem.grow(additionalPages);
+				}
+				new Uint8Array(wasmMem.buffer, dstPtr, dstBytes).fill(0);
+				new Uint8Array(wasmMem.buffer, wasmSrcPtr, srcBytes).set(data);
+				wasmInstance.exports.compileRgba(wasmSrcPtr, dstPtr, width, height, gl_width, start_x, start_y);
+				out = new Uint8Array(new Uint8Array(wasmMem.buffer, dstPtr, dstBytes));
 			} else {
 				out = new Uint8Array(gl_width * gl_height * 4);
 				const out32 = new Uint32Array(out.buffer);
@@ -19214,12 +19415,132 @@ var FileManager = class FileManager {
 * @author Vincent Thibault
 */
 /**
+* The files of one map load, each loaded once, by whichever step asks first.
+* The map loads in steps (world, altitude, ground, ground textures, models,
+* model textures), and each used to ask for its files only when the step
+* before had finished: over a remote link, a round trip per step with the
+* connection idle. Asking for a later step's files as soon as their names are
+* known lets them arrive while the earlier steps still run; the steps still
+* run in the same order.
+*
+* At most `limit` files load at once across all the steps, as when each step
+* ran alone. A file a step is waiting for goes before one asked for early.
+*/
+var MapFiles = class {
+	/**
+	* @param {number} limit - files loading at once
+	*/
+	constructor(limit) {
+		this.limit = limit;
+		this.running = 0;
+		this.closed = false;
+		this.files = /* @__PURE__ */ new Map();
+		this.needed = [];
+		this.early = [];
+	}
+	/**
+	* Ask for a file before a step needs it.
+	*
+	* @param {string} filename
+	* @returns {Promise} the loaded file
+	*/
+	request(filename) {
+		if (this.closed) return Promise.resolve(null);
+		let entry = this.files.get(filename);
+		if (!entry) {
+			entry = this._entry(filename);
+			this.files.set(filename, entry);
+			this.early.push(entry);
+			this._run();
+		}
+		return entry.promise;
+	}
+	/**
+	* The file, for the one step that uses it. An image comes as a blob URL,
+	* and Texture.load revokes it once the image has loaded, so two steps must
+	* not share one: a texture the ground and a model both use would load for
+	* whichever came first and never for the other. A later step that needs
+	* the same file asks again, and gets its own.
+	*
+	* @param {string} filename
+	* @returns {Promise} the loaded file
+	*/
+	take(filename) {
+		let entry = this.files.get(filename);
+		if (entry) {
+			this.files.delete(filename);
+			const index = this.early.indexOf(entry);
+			if (index !== -1) {
+				this.early.splice(index, 1);
+				this.needed.push(entry);
+			}
+		} else {
+			entry = this._entry(filename);
+			this.needed.push(entry);
+		}
+		this._run();
+		return entry.promise;
+	}
+	/**
+	* The load is over, done or failed: ask for nothing more, and free the
+	* blob URLs of files no step took, now or when they arrive.
+	*/
+	close() {
+		this.closed = true;
+		this.needed.length = 0;
+		this.early.length = 0;
+		for (const entry of this.files.values()) {
+			entry.dropped = true;
+			if (entry.done) release(entry.data);
+		}
+		this.files.clear();
+	}
+	_entry(filename) {
+		const entry = {
+			filename,
+			done: false,
+			dropped: false,
+			data: null
+		};
+		entry.promise = new Promise((resolve) => entry.resolve = resolve);
+		return entry;
+	}
+	_run() {
+		while (!this.closed && this.running < this.limit) {
+			const entry = this.needed.shift() || this.early.shift();
+			if (!entry) return;
+			this.running++;
+			FileManager.load(entry.filename, (data) => {
+				this.running--;
+				entry.done = true;
+				entry.data = data;
+				if (entry.dropped) release(data);
+				entry.resolve(data);
+				this._run();
+			});
+		}
+	}
+};
+/**
+* Free a loaded file no step will use.
+*
+* @param {*} data
+*/
+function release(data) {
+	if (typeof data === "string" && data.startsWith("blob:")) URL.revokeObjectURL(data);
+}
+/**
 * Helper to load list
 *
 * @param {array} file list to load
 */
 var Loader = class Loader {
-	constructor(list) {
+	/**
+	* @param {Array} list of files to load
+	* @param {MapFiles} requests - the map's files
+	*/
+	constructor(list, requests) {
+		this.requests = requests;
 		this.files = list;
 		this.list = list.slice(0);
 		this.offset = 0;
@@ -19256,7 +19577,7 @@ var Loader = class Loader {
 	_next() {
 		if (!this.list.length) return;
 		const filename = this.list.shift();
-		FileManager.load(filename, (data) => {
+		this.requests.take(filename).then((data) => {
 			this.out[this.files.indexOf(filename)] = data;
 			this.offset++;
 			if (this.onprogress && this.offset <= this.count) this.onprogress(this.offset, this.count);
@@ -19315,6 +19636,7 @@ var MapLoader = class {
 	load(mapname) {
 		this.setProgress(0);
 		const loader = this;
+		const requests = this.requests = new MapFiles(6);
 		let world;
 		function getFilePath(path) {
 			if (path in FileManager.filesAlias) return FileManager.filesAlias[path];
@@ -19327,19 +19649,28 @@ var MapLoader = class {
 			}
 			world = resourceWorld;
 			loader.setProgress(1);
-			FileManager.load(`data\\${getFilePath(world.files.gat)}`, onAltitudeReady);
+			const ground = requests.request(`data\\${getFilePath(world.files.gnd)}`).then((resourceGround) => {
+				for (const texture of resourceGround?.textures || []) requests.request(`data\\texture\\${texture}`);
+				for (const model of world.models) requests.request(`data\\model\\${model.filename}`);
+				return resourceGround;
+			});
+			requests.request(`data\\${getFilePath(world.files.gat)}`).then((altitude) => {
+				if (onAltitudeReady(altitude)) ground.then(onGroundReady);
+			});
 		}
 		function onAltitudeReady(altitude) {
 			if (!altitude) {
+				requests.close();
 				loader.onload(false, `Can't find file "${world.files.gat}" !`);
-				return;
+				return false;
 			}
 			loader.setProgress(2);
 			loader.ondata("MAP_ALTITUDE", altitude.compile());
-			FileManager.load(`data\\${getFilePath(world.files.gnd)}`, onGroundReady);
+			return true;
 		}
 		function onGroundReady(ground) {
 			if (!ground) {
+				requests.close();
 				loader.onload(false, `Can't find file "${world.files.gnd}" !`);
 				return;
 			}
@@ -19373,7 +19704,7 @@ var MapLoader = class {
 			for (i = 0; i < 32; ++i) textures.push(`${path}${i < 10 ? "0" + i : i}.jpg`);
 		}
 		for (i = 0, count = ground.textures.length; i < count; ++i) textures.push(`data\\texture\\${ground.textures[i]}`);
-		const loader = new Loader(textures);
+		const loader = new Loader(textures, this.requests);
 		loader.onprogress = () => {
 			this.setProgress(3 + 97 / this.fileCount * ++this.offset);
 		};
@@ -19396,7 +19727,7 @@ var MapLoader = class {
 			models[i].filename = `data\\model\\${models[i].filename}`;
 			if (files.indexOf(models[i].filename) < 0) files.push(models[i].filename);
 		}
-		const loader = new Loader(files);
+		const loader = new Loader(files, this.requests);
 		loader.onprogress = () => {
 			this.setProgress(3 + 97 / this.fileCount * ++this.offset);
 		};
@@ -19485,7 +19816,7 @@ var MapLoader = class {
 			buffer.set(object.mesh, offset);
 			offset += size;
 		}
-		const loader = new Loader(textures);
+		const loader = new Loader(textures, this.requests);
 		loader.onprogress = (index, _count) => {
 			this.setProgress(progress + (100 - progress) / _count * (index + 1));
 		};
@@ -19500,6 +19831,7 @@ var MapLoader = class {
 				infos
 			});
 			if (this._animatedModels && this._animatedModels.length > 0) this.sendAnimatedModels(this._animatedModels);
+			this.requests.close();
 			this.onload(true);
 		};
 		loader.start();

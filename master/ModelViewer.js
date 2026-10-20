@@ -11329,6 +11329,7 @@ var init_MemoryManager = __esmMin((() => {
 						for (i = 0, count = file.frames.length; i < count; ++i) if (file.frames[i].texture && gl != null && gl.isTexture(file.frames[i].texture)) gl.deleteTexture(file.frames[i].texture);
 					}
 					if (file.texture && gl != null && gl.isTexture(file.texture)) gl.deleteTexture(file.texture);
+					if (file._atlasRelease) file._atlasRelease();
 					break;
 				case ".pal":
 					if (file.texture && gl != null && gl.isTexture(file.texture)) gl.deleteTexture(file.texture);
@@ -11358,7 +11359,7 @@ var init_MemoryManager = __esmMin((() => {
 //#endregion
 //#region src/Network/Packets/packets2003_len_main.js
 var packets2003_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2003_len_main_default });
-function init$37(packetver) {
+function init$38(packetver) {
 	length_list$22[100] = 55;
 	length_list$22[101] = 17;
 	length_list$22[102] = 3;
@@ -11766,12 +11767,12 @@ function init$37(packetver) {
 var length_list$22, packets2003_len_main_default;
 var init_packets2003_len_main = __esmMin((() => {
 	length_list$22 = new Array();
-	packets2003_len_main_default = { init: init$37 };
+	packets2003_len_main_default = { init: init$38 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2004_len_main.js
 var packets2004_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2004_len_main_default });
-function init$36(packetver) {
+function init$37(packetver) {
 	length_list$21[100] = 55;
 	length_list$21[101] = 17;
 	length_list$21[102] = 3;
@@ -12379,12 +12380,12 @@ function init$36(packetver) {
 var length_list$21, packets2004_len_main_default;
 var init_packets2004_len_main = __esmMin((() => {
 	length_list$21 = new Array();
-	packets2004_len_main_default = { init: init$36 };
+	packets2004_len_main_default = { init: init$37 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2005_len_main.js
 var packets2005_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2005_len_main_default });
-function init$35(packetver) {
+function init$36(packetver) {
 	length_list$20[100] = 55;
 	length_list$20[101] = 17;
 	length_list$20[102] = 3;
@@ -13009,12 +13010,12 @@ function init$35(packetver) {
 var length_list$20, packets2005_len_main_default;
 var init_packets2005_len_main = __esmMin((() => {
 	length_list$20 = new Array();
-	packets2005_len_main_default = { init: init$35 };
+	packets2005_len_main_default = { init: init$36 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2006_len_main.js
 var packets2006_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2006_len_main_default });
-function init$34(packetver) {
+function init$35(packetver) {
 	length_list$19[100] = 55;
 	length_list$19[101] = 17;
 	length_list$19[102] = 3;
@@ -13608,12 +13609,12 @@ function init$34(packetver) {
 var length_list$19, packets2006_len_main_default;
 var init_packets2006_len_main = __esmMin((() => {
 	length_list$19 = new Array();
-	packets2006_len_main_default = { init: init$34 };
+	packets2006_len_main_default = { init: init$35 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2007_len_main.js
 var packets2007_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2007_len_main_default });
-function init$33(packetver) {
+function init$34(packetver) {
 	length_list$18[100] = 55;
 	length_list$18[101] = 17;
 	length_list$18[102] = 3;
@@ -14300,12 +14301,12 @@ function init$33(packetver) {
 var length_list$18, packets2007_len_main_default;
 var init_packets2007_len_main = __esmMin((() => {
 	length_list$18 = new Array();
-	packets2007_len_main_default = { init: init$33 };
+	packets2007_len_main_default = { init: init$34 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2008_len_main.js
 var packets2008_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2008_len_main_default });
-function init$32(packetver) {
+function init$33(packetver) {
 	length_list$17[100] = 55;
 	length_list$17[101] = 17;
 	length_list$17[102] = 3;
@@ -32489,12 +32490,12 @@ function init$32(packetver) {
 var length_list$17, packets2008_len_main_default;
 var init_packets2008_len_main = __esmMin((() => {
 	length_list$17 = new Array();
-	packets2008_len_main_default = { init: init$32 };
+	packets2008_len_main_default = { init: init$33 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2009_len_main.js
 var packets2009_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2009_len_main_default });
-function init$31(packetver) {
+function init$32(packetver) {
 	length_list$16[100] = 55;
 	length_list$16[101] = 17;
 	length_list$16[102] = 3;
@@ -38731,12 +38732,12 @@ function init$31(packetver) {
 var length_list$16, packets2009_len_main_default;
 var init_packets2009_len_main = __esmMin((() => {
 	length_list$16 = new Array();
-	packets2009_len_main_default = { init: init$31 };
+	packets2009_len_main_default = { init: init$32 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2010_len_main.js
 var packets2010_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2010_len_main_default });
-function init$30(packetver) {
+function init$31(packetver) {
 	length_list$15[100] = 55;
 	length_list$15[101] = 17;
 	length_list$15[102] = 3;
@@ -40210,12 +40211,12 @@ function init$30(packetver) {
 var length_list$15, packets2010_len_main_default;
 var init_packets2010_len_main = __esmMin((() => {
 	length_list$15 = new Array();
-	packets2010_len_main_default = { init: init$30 };
+	packets2010_len_main_default = { init: init$31 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2011_len_main.js
 var packets2011_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2011_len_main_default });
-function init$29(packetver) {
+function init$30(packetver) {
 	length_list$14[100] = 55;
 	length_list$14[101] = 17;
 	length_list$14[102] = 3;
@@ -43145,12 +43146,12 @@ function init$29(packetver) {
 var length_list$14, packets2011_len_main_default;
 var init_packets2011_len_main = __esmMin((() => {
 	length_list$14 = new Array();
-	packets2011_len_main_default = { init: init$29 };
+	packets2011_len_main_default = { init: init$30 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2012_len_main.js
 var packets2012_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2012_len_main_default });
-function init$28(packetver) {
+function init$29(packetver) {
 	length_list$13[100] = 55;
 	length_list$13[101] = 17;
 	length_list$13[102] = 3;
@@ -46565,12 +46566,12 @@ function init$28(packetver) {
 var length_list$13, packets2012_len_main_default;
 var init_packets2012_len_main = __esmMin((() => {
 	length_list$13 = new Array();
-	packets2012_len_main_default = { init: init$28 };
+	packets2012_len_main_default = { init: init$29 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2013_len_main.js
 var packets2013_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2013_len_main_default });
-function init$27(packetver) {
+function init$28(packetver) {
 	length_list$12[100] = 55;
 	length_list$12[101] = 17;
 	length_list$12[102] = 3;
@@ -50059,12 +50060,12 @@ function init$27(packetver) {
 var length_list$12, packets2013_len_main_default;
 var init_packets2013_len_main = __esmMin((() => {
 	length_list$12 = new Array();
-	packets2013_len_main_default = { init: init$27 };
+	packets2013_len_main_default = { init: init$28 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2014_len_main.js
 var packets2014_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2014_len_main_default });
-function init$26(packetver) {
+function init$27(packetver) {
 	length_list$11[100] = 55;
 	length_list$11[101] = 17;
 	length_list$11[102] = 3;
@@ -53644,12 +53645,12 @@ function init$26(packetver) {
 var length_list$11, packets2014_len_main_default;
 var init_packets2014_len_main = __esmMin((() => {
 	length_list$11 = new Array();
-	packets2014_len_main_default = { init: init$26 };
+	packets2014_len_main_default = { init: init$27 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2015_len_main.js
 var packets2015_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2015_len_main_default });
-function init$25(packetver) {
+function init$26(packetver) {
 	length_list$10[100] = 55;
 	length_list$10[101] = 17;
 	length_list$10[102] = 3;
@@ -57081,12 +57082,12 @@ function init$25(packetver) {
 var length_list$10, packets2015_len_main_default;
 var init_packets2015_len_main = __esmMin((() => {
 	length_list$10 = new Array();
-	packets2015_len_main_default = { init: init$25 };
+	packets2015_len_main_default = { init: init$26 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2016_len_main.js
 var packets2016_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2016_len_main_default });
-function init$24(packetver) {
+function init$25(packetver) {
 	length_list$9[100] = 55;
 	length_list$9[101] = 17;
 	length_list$9[102] = 3;
@@ -60684,12 +60685,12 @@ function init$24(packetver) {
 var length_list$9, packets2016_len_main_default;
 var init_packets2016_len_main = __esmMin((() => {
 	length_list$9 = new Array();
-	packets2016_len_main_default = { init: init$24 };
+	packets2016_len_main_default = { init: init$25 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2017_len_main.js
 var packets2017_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2017_len_main_default });
-function init$23(packetver) {
+function init$24(packetver) {
 	length_list$8[100] = 55;
 	length_list$8[101] = 17;
 	length_list$8[102] = 3;
@@ -64267,12 +64268,12 @@ function init$23(packetver) {
 var length_list$8, packets2017_len_main_default;
 var init_packets2017_len_main = __esmMin((() => {
 	length_list$8 = new Array();
-	packets2017_len_main_default = { init: init$23 };
+	packets2017_len_main_default = { init: init$24 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2018_len_main.js
 var packets2018_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2018_len_main_default });
-function init$22(packetver) {
+function init$23(packetver) {
 	length_list$7[100] = 55;
 	length_list$7[101] = 17;
 	length_list$7[102] = 3;
@@ -66176,12 +66177,12 @@ function init$22(packetver) {
 var length_list$7, packets2018_len_main_default;
 var init_packets2018_len_main = __esmMin((() => {
 	length_list$7 = new Array();
-	packets2018_len_main_default = { init: init$22 };
+	packets2018_len_main_default = { init: init$23 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2019_len_main.js
 var packets2019_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2019_len_main_default });
-function init$21(packetver) {
+function init$22(packetver) {
 	length_list$6[100] = 55;
 	length_list$6[101] = 17;
 	length_list$6[102] = 3;
@@ -67759,12 +67760,12 @@ function init$21(packetver) {
 var length_list$6, packets2019_len_main_default;
 var init_packets2019_len_main = __esmMin((() => {
 	length_list$6 = new Array();
-	packets2019_len_main_default = { init: init$21 };
+	packets2019_len_main_default = { init: init$22 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2020_len_main.js
 var packets2020_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2020_len_main_default });
-function init$20(packetver) {
+function init$21(packetver) {
 	length_list$5[100] = 55;
 	length_list$5[101] = 17;
 	length_list$5[102] = 3;
@@ -69349,12 +69350,12 @@ function init$20(packetver) {
 var length_list$5, packets2020_len_main_default;
 var init_packets2020_len_main = __esmMin((() => {
 	length_list$5 = new Array();
-	packets2020_len_main_default = { init: init$20 };
+	packets2020_len_main_default = { init: init$21 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2021_len_main.js
 var packets2021_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2021_len_main_default });
-function init$19(packetver) {
+function init$20(packetver) {
 	length_list$4[100] = 55;
 	length_list$4[101] = 17;
 	length_list$4[102] = 3;
@@ -70960,12 +70961,12 @@ function init$19(packetver) {
 var length_list$4, packets2021_len_main_default;
 var init_packets2021_len_main = __esmMin((() => {
 	length_list$4 = new Array();
-	packets2021_len_main_default = { init: init$19 };
+	packets2021_len_main_default = { init: init$20 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2022_len_main.js
 var packets2022_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2022_len_main_default });
-function init$18(packetver) {
+function init$19(packetver) {
 	length_list$3[100] = 55;
 	length_list$3[101] = 17;
 	length_list$3[102] = 3;
@@ -72577,12 +72578,12 @@ function init$18(packetver) {
 var length_list$3, packets2022_len_main_default;
 var init_packets2022_len_main = __esmMin((() => {
 	length_list$3 = new Array();
-	packets2022_len_main_default = { init: init$18 };
+	packets2022_len_main_default = { init: init$19 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2023_len_main.js
 var packets2023_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2023_len_main_default });
-function init$17(packetver) {
+function init$18(packetver) {
 	length_list$2[100] = 55;
 	length_list$2[101] = 17;
 	length_list$2[102] = 3;
@@ -74248,12 +74249,12 @@ function init$17(packetver) {
 var length_list$2, packets2023_len_main_default;
 var init_packets2023_len_main = __esmMin((() => {
 	length_list$2 = new Array();
-	packets2023_len_main_default = { init: init$17 };
+	packets2023_len_main_default = { init: init$18 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2024_len_main.js
 var packets2024_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2024_len_main_default });
-function init$16(packetver) {
+function init$17(packetver) {
 	length_list$1[100] = 55;
 	length_list$1[101] = 17;
 	length_list$1[102] = 3;
@@ -75959,12 +75960,12 @@ function init$16(packetver) {
 var length_list$1, packets2024_len_main_default;
 var init_packets2024_len_main = __esmMin((() => {
 	length_list$1 = new Array();
-	packets2024_len_main_default = { init: init$16 };
+	packets2024_len_main_default = { init: init$17 };
 }));
 //#endregion
 //#region src/Network/Packets/packets2025_len_main.js
 var packets2025_len_main_exports = /* @__PURE__ */ __exportAll({ default: () => packets2025_len_main_default });
-function init$15(packetver) {
+function init$16(packetver) {
 	length_list[100] = 55;
 	length_list[101] = 17;
 	length_list[102] = 3;
@@ -77710,7 +77711,7 @@ function init$15(packetver) {
 var length_list, packets2025_len_main_default;
 var init_packets2025_len_main = __esmMin((() => {
 	length_list = new Array();
-	packets2025_len_main_default = { init: init$15 };
+	packets2025_len_main_default = { init: init$16 };
 }));
 //#endregion
 //#region src/Network/PacketLength.js
@@ -77719,7 +77720,7 @@ var init_packets2025_len_main = __esmMin((() => {
 *
 * @param {number} packetver - packet version (clientdate)
 */
-function init$14(packetver) {
+function init$15(packetver) {
 	packetver = parseInt(packetver);
 	const years = [
 		2025,
@@ -77820,7 +77821,7 @@ var init_PacketLength = __esmMin((() => {
 	};
 	packets_len = new Array();
 	PacketLength_default = {
-		init: init$14,
+		init: init$15,
 		getPacketLength
 	};
 }));
@@ -78437,6 +78438,76 @@ function UIClamp(el, WIDTH, HEIGHT, magnet) {
 }
 var init_ClampToViewport = __esmMin((() => {}));
 //#endregion
+//#region src/UI/WhenDrawn.js
+function onIntersect(entries) {
+	for (const entry of entries) {
+		if (!entry.isIntersecting) continue;
+		const callbacks = _pending$2.get(entry.target);
+		_pending$2.delete(entry.target);
+		_observer.unobserve(entry.target);
+		for (const callback of callbacks || []) try {
+			callback();
+		} catch (e) {
+			console.error("[WhenDrawn]", e);
+		}
+	}
+}
+/**
+* The host and the elements under it, in its light and shadow DOM, that
+* still wait to be drawn.
+*
+* @param {Element} host
+* @returns {Element[]}
+*/
+function pendingWithin(host) {
+	const elements = [host, ...host.querySelectorAll("*")];
+	if (host.shadowRoot) elements.push(...host.shadowRoot.querySelectorAll("*"));
+	return elements.filter((element) => _pending$2.has(element));
+}
+/**
+* @param {Element} element
+* @param {function} callback
+*/
+function whenDrawn(element, callback) {
+	if (typeof IntersectionObserver === "undefined" || !element) {
+		callback();
+		return;
+	}
+	const callbacks = _pending$2.get(element);
+	if (callbacks) {
+		callbacks.push(callback);
+		return;
+	}
+	_pending$2.set(element, [callback]);
+	_observer ??= new IntersectionObserver(onIntersect);
+	_observer.observe(element);
+}
+var _pending$2, _observer;
+var init_WhenDrawn = __esmMin((() => {
+	_pending$2 = /* @__PURE__ */ new WeakMap();
+	_observer = null;
+	/**
+	* Stop watching what waits under a window taken off the page, so the
+	* observer does not hold on to a window that is never shown again. The
+	* callbacks stay with their elements and are freed with them.
+	*
+	* @param {Element} host
+	*/
+	whenDrawn.suspend = function suspend(host) {
+		if (!_observer || !host) return;
+		for (const element of pendingWithin(host)) _observer.unobserve(element);
+	};
+	/**
+	* Watch again what waits under a window put back on the page.
+	*
+	* @param {Element} host
+	*/
+	whenDrawn.resume = function resume(host) {
+		if (!_observer || !host) return;
+		for (const element of pendingWithin(host)) _observer.observe(element);
+	};
+}));
+//#endregion
 //#region src/Preferences/Graphics.js
 var defaultGraphicsSettings, cleanDefaults, GraphicsSettings;
 var init_Graphics = __esmMin((() => {
@@ -78452,9 +78523,10 @@ var init_Graphics = __esmMin((() => {
 		*/
 		cursor: true,
 		/**
-		* Game FPS Limit
+		* Game FPS Limit. -1: none, one frame per display refresh (rAF never runs
+		* faster than the display), which is also the smoothest
 		*/
-		fpslimit: 60,
+		fpslimit: -1,
 		/**
 		* Performance Mode
 		*/
@@ -78502,10 +78574,78 @@ var init_Graphics = __esmMin((() => {
 	GraphicsSettings.defaults = cleanDefaults;
 }));
 //#endregion
+//#region src/Loaders/wasm/paletteConvert.js
+var PALETTE_CONVERT_WASM_BASE64, base64ToUint8Array$1, _wasmInstance$1, _wasmFailed$1, getPaletteConvertWasm;
+var init_paletteConvert = __esmMin((() => {
+	PALETTE_CONVERT_WASM_BASE64 = "AGFzbQEAAAABCQFgBX9/f39/AAMCAQAFAwEAAQcXAgZtZW1vcnkCAApjb252ZXJ0UGFsAAAKdwF1AQV/IANBAnQhCUEAIQUCQANAIAUgBE8NASABIAUgA2xqIQcgAiAEIAVrQQFrIAlsaiEIQQAhBgJAA0AgBiADTw0BIAggBkECdGogACAHIAZqLQAAQQJ0aigCADYCACAGQQFqIQYMAAsLIAVBAWohBQwACwsL";
+	base64ToUint8Array$1 = (base64) => {
+		const binaryString = atob(base64);
+		const len = binaryString.length;
+		const bytes = new Uint8Array(len);
+		for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
+		return bytes;
+	};
+	_wasmInstance$1 = null;
+	_wasmFailed$1 = false;
+	getPaletteConvertWasm = () => {
+		if (_wasmInstance$1) return _wasmInstance$1;
+		if (_wasmFailed$1) return null;
+		if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
+			_wasmFailed$1 = true;
+			return null;
+		}
+		try {
+			const wasmBytes = base64ToUint8Array$1(PALETTE_CONVERT_WASM_BASE64);
+			const module = new WebAssembly.Module(wasmBytes);
+			_wasmInstance$1 = new WebAssembly.Instance(module);
+			return _wasmInstance$1;
+		} catch (e) {
+			_wasmFailed$1 = true;
+			console.warn("Loaders/wasm/paletteConvert - Failed to instantiate WASM module:", e);
+			return null;
+		}
+	};
+}));
+//#endregion
+//#region src/Loaders/wasm/spriteCompile.js
+var SPRITE_COMPILE_WASM_BASE64, base64ToUint8Array, _wasmInstance, _wasmFailed, getSpriteCompileWasm;
+var init_spriteCompile = __esmMin((() => {
+	SPRITE_COMPILE_WASM_BASE64 = "AGFzbQEAAAABJgRgCX9/f39/f39/fwBgB39/f39/f38AYAR/f39/AGAFf39/f38AAwUEAAECAwUDAQABB0wFBm1lbW9yeQIACmNvbXBpbGVQYWwAAAtjb21waWxlUmdiYQABEWZyYW1lUmdiYVRvQ2FudmFzAAIQZnJhbWVQYWxUb0NhbnZhcwADCqcEBIQBAQV/QQAhCQJAA0AgCSAETw0BIAEgCSADbGohCyACIAkgCGogBWwgB2pqIQxBACEKAkADQCAKIANPDQEgCyAKai0AACENIAAgDUECdGooAgBB/4F8RgRAIAwgCmpBADoAAAUgDCAKaiANOgAACyAKQQFqIQoMAAsLIAlBAWohCQwACwsLsQEBCX8gAkECdCEJQQAhBwJAA0AgByADTw0BIAAgAyAHa0EBayAJbGohCiABIAcgBmogBGwgBWpBAnRqIQtBACEIAkADQCAIIAJPDQEgCiAIQQJ0aiEMIAsgCEECdGohDSAMLQAAIQ4gDkUEQCANQQA2AgAFIA5BGHQgDC0AAUEQdHIgDC0AAkEIdCAMLQADcnIhDyANIA82AgALIAhBAWohCAwACwsgB0EBaiEHDAALCwuhAQEHfyACQQJ0IQZBACEEAkADQCAEIANPDQEgACAEIAZsaiEHIAEgAyAEa0EBayAGbGohCEEAIQUCQANAIAUgAk8NASAHIAVBAnRqKAIAIQkgCUH/AXFBGHQgCUGA/gNxQQh0ciAJQYCA/AdxQQh2IAlBgICAeHFBGHZyciEKIAggBUECdGogCjYCACAFQQFqIQUMAAsLIARBAWohBAwACwsLSQEEfyADIARsIQZBACEFAkADQCAFIAZPDQEgASAFai0AACEHIAAgB0ECdGooAgAhCCACIAVBAnRqIAg2AgAgBUEBaiEFDAALCws=";
+	base64ToUint8Array = (base64) => {
+		const binaryString = atob(base64);
+		const len = binaryString.length;
+		const bytes = new Uint8Array(len);
+		for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
+		return bytes;
+	};
+	_wasmInstance = null;
+	_wasmFailed = false;
+	getSpriteCompileWasm = () => {
+		if (_wasmInstance) return _wasmInstance;
+		if (_wasmFailed) return null;
+		if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
+			_wasmFailed = true;
+			return null;
+		}
+		try {
+			const wasmBytes = base64ToUint8Array(SPRITE_COMPILE_WASM_BASE64);
+			const module = new WebAssembly.Module(wasmBytes);
+			_wasmInstance = new WebAssembly.Instance(module);
+			return _wasmInstance;
+		} catch (e) {
+			_wasmFailed = true;
+			console.warn("Loaders/wasm/spriteCompile - Failed to instantiate WASM module:", e);
+			return null;
+		}
+	};
+}));
+//#endregion
 //#region src/Loaders/Sprite.js
 var SPR;
 var init_Sprite = __esmMin((() => {
 	init_BinaryReader();
+	init_paletteConvert();
+	init_spriteCompile();
 	SPR = class SPR {
 		constructor(data) {
 			if (data) this.load(data);
@@ -78526,6 +78666,7 @@ var init_Sprite = __esmMin((() => {
 		rgba_count = 0;
 		rgba_index = 0;
 		palette = null;
+		_pal32Canvas = null;
 		frames = null;
 		/**
 		* Load a Sprite data
@@ -78533,6 +78674,7 @@ var init_Sprite = __esmMin((() => {
 		* @param {ArrayBuffer} data - file content
 		*/
 		load(data) {
+			this._pal32Canvas = null;
 			this.fp = new BinaryReader(data);
 			this.header = this.fp.readBinaryString(2);
 			this.version = this.fp.readUByte() / 10 + this.fp.readUByte();
@@ -78650,22 +78792,42 @@ var init_Sprite = __esmMin((() => {
 		switchToRGBA() {
 			const frames = this.frames, pal = this.palette;
 			const pal32 = this.convert32bPal(pal, false);
-			for (let i = 0; i < this.indexed_count; ++i) {
+			const wasmInstance = getPaletteConvertWasm();
+			if (wasmInstance) {
+				const memory = wasmInstance.exports.memory;
+				const convertPal = wasmInstance.exports.convertPal;
+				const palPtr = 0;
+				const srcPtr = 1024;
+				new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+				for (let i = 0; i < this.indexed_count; ++i) {
+					const frame = frames[i];
+					if (frame.type !== SPR.TYPE_PAL) continue;
+					const width = frame.width, height = frame.height;
+					const pixelCount = width * height;
+					if (pixelCount <= 0) {
+						frame.data = /* @__PURE__ */ new Uint8Array(0);
+						frame.type = SPR.TYPE_RGBA;
+						continue;
+					}
+					const dstPtr = srcPtr + pixelCount;
+					const totalBytesNeeded = dstPtr + pixelCount * 4;
+					if (memory.buffer.byteLength < totalBytesNeeded) {
+						const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
+						memory.grow(additionalPages);
+						new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+					}
+					new Uint8Array(memory.buffer, srcPtr, pixelCount).set(frame.data);
+					convertPal(palPtr, srcPtr, dstPtr, width, height);
+					frame.data = new Uint8Array(new Uint8Array(memory.buffer, dstPtr, pixelCount * 4));
+					frame.type = SPR.TYPE_RGBA;
+				}
+			} else for (let i = 0; i < this.indexed_count; ++i) {
 				const frame = frames[i];
 				if (frame.type !== SPR.TYPE_PAL) continue;
 				const width = frame.width, height = frame.height;
 				const data = frame.data;
 				const out = new Uint8Array(width * height * 4);
 				const out32 = new Uint32Array(out.buffer);
-				/**
-				* OLD LOGIC:
-				* - READ: Accessed data[x + y * width] every iteration (redundant multiplication).
-				* - WRITE: Performed 4 separate byte assignments (out[ idx2 + 3 ] = pal[ idx1 + 0 ]...out[ idx2 + 1 ] = pal[ idx1 + 2 ]).
-				* NEW LOGIC:
-				* - READ: Pre-calculates row offsets per line to minimize arithmetic overhead.
-				* - WRITE: Uses a single 32-bit integer assignment to write all 4 channels (RGBA) at once.
-				* COORDINATES: Vertical flip logic (height - y - 1) is maintained for correct visual orientation.
-				*/
 				for (let y = 0; y < height; ++y) {
 					const srcRowStart = y * width;
 					const dstRowStart = (height - y - 1) * width;
@@ -78702,30 +78864,71 @@ var init_Sprite = __esmMin((() => {
 			const width = canvas.width = frame.width;
 			const height = canvas.height = frame.height;
 			const imageData = ctx.createImageData(width, height);
-			const data32 = new Uint32Array(imageData.data.buffer);
+			const wasmInstance = getSpriteCompileWasm();
 			if (frame.type === SPR.TYPE_RGBA) {
-				const frameData32 = new Uint32Array(frame.data.buffer);
-				for (let y = 0; y < height; ++y) {
-					const srcRow = y * width;
-					const dstRow = (height - y - 1) * width;
-					for (let x = 0; x < width; ++x) {
-						const pixel = frameData32[srcRow + x];
-						/**
-						* OLD LOGIC: Manual assignments for each channel (ImageData.data[j+0] = ...).
-						* NEW LOGIC: Reads the source pixel as a 32-bit integer and performs bitwise operations
-						* WHY: The source RGBA order in .spr files might not match the Canvas [R,G,B,A] layout.
-						* Manipulating the full 32-bit word with shifts and masks is faster than 4 separate array writes.
-						*/
-						data32[dstRow + x] = (pixel & 255) << 24 | (pixel & 65280) << 8 | (pixel & 16711680) >> 8 | (pixel & 4278190080) >> 24;
+				const pixelCount = width * height;
+				const srcBytes = pixelCount * 4;
+				const dstBytes = pixelCount * 4;
+				if (wasmInstance && wasmInstance.exports.frameRgbaToCanvas) {
+					const memory = wasmInstance.exports.memory;
+					const srcPtr = 1024;
+					const dstPtr = srcPtr + srcBytes;
+					const totalBytesNeeded = dstPtr + dstBytes;
+					if (memory.buffer.byteLength < totalBytesNeeded) {
+						const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
+						memory.grow(additionalPages);
+					}
+					const frameBytes = new Uint8Array(frame.data.buffer, frame.data.byteOffset, srcBytes);
+					new Uint8Array(memory.buffer, srcPtr, srcBytes).set(frameBytes);
+					wasmInstance.exports.frameRgbaToCanvas(srcPtr, dstPtr, width, height);
+					new Uint8Array(imageData.data.buffer).set(new Uint8Array(memory.buffer, dstPtr, dstBytes));
+				} else {
+					const data32 = new Uint32Array(imageData.data.buffer);
+					let frameData32;
+					if ((frame.data.byteOffset & 3) === 0) frameData32 = new Uint32Array(frame.data.buffer, frame.data.byteOffset, pixelCount);
+					else {
+						frameData32 = new Uint32Array(pixelCount);
+						new Uint8Array(frameData32.buffer).set(new Uint8Array(frame.data.buffer, frame.data.byteOffset, pixelCount * 4));
+					}
+					for (let y = 0; y < height; ++y) {
+						const srcRow = y * width;
+						const dstRow = (height - y - 1) * width;
+						for (let x = 0; x < width; ++x) {
+							const pixel = frameData32[srcRow + x];
+							data32[dstRow + x] = (pixel & 255) << 24 | (pixel & 65280) << 8 | (pixel & 16711680) >> 8 | (pixel & 4278190080) >>> 24;
+						}
 					}
 				}
 			} else {
-				const pal32 = this.convert32bPal(this.palette, true);
-				for (let y = 0; y < height; ++y) {
-					const rowStart = y * width;
-					for (let x = 0; x < width; ++x) {
-						const idx = frame.data[rowStart + x];
-						data32[rowStart + x] = pal32[idx];
+				if (!this._pal32Canvas && this.palette) this._pal32Canvas = this.convert32bPal(this.palette, true);
+				const pal32 = this._pal32Canvas || this.convert32bPal(this.palette, true);
+				const pixelCount = width * height;
+				const srcBytes = pixelCount;
+				const dstBytes = pixelCount * 4;
+				if (wasmInstance && wasmInstance.exports.framePalToCanvas) {
+					const memory = wasmInstance.exports.memory;
+					const palPtr = 0;
+					const srcPtr = 1024;
+					const dstPtr = srcPtr + srcBytes;
+					const totalBytesNeeded = dstPtr + dstBytes;
+					if (memory.buffer.byteLength < totalBytesNeeded) {
+						const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
+						memory.grow(additionalPages);
+					}
+					new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+					const frameBytes = new Uint8Array(frame.data.buffer, frame.data.byteOffset, srcBytes);
+					new Uint8Array(memory.buffer, srcPtr, srcBytes).set(frameBytes);
+					wasmInstance.exports.framePalToCanvas(palPtr, srcPtr, dstPtr, width, height);
+					new Uint8Array(imageData.data.buffer).set(new Uint8Array(memory.buffer, dstPtr, dstBytes));
+				} else {
+					const data32 = new Uint32Array(imageData.data.buffer);
+					const frameIndices = new Uint8Array(frame.data.buffer, frame.data.byteOffset, pixelCount);
+					for (let y = 0; y < height; ++y) {
+						const rowStart = y * width;
+						for (let x = 0; x < width; ++x) {
+							const idx = frameIndices[rowStart + x];
+							data32[rowStart + x] = pal32[idx];
+						}
 					}
 				}
 			}
@@ -78743,6 +78946,18 @@ var init_Sprite = __esmMin((() => {
 			let data, width, height, gl_width, gl_height, start_x, start_y;
 			let out;
 			const output = new Array(count);
+			let pal32 = null;
+			const MAGENTA = 4294902015;
+			const wasmInstance = getSpriteCompileWasm();
+			let wasmMem = null;
+			let wasmPalPtr = 0;
+			let wasmSrcPtr = 0;
+			let wasmPalInitialized = false;
+			if (wasmInstance) {
+				wasmMem = wasmInstance.exports.memory;
+				wasmPalPtr = 0;
+				wasmSrcPtr = 1024;
+			}
 			for (i = 0; i < count; ++i) {
 				frame = frames[i];
 				data = frame.data;
@@ -78753,18 +78968,51 @@ var init_Sprite = __esmMin((() => {
 				start_x = Math.floor((gl_width - width) * .5);
 				start_y = Math.floor((gl_height - height) * .5);
 				if (frame.type === SPR.TYPE_PAL) {
-					const pal32 = this.convert32bPal(this.palette, true);
-					const MAGENTA = 4294902015;
-					out = new Uint8Array(gl_width * gl_height);
-					for (let y = 0; y < height; ++y) {
-						const srcRow = y * width;
-						const dstRow = (y + start_y) * gl_width + start_x;
-						for (let x = 0; x < width; ++x) {
-							const idx = data[srcRow + x];
-							if (pal32[idx] === MAGENTA) out[dstRow + x] = 0;
-							else out[dstRow + x] = idx;
+					if (!pal32) pal32 = this.convert32bPal(this.palette, true);
+					if (width <= 0 || height <= 0) out = new Uint8Array(gl_width * gl_height);
+					else if (wasmInstance) {
+						const srcBytes = width * height;
+						const dstBytes = gl_width * gl_height;
+						const dstPtr = wasmSrcPtr + srcBytes;
+						const totalBytesNeeded = dstPtr + dstBytes;
+						if (wasmMem.buffer.byteLength < totalBytesNeeded) {
+							const additionalPages = Math.ceil((totalBytesNeeded - wasmMem.buffer.byteLength) / 65536);
+							wasmMem.grow(additionalPages);
+						}
+						if (!wasmPalInitialized) {
+							new Uint32Array(wasmMem.buffer, wasmPalPtr, 256).set(pal32);
+							wasmPalInitialized = true;
+						}
+						new Uint8Array(wasmMem.buffer, dstPtr, dstBytes).fill(0);
+						new Uint8Array(wasmMem.buffer, wasmSrcPtr, srcBytes).set(data);
+						wasmInstance.exports.compilePal(wasmPalPtr, wasmSrcPtr, dstPtr, width, height, gl_width, gl_height, start_x, start_y);
+						out = new Uint8Array(new Uint8Array(wasmMem.buffer, dstPtr, dstBytes));
+					} else {
+						out = new Uint8Array(gl_width * gl_height);
+						for (let y = 0; y < height; ++y) {
+							const srcRow = y * width;
+							const dstRow = (y + start_y) * gl_width + start_x;
+							for (let x = 0; x < width; ++x) {
+								const idx = data[srcRow + x];
+								if (pal32[idx] === MAGENTA) out[dstRow + x] = 0;
+								else out[dstRow + x] = idx;
+							}
 						}
 					}
+				} else if (width <= 0 || height <= 0) out = new Uint8Array(gl_width * gl_height * 4);
+				else if (wasmInstance) {
+					const srcBytes = width * height * 4;
+					const dstBytes = gl_width * gl_height * 4;
+					const dstPtr = wasmSrcPtr + srcBytes;
+					const totalBytesNeeded = dstPtr + dstBytes;
+					if (wasmMem.buffer.byteLength < totalBytesNeeded) {
+						const additionalPages = Math.ceil((totalBytesNeeded - wasmMem.buffer.byteLength) / 65536);
+						wasmMem.grow(additionalPages);
+					}
+					new Uint8Array(wasmMem.buffer, dstPtr, dstBytes).fill(0);
+					new Uint8Array(wasmMem.buffer, wasmSrcPtr, srcBytes).set(data);
+					wasmInstance.exports.compileRgba(wasmSrcPtr, dstPtr, width, height, gl_width, start_x, start_y);
+					out = new Uint8Array(new Uint8Array(wasmMem.buffer, dstPtr, dstBytes));
 				} else {
 					out = new Uint8Array(gl_width * gl_height * 4);
 					const out32 = new Uint32Array(out.buffer);
@@ -78960,7 +79208,7 @@ var init_Controls = __esmMin((() => {
 }));
 //#endregion
 //#region src/Vendors/gl-matrix.js
-var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$8, mat2$1, mat2d, mat3$6, mat4$24, quat$2;
+var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$8, mat2$1, mat2d, mat3$6, mat4$25, quat$2;
 var init_gl_matrix$1 = __esmMin((() => {
 	exports$3 = {};
 	if (!GLMAT_EPSILON) GLMAT_EPSILON = 1e-6;
@@ -80959,13 +81207,13 @@ var init_gl_matrix$1 = __esmMin((() => {
 		return "mat3(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ")";
 	};
 	if (typeof exports$3 !== "undefined") exports$3.mat3 = mat3$6;
-	mat4$24 = {};
+	mat4$25 = {};
 	/**
 	* Creates a new identity mat4
 	*
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$24.create = function() {
+	mat4$25.create = function() {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = 1;
 		out[1] = 0;
@@ -80991,7 +81239,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a matrix to clone
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$24.clone = function(a) {
+	mat4$25.clone = function(a) {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = a[0];
 		out[1] = a[1];
@@ -81018,7 +81266,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$24.copy = function(out, a) {
+	mat4$25.copy = function(out, a) {
 		out[0] = a[0];
 		out[1] = a[1];
 		out[2] = a[2];
@@ -81043,7 +81291,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} out the receiving matrix
 	* @returns {mat4} out
 	*/
-	mat4$24.identity = function(out) {
+	mat4$25.identity = function(out) {
 		out[0] = 1;
 		out[1] = 0;
 		out[2] = 0;
@@ -81069,7 +81317,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$24.transpose = function(out, a) {
+	mat4$25.transpose = function(out, a) {
 		if (out === a) {
 			var a01 = a[1], a02 = a[2], a03 = a[3], a12 = a[6], a13 = a[7], a23 = a[11];
 			out[1] = a[4];
@@ -81111,7 +81359,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$24.invert = function(out, a) {
+	mat4$25.invert = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31, b11 = a22 * a33 - a23 * a32, det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 		if (!det) return null;
 		det = 1 / det;
@@ -81140,7 +81388,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$24.adjoint = function(out, a) {
+	mat4$25.adjoint = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		out[0] = a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22);
 		out[1] = -(a01 * (a22 * a33 - a23 * a32) - a21 * (a02 * a33 - a03 * a32) + a31 * (a02 * a23 - a03 * a22));
@@ -81166,7 +81414,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {Number} determinant of a
 	*/
-	mat4$24.determinant = function(a) {
+	mat4$25.determinant = function(a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31;
 		return b00 * (a22 * a33 - a23 * a32) - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 	};
@@ -81178,7 +81426,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} b the second operand
 	* @returns {mat4} out
 	*/
-	mat4$24.multiply = function(out, a, b) {
+	mat4$25.multiply = function(out, a, b) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		var b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
 		out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
@@ -81215,7 +81463,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link mat4.multiply}
 	* @function
 	*/
-	mat4$24.mul = mat4$24.multiply;
+	mat4$25.mul = mat4$25.multiply;
 	/**
 	* Translate a mat4 by the given vector
 	*
@@ -81224,7 +81472,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v vector to translate by
 	* @returns {mat4} out
 	*/
-	mat4$24.translate = function(out, a, v) {
+	mat4$25.translate = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2], a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
 		if (a === out) {
 			out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
@@ -81271,7 +81519,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v the vec3 to scale the matrix by
 	* @returns {mat4} out
 	**/
-	mat4$24.scale = function(out, a, v) {
+	mat4$25.scale = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2];
 		out[0] = a[0] * x;
 		out[1] = a[1] * x;
@@ -81300,7 +81548,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} axis the axis to rotate around
 	* @returns {mat4} out
 	*/
-	mat4$24.rotate = function(out, a, rad, axis) {
+	mat4$25.rotate = function(out, a, rad, axis) {
 		var x = axis[0], y = axis[1], z = axis[2], len = Math.sqrt(x * x + y * y + z * z), s, c, t, a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, b00, b01, b02, b10, b11, b12, b20, b21, b22;
 		if (Math.abs(len) < GLMAT_EPSILON) return null;
 		len = 1 / len;
@@ -81359,7 +81607,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$24.rotateX = function(out, a, rad) {
+	mat4$25.rotateX = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[0] = a[0];
@@ -81389,7 +81637,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$24.rotateY = function(out, a, rad) {
+	mat4$25.rotateY = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[4] = a[4];
@@ -81419,7 +81667,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$24.rotateZ = function(out, a, rad) {
+	mat4$25.rotateZ = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
 		if (a !== out) {
 			out[8] = a[8];
@@ -81456,7 +81704,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v Translation vector
 	* @returns {mat4} out
 	*/
-	mat4$24.fromRotationTranslation = function(out, q, v) {
+	mat4$25.fromRotationTranslation = function(out, q, v) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81484,7 +81732,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	*
 	* @returns {mat4} out
 	*/
-	mat4$24.fromQuat = function(out, q) {
+	mat4$25.fromQuat = function(out, q) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81516,7 +81764,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$24.frustum = function(out, left, right, bottom, top, near, far) {
+	mat4$25.frustum = function(out, left, right, bottom, top, near, far) {
 		var rl = 1 / (right - left), tb = 1 / (top - bottom), nf = 1 / (near - far);
 		out[0] = near * 2 * rl;
 		out[1] = 0;
@@ -81546,7 +81794,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$24.perspective = function(out, fovy, aspect, near, far) {
+	mat4$25.perspective = function(out, fovy, aspect, near, far) {
 		var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
 		out[0] = f / aspect;
 		out[1] = 0;
@@ -81578,7 +81826,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$24.ortho = function(out, left, right, bottom, top, near, far) {
+	mat4$25.ortho = function(out, left, right, bottom, top, near, far) {
 		var lr = 1 / (left - right), bt = 1 / (bottom - top), nf = 1 / (near - far);
 		out[0] = -2 * lr;
 		out[1] = 0;
@@ -81607,9 +81855,9 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} up vec3 pointing up
 	* @returns {mat4} out
 	*/
-	mat4$24.lookAt = function(out, eye, center, up) {
+	mat4$25.lookAt = function(out, eye, center, up) {
 		var x0, x1, x2, y0, y1, y2, z0, z1, z2, len, eyex = eye[0], eyey = eye[1], eyez = eye[2], upx = up[0], upy = up[1], upz = up[2], centerx = center[0], centery = center[1], centerz = center[2];
-		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$24.identity(out);
+		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$25.identity(out);
 		z0 = eyex - centerx;
 		z1 = eyey - centery;
 		z2 = eyez - centerz;
@@ -81669,10 +81917,10 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} mat matrix to represent as a string
 	* @returns {String} string representation of the matrix
 	*/
-	mat4$24.str = function(a) {
+	mat4$25.str = function(a) {
 		return "mat4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + ", " + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + ")";
 	};
-	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$24;
+	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$25;
 	quat$2 = {};
 	/**
 	* Creates a new identity quat
@@ -83659,18 +83907,18 @@ var init_PostProcess = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Effects/Shaders/VerticalFlip.js
-var _program$27, _buffer$21, _active$3, VerticalFlip;
+var _program$28, _buffer$21, _active$4, VerticalFlip;
 var init_VerticalFlip = __esmMin((() => {
 	init_VerticalFlip$2();
 	init_VerticalFlip$1();
 	init_WebGL();
 	init_PostProcess();
-	_active$3 = false;
+	_active$4 = false;
 	VerticalFlip = class {
 		static init(gl) {
-			if (_program$27) return;
+			if (_program$28) return;
 			try {
-				_program$27 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
+				_program$28 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
 			} catch (e) {
 				console.error("Error when compiling shader VerticalFlip.", e);
 				return;
@@ -83703,19 +83951,19 @@ var init_VerticalFlip = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$21 || !_program$27 || !_active$3) return;
+			if (!_buffer$21 || !_program$28 || !_active$4) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$27);
+			gl.useProgram(_program$28);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$21);
-			let posLoc = _program$27.attribute.aPosition;
+			let posLoc = _program$28.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 0);
-			posLoc = _program$27.attribute.aTextureCoord;
+			posLoc = _program$28.attribute.aTextureCoord;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 8);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$27.uniform.uTexture, 0);
+			gl.uniform1i(_program$28.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 			PostProcess.afterRenderPass(gl);
 		}
@@ -83723,27 +83971,27 @@ var init_VerticalFlip = __esmMin((() => {
 		* @returns {WebGLProgram} Shader program
 		*/
 		static program() {
-			return _program$27;
+			return _program$28;
 		}
 		/** Resets effect state */
 		static clean(gl) {
-			_active$3 = false;
+			_active$4 = false;
 			if (_buffer$21) gl.deleteBuffer(_buffer$21);
-			_program$27 = _buffer$21 = null;
+			_program$28 = _buffer$21 = null;
 		}
 		/** @returns {boolean} Whether the effect is active */
 		static isActive() {
-			return _active$3;
+			return _active$4;
 		}
 		/** @param {boolean} bool - Enables/disables the effect */
 		static setActive(bool) {
-			_active$3 = bool;
+			_active$4 = bool;
 		}
 	};
 }));
 //#endregion
 //#region src/Renderer/Map/Altitude.js
-var _cells, _types$1, mat4$23, vec3$7, vec4$7, _from, _to, _unit, _matrix$7, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
+var _cells, _types$1, mat4$24, vec3$7, vec4$7, _from, _to, _unit, _matrix$7, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
 var init_Altitude = __esmMin((() => {
 	init_gl_matrix$1();
 	init_PathFinding();
@@ -83751,11 +83999,11 @@ var init_Altitude = __esmMin((() => {
 	init_VerticalFlip();
 	_cells = null;
 	_types$1 = null;
-	({mat4: mat4$23, vec3: vec3$7, vec4: vec4$7} = exports$3);
+	({mat4: mat4$24, vec3: vec3$7, vec4: vec4$7} = exports$3);
 	_from = vec3$7.create();
 	_to = vec4$7.create();
 	_unit = vec3$7.create();
-	_matrix$7 = mat4$23.create();
+	_matrix$7 = mat4$24.create();
 	buffer1x1 = /* @__PURE__ */ new Float32Array(30);
 	buffer5x5 = /* @__PURE__ */ new Float32Array(750);
 	buffer7x7 = /* @__PURE__ */ new Float32Array(1470);
@@ -83852,7 +84100,7 @@ var init_Altitude = __esmMin((() => {
 		static intersect(modelView, projection, out) {
 			let i;
 			const count = Altitude.MAX_INTERSECT_COUNT;
-			mat4$23.invert(_matrix$7, modelView);
+			mat4$24.invert(_matrix$7, modelView);
 			_from[0] = _matrix$7[12];
 			_from[1] = _matrix$7[13];
 			_from[2] = _matrix$7[14];
@@ -83861,8 +84109,8 @@ var init_Altitude = __esmMin((() => {
 			if (VerticalFlip.isActive()) _to[1] = -_to[1];
 			_to[2] = 1;
 			_to[3] = 1;
-			mat4$23.multiply(_matrix$7, projection, modelView);
-			mat4$23.invert(_matrix$7, _matrix$7);
+			mat4$24.multiply(_matrix$7, projection, modelView);
+			mat4$24.invert(_matrix$7, _matrix$7);
 			vec4$7.transformMat4(_to, _to, _matrix$7);
 			_to[0] /= _to[3];
 			_to[1] /= _to[3];
@@ -207705,28 +207953,35 @@ function render$15() {
 function transition(callback) {
 	const transitionDuration = Configs.get("transitionDuration") ? Configs.get("transitionDuration") : 500;
 	if (Background._overlayAnim) Background._overlayAnim.stop();
-	_overlay.style.opacity = "0.01";
-	document.body.appendChild(_overlay);
-	Background._overlayAnim = animateElement(_overlay, { opacity: 1 }, transitionDuration, () => {
+	let duration = transitionDuration;
+	if (_overlay$1.parentNode) {
+		if (parseFloat(_overlay$1.style.opacity) >= .99) duration = 1;
+	} else {
+		_overlay$1.style.opacity = "0.01";
+		document.body.appendChild(_overlay$1);
+	}
+	const anim = animateElement(_overlay$1, { opacity: 1 }, duration, () => {
 		callback();
-		Background._overlayAnim = animateElement(_overlay, { opacity: .01 }, transitionDuration, () => {
-			if (_overlay.parentNode) _overlay.parentNode.removeChild(_overlay);
+		if (Background._overlayAnim !== anim) return;
+		Background._overlayAnim = animateElement(_overlay$1, { opacity: .01 }, transitionDuration, () => {
+			if (_overlay$1.parentNode) _overlay$1.parentNode.removeChild(_overlay$1);
 		});
 	});
+	Background._overlayAnim = anim;
 }
-var _overlay, _container, _canvas, _ctx$5, Background;
+var _overlay$1, _container, _canvas, _ctx$5, Background;
 var init_Background = __esmMin((() => {
 	init_DBManager();
 	init_Client();
 	init_Configs();
 	init_PacketVerManager();
 	init_HtmlHelper();
-	_overlay = document.createElement("div");
-	Object.assign(_overlay.style, {
+	_overlay$1 = document.createElement("div");
+	Object.assign(_overlay$1.style, {
 		position: "absolute",
 		top: "0",
 		left: "0",
-		zIndex: "1000",
+		zIndex: "1010",
 		backgroundColor: "black",
 		opacity: "0"
 	});
@@ -207789,7 +208044,7 @@ var init_Background = __esmMin((() => {
 		static resize(width, height) {
 			_canvas.width = width;
 			_canvas.height = height;
-			Object.assign(_overlay.style, {
+			Object.assign(_overlay$1.style, {
 				width: width + "px",
 				height: height + "px"
 			});
@@ -207909,10 +208164,13 @@ var init_Background = __esmMin((() => {
 		* @param {function} callback once the overlay hide the window (optional)
 		*/
 		static remove(callback) {
-			const removal = {};
+			const removal = { zIndex: [_container.style.zIndex, _canvas.style.zIndex] };
 			Background._removal = removal;
+			_container.style.zIndex = "1008";
+			_canvas.style.zIndex = "1009";
 			transition(() => {
-				if (Background._removal === removal) {
+				if (Background._removal !== removal) [_container.style.zIndex, _canvas.style.zIndex] = removal.zIndex;
+				else {
 					Background._removal = null;
 					_container.style.zIndex = "0";
 					_canvas.style.zIndex = "0";
@@ -208482,7 +208740,7 @@ var init_GridSelector$1 = __esmMin((() => {
 *
 * @param {object} gl context
 */
-function init$13(gl) {
+function init$14(gl) {
 	Client.loadFile("data/texture/grid.tga", function(buffer) {
 		Texture.load(buffer, function(success) {
 			if (!success) return;
@@ -208505,7 +208763,7 @@ function init$13(gl) {
 		});
 	});
 	_buffer$20 = gl.createBuffer();
-	_program$26 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
+	_program$27 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$20);
 	gl.bufferData(gl.ARRAY_BUFFER, _buffer_data.byteLength, gl.DYNAMIC_DRAW);
 }
@@ -208521,10 +208779,10 @@ function init$13(gl) {
 */
 function render$14(gl, modelView, projection, fog, x, y) {
 	if (!_texture$5) return;
-	const uniform = _program$26.uniform;
-	const attribute = _program$26.attribute;
+	const uniform = _program$27.uniform;
+	const attribute = _program$27.attribute;
 	let z;
-	gl.useProgram(_program$26);
+	gl.useProgram(_program$27);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -208570,12 +208828,12 @@ function free$8(gl) {
 		gl.deleteTexture(_texture$5);
 		_texture$5 = null;
 	}
-	if (_program$26) {
-		gl.deleteProgram(_program$26);
-		_program$26 = null;
+	if (_program$27) {
+		gl.deleteProgram(_program$27);
+		_program$27 = null;
 	}
 }
-var _program$26, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
+var _program$27, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
 var init_GridSelector = __esmMin((() => {
 	init_Altitude();
 	init_Client();
@@ -208584,7 +208842,7 @@ var init_GridSelector = __esmMin((() => {
 	init_Configs();
 	init_GridSelector$2();
 	init_GridSelector$1();
-	_program$26 = null;
+	_program$27 = null;
 	_buffer$20 = null;
 	_texture$5 = null;
 	_xy = null;
@@ -208611,7 +208869,7 @@ var init_GridSelector = __esmMin((() => {
 		1
 	]);
 	GridSelector_default = {
-		init: init$13,
+		init: init$14,
 		free: free$8,
 		render: render$14
 	};
@@ -208697,9 +208955,9 @@ var init_Ground$1 = __esmMin((() => {
 * @param {object} light structure
 */
 function render$13(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$25.uniform;
-	const attribute = _program$25.attribute;
-	gl.useProgram(_program$25);
+	const uniform = _program$26.uniform;
+	const attribute = _program$26.attribute;
+	gl.useProgram(_program$26);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -208864,13 +209122,13 @@ function onTextureAtlasComplete(gl, atlas) {
 * @param {object} gl context
 * @param {object} data - ground
 */
-function init$12(gl, data) {
+function init$13(gl, data) {
 	_vertCount$1 = data.meshVertCount;
 	_width = data.width;
 	data.height;
 	_shadowMap = data.shadowMap;
 	if (!_buffer$19) _buffer$19 = gl.createBuffer();
-	if (!_program$25) _program$25 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
+	if (!_program$26) _program$26 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$19);
 	gl.bufferData(gl.ARRAY_BUFFER, data.mesh, gl.STATIC_DRAW);
 	initLightmap(gl, data.lightmap, data.lightmapSize);
@@ -208921,7 +209179,7 @@ function getShadowFactor(x, y) {
 	for (y = -3; y < 3; ++y) for (x = -3; x < 3; ++x) factor += _shadowMap[_x + x + (_y + y) * _width * 8];
 	return factor / 36 / 255;
 }
-var procCanvas$2, procCtx$2, _program$25, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
+var procCanvas$2, procCtx$2, _program$26, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
 var init_Ground = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -208931,7 +209189,7 @@ var init_Ground = __esmMin((() => {
 	init_Ground$1();
 	procCanvas$2 = document.createElement("canvas");
 	procCtx$2 = procCanvas$2.getContext("2d", { willReadFrequently: true });
-	_program$25 = null;
+	_program$26 = null;
 	_buffer$19 = null;
 	_lightmap = null;
 	_tileColor = null;
@@ -208940,10 +209198,753 @@ var init_Ground = __esmMin((() => {
 	_vertCount$1 = 0;
 	_width = 0;
 	Ground_default = {
-		init: init$12,
+		init: init$13,
 		free: free$7,
 		render: render$13,
 		getShadowFactor
+	};
+}));
+//#endregion
+//#region src/Renderer/SpriteAtlas.js
+/**
+* Pack every frame of a sprite file, tallest first, and upload it.
+*/
+function pack(spr) {
+	spr._atlasGeneration = _generation;
+	const placed = [];
+	const owned = [];
+	for (const atlas of [_index$1, _rgba]) {
+		const frames = [];
+		for (let i = 0; i < spr.frames.length; i++) {
+			const frame = spr.frames[i];
+			if (!frame || !!frame.type !== atlas.rgba) continue;
+			frame._atlas = null;
+			if (frame.data && frame.width > 0 && frame.height > 0) frames.push(frame);
+		}
+		if (!frames.length) continue;
+		frames.sort((a, b) => b.height - a.height || b.width - a.width);
+		const layers = /* @__PURE__ */ new Set();
+		const spots = [];
+		for (const frame of frames) {
+			const spot = atlas.place(frame.width + 2, frame.height + 2, layers);
+			if (!spot) continue;
+			spot.frame = frame;
+			spots.push(spot);
+			const size = atlas.size;
+			frame._atlas = {
+				rgba: atlas.rgba,
+				layer: spot.layer,
+				u0: (spot.x + 1) / size,
+				v0: (spot.y + 1) / size,
+				u1: (spot.x + 1 + frame.width) / size,
+				v1: (spot.y + 1 + frame.height) / size
+			};
+		}
+		let start = 0;
+		for (let i = 1; i <= spots.length; i++) if (i === spots.length || spots[i].layer !== spots[start].layer || spots[i].y !== spots[start].y) {
+			atlas.upload(spots.slice(start, i));
+			start = i;
+		}
+		if (layers.size) owned.push({
+			atlas,
+			layers
+		});
+		placed.push(...spots);
+	}
+	const generation = _generation;
+	spr._atlasRelease = () => {
+		spr._atlasRelease = null;
+		spr._atlasGeneration = 0;
+		if (generation !== _generation) return;
+		for (const { atlas, layers } of owned) atlas.release(layers);
+		for (const spot of placed) spot.frame._atlas = null;
+	};
+}
+var PALETTE_ROWS, UNIT_INDEX, UNIT_RGBA, UNIT_PALETTES, ArrayAtlas, _gl$5, _generation, _index$1, _rgba, _palettes, _paletteRows, _paletteNext, SpriteAtlas;
+var init_SpriteAtlas = __esmMin((() => {
+	init_Graphics();
+	PALETTE_ROWS = 512;
+	UNIT_INDEX = 5;
+	UNIT_RGBA = 6;
+	UNIT_PALETTES = 7;
+	ArrayAtlas = class {
+		/**
+		* @param {WebGL2RenderingContext} gl
+		* @param {boolean} rgba - RGBA frames, or palette indices
+		* @param {number} size - width and height of a layer
+		* @param {number} layers - layers to start with
+		* @param {number} maxLayers - layers it may grow to
+		*/
+		constructor(gl, rgba, size, layers, maxLayers) {
+			this.gl = gl;
+			this.rgba = rgba;
+			this.size = Math.min(size, gl.getParameter(gl.MAX_TEXTURE_SIZE) || size);
+			this.maxLayers = Math.min(maxLayers, gl.getParameter(gl.MAX_ARRAY_TEXTURE_LAYERS) || maxLayers);
+			this.capacity = 0;
+			this.texture = null;
+			this.filter = null;
+			this.use = [];
+			this.layer = -1;
+			this.x = 0;
+			this.y = 0;
+			this.shelf = 0;
+			this.allocate(Math.min(layers, this.maxLayers));
+		}
+		/**
+		* Make the texture hold `layers` layers, keeping what the old one held.
+		*/
+		allocate(layers) {
+			const gl = this.gl;
+			const old = this.texture;
+			const texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D_ARRAY, texture);
+			gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, this.rgba ? gl.RGBA8 : gl.R8, this.size, this.size, layers);
+			gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			this.texture = texture;
+			this.filter = null;
+			this.updateFilter();
+			if (old) {
+				const framebuffer = gl.createFramebuffer();
+				const previous = gl.getParameter(gl.READ_FRAMEBUFFER_BINDING);
+				gl.bindFramebuffer(gl.READ_FRAMEBUFFER, framebuffer);
+				for (let i = 0; i < this.capacity; i++) {
+					gl.framebufferTextureLayer(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, old, 0, i);
+					gl.copyTexSubImage3D(gl.TEXTURE_2D_ARRAY, 0, 0, 0, i, 0, 0, this.size, this.size);
+				}
+				gl.bindFramebuffer(gl.READ_FRAMEBUFFER, previous);
+				gl.deleteFramebuffer(framebuffer);
+				gl.deleteTexture(old);
+			}
+			for (let i = this.capacity; i < layers; i++) this.use[i] = 0;
+			this.capacity = layers;
+		}
+		/**
+		* RGBA frames are smoothed unless pixel perfect sprites are on; palette
+		* frames are read texel by texel.
+		*/
+		updateFilter() {
+			const gl = this.gl;
+			const filter = this.rgba && !GraphicsSettings.pixelPerfectSprites ? gl.LINEAR : gl.NEAREST;
+			if (filter !== this.filter) {
+				this.filter = filter;
+				gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texture);
+				gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, filter);
+				gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, filter);
+			}
+		}
+		/**
+		* Move to an empty layer: one no file lives on any more, or a new one.
+		*
+		* @returns {boolean} false when it cannot grow any more
+		*/
+		nextLayer() {
+			let layer = -1;
+			for (let i = 0; i < this.capacity; i++) if (i !== this.layer && this.use[i] === 0) {
+				layer = i;
+				break;
+			}
+			if (layer < 0) {
+				if (this.capacity >= this.maxLayers) return false;
+				layer = this.capacity;
+				this.allocate(Math.min(this.capacity * 2, this.maxLayers));
+			}
+			this.layer = layer;
+			this.x = 0;
+			this.y = 0;
+			this.shelf = 0;
+			return true;
+		}
+		/**
+		* Find room for a w x h rectangle.
+		*
+		* @param {Set} layers - the layers the file being packed is on; a layer
+		*   joins it (and is counted as used) as soon as the file has a frame on it
+		* @returns {object|null} { layer, x, y }
+		*/
+		place(w, h, layers) {
+			if (w > this.size || h > this.size) return null;
+			if (this.layer < 0 && !this.nextLayer()) return null;
+			if (this.x + w > this.size) {
+				this.y += this.shelf;
+				this.x = 0;
+				this.shelf = 0;
+			}
+			if (this.y + h > this.size) {
+				if (!this.nextLayer()) return null;
+			}
+			if (!layers.has(this.layer)) {
+				layers.add(this.layer);
+				this.use[this.layer]++;
+			}
+			const spot = {
+				layer: this.layer,
+				x: this.x,
+				y: this.y
+			};
+			this.x += w;
+			this.shelf = Math.max(this.shelf, h);
+			return spot;
+		}
+		/**
+		* A file on these layers was freed.
+		*/
+		release(layers) {
+			for (const layer of layers) if (--this.use[layer] === 0 && layer === this.layer) {
+				this.x = 0;
+				this.y = 0;
+				this.shelf = 0;
+			}
+		}
+		/**
+		* Copy one shelf of a file's frames to the GPU, with a copy of each
+		* frame's edge pixels around it, so sampling past its edge reads what
+		* CLAMP_TO_EDGE read on its own texture.
+		*
+		* @param {Array} spots - { frame, layer, x, y } on one shelf, left to right
+		*/
+		upload(spots) {
+			const gl = this.gl;
+			const first = spots[0];
+			const last = spots[spots.length - 1];
+			const left = first.x;
+			const width = last.x + last.frame.width + 2 - left;
+			let height = 0;
+			for (const spot of spots) height = Math.max(height, spot.frame.height + 2);
+			const pixels = this.rgba ? new Uint32Array(width * height) : new Uint8Array(width * height);
+			for (const { frame, x } of spots) {
+				const fw = frame.width;
+				const fh = frame.height;
+				const src = this.rgba ? new Uint32Array(frame.data.buffer, frame.data.byteOffset, fw * fh) : frame.data;
+				const dx = x - left + 1;
+				for (let row = -1; row <= fh; row++) {
+					const srcRow = Math.min(Math.max(row, 0), fh - 1) * fw;
+					const dst = (row + 1) * width + dx;
+					pixels[dst - 1] = src[srcRow];
+					pixels.set(src.subarray(srcRow, srcRow + fw), dst);
+					pixels[dst + fw] = src[srcRow + fw - 1];
+				}
+			}
+			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+			gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.texture);
+			gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0, left, first.y, first.layer, width, height, 1, this.rgba ? gl.RGBA : gl.RED, gl.UNSIGNED_BYTE, this.rgba ? new Uint8Array(pixels.buffer) : pixels);
+		}
+		destroy() {
+			if (this.texture) {
+				this.gl.deleteTexture(this.texture);
+				this.texture = null;
+			}
+		}
+	};
+	_gl$5 = null;
+	_generation = 0;
+	_index$1 = null;
+	_rgba = null;
+	_palettes = null;
+	_paletteRows = /* @__PURE__ */ new WeakMap();
+	_paletteNext = 0;
+	SpriteAtlas = class {
+		/**
+		* @type {number} rows of the palette texture
+		*/
+		static PALETTE_ROWS = PALETTE_ROWS;
+		/**
+		* @type {number} texture units the atlas is bound to while drawing
+		*/
+		static UNIT_INDEX = UNIT_INDEX;
+		static UNIT_RGBA = UNIT_RGBA;
+		static UNIT_PALETTES = UNIT_PALETTES;
+		/**
+		* Create the textures for a context (again, if it changed).
+		*
+		* @param {WebGL2RenderingContext} gl
+		*/
+		static init(gl) {
+			if (_gl$5 === gl) return;
+			if (_index$1) {
+				_index$1.destroy();
+				_rgba.destroy();
+			}
+			if (_palettes) _gl$5.deleteTexture(_palettes);
+			_gl$5 = gl;
+			_generation++;
+			_index$1 = new ArrayAtlas(gl, false, 2048, 2, 16);
+			_rgba = new ArrayAtlas(gl, true, 1024, 1, 16);
+			_palettes = gl.createTexture();
+			gl.activeTexture(gl.TEXTURE0 + UNIT_PALETTES);
+			gl.bindTexture(gl.TEXTURE_2D, _palettes);
+			gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, 256, PALETTE_ROWS);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.activeTexture(gl.TEXTURE0);
+			_paletteRows = /* @__PURE__ */ new WeakMap();
+			_paletteNext = 0;
+		}
+		/**
+		* Forget the textures of a lost context, which the restored context
+		* object still matches. The next init() creates them again, and the
+		* new generation makes every sprite file pack itself again.
+		*/
+		static contextRestored() {
+			_gl$5 = null;
+			_index$1 = null;
+			_rgba = null;
+			_palettes = null;
+		}
+		/**
+		* @returns {object} { index, rgba, palettes, indexSize } the textures to bind
+		*/
+		static get textures() {
+			_rgba.updateFilter();
+			return {
+				index: _index$1.texture,
+				rgba: _rgba.texture,
+				palettes: _palettes,
+				indexSize: _index$1.size
+			};
+		}
+		/**
+		* Where a frame is in the atlas, packing its sprite file on first use.
+		*
+		* @param {object} spr - compiled sprite file
+		* @param {object} frame - one of spr.frames
+		* @returns {object|null} { rgba, layer, u0, v0, u1, v1 }, or null if it has no room
+		*/
+		static frame(spr, frame) {
+			if (spr._atlasGeneration !== _generation) pack(spr);
+			return frame._atlas || null;
+		}
+		/**
+		* The palette texture's row holding a palette, uploading it on first use.
+		*
+		* @param {WebGLTexture} texture - the palette's own texture, as a key
+		* @param {Uint8Array} data - its 256 RGBA colours
+		* @returns {number} the row, or -1 when the texture is full (or no data)
+		*/
+		static paletteRow(texture, data) {
+			const known = _paletteRows.get(texture);
+			if (known !== void 0) return known;
+			if (_paletteNext >= PALETTE_ROWS || !data || data.length < 1024) return -1;
+			const gl = _gl$5;
+			const row = _paletteNext++;
+			gl.activeTexture(gl.TEXTURE0 + UNIT_PALETTES);
+			gl.bindTexture(gl.TEXTURE_2D, _palettes);
+			gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, row, 256, 1, gl.RGBA, gl.UNSIGNED_BYTE, data.length === 1024 ? data : data.subarray(0, 1024));
+			gl.activeTexture(gl.TEXTURE0);
+			_paletteRows.set(texture, row);
+			return row;
+		}
+		/**
+		* Start the palette texture over if it filled up. Call between frames,
+		* never while sprites using its rows wait to be drawn.
+		*/
+		static recyclePalettes() {
+			if (_paletteNext >= PALETTE_ROWS) {
+				_paletteRows = /* @__PURE__ */ new WeakMap();
+				_paletteNext = 0;
+			}
+		}
+	};
+}));
+//#endregion
+//#region src/Renderer/SpriteBatch.vs?raw
+var SpriteBatch_default$1;
+var init_SpriteBatch$2 = __esmMin((() => {
+	SpriteBatch_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\n// The quad, shared by every sprite\r\nin vec2 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\n// One sprite per instance; see SpriteBatch.js for how these are packed\r\nin vec4 aPositionZIndex;  // xyz world position, w zIndex\r\nin vec4 aOffsetSize;      // xy offset, zw size (both in world units)\r\nin vec4 aColor;\r\nin vec4 aUV;              // xy top-left, zw bottom-right, in the texture\r\nin vec4 aAngleDepthShadowCap; // angle (degrees), depth, shadow, ignore z-index cap (0/1)\r\nin vec3 aSource;          // where the pixels are, atlas layer, palette row (see SpriteBatch.js)\r\n\r\nout vec2 vTextureCoord;\r\nflat out vec4 vUV;\r\nflat out vec4 vColor;\r\nflat out float vShadow;\r\nflat out vec3 vSource;    // source, atlas layer, palette row\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uViewModelMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nuniform float uCameraZoom;\r\nuniform bool  uDisableDepthCorrection;\r\n\r\n// The same as SpriteRenderer.vs, with the per-sprite uniforms read from the instance.\r\nmat4 Project( mat4 mat, vec3 pos) {\r\n\r\n    // xyz = x(-z)y + middle of cell (0.5)\r\n    float x =  pos.x + 0.5;\r\n    float y = -pos.z;\r\n    float z =  pos.y + 0.5;\r\n\r\n    // Matrix translation\r\n    mat[3].x += mat[0].x * x + mat[1].x * y + mat[2].x * z;\r\n    mat[3].y += mat[0].y * x + mat[1].y * y + mat[2].y * z;\r\n    mat[3].z += (mat[0].z * x + mat[1].z * y + mat[2].z * z);\r\n    mat[3].w += mat[0].w * x + mat[1].w * y + mat[2].w * z;\r\n\r\n    // Spherical billboard\r\n    mat[0].xyz = vec3( 1.0, 0.0, 0.0 );\r\n    mat[1].xyz = vec3( 0.0, 1.0, 0.0 );\r\n    mat[2].xyz = vec3( 0.0, 0.0, 1.0 );\r\n\r\n    return mat;\r\n}\r\n\r\nvec3 getCameraPosition() {\r\n    return (uViewModelMat * vec4(0.0, 0.0, 0.0, 1.0)).xyz;\r\n}\r\n\r\nvec3 getCameraForward() {\r\n    return normalize((uViewModelMat * vec4(0.0, 0.0, -1.0, 0.0)).xyz);\r\n}\r\n\r\nvoid main(void) {\r\n    // Rotation, as mat4.rotateZ(-angle) in SpriteRenderer.js\r\n    float angle = -aAngleDepthShadowCap.x / 180.0 * 3.14159265358979;\r\n    float c = cos(angle);\r\n    float s = sin(angle);\r\n    vec2 scaled = aPosition * aOffsetSize.zw;\r\n    vec4 position = vec4( c * scaled.x - s * scaled.y, s * scaled.x + c * scaled.y, 0.0, 1.0 );\r\n    position.x   += aOffsetSize.x;\r\n    position.y   -= aOffsetSize.y + 0.5;\r\n\r\n    mat4 modelView = Project(uModelViewMat, aPositionZIndex.xyz);\r\n    vec4 viewPosition = modelView * position;\r\n    vec4 viewCenter   = modelView * vec4( 0.0, 0.0, 0.0, 1.0 );\r\n\r\n    gl_Position = uProjectionMat * viewPosition;\r\n\r\n    vec3 cameraPos     = getCameraPosition();\r\n    vec3 cameraForward = getCameraForward();\r\n\r\n    if (!uDisableDepthCorrection) {\r\n        // See SpriteRenderer.vs\r\n        vec3 planePoint = (uViewModelMat * viewCenter).xyz;\r\n        vec3 planeNormal = normalize(vec3(cameraForward.x, 0.0, cameraForward.z));\r\n        if (length(planeNormal) < 0.000001) {\r\n            planeNormal = cameraForward;\r\n        }\r\n\r\n        vec3 worldVertex = (uViewModelMat * viewPosition).xyz;\r\n        vec3 rayDir      = normalize(worldVertex - cameraPos);\r\n        float denom      = max(dot(planeNormal, rayDir), 0.000001);\r\n        float dist       = dot(planePoint - cameraPos, planeNormal) / denom;\r\n\r\n        vec4 planeClip       = uProjectionMat * (uModelViewMat * vec4(cameraPos + rayDir * dist, 1.0));\r\n        float correctedZBase = planeClip.z * (gl_Position.w / max(planeClip.w, 0.000001));\r\n\r\n        gl_Position.z = aAngleDepthShadowCap.w > 0.5 ? correctedZBase : min(gl_Position.z, correctedZBase);\r\n    }\r\n    gl_Position.z -= (aPositionZIndex.w * 0.01 + aAngleDepthShadowCap.y) / max(uCameraZoom, 1.0);\r\n\r\n    vTextureCoord = aTextureCoord;\r\n    vUV     = aUV;\r\n    vColor  = aColor;\r\n    vShadow = aAngleDepthShadowCap.z;\r\n    vSource = aSource;\r\n}";
+}));
+//#endregion
+//#region src/Renderer/SpriteBatch.fs?raw
+var SpriteBatch_default;
+var init_SpriteBatch$1 = __esmMin((() => {
+	SpriteBatch_default = "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DArray;\r\n\r\nin vec2 vTextureCoord;  // 0..1 across the frame, as in SpriteRenderer.fs\r\nflat in vec4 vUV;       // the frame's rectangle in the texture\r\nflat in vec4 vColor;\r\nflat in float vShadow;\r\nflat in vec3 vSource;   // source, atlas layer, palette row (see SpriteBatch.js)\r\nout vec4 fragColor;\r\n\r\n// The sprite's own texture and palette (source 0, palette row -2)\r\nuniform sampler2D uDiffuse;\r\nuniform sampler2D uPalette;\r\nuniform vec2 uTextSize;\r\n\r\n// The shared atlas (SpriteAtlas.js)\r\nuniform sampler2DArray uIndexAtlas;\r\nuniform sampler2DArray uRGBAAtlas;\r\nuniform sampler2D uPaletteAtlas;\r\nuniform vec2 uIndexAtlasSize;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\n// Where a point of the frame (0..1) is in the texture\r\nvec2 toTexture(vec2 uv) {\r\n    return mix(vUV.xy, vUV.zw, uv);\r\n}\r\n\r\n// One texel of the frame, as NEAREST with CLAMP_TO_EDGE picks it on the\r\n// frame's own texture. Done in the frame's texels, not the atlas's, so the\r\n// rounding is the frame's: a sample that falls on a texel's edge picks the\r\n// same side it did before.\r\nfloat fetchIndex(vec2 uv, vec2 size, vec2 origin) {\r\n    ivec2 texel = ivec2(origin + clamp(floor(uv * size), vec2(0.0), size - 1.0));\r\n    if (vSource.x > 0.5) {\r\n        return texelFetch(uIndexAtlas, ivec3(texel, int(vSource.y + 0.5)), 0).x;\r\n    }\r\n    return texelFetch(uDiffuse, texel, 0).x;\r\n}\r\n\r\n// A palette colour; index is the texel's value, k / 255. On its own texture,\r\n// texture(LUT, vec2(index, 1.0)) reads colour k, except for 255: 1.0 wraps\r\n// around (palette textures REPEAT) and reads colour 0. The atlas does the same.\r\nvec4 lookup(float index) {\r\n    if (vSource.z > -0.5) {\r\n        int k = int(index * 255.0 + 0.5);\r\n        return vec4(texelFetch(uPaletteAtlas, ivec2(k == 255 ? 0 : k, int(vSource.z + 0.5)), 0).rgb, 1.0);\r\n    }\r\n    return vec4(texture(uPalette, vec2(index, 1.0)).rgb, 1.0);\r\n}\r\n\r\n// The same as SpriteRenderer.fs, on the frame's own coordinates.\r\nvec4 bilinearSample(vec2 uv) {\r\n    vec2 atlasSize = vSource.x > 0.5 ? uIndexAtlasSize : uTextSize * 0.5;\r\n    vec2 size      = floor((vUV.zw - vUV.xy) * atlasSize + 0.5);\r\n    vec2 origin    = floor(vUV.xy * atlasSize + 0.5);\r\n    vec2 textSize  = size * 2.0;\r\n    vec2 TextInterval = 1.0 / textSize;\r\n\r\n    float tlLUT = fetchIndex(uv, size, origin);\r\n    float trLUT = fetchIndex(uv + vec2(TextInterval.x, 0.0), size, origin);\r\n    float blLUT = fetchIndex(uv + vec2(0.0, TextInterval.y), size, origin);\r\n    float brLUT = fetchIndex(uv + TextInterval, size, origin);\r\n\r\n    vec4 transparent = vec4( 0.0, 0.0, 0.0, 0.0);\r\n\r\n    vec4 tl = tlLUT == 0.0 ? transparent : lookup(tlLUT);\r\n    vec4 tr = trLUT == 0.0 ? transparent : lookup(trLUT);\r\n    vec4 bl = blLUT == 0.0 ? transparent : lookup(blLUT);\r\n    vec4 br = brLUT == 0.0 ? transparent : lookup(brLUT);\r\n\r\n    vec2 f  = fract( uv.xy * textSize );\r\n    vec4 tA = mix( tl, tr, f.x );\r\n    vec4 tB = mix( bl, br, f.x );\r\n\r\n    return mix( tA, tB, f.y );\r\n}\r\n\r\n\r\nvoid main(void) {\r\n\r\n    // Don't render if it's not shown.\r\n    if (vColor.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    // Calculate texture\r\n    vec4 textureSample;\r\n    if (abs(vSource.z + 1.0) > 0.5) { // a palette: not -1\r\n        textureSample = bilinearSample( vTextureCoord );\r\n    }\r\n    else if (vSource.x > 1.5) {\r\n        textureSample = texture( uRGBAAtlas, vec3(toTexture(vTextureCoord.st), vSource.y) );\r\n    }\r\n    else {\r\n        textureSample = texture( uDiffuse, toTexture(vTextureCoord.st) );\r\n    }\r\n\r\n    // No alpha, skip.\r\n    if ( textureSample.a == 0.0 )\r\n        discard;\r\n\r\n    // Apply shadow, apply color\r\n    textureSample.rgb   *= vShadow;\r\n    fragColor   = textureSample * vColor;\r\n\r\n    // Fog feature\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}\r\n";
+}));
+//#endregion
+//#region src/Renderer/SpriteBatch.js
+/**
+* Create the program, the quad and the vertex array. The batch keeps its own
+* quad (the same one SpriteRenderer draws), so a context restore rebuilds it
+* here whatever SpriteRenderer holds.
+*
+* @param {WebGL2RenderingContext} gl
+*/
+function init$12(gl) {
+	_gl$4 = gl;
+	_program$25 = WebGL_default.createShaderProgram(gl, SpriteBatch_default$1, SpriteBatch_default);
+	_quad = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, _quad);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+		-.5,
+		.5,
+		0,
+		0,
+		.5,
+		.5,
+		1,
+		0,
+		-.5,
+		-.5,
+		0,
+		1,
+		.5,
+		-.5,
+		1,
+		1
+	]), gl.STATIC_DRAW);
+	_instanceBuffer = gl.createBuffer();
+	_vao = gl.createVertexArray();
+	const attribute = _program$25.attribute;
+	gl.bindVertexArray(_vao);
+	gl.bindBuffer(gl.ARRAY_BUFFER, _quad);
+	gl.enableVertexAttribArray(attribute.aPosition);
+	gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 16, 0);
+	gl.enableVertexAttribArray(attribute.aTextureCoord);
+	gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 16, 8);
+	gl.bindBuffer(gl.ARRAY_BUFFER, _instanceBuffer);
+	for (const name of [
+		"aPositionZIndex",
+		"aOffsetSize",
+		"aColor",
+		"aUV",
+		"aAngleDepthShadowCap",
+		"aSource"
+	]) {
+		gl.enableVertexAttribArray(attribute[name]);
+		gl.vertexAttribDivisor(attribute[name], 1);
+	}
+	pointInstances(0);
+	gl.bindVertexArray(null);
+}
+/**
+* Point the instance attributes at a run's first sprite (WebGL 2 has no
+* base instance, so each run moves the pointers instead).
+*
+* @param {number} first - index of the run's first sprite in the buffer
+*/
+function pointInstances(first) {
+	const gl = _gl$4;
+	const attribute = _program$25.attribute;
+	const base = first * STRIDE;
+	gl.vertexAttribPointer(attribute.aPositionZIndex, 4, gl.FLOAT, false, STRIDE, base);
+	gl.vertexAttribPointer(attribute.aOffsetSize, 4, gl.FLOAT, false, STRIDE, base + 16);
+	gl.vertexAttribPointer(attribute.aColor, 4, gl.FLOAT, false, STRIDE, base + 32);
+	gl.vertexAttribPointer(attribute.aUV, 4, gl.FLOAT, false, STRIDE, base + 48);
+	gl.vertexAttribPointer(attribute.aAngleDepthShadowCap, 4, gl.FLOAT, false, STRIDE, base + 64);
+	gl.vertexAttribPointer(attribute.aSource, 3, gl.FLOAT, false, STRIDE, base + 80);
+}
+var mat4$23, FLOATS, STRIDE, SOURCE_OWN, SOURCE_INDEX, SOURCE_RGBA, PALETTE_NONE, PALETTE_OWN, QUEUE_SHADOW, QUEUE_MAIN, Queue$1, Run, _gl$4, _program$25, _vao, _quad, _instanceBuffer, _upload, _active$3, _queues, _modelView$1, _viewModel, _projection, _fogColor, _frame, _glState, SpriteBatch;
+var init_SpriteBatch = __esmMin((() => {
+	init_WebGL();
+	init_gl_matrix();
+	init_SpriteAtlas();
+	init_SpriteBatch$2();
+	init_SpriteBatch$1();
+	mat4$23 = gl_matrix_default.mat4;
+	FLOATS = 24;
+	STRIDE = 96;
+	SOURCE_OWN = 0;
+	SOURCE_INDEX = 1;
+	SOURCE_RGBA = 2;
+	PALETTE_NONE = -1;
+	PALETTE_OWN = -2;
+	QUEUE_SHADOW = 0;
+	QUEUE_MAIN = 1;
+	Queue$1 = class {
+		constructor() {
+			this.data = new Float32Array(FLOATS * 256);
+			this.count = 0;
+			this.runs = [];
+			this.runCount = 0;
+		}
+		reserve() {
+			if ((this.count + 1) * FLOATS > this.data.length) {
+				const data = new Float32Array(this.data.length * 2);
+				data.set(this.data);
+				this.data = data;
+			}
+			return this.count++ * FLOATS;
+		}
+		clear() {
+			this.count = 0;
+			this.runCount = 0;
+		}
+	};
+	Run = class {
+		constructor() {
+			this.start = 0;
+			this.count = 0;
+			this.texture = null;
+			this.palette = null;
+			this.textSizeX = 0;
+			this.textSizeY = 0;
+			this.blendOne = null;
+			this.depthTest = true;
+			this.depthMask = true;
+			this.noCorrection = false;
+		}
+	};
+	_gl$4 = null;
+	_program$25 = null;
+	_vao = null;
+	_quad = null;
+	_instanceBuffer = null;
+	_upload = /* @__PURE__ */ new Float32Array(0);
+	_active$3 = false;
+	_queues = [new Queue$1(), new Queue$1()];
+	_modelView$1 = /* @__PURE__ */ new Float32Array(16);
+	_viewModel = /* @__PURE__ */ new Float32Array(16);
+	_projection = /* @__PURE__ */ new Float32Array(16);
+	_fogColor = /* @__PURE__ */ new Float32Array(3);
+	_frame = {
+		fogUse: false,
+		fogNear: 0,
+		fogFar: 0,
+		zoom: 1
+	};
+	_glState = {
+		depthTest: true,
+		depthMask: true,
+		blendOne: null
+	};
+	SpriteBatch = class SpriteBatch {
+		/**
+		* @type {boolean} set false to draw every sprite on its own (Config `spriteBatching`)
+		*/
+		static enabled = true;
+		/**
+		* @type {number} queue ids, for record()
+		*/
+		static SHADOW = QUEUE_SHADOW;
+		static MAIN = QUEUE_MAIN;
+		/**
+		* @type {number} sources and palettes, for the sprite's instance values
+		*/
+		static SOURCE_OWN = SOURCE_OWN;
+		static SOURCE_INDEX = SOURCE_INDEX;
+		static SOURCE_RGBA = SOURCE_RGBA;
+		static PALETTE_NONE = PALETTE_NONE;
+		static PALETTE_OWN = PALETTE_OWN;
+		/**
+		* @returns {boolean} a batch is open: SpriteRenderer records instead of drawing
+		*/
+		static get active() {
+			return _active$3;
+		}
+		/**
+		* Capture the uniforms SpriteRenderer.bind3DContext set, for the runs
+		* recorded after it.
+		*/
+		static setFrame(modelView, projection, fog, zoom) {
+			_modelView$1.set(modelView);
+			_projection.set(projection);
+			mat4$23.invert(_viewModel, _modelView$1);
+			_frame.fogUse = !!(fog.use && fog.exist);
+			_frame.fogNear = fog.near;
+			_frame.fogFar = fog.far;
+			_fogColor.set(fog.color);
+			_frame.zoom = zoom;
+		}
+		/**
+		* Start recording.
+		*
+		* @param {WebGL2RenderingContext} gl
+		* @param {object} state - the GL state now: { depthTest, depthMask }
+		* @returns {boolean} whether recording started
+		*/
+		static open(gl, state) {
+			if (!SpriteBatch.enabled || _active$3 || typeof gl.drawArraysInstanced !== "function") return false;
+			if (!_program$25 || _gl$4 !== gl) init$12(gl);
+			SpriteAtlas.init(gl);
+			SpriteAtlas.recyclePalettes();
+			_glState.depthTest = state.depthTest;
+			_glState.depthMask = state.depthMask;
+			_glState.blendOne = null;
+			_active$3 = true;
+			return true;
+		}
+		/**
+		* Forget the GL state flush() left: something else drew since.
+		*/
+		static invalidate() {
+			_glState.depthTest = null;
+			_glState.depthMask = null;
+			_glState.blendOne = null;
+		}
+		/**
+		* Draw what was recorded and stop recording.
+		*
+		* @param {object} state - the GL state recording left: { depthTest, depthMask, blendOne }
+		*/
+		static close(state) {
+			if (!_active$3) return;
+			SpriteBatch.flush(state);
+			_active$3 = false;
+		}
+		/**
+		* Where a frame is in the shared atlas, packing its sprite file on first use.
+		*
+		* @param {object} spr - compiled sprite file
+		* @param {object} frame - one of spr.frames
+		* @returns {object|null} { rgba, layer, u0, v0, u1, v1 }
+		*/
+		static atlasFor(spr, frame) {
+			return SpriteAtlas.frame(spr, frame);
+		}
+		/**
+		* The atlas row of a palette, or -1 when it has to stay on its own texture.
+		*
+		* @param {WebGLTexture} texture - the palette's texture
+		* @param {Uint8Array} data - its colours
+		* @returns {number}
+		*/
+		static paletteRow(texture, data) {
+			return SpriteAtlas.paletteRow(texture, data);
+		}
+		/**
+		* Forget every GPU object made on the lost context. The context object
+		* stays the same after a restore, so the next open() would otherwise
+		* keep using them. Call from Renderer.onContextRestored.
+		*/
+		static contextRestored() {
+			_gl$4 = null;
+			_program$25 = null;
+			_vao = null;
+			_quad = null;
+			_instanceBuffer = null;
+			_active$3 = false;
+			_queues[QUEUE_SHADOW].clear();
+			_queues[QUEUE_MAIN].clear();
+			SpriteAtlas.contextRestored();
+		}
+		/**
+		* Record one sprite. Returns the offset in the queue's data where the
+		* caller writes the sprite's FLOATS values.
+		*
+		* @param {number} queue - SpriteBatch.SHADOW or SpriteBatch.MAIN
+		* @param {WebGLTexture|null} texture - the sprite's own texture, null when it is in the atlas
+		* @param {WebGLTexture|null} palette - its own palette texture (PALETTE_OWN), or null
+		* @param {number} textSizeX - uTextSize, for its own texture and palette
+		* @param {number} textSizeY
+		* @param {boolean|null} blendOne - additive blend, or null for unchanged
+		* @param {boolean} depthTest
+		* @param {boolean} depthMask
+		* @param {boolean} noCorrection - disable the depth correction
+		* @returns {Float32Array} data; write the sprite at SpriteBatch.offset
+		*/
+		static record(queue, texture, palette, textSizeX, textSizeY, blendOne, depthTest, depthMask, noCorrection) {
+			const q = _queues[queue];
+			let run = q.runCount ? q.runs[q.runCount - 1] : null;
+			if (!run || run.texture !== texture || run.palette !== palette || texture && palette && (run.textSizeX !== textSizeX || run.textSizeY !== textSizeY) || run.blendOne !== blendOne || run.depthTest !== depthTest || run.depthMask !== depthMask || run.noCorrection !== noCorrection) {
+				run = q.runs[q.runCount] || (q.runs[q.runCount] = new Run());
+				q.runCount++;
+				run.start = q.count;
+				run.count = 0;
+				run.texture = texture;
+				run.palette = palette;
+				run.textSizeX = textSizeX;
+				run.textSizeY = textSizeY;
+				run.blendOne = blendOne;
+				run.depthTest = depthTest;
+				run.depthMask = depthMask;
+				run.noCorrection = noCorrection;
+			}
+			run.count++;
+			SpriteBatch.offset = q.reserve();
+			return q.data;
+		}
+		/**
+		* @type {number} where record() put the sprite in the returned data
+		*/
+		static offset = 0;
+		/**
+		* Draw everything recorded so far: the shadows, then the rest.
+		*
+		* @param {object} state - the GL state to leave behind: { depthTest, depthMask, blendOne }
+		* @returns {number} draw calls made
+		*/
+		static flush(state) {
+			const shadow = _queues[QUEUE_SHADOW];
+			const main = _queues[QUEUE_MAIN];
+			const total = shadow.count + main.count;
+			if (!_active$3 || !total) return 0;
+			const gl = _gl$4;
+			const uniform = _program$25.uniform;
+			if (_upload.length < total * FLOATS) _upload = new Float32Array(total * FLOATS * 2);
+			_upload.set(shadow.data.subarray(0, shadow.count * FLOATS), 0);
+			_upload.set(main.data.subarray(0, main.count * FLOATS), shadow.count * FLOATS);
+			gl.bindBuffer(gl.ARRAY_BUFFER, _instanceBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, _upload, gl.STREAM_DRAW, 0, total * FLOATS);
+			gl.useProgram(_program$25);
+			gl.bindVertexArray(_vao);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, _projection);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, _modelView$1);
+			gl.uniformMatrix4fv(uniform.uViewModelMat, false, _viewModel);
+			gl.uniform1f(uniform.uCameraZoom, _frame.zoom);
+			gl.uniform1i(uniform.uFogUse, _frame.fogUse);
+			gl.uniform1f(uniform.uFogNear, _frame.fogNear);
+			gl.uniform1f(uniform.uFogFar, _frame.fogFar);
+			gl.uniform3fv(uniform.uFogColor, _fogColor);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.uniform1i(uniform.uPalette, 1);
+			gl.uniform1i(uniform.uIndexAtlas, SpriteAtlas.UNIT_INDEX);
+			gl.uniform1i(uniform.uRGBAAtlas, SpriteAtlas.UNIT_RGBA);
+			gl.uniform1i(uniform.uPaletteAtlas, SpriteAtlas.UNIT_PALETTES);
+			const atlas = SpriteAtlas.textures;
+			gl.uniform2f(uniform.uIndexAtlasSize, atlas.indexSize, atlas.indexSize);
+			gl.activeTexture(gl.TEXTURE0 + SpriteAtlas.UNIT_INDEX);
+			gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlas.index);
+			gl.activeTexture(gl.TEXTURE0 + SpriteAtlas.UNIT_RGBA);
+			gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlas.rgba);
+			gl.activeTexture(gl.TEXTURE0 + SpriteAtlas.UNIT_PALETTES);
+			gl.bindTexture(gl.TEXTURE_2D, atlas.palettes);
+			gl.activeTexture(gl.TEXTURE0);
+			let noCorrection = null, texture = null, textSizeX = -1, textSizeY = -1, palette = null, draws = 0;
+			const play = (queue, base) => {
+				for (let r = 0; r < queue.runCount; r++) {
+					const run = queue.runs[r];
+					if (run.depthTest !== _glState.depthTest) {
+						_glState.depthTest = run.depthTest;
+						if (run.depthTest) gl.enable(gl.DEPTH_TEST);
+						else gl.disable(gl.DEPTH_TEST);
+					}
+					if (run.depthMask !== _glState.depthMask) gl.depthMask(_glState.depthMask = run.depthMask);
+					if (run.blendOne !== null && run.blendOne !== _glState.blendOne) {
+						_glState.blendOne = run.blendOne;
+						gl.blendFunc(gl.SRC_ALPHA, run.blendOne ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA);
+					}
+					if (run.noCorrection !== noCorrection) gl.uniform1i(uniform.uDisableDepthCorrection, noCorrection = run.noCorrection);
+					if (run.palette !== null && run.palette !== palette) {
+						gl.activeTexture(gl.TEXTURE1);
+						gl.bindTexture(gl.TEXTURE_2D, palette = run.palette);
+						gl.activeTexture(gl.TEXTURE0);
+					}
+					if (run.texture !== null) {
+						if (run.palette !== null && (run.textSizeX !== textSizeX || run.textSizeY !== textSizeY)) gl.uniform2f(uniform.uTextSize, textSizeX = run.textSizeX, textSizeY = run.textSizeY);
+						if (run.texture !== texture) gl.bindTexture(gl.TEXTURE_2D, texture = run.texture);
+					}
+					pointInstances(base + run.start);
+					gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, run.count);
+					draws++;
+				}
+			};
+			play(shadow, 0);
+			play(main, shadow.count);
+			gl.bindVertexArray(null);
+			shadow.clear();
+			main.clear();
+			if (state.depthTest !== _glState.depthTest) {
+				_glState.depthTest = state.depthTest;
+				if (state.depthTest) gl.enable(gl.DEPTH_TEST);
+				else gl.disable(gl.DEPTH_TEST);
+			}
+			if (state.depthMask !== _glState.depthMask) gl.depthMask(_glState.depthMask = state.depthMask);
+			if (state.blendOne !== null && state.blendOne !== _glState.blendOne) {
+				_glState.blendOne = state.blendOne;
+				gl.blendFunc(gl.SRC_ALPHA, state.blendOne ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA);
+			}
+			return draws;
+		}
 	};
 }));
 //#endregion
@@ -208965,8 +209966,12 @@ var init_SpriteRenderer$1 = __esmMin((() => {
 */
 function RenderCanvas3D(isBlendModeOne) {
 	if (!this.image.texture || !this.color[3]) return;
+	if (SpriteBatch.active) {
+		RecordCanvas3D.call(this, isBlendModeOne);
+		return;
+	}
 	const uniform = _program$24.uniform;
-	const gl = _gl$2;
+	const gl = _gl$3;
 	const use_pal = this.image.palette !== null;
 	if (isBlendModeOne) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 	else if (isBlendModeOne === false) gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -209006,6 +210011,66 @@ function RenderCanvas3D(isBlendModeOne) {
 		gl.bindTexture(gl.TEXTURE_2D, _texture$4 = this.image.texture);
 	}
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+/**
+* Record a sprite into the open batch: the same values RenderCanvas3D
+* uploads as uniforms, and the state it would have drawn with.
+*/
+function RecordCanvas3D(isBlendModeOne) {
+	if (isBlendModeOne === true || isBlendModeOne === false) _blendOne = isBlendModeOne;
+	const image = this.image;
+	let texture = image.texture;
+	let palette = image.palette;
+	let source = SpriteBatch.SOURCE_OWN;
+	let paletteRow = palette ? SpriteBatch.PALETTE_OWN : SpriteBatch.PALETTE_NONE;
+	let layer = 0;
+	let u0 = 0, v0 = 0, u1 = 1, v1 = 1;
+	if (image.frame && image.spr && image.frame.texture === texture) {
+		const rect = SpriteBatch.atlasFor(image.spr, image.frame);
+		if (rect && rect.rgba === !palette) {
+			source = rect.rgba ? SpriteBatch.SOURCE_RGBA : SpriteBatch.SOURCE_INDEX;
+			texture = null;
+			layer = rect.layer;
+			u0 = rect.u0;
+			v0 = rect.v0;
+			u1 = rect.u1;
+			v1 = rect.v1;
+			if (palette) {
+				const row = SpriteBatch.paletteRow(palette, this.palette);
+				if (row >= 0) {
+					paletteRow = row;
+					palette = null;
+				}
+			}
+		}
+	}
+	image.frame = null;
+	image.spr = null;
+	const data = SpriteBatch.record(this.shadowQueue ? SpriteBatch.SHADOW : SpriteBatch.MAIN, texture, palette, image.size[0], image.size[1], _blendOne, _depthTest, _depthMask, !!this.disableDepthCorrection);
+	let o = SpriteBatch.offset;
+	data[o++] = this.position[0];
+	data[o++] = this.position[1];
+	data[o++] = this.position[2];
+	data[o++] = this.zIndex++;
+	data[o++] = this.offset[0] / 175 * this.xSize;
+	data[o++] = this.offset[1] / 175 * this.ySize - .5;
+	data[o++] = this.size[0] / 175 * this.xSize;
+	data[o++] = this.size[1] / 175 * this.ySize;
+	data[o++] = this.color[0];
+	data[o++] = this.color[1];
+	data[o++] = this.color[2];
+	data[o++] = this.color[3];
+	data[o++] = u0;
+	data[o++] = v0;
+	data[o++] = u1;
+	data[o++] = v1;
+	data[o++] = this.angle;
+	data[o++] = this.depth;
+	data[o++] = this.shadow;
+	data[o++] = this.ignoreDepthMinCap ? 1 : 0;
+	data[o++] = source;
+	data[o++] = layer;
+	data[o] = paletteRow;
 }
 /**
 * Convert a sprite frame (RGBA or palette-indexed) into canvas ImageData,
@@ -209070,11 +210135,44 @@ function fillImageData(imageData, frame, pal, color) {
 		}
 	}
 }
-var mat4$22, RenderCanvas2D, _program$24, _buffer$18, _ctx$4, _gl$2, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
+/**
+* Set the depth test and depth write. Inside a batch only the state is kept:
+* each recorded sprite carries it, and SpriteBatch sets it when it draws.
+*
+* @param {boolean} depthTest
+* @param {boolean} depthMask
+*/
+function setDepth(depthTest, depthMask) {
+	const direct = !SpriteBatch.active;
+	if (_depthTest !== depthTest) {
+		_depthTest = depthTest;
+		if (direct) {
+			if (depthTest) _gl$3.enable(_gl$3.DEPTH_TEST);
+			else _gl$3.disable(_gl$3.DEPTH_TEST);
+		}
+	}
+	if (_depthMask !== depthMask) {
+		_depthMask = depthMask;
+		if (direct) _gl$3.depthMask(depthMask);
+	}
+}
+/**
+* After a batch drew with its own program: put this program back and forget
+* the bound texture.
+*/
+function syncAfterBatch() {
+	_gl$3.useProgram(_program$24);
+	_gl$3.activeTexture(_gl$3.TEXTURE0);
+	_texture$4 = null;
+	_groupId++;
+}
+var mat4$22, RenderCanvas2D, _program$24, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
+	init_Configs();
 	init_Camera();
+	init_SpriteBatch();
 	init_SpriteRenderer$2();
 	init_SpriteRenderer$1();
 	mat4$22 = gl_matrix_default.mat4;
@@ -209146,7 +210244,7 @@ var init_SpriteRenderer = __esmMin((() => {
 	_program$24 = null;
 	_buffer$18 = null;
 	_ctx$4 = null;
-	_gl$2 = null;
+	_gl$3 = null;
 	_groupId = 0;
 	_lastGroupId = 0;
 	_shadow = null;
@@ -209155,6 +210253,7 @@ var init_SpriteRenderer = __esmMin((() => {
 	_disableDepthCorrection = false;
 	_depthMask = true;
 	_depthTest = true;
+	_blendOne = null;
 	_texture$4 = null;
 	_usepal = null;
 	_pos$8 = /* @__PURE__ */ new Int16Array(2);
@@ -209200,8 +210299,14 @@ var init_SpriteRenderer = __esmMin((() => {
 		static image = {
 			texture: null,
 			palette: null,
-			size: /* @__PURE__ */ new Float32Array(2)
+			size: /* @__PURE__ */ new Float32Array(2),
+			spr: null,
+			frame: null
 		};
+		/**
+		* @type {boolean} the sprite is a shadow: a batch draws it before the other sprites
+		*/
+		static shadowQueue = false;
 		/**
 		* @type {object} sprite imageData (for 2D context)
 		*/
@@ -209259,6 +210364,7 @@ var init_SpriteRenderer = __esmMin((() => {
 				]), gl.STATIC_DRAW);
 			}
 			if (!_program$24) _program$24 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
+			SpriteBatch.enabled = Configs.get("spriteBatching", true) !== false;
 		}
 		/**
 		* Initialize 3D Context
@@ -209271,6 +210377,11 @@ var init_SpriteRenderer = __esmMin((() => {
 		static bind3DContext(gl, modelView, projection, fog) {
 			const attribute = _program$24.attribute;
 			const uniform = _program$24.uniform;
+			if (SpriteBatch.active) {
+				this.flushBatch();
+				SpriteBatch.invalidate();
+			}
+			SpriteBatch.setFrame(modelView, projection, fog, Camera.zoom);
 			gl.useProgram(_program$24);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
@@ -209293,7 +210404,7 @@ var init_SpriteRenderer = __esmMin((() => {
 			this.render = RenderCanvas3D;
 			this.xSize = 5;
 			this.ySize = 5;
-			_gl$2 = gl;
+			_gl$3 = gl;
 			_depthMask = true;
 			_groupId++;
 		}
@@ -209337,37 +210448,58 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {function} execute function with this parameters before restore gl state.
 		*/
 		static runWithDepth(depthTest, depthMask, depthCorrection, fn) {
-			if (!_gl$2) {
+			if (!_gl$3) {
 				fn();
 				return;
 			}
 			const prevDepthTest = _depthTest;
 			const prevDepthMask = _depthMask;
 			const prevDepthCorrection = this.disableDepthCorrection;
-			if (_depthTest !== depthTest) {
-				_depthTest = depthTest;
-				if (depthTest) _gl$2.enable(_gl$2.DEPTH_TEST);
-				else _gl$2.disable(_gl$2.DEPTH_TEST);
-			}
-			if (_depthMask !== depthMask) {
-				_depthMask = depthMask;
-				_gl$2.depthMask(depthMask);
-			}
+			setDepth(depthTest, depthMask);
 			if (this.disableDepthCorrection !== depthCorrection) this.disableDepthCorrection = depthCorrection;
 			try {
 				fn();
 			} finally {
-				if (_depthTest !== prevDepthTest) {
-					_depthTest = prevDepthTest;
-					if (prevDepthTest) _gl$2.enable(_gl$2.DEPTH_TEST);
-					else _gl$2.disable(_gl$2.DEPTH_TEST);
-				}
-				if (_depthMask !== prevDepthMask) {
-					_depthMask = prevDepthMask;
-					_gl$2.depthMask(prevDepthMask);
-				}
+				setDepth(prevDepthTest, prevDepthMask);
 				if (this.disableDepthCorrection !== prevDepthCorrection) this.disableDepthCorrection = prevDepthCorrection;
 			}
+		}
+		/**
+		* Record the sprites drawn from here to endBatch() and draw them in a few
+		* instanced calls (see SpriteBatch.js). Call after bind3DContext.
+		*
+		* @param {WebGL2RenderingContext} gl
+		*/
+		static beginBatch(gl) {
+			if (SpriteBatch.open(gl, {
+				depthTest: _depthTest,
+				depthMask: _depthMask
+			})) _blendOne = null;
+		}
+		/**
+		* Draw what the batch recorded so far. Anything that draws with another
+		* program in the middle of a batch calls this first, to keep the order.
+		*/
+		static flushBatch() {
+			if (!SpriteBatch.active) return;
+			SpriteBatch.flush({
+				depthTest: _depthTest,
+				depthMask: _depthMask,
+				blendOne: _blendOne
+			});
+			syncAfterBatch();
+		}
+		/**
+		* Draw what the batch recorded and go back to drawing sprites one by one.
+		*/
+		static endBatch() {
+			if (!SpriteBatch.active) return;
+			SpriteBatch.close({
+				depthTest: _depthTest,
+				depthMask: _depthMask,
+				blendOne: _blendOne
+			});
+			syncAfterBatch();
 		}
 	};
 }));
@@ -209512,7 +210644,7 @@ var init_OccluderFade$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/Renderer/Map/OccluderFade.js
-var mat4$21, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick, OccluderFade;
+var mat4$21, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick$1, OccluderFade;
 var init_OccluderFade = __esmMin((() => {
 	init_OccluderFade$1();
 	init_Camera();
@@ -209546,7 +210678,7 @@ var init_OccluderFade = __esmMin((() => {
 	_queryPending = [false, false];
 	_queryHit = [false, false];
 	_strength = 0;
-	_lastTick = 0;
+	_lastTick$1 = 0;
 	OccluderFade = class OccluderFade {
 		static MODE = MODE;
 		static SETTING = SETTING;
@@ -209606,8 +210738,8 @@ var init_OccluderFade = __esmMin((() => {
 			_eye[0] = _inverse[12];
 			_eye[1] = _inverse[13];
 			_eye[2] = _inverse[14];
-			const dt = _lastTick ? Math.min(tick - _lastTick, 100) : 0;
-			_lastTick = tick;
+			const dt = _lastTick$1 ? Math.min(tick - _lastTick$1, 100) : 0;
+			_lastTick$1 = tick;
 			if (!OccluderFade.isActive()) {
 				_strength = 0;
 				return;
@@ -209724,7 +210856,7 @@ var init_OccluderFade = __esmMin((() => {
 				_queryHit[i] = false;
 			}
 			_strength = 0;
-			_lastTick = 0;
+			_lastTick$1 = 0;
 		}
 	};
 }));
@@ -214542,7 +215674,7 @@ function normalize3(v) {
 * Camera.modelView (the view matrix); the per-instance world is composed on top.
 */
 function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
-	_gl$1 = gl;
+	_gl$2 = gl;
 	if (_instances.length === 0 || !light) return;
 	if (!_program$20) init$8(gl);
 	for (const path in _types) {
@@ -214808,8 +215940,8 @@ function detach(inst) {
 	if (idx !== -1) _instances.splice(idx, 1);
 	const type = _types[inst.path];
 	if (type && type.refcount > 0) type.refcount--;
-	if (inst.emblemTex && _gl$1) {
-		_gl$1.deleteTexture(inst.emblemTex);
+	if (inst.emblemTex && _gl$2) {
+		_gl$2.deleteTexture(inst.emblemTex);
 		inst.emblemTex = null;
 	}
 	inst.entity = null;
@@ -214899,7 +216031,7 @@ function clear() {
 	for (let i = 0; i < insts.length; i++) detach(insts[i]);
 	_poseCache = {};
 }
-var mat3$4, mat4$19, ALPHA_REF, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$20, _gl$1, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv, _mvp, _nmat, _lightView, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX, TEX_GREY_PX, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE, GR2_VERTEX_LAYOUT, GR2ModelRenderer_default;
+var mat3$4, mat4$19, ALPHA_REF, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$20, _gl$2, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv, _mvp, _nmat, _lightView, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX, TEX_GREY_PX, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE, GR2_VERTEX_LAYOUT, GR2ModelRenderer_default;
 var init_GR2ModelRenderer = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -214959,7 +216091,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 		treasurebox_2: "emp"
 	};
 	_program$20 = null;
-	_gl$1 = null;
+	_gl$2 = null;
 	_types = {};
 	_missing = {};
 	_instances = [];
@@ -219673,6 +220805,324 @@ var init_Emotions = __esmMin((() => {
 	};
 }));
 //#endregion
+//#region src/Core/PerfProbe.js
+/**
+* Percentile of a sorted array
+*
+* @param {Float32Array|Array} sorted ascending
+* @param {number} p 0..100
+* @return {number}
+*/
+function percentile(sorted, p) {
+	if (!sorted.length) return 0;
+	const index = Math.min(sorted.length - 1, Math.ceil(p / 100 * sorted.length) - 1);
+	return sorted[Math.max(0, index)];
+}
+/**
+* avg / p50 / p95 / p99 / max of the first `count` values
+*
+* @param {Float32Array|Uint32Array} values
+* @param {number} count
+* @return {object}
+*/
+function summarize(values, count) {
+	const sorted = Float64Array.from(values.subarray(0, count)).sort();
+	let sum = 0;
+	for (let i = 0; i < count; ++i) sum += sorted[i];
+	const round = (v) => Math.round(v * 100) / 100;
+	return {
+		avg: round(count ? sum / count : 0),
+		p50: round(percentile(sorted, 50)),
+		p95: round(percentile(sorted, 95)),
+		p99: round(percentile(sorted, 99)),
+		max: round(count ? sorted[count - 1] : 0)
+	};
+}
+/**
+* Record a slow frame: the gap since the previous frame started, up to the
+* end of this frame's work
+*
+* @param {number} interval ms since the previous frame started
+* @param {number} work ms spent in this frame
+* @param {number} draws draw calls in this frame
+*/
+function logSlow(interval, work, draws) {
+	_slowTotal++;
+	if (_slow.length >= MAX_SLOW) return;
+	const start = _frameTime - interval;
+	_slow.push({
+		at: Math.round(start),
+		frameMs: Math.round(interval * 10) / 10,
+		workMs: Math.round(work * 10) / 10,
+		draws
+	});
+	try {
+		performance.measure("roPerf slow frame", {
+			start,
+			end: performance.now()
+		});
+	} catch (_e) {}
+}
+/**
+* Wrap the context's draw calls to count them
+*
+* @param {WebGLRenderingContext} gl
+*/
+function wrapContext(gl) {
+	for (const name of DRAW_CALLS) {
+		const original = gl[name];
+		if (typeof original !== "function") continue;
+		const countArg = name === "drawArrays" || name === "drawArraysInstanced" ? 2 : name === "drawRangeElements" ? 3 : 1;
+		const instanceArg = name === "drawArraysInstanced" ? 3 : name === "drawElementsInstanced" ? 4 : -1;
+		gl[name] = function() {
+			_frameDraws++;
+			const instances = instanceArg < 0 ? 1 : arguments[instanceArg] | 0;
+			_frameVertices += (arguments[countArg] | 0) * instances;
+			return original.apply(gl, arguments);
+		};
+	}
+}
+/**
+* Build the overlay element
+*/
+function makeOverlay() {
+	_overlay = document.createElement("div");
+	_overlay.id = "roPerfOverlay";
+	_overlay.style.cssText = "position:fixed;top:4px;right:4px;z-index:100000;pointer-events:none;font:11px/1.3 monospace;color:#cfc;background:rgba(0,0,0,0.6);padding:3px 6px;white-space:pre;";
+	document.body.appendChild(_overlay);
+	_overlayTimer = setInterval(updateOverlay, 500);
+}
+/**
+* Refresh the overlay from the last second of frames
+*/
+function updateOverlay() {
+	if (!_overlay) return;
+	const now = performance.now();
+	let frames = 0;
+	let work = 0;
+	let worst = 0;
+	let draws = 0;
+	let elapsed = 0;
+	for (let k = _total - 1; k >= Math.max(0, _total - MAX_FRAMES) && elapsed < 1e3; --k) {
+		const i = k % MAX_FRAMES;
+		frames++;
+		elapsed += _interval[i];
+		work += _work[i];
+		draws += _draws[i];
+		worst = Math.max(worst, _interval[i]);
+	}
+	const last = _marks.maps[_marks.maps.length - 1];
+	_overlay.textContent = (frames ? Math.round(frames * 1e3 / Math.max(elapsed, 1)) : 0) + " fps  " + (frames ? (elapsed / frames).toFixed(1) : "-") + " ms (max " + worst.toFixed(0) + ")\nwork " + (frames ? (work / frames).toFixed(1) : "-") + " ms  draws " + (frames ? Math.round(draws / frames) : 0) + "\n" + (last ? last.map + " load " + Math.round(last.loadMs) + " ms" : "") + (_marks.login !== null ? "  login " + Math.round(_marks.login) + " ms" : "") + (now - _lastFrameStart > 1e3 ? "\n(no frames)" : "");
+}
+var MAX_FRAMES, HITCH_MS, SLOW_MS, MAX_SLOW, DRAW_CALLS, _interval, _work, _draws, _total, _pending$1, _windowStart, _frameStart, _frameTime, _lastFrameStart, _frameDraws, _frameVertices, _totalVertices, _gl$1, _overlay, _overlayTimer, _overlayWanted, _mapStart, _mapName$6, _mapReady, _slow, _slowTotal, _marks, PerfProbe;
+var init_PerfProbe = __esmMin((() => {
+	init_Configs();
+	MAX_FRAMES = 36e3;
+	HITCH_MS = 50;
+	SLOW_MS = 33;
+	MAX_SLOW = 1e3;
+	DRAW_CALLS = [
+		"drawArrays",
+		"drawElements",
+		"drawArraysInstanced",
+		"drawElementsInstanced",
+		"drawRangeElements"
+	];
+	_interval = new Float32Array(MAX_FRAMES);
+	_work = new Float32Array(MAX_FRAMES);
+	_draws = new Uint32Array(MAX_FRAMES);
+	_total = 0;
+	_pending$1 = 0;
+	_windowStart = 0;
+	_frameStart = 0;
+	_frameTime = 0;
+	_lastFrameStart = 0;
+	_frameDraws = 0;
+	_frameVertices = 0;
+	_totalVertices = 0;
+	_gl$1 = null;
+	_overlay = null;
+	_overlayTimer = 0;
+	_overlayWanted = true;
+	_mapStart = 0;
+	_mapName$6 = "";
+	_mapReady = 0;
+	_slow = [];
+	_slowTotal = 0;
+	_marks = {
+		login: null,
+		maps: []
+	};
+	PerfProbe = class PerfProbe {
+		/**
+		* @type {boolean} set by the first attach() when the configuration has
+		* `perfProbe: true`
+		*/
+		static enabled = false;
+		/**
+		* Called by Renderer.init: switch the probe on if the configuration asks
+		* for it, and count draw calls on this context (once per context)
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		static attach(gl) {
+			if (!PerfProbe.enabled) {
+				if (!Configs.get("perfProbe", false)) return;
+				PerfProbe.enabled = true;
+				PerfProbe.reset();
+			}
+			if (!gl || _gl$1 === gl) return;
+			_gl$1 = gl;
+			wrapContext(gl);
+			if (!_overlay && _overlayWanted) makeOverlay();
+		}
+		/**
+		* Called by the render loop before a frame's work
+		*
+		* @param {number} now rAF timestamp
+		*/
+		static frameStart(now) {
+			_frameStart = performance.now();
+			_frameTime = now;
+			_pending$1 = _lastFrameStart ? now - _lastFrameStart : 0;
+			_lastFrameStart = now;
+			_frameDraws = 0;
+			_frameVertices = 0;
+		}
+		/**
+		* Called by the render loop after a frame's work
+		*/
+		static frameEnd() {
+			if (!_frameStart) return;
+			if (_pending$1 > 0) {
+				const i = _total % MAX_FRAMES;
+				_interval[i] = _pending$1;
+				_work[i] = performance.now() - _frameStart;
+				_draws[i] = _frameDraws;
+				_totalVertices += _frameVertices;
+				if (_pending$1 > SLOW_MS) logSlow(_pending$1, _work[i], _frameDraws);
+				_total++;
+				_pending$1 = 0;
+			}
+			if (_mapReady) {
+				const map = _marks.maps[_marks.maps.length - 1];
+				map.firstFrameMs = Math.round((performance.now() - _mapStart) * 10) / 10;
+				_mapReady = 0;
+			}
+		}
+		/**
+		* A map started loading
+		*
+		* @param {string} name
+		*/
+		static mapStart(name) {
+			_mapStart = performance.now();
+			_mapName$6 = name;
+			_lastFrameStart = 0;
+		}
+		/**
+		* Called by Renderer.stop: the pause until the loop starts again is not a
+		* frame, so the first frame after it only sets the clock
+		*/
+		static stop() {
+			_lastFrameStart = 0;
+			_pending$1 = 0;
+		}
+		/**
+		* A map finished loading and is about to be drawn
+		*/
+		static mapReady() {
+			if (!_mapStart) return;
+			_marks.maps.push({
+				map: _mapName$6,
+				loadMs: Math.round((performance.now() - _mapStart) * 10) / 10,
+				firstFrameMs: null
+			});
+			_mapReady = 1;
+		}
+		/**
+		* The login window was shown; the first time is the startup time
+		*/
+		static loginShown() {
+			if (_marks.login === null) _marks.login = Math.round(performance.now());
+		}
+		/**
+		* Start a new measurement window: frames, slow frames and map marks.
+		* The login mark is kept, since it is the startup time and happens once.
+		*/
+		static reset() {
+			_total = 0;
+			_pending$1 = 0;
+			_lastFrameStart = 0;
+			_totalVertices = 0;
+			_slow.length = 0;
+			_slowTotal = 0;
+			_marks.maps.length = 0;
+			_mapReady = 0;
+			_windowStart = performance.now();
+			try {
+				performance.clearMeasures("roPerf slow frame");
+			} catch (_e) {}
+		}
+		/**
+		* Frame statistics since the last reset
+		*
+		* @return {object}
+		*/
+		static stats() {
+			const seconds = (performance.now() - _windowStart) / 1e3;
+			const kept = Math.min(_total, MAX_FRAMES);
+			const draws = summarize(_draws, kept);
+			let hitches = 0;
+			let drawing = 0;
+			for (let i = 0; i < kept; ++i) {
+				drawing += _interval[i];
+				if (_interval[i] > HITCH_MS) hitches++;
+			}
+			const memory = performance.memory;
+			return {
+				frames: _total,
+				kept,
+				seconds: Math.round(seconds * 10) / 10,
+				drawingSeconds: Math.round(drawing / 100) / 10,
+				fps: kept ? Math.round(kept * 1e3 / Math.max(drawing, .001) * 10) / 10 : 0,
+				frameMs: summarize(_interval, kept),
+				workMs: summarize(_work, kept),
+				drawCalls: draws,
+				verticesPerFrame: _total ? Math.round(_totalVertices / _total) : 0,
+				hitches,
+				slowFrames: _slowTotal,
+				heapMB: memory ? Math.round(memory.usedJSHeapSize / 1048576) : null,
+				marks: JSON.parse(JSON.stringify(_marks))
+			};
+		}
+		/**
+		* The first 1000 frames slower than 33 ms since the last reset: when the
+		* gap started (performance.now() time), its length, and the frame's work
+		* and draws. stats().slowFrames counts them all.
+		*
+		* @return {Array}
+		*/
+		static slowFrames() {
+			return _slow.slice();
+		}
+		/**
+		* Show or hide the overlay
+		*
+		* @param {boolean} show
+		*/
+		static overlay(show) {
+			_overlayWanted = !!show;
+			if (show && !_overlay && _gl$1) makeOverlay();
+			else if (!show && _overlay) {
+				clearInterval(_overlayTimer);
+				_overlay.remove();
+				_overlay = null;
+			}
+		}
+	};
+}));
+//#endregion
 //#region src/DB/Status/StatusState.js
 var StatusState_default;
 var init_StatusState = __esmMin((() => {
@@ -219775,6 +221225,7 @@ var init_UIButton = __esmMin((() => {
 	init_DBManager();
 	init_Client();
 	init_Targa();
+	init_WhenDrawn();
 	UIButton = class extends HTMLElement {
 		connectedCallback() {
 			if (this._initialized) return;
@@ -219815,15 +221266,17 @@ var init_UIButton = __esmMin((() => {
 					else cb(dataURI);
 				});
 			};
-			loadBmp(bg, (uri) => {
-				bgUri = uri;
-				update();
-			});
-			loadBmp(hover, (uri) => {
-				hoverUri = uri;
-			});
-			loadBmp(down, (uri) => {
-				downUri = uri;
+			whenDrawn(this, () => {
+				loadBmp(bg, (uri) => {
+					bgUri = uri;
+					update();
+				});
+				loadBmp(hover, (uri) => {
+					hoverUri = uri;
+				});
+				loadBmp(down, (uri) => {
+					downUri = uri;
+				});
 			});
 			this.addEventListener("mouseover", () => {
 				if (this.disabled) return;
@@ -219903,6 +221356,7 @@ var init_UIImage = __esmMin((() => {
 	init_DBManager();
 	init_Client();
 	init_Targa();
+	init_WhenDrawn();
 	UIImage = class extends HTMLElement {
 		connectedCallback() {
 			if (this._initialized) return;
@@ -219923,11 +221377,11 @@ var init_UIImage = __esmMin((() => {
 			if (!target) {
 				requestAnimationFrame(() => {
 					const retryTarget = this.parentElement;
-					if (retryTarget) this._loadImage(path, retryTarget);
+					if (retryTarget) whenDrawn(retryTarget, () => this._loadImage(path, retryTarget));
 				});
 				return;
 			}
-			this._loadImage(path, target);
+			whenDrawn(target, () => this._loadImage(path, target));
 		}
 		_loadImage(path, target) {
 			Client.loadFile(DB.INTERFACE_PATH + path, (dataURI) => {
@@ -226245,6 +227699,7 @@ function createWorldMapView(map, imgData) {
 		}
 		let className = "section";
 		if (currentMap == section.id) className += " currentmap";
+		if (_partyMembersByMap[section.id]) className += " membersonmap";
 		if (sectionType === 1) {
 			const posKey = section.left + "_" + section.top;
 			if (renderedDungeonPos.has(posKey)) className += " is-dungeon-stacked";
@@ -226320,6 +227775,17 @@ function setAirplanePosition(airplane) {
 	el.style.top = "35%";
 	el.style.left = "35%";
 	el.style.transform = "rotate(75deg)";
+}
+/**
+* Mark the built sections that have party members on them
+*/
+function showPartyMembers() {
+	const root = WorldMap.getRoot();
+	root.querySelectorAll(".worldmap .section").forEach((el) => el.classList.remove("membersonmap"));
+	for (const mapId of Object.keys(_partyMembersByMap)) {
+		const el = root.querySelector(".worldmap .section#" + CSS.escape(mapId));
+		if (el) el.classList.add("membersonmap");
+	}
 }
 /**
 * Toggle all maps
@@ -226440,7 +227906,7 @@ var init_WorldMap = __esmMin((() => {
 		if (this.settings.add.length > 0) console.log("%c[WoldMap] Add Maps: ", "color:#007000", this.settings.add);
 		if (this.settings.remove.length > 0) console.log("%c[WoldMap] Remove Maps: ", "color:#007000", this.settings.remove);
 		setMapList();
-		selectMap();
+		if (this._host.style.display !== "none") selectMap();
 		this._host.style.top = "0px";
 		this._host.style.left = "0px";
 	};
@@ -226511,12 +227977,20 @@ var init_WorldMap = __esmMin((() => {
 				});
 			}
 		});
-		const root = WorldMap.getRoot();
-		root.querySelectorAll(".worldmap .section").forEach((el) => el.classList.remove("membersonmap"));
-		for (const mapId of Object.keys(_partyMembersByMap)) {
-			const el = root.querySelector(".worldmap .section#" + CSS.escape(mapId));
-			if (el) el.classList.add("membersonmap");
+		showPartyMembers();
+	};
+	/**
+	* Forget a member who left the party, or the whole party when it is us
+	*
+	* @param {number} AID
+	*/
+	WorldMap.removePartyMember = function removePartyMember(AID) {
+		if (AID === SessionStorage_default.AID) _partyMembersByMap = {};
+		else for (const mapId of Object.keys(_partyMembersByMap)) {
+			_partyMembersByMap[mapId] = _partyMembersByMap[mapId].filter((member) => member.AID !== AID);
+			if (!_partyMembersByMap[mapId].length) delete _partyMembersByMap[mapId];
 		}
+		showPartyMembers();
 	};
 	WorldMap.mouseMode = GUIComponent.MouseMode.STOP;
 	WorldMap_default = UIManager.addComponent(WorldMap);
@@ -233366,10 +234840,141 @@ var init_SoundOption = __esmMin((() => {
 	SoundOption_default = UIManager.addComponent(SoundOption);
 }));
 //#endregion
+//#region src/Renderer/FramePacer.js
+var SAMPLES, MIN_SAMPLES, MAX_INTERVAL, _intervals, _sorted, _count, _next, _lastTick, _frames, _framesLimit, FramePacer;
+var init_FramePacer = __esmMin((() => {
+	SAMPLES = 31;
+	MIN_SAMPLES = 8;
+	MAX_INTERVAL = 100;
+	_intervals = new Float32Array(SAMPLES);
+	_sorted = new Float32Array(SAMPLES);
+	_count = 0;
+	_next = 0;
+	_lastTick = 0;
+	_frames = 0;
+	_framesLimit = 0;
+	FramePacer = class FramePacer {
+		/**
+		* Record a rAF callback, rendered or not
+		*
+		* @param {number} now rAF timestamp (ms)
+		*/
+		static sample(now) {
+			const interval = now - _lastTick;
+			_lastTick = now;
+			if (interval <= 0 || interval > MAX_INTERVAL) return;
+			_intervals[_next] = interval;
+			_next = (_next + 1) % SAMPLES;
+			_count = Math.min(_count + 1, SAMPLES);
+		}
+		/**
+		* Measured refresh interval: the mean of the middle half of the recent
+		* rAF intervals (robust to a stall, and to timestamps that jitter either
+		* side of the refresh, where a median picks one side), or 0 while there
+		* are too few
+		*
+		* @return {number} ms
+		*/
+		static refreshInterval() {
+			if (_count < MIN_SAMPLES) return 0;
+			const sorted = _sorted.subarray(0, _count);
+			sorted.set(_intervals.subarray(0, _count));
+			sorted.sort();
+			const from = _count >> 2;
+			const to = _count - from;
+			let sum = 0;
+			for (let i = from; i < to; ++i) sum += sorted[i];
+			return sum / (to - from);
+		}
+		/**
+		* How many refreshes each frame lasts, for a limit: the fewest that keep
+		* the frame rate at or under it. 1% of slack lets a 60.0x or 120.0x Hz
+		* display count as 60 or 120.
+		*
+		* Near the edge of the slack the last count chosen is kept: a display
+		* measured either side of it (60.6 Hz for 60) would otherwise switch on
+		* every few frames between pacing and the time limiter, and stutter. The
+		* band is 0.15% below the edge, wider than the estimate wanders with
+		* 0.1 ms of timestamp jitter (about 0.1%), so a display that really moves
+		* under the edge (60.5 Hz) gets the lower count back.
+		*
+		* @param {number} limit fps
+		* @param {number} refresh refresh interval (ms)
+		* @return {number} 1 or more
+		*/
+		static refreshesPerFrame(limit, refresh) {
+			const display = 1e3 / refresh;
+			const frames = Math.max(1, Math.ceil(display / (limit * 1.01)));
+			if (limit === _framesLimit && _frames === frames + 1 && display / frames > limit * 1.01 * .9985) return _frames;
+			return frames;
+		}
+		/**
+		* Whether frames can be paced evenly under a limit: the rate a whole
+		* number of refreshes gives is the display's own, or within 10% of it
+		*
+		* @param {number} limit fps
+		* @param {number} refresh refresh interval (ms)
+		* @return {boolean}
+		*/
+		static canPace(limit, refresh) {
+			const frames = FramePacer.refreshesPerFrame(limit, refresh);
+			return frames === 1 || 1e3 / refresh / frames >= limit * .9;
+		}
+		/**
+		* Whether a frame is due, and from when the next one counts
+		*
+		* @param {number} now rAF timestamp (ms)
+		* @param {number} last value returned for the previous frame
+		* @param {number} limit fps, above 0
+		* @return {number} the new `last` when a frame is due, or -1 to skip
+		*/
+		static next(now, last, limit) {
+			const elapsed = now - last;
+			const refresh = FramePacer.refreshInterval();
+			if (refresh) {
+				_frames = FramePacer.refreshesPerFrame(limit, refresh);
+				_framesLimit = limit;
+			}
+			if (!refresh || !FramePacer.canPace(limit, refresh)) {
+				const interval = 1e3 / limit;
+				return elapsed < interval ? -1 : now - elapsed % interval;
+			}
+			return elapsed < (_frames - .5) * refresh ? -1 : now;
+		}
+		/**
+		* The frame rate a limit is expected to give on this display: the display's
+		* own rate with no limit or a limit above it, the evenly paced rate when
+		* frames can be paced, otherwise the limit. With the refresh rate not known
+		* yet, the limit (0 when there is none).
+		*
+		* @param {number} limit fps, or 0 or less for none
+		* @return {number} fps
+		*/
+		static targetRate(limit) {
+			const refresh = FramePacer.refreshInterval();
+			if (!refresh) return limit > 0 ? limit : 0;
+			const display = 1e3 / refresh;
+			if (limit <= 0) return display;
+			if (!FramePacer.canPace(limit, refresh)) return Math.min(limit, display);
+			return display / FramePacer.refreshesPerFrame(limit, refresh);
+		}
+		/**
+		* Forget the measured refresh rate (for tests, or a display change)
+		*/
+		static reset() {
+			_count = 0;
+			_next = 0;
+			_lastTick = 0;
+			_frames = 0;
+			_framesLimit = 0;
+		}
+	};
+}));
+//#endregion
 //#region src/UI/Components/FPS/FPS.html?raw
 var FPS_default$2;
 var init_FPS$2 = __esmMin((() => {
-	FPS_default$2 = "<div id=\"FPS\">\r\n	<div class=\"titlebar\">\r\n		<div class=\"left\"><span id=\"fpsCounter\">--</span> FPS</div>\r\n	</div>\r\n</div>\r\n";
+	FPS_default$2 = "<div id=\"FPS\">\r\n	<div class=\"titlebar\">\r\n		<div class=\"left\"><span id=\"fpsCounter\">--</span> FPS</div>\r\n		<div class=\"left fps-low\"><span id=\"fpsLowCounter\">--</span> lowest</div>\r\n	</div>\r\n</div>\r\n";
 }));
 //#endregion
 //#region src/UI/Components/FPS/FPS.css?raw
@@ -233379,10 +234984,11 @@ var init_FPS$1 = __esmMin((() => {
 }));
 //#endregion
 //#region src/UI/Components/FPS/FPS.js
-var FPS, _maxFPSRegistered, _tickFn, _preferences$33, FPS_default;
+var FPS, _maxFPSRegistered, _minFPSRegistered, _tickFn, _preferences$33, FPS_default;
 var init_FPS = __esmMin((() => {
 	init_Preferences$1();
 	init_Renderer();
+	init_FramePacer();
 	init_UIManager();
 	init_GUIComponent();
 	init_Elements();
@@ -233391,6 +234997,7 @@ var init_FPS = __esmMin((() => {
 	FPS = new GUIComponent("FPS", FPS_default$1);
 	FPS.render = () => FPS_default$2;
 	_maxFPSRegistered = 0;
+	_minFPSRegistered = Infinity;
 	_tickFn = null;
 	_preferences$33 = Preferences.get("FPS", {
 		show: false,
@@ -233422,7 +235029,12 @@ var init_FPS = __esmMin((() => {
 		const root = this.getRoot();
 		const fpsEl = root.querySelector("#fpsCounter");
 		const fpsRoot = root.querySelector("#FPS");
+		const fpsLowEl = root.querySelector("#fpsLowCounter");
+		_minFPSRegistered = Infinity;
+		_maxFPSRegistered = 0;
+		fpsLowEl.textContent = "--";
 		let startTime = 0;
+		let lastResetTime = 0;
 		let frame = 0;
 		let lastValue = null;
 		let lastClass = null;
@@ -233438,6 +235050,12 @@ var init_FPS = __esmMin((() => {
 			return "fps-bad";
 		}
 		function tick(time) {
+			if (startTime === 0) {
+				lastResetTime = time;
+				startTime = time;
+				frame = 0;
+				return;
+			}
 			frame++;
 			if (time - startTime < 1e3) return;
 			const value = +(frame / ((time - startTime) / 1e3)).toFixed(1);
@@ -233446,7 +235064,13 @@ var init_FPS = __esmMin((() => {
 				lastValue = value;
 			}
 			if (_maxFPSRegistered < value) _maxFPSRegistered = value;
-			const cls = getFPSClass(value, Renderer.frameLimit > 0 ? Renderer.frameLimit : _maxFPSRegistered);
+			if (time - lastResetTime > 5e3) {
+				if (value < _minFPSRegistered) {
+					_minFPSRegistered = value;
+					fpsLowEl.textContent = value;
+				}
+			}
+			const cls = getFPSClass(value, FramePacer.targetRate(Renderer.frameLimit) || _maxFPSRegistered);
 			if (cls !== lastClass) {
 				fpsRoot.style.color = FPS_COLORS[cls] || FPS_COLORS["fps-good"];
 				lastClass = cls;
@@ -233557,7 +235181,7 @@ var init_Context = __esmMin((() => {
 //#region src/UI/Components/GraphicsOption/GraphicsOption.html?raw
 var GraphicsOption_default$2;
 var init_GraphicsOption$2 = __esmMin((() => {
-	GraphicsOption_default$2 = "<div id=\"GraphicsOption\">\r\n	<div class=\"titlebar\" data-background=\"basic_interface/titlebar_mid.bmp\">\r\n		<div class=\"left\">\r\n			<button\r\n				class=\"base\"\r\n				data-background=\"basic_interface/sys_base_off.bmp\"\r\n				data-hover=\"basic_interface/sys_base_on.bmp\"\r\n			></button>\r\n			<span class=\"text\" data-text=\"1484\">Graphics Settings</span>\r\n		</div>\r\n		<div class=\"right\">\r\n			<button\r\n				class=\"base close\"\r\n				data-background=\"basic_interface/sys_close_off.bmp\"\r\n				data-hover=\"basic_interface/sys_close_on.bmp\"\r\n			></button>\r\n		</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"tabs-container\">\r\n		<div class=\"tabs\">\r\n			<button class=\"tab-button selected\" data-tab=\"basic\">Basic</button>\r\n			<button class=\"tab-button\" data-tab=\"advanced\">Advanced</button>\r\n		</div>\r\n	</div>\r\n\r\n	<div class=\"panel\">\r\n		<div class=\"tab-content selected\" id=\"basic\">\r\n			<table>\r\n				<tr>\r\n					<td>Details</td>\r\n					<td style=\"display: inline-block; width: 260px\">\r\n						<input\r\n							class=\"details\"\r\n							type=\"range\"\r\n							value=\"100\"\r\n							max=\"100\"\r\n							min=\"25\"\r\n							step=\"5\"\r\n							style=\"width: 90%\"\r\n						/>\r\n					</td>\r\n				</tr>\r\n				<tr class=\"resolution\">\r\n					<td>Resolution</td>\r\n					<td>\r\n						<select class=\"screensize\">\r\n							<option value=\"650x480\">640 x 480</option>\r\n							<option value=\"800x600\">800 x 600</option>\r\n							<option value=\"1024x768\">1024 x 768</option>\r\n							<option value=\"1280x800\">1280 x 800</option>\r\n							<option value=\"1400x900\">1400 x 900</option>\r\n							<option value=\"1680x1050\">1680 x 1050</option>\r\n							<option value=\"full\">Full Screen</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>Cursor</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"cursor-option\" type=\"checkbox\" />\r\n							Show official cursor\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Limit</td>\r\n					<td>\r\n						<select class=\"fpslimit\">\r\n							<option value=\"-1\">Unlimited</option>\r\n							<option value=\"30\">30</option>\r\n							<option value=\"60\">60</option>\r\n							<option value=\"90\">90</option>\r\n							<option value=\"120\">120</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Display</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"fps\" type=\"checkbox\" />\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n		</div>\r\n\r\n		<div class=\"tab-content\" id=\"advanced\">\r\n			<table>\r\n				<tr>\r\n					<td title=\"Force nearest neighbor filtering for pixel-perfect sprite rendering\">\r\n						Pixel Perfect Sprites\r\n					</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"pixel-perfect\" type=\"checkbox\" />\r\n							Force nearest neighbor filtering\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Add a glowing bloom effect to bright areas\">Bloom</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"bloom\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"bloom-intensity\"\r\n								type=\"range\"\r\n								value=\"0.5\"\r\n								min=\"0.1\"\r\n								max=\"3.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Apply a blur effect to the screen\">Blur</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"blur\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Intensity:\r\n							<input\r\n								class=\"blur-intensity\"\r\n								type=\"range\"\r\n								value=\"3.0\"\r\n								min=\"2.0\"\r\n								max=\"10.0\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Area:\r\n							<input\r\n								class=\"blur-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"3.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Contrast Adaptive Sharpening for enhanced details\">Contr. Adapt. Sharp. (CAS)</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"casEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Contrast:\r\n							<input\r\n								class=\"casContrast\"\r\n								type=\"range\"\r\n								value=\"0.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Sharpening:\r\n							<input\r\n								class=\"casSharpening\"\r\n								type=\"range\"\r\n								value=\"1.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Fast Approximate Anti-Aliasing for smoother edges\">FXAA</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"fxaaEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Subpix:\r\n							<input\r\n								class=\"fxaaSubpix\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Threshold:\r\n							<input\r\n								class=\"fxaaEdgeThreshold\"\r\n								type=\"range\"\r\n								value=\"0.125\"\r\n								min=\"0.063\"\r\n								max=\"0.333\"\r\n								step=\"0.03\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Cartoon rendering effect for stylized visuals\">Cartoon</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"cartoonEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Power:\r\n							<input\r\n								class=\"cartoonPower\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"0.1\"\r\n								max=\"9.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Slope:\r\n							<input\r\n								class=\"cartoonEdgeSlope\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"1.5\"\r\n								max=\"5.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Increase color intensity and saturation\">Vibrance</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"vibranceEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"vibrance\"\r\n								type=\"range\"\r\n								value=\"0.15\"\r\n								min=\"-0.9\"\r\n								max=\"0.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Hide objects outside the viewing area, enable downsampling rendering and others to improve performance\"\r\n					>\r\n						Performance Mode\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"performanceMode\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Culling Area:\r\n							<input\r\n								class=\"view-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"4.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Make buildings and trees blocking the view of your character see-through (not in first person). Dither is cheaper, Alpha looks smoother.\"\r\n					>\r\n						See-through Occluders\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<select class=\"occluderFade\">\r\n								<option value=\"off\">Off</option>\r\n								<option value=\"dither\">Dither (fast)</option>\r\n								<option value=\"alpha\">Alpha (smooth)</option>\r\n							</select>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 120px\">\r\n							Opacity:\r\n							<input\r\n								class=\"occluderFadeOpacity\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"0.8\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 120px\">\r\n							Area:\r\n							<input\r\n								class=\"occluderFadeRadius\"\r\n								type=\"range\"\r\n								value=\"5.0\"\r\n								min=\"1.5\"\r\n								max=\"12.5\"\r\n								step=\"0.5\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n\r\n			<div class=\"reset-section\">\r\n				<button class=\"reset-button\">Reset to Default Values</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>\r\n";
+	GraphicsOption_default$2 = "<div id=\"GraphicsOption\">\r\n	<div class=\"titlebar\" data-background=\"basic_interface/titlebar_mid.bmp\">\r\n		<div class=\"left\">\r\n			<button\r\n				class=\"base\"\r\n				data-background=\"basic_interface/sys_base_off.bmp\"\r\n				data-hover=\"basic_interface/sys_base_on.bmp\"\r\n			></button>\r\n			<span class=\"text\" data-text=\"1484\">Graphics Settings</span>\r\n		</div>\r\n		<div class=\"right\">\r\n			<button\r\n				class=\"base close\"\r\n				data-background=\"basic_interface/sys_close_off.bmp\"\r\n				data-hover=\"basic_interface/sys_close_on.bmp\"\r\n			></button>\r\n		</div>\r\n		<div class=\"clear\"></div>\r\n	</div>\r\n\r\n	<div class=\"tabs-container\">\r\n		<div class=\"tabs\">\r\n			<button class=\"tab-button selected\" data-tab=\"basic\">Basic</button>\r\n			<button class=\"tab-button\" data-tab=\"advanced\">Advanced</button>\r\n		</div>\r\n	</div>\r\n\r\n	<div class=\"panel\">\r\n		<div class=\"tab-content selected\" id=\"basic\">\r\n			<table>\r\n				<tr>\r\n					<td>Details</td>\r\n					<td style=\"display: inline-block; width: 260px\">\r\n						<input\r\n							class=\"details\"\r\n							type=\"range\"\r\n							value=\"100\"\r\n							max=\"100\"\r\n							min=\"25\"\r\n							step=\"5\"\r\n							style=\"width: 90%\"\r\n						/>\r\n					</td>\r\n				</tr>\r\n				<tr class=\"resolution\">\r\n					<td>Resolution</td>\r\n					<td>\r\n						<select class=\"screensize\">\r\n							<option value=\"650x480\">640 x 480</option>\r\n							<option value=\"800x600\">800 x 600</option>\r\n							<option value=\"1024x768\">1024 x 768</option>\r\n							<option value=\"1280x800\">1280 x 800</option>\r\n							<option value=\"1400x900\">1400 x 900</option>\r\n							<option value=\"1680x1050\">1680 x 1050</option>\r\n							<option value=\"full\">Full Screen</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>Cursor</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"cursor-option\" type=\"checkbox\" />\r\n							Show official cursor\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Limit</td>\r\n					<td>\r\n						<select class=\"fpslimit\">\r\n							<option value=\"-1\">Match display</option>\r\n							<option value=\"30\">30</option>\r\n							<option value=\"60\">60</option>\r\n							<option value=\"90\">90</option>\r\n							<option value=\"120\">120</option>\r\n						</select>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td>FPS Display</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"fps\" type=\"checkbox\" />\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n		</div>\r\n\r\n		<div class=\"tab-content\" id=\"advanced\">\r\n			<table>\r\n				<tr>\r\n					<td title=\"Force nearest neighbor filtering for pixel-perfect sprite rendering\">\r\n						Pixel Perfect Sprites\r\n					</td>\r\n					<td>\r\n						<label>\r\n							<input class=\"pixel-perfect\" type=\"checkbox\" />\r\n							Force nearest neighbor filtering\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Add a glowing bloom effect to bright areas\">Bloom</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"bloom\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"bloom-intensity\"\r\n								type=\"range\"\r\n								value=\"0.5\"\r\n								min=\"0.1\"\r\n								max=\"3.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Apply a blur effect to the screen\">Blur</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"blur\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Intensity:\r\n							<input\r\n								class=\"blur-intensity\"\r\n								type=\"range\"\r\n								value=\"3.0\"\r\n								min=\"2.0\"\r\n								max=\"10.0\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Area:\r\n							<input\r\n								class=\"blur-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"3.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Contrast Adaptive Sharpening for enhanced details\">Contr. Adapt. Sharp. (CAS)</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"casEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Contrast:\r\n							<input\r\n								class=\"casContrast\"\r\n								type=\"range\"\r\n								value=\"0.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Sharpening:\r\n							<input\r\n								class=\"casSharpening\"\r\n								type=\"range\"\r\n								value=\"1.0\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Fast Approximate Anti-Aliasing for smoother edges\">FXAA</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"fxaaEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Subpix:\r\n							<input\r\n								class=\"fxaaSubpix\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"1.0\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Threshold:\r\n							<input\r\n								class=\"fxaaEdgeThreshold\"\r\n								type=\"range\"\r\n								value=\"0.125\"\r\n								min=\"0.063\"\r\n								max=\"0.333\"\r\n								step=\"0.03\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Cartoon rendering effect for stylized visuals\">Cartoon</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"cartoonEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Power:\r\n							<input\r\n								class=\"cartoonPower\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"0.1\"\r\n								max=\"9.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 90px\">\r\n							Edge Slope:\r\n							<input\r\n								class=\"cartoonEdgeSlope\"\r\n								type=\"range\"\r\n								value=\"1.5\"\r\n								min=\"1.5\"\r\n								max=\"5.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td title=\"Increase color intensity and saturation\">Vibrance</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"vibranceEnabled\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Intensity:\r\n							<input\r\n								class=\"vibrance\"\r\n								type=\"range\"\r\n								value=\"0.15\"\r\n								min=\"-0.9\"\r\n								max=\"0.9\"\r\n								step=\"0.1\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Hide objects outside the viewing area, enable downsampling rendering and others to improve performance\"\r\n					>\r\n						Performance Mode\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<input class=\"performanceMode\" type=\"checkbox\" />\r\n						</label>\r\n						<label style=\"display: inline-block; width: 200px\">\r\n							Culling Area:\r\n							<input\r\n								class=\"view-area\"\r\n								type=\"range\"\r\n								value=\"14.0\"\r\n								min=\"4.0\"\r\n								max=\"20.0\"\r\n								step=\"1.0\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n				<tr>\r\n					<td\r\n						title=\"Make buildings and trees blocking the view of your character see-through (not in first person). Dither is cheaper, Alpha looks smoother.\"\r\n					>\r\n						See-through Occluders\r\n					</td>\r\n					<td>\r\n						<label style=\"display: inline-block; margin-right: 20px\">\r\n							<select class=\"occluderFade\">\r\n								<option value=\"off\">Off</option>\r\n								<option value=\"dither\">Dither (fast)</option>\r\n								<option value=\"alpha\">Alpha (smooth)</option>\r\n							</select>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 120px\">\r\n							Opacity:\r\n							<input\r\n								class=\"occluderFadeOpacity\"\r\n								type=\"range\"\r\n								value=\"0.25\"\r\n								min=\"0.0\"\r\n								max=\"0.8\"\r\n								step=\"0.05\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n						<label style=\"display: inline-block; width: 120px\">\r\n							Area:\r\n							<input\r\n								class=\"occluderFadeRadius\"\r\n								type=\"range\"\r\n								value=\"5.0\"\r\n								min=\"1.5\"\r\n								max=\"12.5\"\r\n								step=\"0.5\"\r\n								style=\"width: 90%; vertical-align: middle\"\r\n							/>\r\n						</label>\r\n					</td>\r\n				</tr>\r\n			</table>\r\n\r\n			<div class=\"reset-section\">\r\n				<button class=\"reset-button\">Reset to Default Values</button>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>\r\n";
 }));
 //#endregion
 //#region src/UI/Components/GraphicsOption/GraphicsOption.css?raw
@@ -247623,6 +249247,7 @@ function onPartyMemberLeave(pkt) {
 	}
 	if (SessionStorage_default.AID === pkt.AID) SessionStorage_default.hasParty = false;
 	controller.removePartyMember(pkt.AID, pkt.characterName);
+	WorldMap_default.removePartyMember(pkt.AID);
 }
 /**
 * Display entity life
@@ -253083,6 +254708,7 @@ var init_ProcessCommand = __esmMin((() => {
 	init_Camera$1();
 	init_Renderer();
 	init_Configs();
+	init_PerfProbe();
 	init_EffectConst();
 	init_StatusState();
 	init_EntityManager();
@@ -253914,6 +255540,40 @@ var init_ProcessCommand = __esmMin((() => {
 				return;
 			}
 			this.addText("Unknown weather. Usage: /weather snow|rain|leaves|sakura|fireworks|cloud|cloud2|off", this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
+		}
+	};
+	if (Configs.get("perfProbe")) CommandStore.perf = {
+		description: "Performance probe. Usage: /perf [reset|slow|overlay on|off]",
+		callback: function(text) {
+			const args = text.trim().split(/\s+/).slice(1);
+			const mode = (args[0] || "").toLowerCase();
+			if (!PerfProbe.enabled) {
+				this.addText("The performance probe is not running.", this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
+				return;
+			}
+			if (!mode || mode === "stats") {
+				const stats = PerfProbe.stats();
+				console.log("[PerfProbe] stats", stats);
+				this.addText(`${stats.fps} fps over ${stats.drawingSeconds} s of drawing: frame p50 ${stats.frameMs.p50} / p99 ${stats.frameMs.p99} ms, work ${stats.workMs.avg} ms, ${stats.drawCalls.avg} draws, ${stats.hitches} hitches`, this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
+				return;
+			}
+			if (mode === "reset") {
+				PerfProbe.reset();
+				this.addText("Performance probe reset.", this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
+				return;
+			}
+			if (mode === "slow") {
+				const slow = PerfProbe.slowFrames();
+				const total = PerfProbe.stats().slowFrames;
+				console.table(slow);
+				this.addText(total > slow.length ? `${total} frames over 33 ms since the last reset; the first ${slow.length} are listed.` : `${slow.length} frames over 33 ms since the last reset.`, this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
+				return;
+			}
+			if (mode === "overlay") {
+				PerfProbe.overlay((args[1] || "on").toLowerCase() !== "off");
+				return;
+			}
+			this.addText("Usage: /perf [reset|slow|overlay on|off]", this.TYPE.INFO, this.FILTER.PUBLIC_LOG);
 		}
 	};
 	loadAliases();
@@ -262097,18 +263757,26 @@ function onMapComplete(success, error) {
 	ScreenEffectManager.init(gl, worldResource);
 	registerPostProcessModules(gl);
 	JoystickUI_default.onRestore();
+	MapRenderer.loading = false;
+	_revealing = true;
+	MapRenderer.onLoad();
+	Sky_default.setUpCloudData();
+	ScreenEffectManager.startMapflagEffect(worldResource);
+	if (PerfProbe.enabled) PerfProbe.mapReady();
+	Renderer.show();
+	Renderer.render(MapRenderer.onRender);
 	Background.remove(() => {
 		if (loadId !== MapRenderer._loadId) return;
-		MapRenderer.loading = false;
-		MapRenderer.onLoad();
-		Sky_default.setUpCloudData();
-		ScreenEffectManager.startMapflagEffect(worldResource);
-		Renderer.show();
-		Renderer.render(MapRenderer.onRender);
+		_revealing = false;
 		Mouse.intersect = true;
+		if (_nextMap) {
+			const mapname = _nextMap;
+			_nextMap = null;
+			MapRenderer.setMap(mapname);
+		}
 	});
 }
-var mat4$12, _pos$6, MapRenderer;
+var mat4$12, _pos$6, _revealing, _nextMap, MapRenderer;
 var init_MapRenderer = __esmMin((() => {
 	init_Thread();
 	init_SoundManager();
@@ -262155,8 +263823,11 @@ var init_MapRenderer = __esmMin((() => {
 	init_Blind();
 	init_Upsampling();
 	init_WebGL();
+	init_PerfProbe();
 	mat4$12 = gl_matrix_default.mat4;
 	_pos$6 = /* @__PURE__ */ new Uint16Array(2);
+	_revealing = false;
+	_nextMap = null;
 	MapRenderer = class MapRenderer {
 		/**
 		* @var {string} current map's name
@@ -262191,6 +263862,10 @@ var init_MapRenderer = __esmMin((() => {
 		*/
 		static _loadRequest = 0;
 		/**
+		* @var {Array<function>} worker results of the map load in progress, held until the fade is over
+		*/
+		static _fadeQueue = [];
+		/**
 		* @var {Float32Array} diffuse Modified diffuse color
 		*/
 		static diffuse = null;
@@ -262216,6 +263891,10 @@ var init_MapRenderer = __esmMin((() => {
 		*/
 		static setMap(mapname) {
 			if (this.loading) return;
+			if (_revealing) {
+				_nextMap = mapname;
+				return;
+			}
 			mapname = mapname.replace(/^(\d{3})(\d@)/, "$2").replace(/^\d{3}#/, "");
 			const loadId = ++this._loadId;
 			SoundManager.stop();
@@ -262225,19 +263904,29 @@ var init_MapRenderer = __esmMin((() => {
 			if (stripMapExtension(this.currentMap) !== stripMapExtension(mapname)) {
 				this.loading = true;
 				BGM.stop();
+				if (PerfProbe.enabled) PerfProbe.mapStart(mapname);
 				this.currentMap = mapname;
 				const filename = mapname.replace(/\.gat$/i, ".rsw");
-				Background.setLoading(function() {
+				let faded = false;
+				const waiting = [];
+				this._fadeQueue = waiting;
+				const afterFade = (fn) => (...args) => {
+					if (faded) fn(...args);
+					else if (loadId === MapRenderer._loadId) waiting.push(() => fn(...args));
+				};
+				Thread.hook("MAP_PROGRESS", afterFade(loadEvent(onProgressUpdate)));
+				Thread.hook("MAP_WORLD", afterFade(loadEvent(onWorldComplete)));
+				Thread.hook("MAP_GROUND", afterFade(loadEvent(onGroundComplete)));
+				Thread.hook("MAP_ALTITUDE", afterFade(loadEvent(onAltitudeComplete)));
+				Thread.hook("MAP_MODELS", afterFade(loadEvent(onModelsComplete)));
+				Thread.hook("MAP_ANIMATED_MODEL", afterFade(loadEvent(onAnimatedModelComplete)));
+				MapRenderer._loadRequest = Thread.send("LOAD_MAP", filename, afterFade(loadStep(loadId, onMapComplete)));
+				Background.setLoading(() => {
 					if (loadId !== MapRenderer._loadId) return;
-					Thread.hook("MAP_PROGRESS", loadEvent(onProgressUpdate));
-					Thread.hook("MAP_WORLD", loadEvent(onWorldComplete));
-					Thread.hook("MAP_GROUND", loadEvent(onGroundComplete));
-					Thread.hook("MAP_ALTITUDE", loadEvent(onAltitudeComplete));
-					Thread.hook("MAP_MODELS", loadEvent(onModelsComplete));
-					Thread.hook("MAP_ANIMATED_MODEL", loadEvent(onAnimatedModelComplete));
 					MapRenderer.free();
 					Renderer.remove();
-					MapRenderer._loadRequest = Thread.send("LOAD_MAP", filename, loadStep(loadId, onMapComplete));
+					faded = true;
+					waiting.splice(0).forEach((fn) => fn());
 				});
 				return;
 			}
@@ -262261,7 +263950,10 @@ var init_MapRenderer = __esmMin((() => {
 		static cancelLoad() {
 			this._loadId++;
 			this._loadRequest = 0;
+			this._fadeQueue.length = 0;
 			this.loading = false;
+			_revealing = false;
+			_nextMap = null;
 		}
 		/**
 		* Clean up data
@@ -262780,6 +264472,9 @@ var init_Renderer = __esmMin((() => {
 	init_SessionStorage();
 	init_PostProcess();
 	init_MemoryManager();
+	init_PerfProbe();
+	init_SpriteBatch();
+	init_FramePacer();
 	init_preload_helper();
 	({mat4: mat4$10} = gl_matrix_default);
 	_requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
@@ -262860,6 +264555,7 @@ var init_Renderer = __esmMin((() => {
 				this.canvas.addEventListener("webglcontextrestored", this.onContextRestored.bind(this), false);
 				this.gl = WebGL_default.getContext(this.canvas, param);
 				this.isWebGL2 = WebGL_default.isWebGL2(this.gl);
+				PerfProbe.attach(this.gl);
 				if (typeof console !== "undefined" && console.info) console.info("Renderer using WebGL " + (this.isWebGL2 ? "2" : "1") + " context");
 				window.addEventListener("resize", this.onResize.bind(this));
 				window.addEventListener("contextmenu", (event) => {
@@ -262910,6 +264606,7 @@ var init_Renderer = __esmMin((() => {
 			gl.enable(gl.BLEND);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 			PostProcess.restartModules(gl);
+			SpriteBatch.contextRestored();
 			this.resize();
 			this.render();
 		}
@@ -262975,6 +264672,7 @@ var init_Renderer = __esmMin((() => {
 			if (this.contextLost) return;
 			const now = typeof time === "number" ? time : Date.now();
 			if (!this._renderBound) this._renderBound = this._render.bind(this);
+			if (typeof time === "number") FramePacer.sample(now);
 			if (typeof this._lastFrameTime === "undefined" || this._lastFrameTime === 0) {
 				this._lastFrameTime = now;
 				if (!this.tick) this.tick = Date.now();
@@ -262982,14 +264680,14 @@ var init_Renderer = __esmMin((() => {
 			if (!SessionStorage_default.Playing && (this.frameLimit <= 0 || this.frameLimit > 60)) this.frameLimit = 60;
 			else if (SessionStorage_default.Playing && this.frameLimit !== GraphicsSettings.fpslimit) this.frameLimit = GraphicsSettings.fpslimit;
 			if (this.frameLimit > 0) {
-				const interval = 1e3 / this.frameLimit;
-				const elapsed = now - this._lastFrameTime;
-				if (elapsed < interval) {
+				const next = FramePacer.next(now, this._lastFrameTime, this.frameLimit);
+				if (next < 0) {
 					this.updateId = _requestAnimationFrame(this._renderBound);
 					return;
 				}
-				this._lastFrameTime = now - elapsed % interval;
+				this._lastFrameTime = next;
 			} else this._lastFrameTime = now;
+			if (PerfProbe.enabled) PerfProbe.frameStart(now);
 			const newTick = Date.now();
 			SessionStorage_default.serverTick += newTick - this.tick;
 			this.tick = newTick;
@@ -263006,6 +264704,7 @@ var init_Renderer = __esmMin((() => {
 				}
 			}
 			Cursor.render(this.tick);
+			if (PerfProbe.enabled) PerfProbe.frameEnd();
 			this.updateId = _requestAnimationFrame(this._renderBound);
 		}
 		/**
@@ -263044,6 +264743,7 @@ var init_Renderer = __esmMin((() => {
 					console.error(e);
 				}
 				Cursor.setSceneDriven(false);
+				if (PerfProbe.enabled) PerfProbe.stop();
 				return;
 			}
 			const pos = this.renderCallbacks.indexOf(fn);
@@ -313098,6 +314798,8 @@ function renderLayer(layer, spr, pal, size, pos, type, isBlendModeOne) {
 	SpriteRenderer.xSize = this.xSize;
 	SpriteRenderer.ySize = this.ySize;
 	SpriteRenderer.image.texture = frame.texture;
+	SpriteRenderer.image.spr = spr;
+	SpriteRenderer.image.frame = frame;
 	SpriteRenderer.render(isBlendModeOne);
 }
 /**
@@ -313266,9 +314968,11 @@ var init_EntityRender = __esmMin((() => {
 				SpriteRenderer.position[0] = this.position[0];
 				SpriteRenderer.position[1] = this.position[1];
 				SpriteRenderer.position[2] = Altitude.getCellHeight(this.position[0], this.position[1]) + .05;
+				SpriteRenderer.shadowQueue = true;
 				SpriteRenderer.runWithDepth(true, false, false, function() {
 					renderElement(self, self.files.shadow, "shadow", _position, false);
 				});
+				SpriteRenderer.shadowQueue = false;
 			}
 			SpriteRenderer.position.set(self.position);
 			this.attachments.renderBefore(Date.now());
@@ -314283,6 +315987,7 @@ var init_EntityAttachments = __esmMin((() => {
 					strEffect.ownerDirection = this.entity.direction;
 					if (!StrEffect.ready && gl) StrEffect.init(gl);
 					if (gl) {
+						SpriteRenderer.flushBatch();
 						StrEffect.beforeRender(gl, Camera.modelView, Camera.projection, _defaultFog, tick, true);
 						strEffect.render(gl, tick);
 						StrEffect.afterRender(gl);
@@ -315344,7 +317049,6 @@ function cull() {
 * Infos: RO Game doesn't seems to render ambiant and diffuse on Sprites
 */
 function render$5(gl, modelView, projection, fog, renderEffects) {
-	let i, count;
 	const tick = Date.now();
 	if (!_list.length) return;
 	_renderFrameCounter++;
@@ -315355,6 +317059,19 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 		_pickSortDirty = true;
 	}
 	SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
+	SpriteRenderer.beginBatch(gl);
+	try {
+		renderList(modelView, projection, renderEffects, tick);
+	} finally {
+		SpriteRenderer.endBatch();
+	}
+	SpriteRenderer.unbind(gl);
+}
+/**
+* The entity loop of render()
+*/
+function renderList(modelView, projection, renderEffects, tick) {
+	let i, count;
 	for (i = 0, count = _list.length; i < count; ++i) if (_list[i].objecttype != _list[i].constructor.TYPE_EFFECT && !renderEffects || _list[i].objecttype == _list[i].constructor.TYPE_EFFECT && renderEffects) {
 		if (_list[i].remove_tick && _list[i].remove_tick + _list[i].remove_delay < tick) {
 			const entityFocus = getFocusEntity();
@@ -315374,7 +317091,6 @@ function render$5(gl, modelView, projection, fog, renderEffects) {
 		if (_list[i].culled) continue;
 		_list[i].render(modelView, projection);
 	}
-	SpriteRenderer.unbind(gl);
 }
 /**
 * Intersect Entities
@@ -316418,6 +318134,7 @@ var init_GUIComponent = __esmMin((() => {
 	init_SessionStorage();
 	init_Targa();
 	init_ClampToViewport();
+	init_WhenDrawn();
 	init_preload_helper();
 	_Cursor = null;
 	_DB = null;
@@ -316517,12 +318234,13 @@ var init_GUIComponent = __esmMin((() => {
 			this._container.classList.add("ui-component-root");
 			this._shadow.appendChild(this._container);
 			if (this.render) this._container.innerHTML = this.render();
-			this._processAllDataAttrs();
+			this._processAllDataAttrs(true);
 			this._createUIProxy();
 			document.body.appendChild(this._host);
 			if (this.init) this.init();
 			this._setupMouseMode();
 			this._host.remove();
+			whenDrawn.suspend(this._host);
 		}
 		/**
 		* Add the component to the DOM.
@@ -316543,6 +318261,7 @@ var init_GUIComponent = __esmMin((() => {
 				return;
 			}
 			parent.appendChild(this._host);
+			whenDrawn.resume(this._host);
 			if (this._noCursorStyle) _trackNoCursorStyle(this._noCursorStyle);
 			if (this.onKeyDown) this._bindKeyDown();
 			if (this.mouseMode === MouseMode.FREEZE) {
@@ -316584,6 +318303,7 @@ var init_GUIComponent = __esmMin((() => {
 					node.dispatchEvent(new Event("x_remove"));
 				});
 				this._host.remove();
+				whenDrawn.suspend(this._host);
 				if (this._noCursorStyle) _untrackNoCursorStyle(this._noCursorStyle);
 				if (this.mouseMode === MouseMode.FREEZE) {
 					Mouse.intersect = true;
@@ -317052,10 +318772,22 @@ var init_GUIComponent = __esmMin((() => {
 		* Process legacy data-* attributes on a single DOM element.
 		* Handles: data-background, data-hover, data-down, data-active, data-text, data-preload.
 		* Static so it can be called from anywhere (e.g. dynamically created buttons).
+		*
+		* @param {HTMLElement} node
+		* @param {object} [options]
+		* @param {boolean} [options.text] - set the localized text
+		* @param {boolean} [options.images] - fetch the images
+		* @param {string} [options.deferredFrom] - the node's inline background
+		*   when its images were deferred: a different one set since then by the
+		*   window itself stays
 		*/
-		static processDataAttrs(node) {
+		static processDataAttrs(node, { text = true, images = true, deferredFrom } = {}) {
 			if (!_Client || !_DB) {
-				_ensureDeps().then(() => GUIComponent.processDataAttrs(node));
+				_ensureDeps().then(() => GUIComponent.processDataAttrs(node, {
+					text,
+					images,
+					deferredFrom
+				}));
 				return;
 			}
 			const background = node.dataset.background;
@@ -317080,7 +318812,8 @@ var init_GUIComponent = __esmMin((() => {
 				else if (bgUri) node.style.backgroundImage = `url(${bgUri})`;
 				else node.style.backgroundImage = "";
 			};
-			if (msgId && _DB?.getMessage(msgId, "")) node.textContent = _DB?.getMessage(msgId, "");
+			if (text && msgId && _DB?.getMessage(msgId, "")) node.textContent = _DB?.getMessage(msgId, "");
+			if (!images) return;
 			if (background) _Client?.loadFile(_DB.INTERFACE_PATH + background, (dataURI) => {
 				bgUri = dataURI;
 				if (dataURI instanceof ArrayBuffer) try {
@@ -317090,6 +318823,7 @@ var init_GUIComponent = __esmMin((() => {
 				} catch (e) {
 					console.error(e.message);
 				}
+				if (deferredFrom !== void 0 && node.style.backgroundImage !== deferredFrom) return;
 				updateBg();
 			});
 			if (active) {
@@ -317155,12 +318889,29 @@ var init_GUIComponent = __esmMin((() => {
 		/**
 		* Walk the shadow DOM and process all elements with data-* attributes.
 		* Called once during prepare().
+		*
+		* @param {boolean} [deferImages] - set the text now, and fetch each
+		*   node's images when it is first drawn (UI/WhenDrawn.js)
 		*/
-		_processAllDataAttrs() {
+		_processAllDataAttrs(deferImages = false) {
 			const root = this._shadow || this._host;
 			if (!root) return;
 			const nodes = root.querySelectorAll("[data-background],[data-hover],[data-down],[data-active],[data-text],[data-preload]");
-			for (const node of nodes) GUIComponent.processDataAttrs(node);
+			for (const node of nodes) {
+				if (!deferImages) {
+					GUIComponent.processDataAttrs(node);
+					continue;
+				}
+				GUIComponent.processDataAttrs(node, { images: false });
+				const { background, hover, down, active, preload } = node.dataset;
+				if (background || hover || down || active || preload) {
+					const deferredFrom = node.style.backgroundImage;
+					whenDrawn(node, () => GUIComponent.processDataAttrs(node, {
+						text: false,
+						deferredFrom
+					}));
+				}
+			}
 		}
 		/**
 		* Compatibility shim for UIComponent.parseHTML.
@@ -322545,6 +324296,7 @@ var init_ChangeCart = __esmMin((() => {
 	init_DBManager();
 	init_ChangeCart$2();
 	init_ChangeCart$1();
+	init_WhenDrawn();
 	CART_LIMIT = 13;
 	ChangeCart = new GUIComponent("ChangeCart", ChangeCart_default$1);
 	/**
@@ -322573,14 +324325,14 @@ var init_ChangeCart = __esmMin((() => {
 				onCart(parseInt(event.currentTarget.getAttribute("data-id"), 10));
 			});
 		});
-		loadCartData();
+		whenDrawn(this._host, loadCartData);
 	};
 	/**
 	* Append to body
 	*/
 	ChangeCart.onAppend = function onAppend() {
 		this._host.style.display = "none";
-		loadCartData();
+		whenDrawn(this._host, loadCartData);
 	};
 	ChangeCart.onChangeCartSkill = function onChangeCartSkill() {
 		if (SessionStorage_default.Entity.hasCart == false) return;
@@ -322705,6 +324457,7 @@ var init_CartDecoration = __esmMin((() => {
 	init_DBManager();
 	init_CartDecoration$2();
 	init_CartDecoration$1();
+	init_WhenDrawn();
 	CartDecoration = new GUIComponent("CartDecoration", CartDecoration_default$1);
 	/**
 	* Render HTML
@@ -322736,14 +324489,14 @@ var init_CartDecoration = __esmMin((() => {
 				onCartSelected(parseInt(event.currentTarget.getAttribute("data-id"), 10));
 			});
 		});
-		preloadCartData();
+		whenDrawn(this._host, preloadCartData);
 	};
 	/**
 	* Append to body
 	*/
 	CartDecoration.onAppend = function onAppend() {
 		this._host.style.display = "none";
-		preloadCartData();
+		whenDrawn(this._host, preloadCartData);
 	};
 	/**
 	* @param {object} pkt - parsed ZC_SELECTCART packet
@@ -322841,6 +324594,7 @@ function refreshList(contentEl) {
 	const end = Math.min(EMOTICONS_COUNT, index + EMOTICONS_PER_PAGE);
 	const pos = [0, 0];
 	contentEl.innerHTML = "";
+	if (!_action) return;
 	while (index < end) {
 		const canvas = document.createElement("canvas");
 		const ctx = canvas.getContext("2d");
@@ -322872,6 +324626,7 @@ var init_Emoticons = __esmMin((() => {
 	init_Emoticons$2();
 	init_Emoticons$1();
 	init_ShortCuts();
+	init_WhenDrawn();
 	Emoticons = new GUIComponent("Emoticons", Emoticons_default$1);
 	/**
 	* Render HTML
@@ -322893,7 +324648,8 @@ var init_Emoticons = __esmMin((() => {
 	Emoticons.init = function init() {
 		const root = this.getRoot();
 		const contentEl = root.querySelector(".content");
-		Client.loadFiles(["data/sprite/ÀÌÆÑÆ®/emotion.act", "data/sprite/ÀÌÆÑÆ®/emotion.spr"], (act, spr) => {
+		const loadFiles = (files, callback) => whenDrawn(this._host, () => Client.loadFiles(files, callback));
+		loadFiles(["data/sprite/ÀÌÆÑÆ®/emotion.act", "data/sprite/ÀÌÆÑÆ®/emotion.spr"], (act, spr) => {
 			_action = act;
 			_sprite = spr;
 			TOTAL_PAGES = Math.max(0, Math.ceil(EMOTICONS_COUNT / EMOTICONS_PER_PAGE) - 1);
@@ -323667,6 +325423,7 @@ var init_CashShop$1 = __esmMin((() => {
 	init_Elements();
 	init_CashShop$3();
 	init_CashShop$2();
+	init_WhenDrawn();
 	CashShop = new GUIComponent("CashShop", CashShop_default$1);
 	/**
 	* Store cash shop items
@@ -323901,9 +325658,9 @@ var init_CashShop$1 = __esmMin((() => {
 				slide.setAttribute("data-index", index);
 				slide.setAttribute("data-url", banner.url || "");
 				slide.innerHTML = "<button class=\"btn-banner\"></button>";
-				Client.loadFile(DB.INTERFACE_PATH + "cashshop/" + banner.bmp, function(data) {
+				whenDrawn(slidesContainer || slide, () => Client.loadFile(DB.INTERFACE_PATH + "cashshop/" + banner.bmp, function(data) {
 					slide.style.backgroundImage = `url(${data})`;
-				});
+				}));
 				if (slidesContainer) slidesContainer.appendChild(slide);
 				const dot = document.createElement("li");
 				dot.className = "banner-dot" + (index === 0 ? " active" : "");
@@ -323913,7 +325670,7 @@ var init_CashShop$1 = __esmMin((() => {
 				dot.innerHTML = "<button class=\"btn-banner\"></button>";
 				if (dotsContainer) dotsContainer.appendChild(dot);
 			});
-			if (dotsContainer) _processContent(dotsContainer);
+			if (dotsContainer) whenDrawn(dotsContainer, () => _processContent(dotsContainer));
 			CashShop.currentBannerIndex = 0;
 		}
 	};
@@ -325123,6 +326880,7 @@ var init_LaphineSys = __esmMin((() => {
 	init_LaphineSys$2();
 	init_LaphineSys$1();
 	init_PacketStructure();
+	init_WhenDrawn();
 	LaphineSys = new GUIComponent("LaphineSys", LaphineSys_default$1);
 	LaphineUIState = {
 		itemId: null,
@@ -325228,7 +326986,8 @@ var init_LaphineSys = __esmMin((() => {
 			const item = e.target.closest(".item");
 			if (item) onItemInfo$6.call(item, e);
 		});
-		Client.loadFiles([
+		const loadFiles = (files, callback) => whenDrawn(this._host, () => Client.loadFiles(files, callback));
+		loadFiles([
 			DB.INTERFACE_PATH + "lapine/scrollbar_bg_btm.bmp",
 			DB.INTERFACE_PATH + "lapine/scrollbar_bg_mid.bmp",
 			DB.INTERFACE_PATH + "lapine/scrollbar_bg_top.bmp",
@@ -325692,6 +327451,7 @@ var init_LaphineUpg = __esmMin((() => {
 	init_LaphineUpg$2();
 	init_LaphineUpg$1();
 	init_PacketStructure();
+	init_WhenDrawn();
 	LaphineUpg = new GUIComponent("LaphineUpg", LaphineUpg_default$1);
 	LaphineUpgUIState = {
 		itemId: null,
@@ -325797,7 +327557,8 @@ var init_LaphineUpg = __esmMin((() => {
 			const item = e.target.closest(".item");
 			if (item) onItemInfo$5.call(item, e);
 		});
-		Client.loadFiles([
+		const loadFiles = (files, callback) => whenDrawn(this._host, () => Client.loadFiles(files, callback));
+		loadFiles([
 			DB.INTERFACE_PATH + "lapine/scrollbar_bg_btm.bmp",
 			DB.INTERFACE_PATH + "lapine/scrollbar_bg_mid.bmp",
 			DB.INTERFACE_PATH + "lapine/scrollbar_bg_top.bmp",
@@ -326860,7 +328621,7 @@ function playTimeAttackBanner() {
 	}
 	run();
 }
-var PvPTimer, TIMER_W, TIMER_H, TA_W, TA_H, TIMER_Y, TA_Y, _timerCanvas, _timerCtx, _taCanvas, _taCtx, _timefontAct, _timefontSpr, _timeAtkAct, _timeAtkSpr, _timerInterval, _startTs, _layerEntity$1, _taHideTimer, isFirstTime, PvPTimer_default;
+var PvPTimer, TIMER_W, TIMER_H, TA_W, TA_H, TIMER_Y, TA_Y, _timerCanvas, _timerCtx, _taCanvas, _taCtx, _timefontAct, _timefontSpr, _timeAtkAct, _timeAtkSpr, _timerInterval, _startTs, _layerEntity$1, _taHideTimer, isFirstTime, _bannerPending, PvPTimer_default;
 var init_PvPTimer = __esmMin((() => {
 	init_UIManager();
 	init_GUIComponent();
@@ -326869,6 +328630,7 @@ var init_PvPTimer = __esmMin((() => {
 	init_Entity$1();
 	init_PvPTimer$2();
 	init_PvPTimer$1();
+	init_WhenDrawn();
 	PvPTimer = new GUIComponent("PvPTimer", PvPTimer_default$1);
 	PvPTimer.render = () => PvPTimer_default$2;
 	PvPTimer.mouseMode = GUIComponent.MouseMode.CROSS;
@@ -326884,11 +328646,13 @@ var init_PvPTimer = __esmMin((() => {
 	_layerEntity$1 = new Entity();
 	_taHideTimer = null;
 	isFirstTime = true;
+	_bannerPending = false;
 	/**
 	* Initialize UI
 	*/
 	PvPTimer.init = function init() {
-		Client.loadFiles([
+		const loadFiles = (files, callback) => whenDrawn(this._host, () => Client.loadFiles(files, callback));
+		loadFiles([
 			"data/sprite/ÀÌÆÑÆ®/timefont.act",
 			"data/sprite/ÀÌÆÑÆ®/timefont.spr",
 			"data/sprite/ÀÌÆÑÆ®/timeattack.act",
@@ -326898,6 +328662,11 @@ var init_PvPTimer = __esmMin((() => {
 			_timefontSpr = tSpr;
 			_timeAtkAct = aAct;
 			_timeAtkSpr = aSpr;
+			if (_timerInterval) renderTimer((Date.now() / 1e3 | 0) - _startTs);
+			if (_bannerPending && this._host.style.display !== "none") {
+				_bannerPending = false;
+				playTimeAttackBanner();
+			}
 		});
 		const root = this.getRoot();
 		_timerCanvas = root.querySelector(".pvp-timer-canvas");
@@ -326921,6 +328690,7 @@ var init_PvPTimer = __esmMin((() => {
 	*/
 	PvPTimer.onRemove = function onRemove() {
 		isFirstTime = true;
+		_bannerPending = false;
 		stopTimer();
 	};
 	/**
@@ -326936,8 +328706,12 @@ var init_PvPTimer = __esmMin((() => {
 		this._host.style.display = "";
 		startTimer();
 		if (isFirstTime === true) {
-			playTimeAttackBanner();
+			_bannerPending = true;
 			isFirstTime = false;
+		}
+		if (_bannerPending && _timeAtkAct) {
+			_bannerPending = false;
+			playTimeAttackBanner();
 		}
 	};
 	PvPTimer_default = UIManager.addComponent(PvPTimer);
@@ -327019,6 +328793,7 @@ var init_PvPCount = __esmMin((() => {
 	init_SoundManager();
 	init_PvPCount$2();
 	init_PvPCount$1();
+	init_WhenDrawn();
 	PvPCount = new GUIComponent("PvPCount", PvPCount_default$1);
 	PvPCount.render = () => PvPCount_default$2;
 	PvPCount.mouseMode = GUIComponent.MouseMode.CROSS;
@@ -327033,9 +328808,11 @@ var init_PvPCount = __esmMin((() => {
 	* Initialize UI
 	*/
 	PvPCount.init = function init() {
-		Client.loadFiles(["data/sprite/ÀÌÆÑÆ®/rankfont.act", "data/sprite/ÀÌÆÑÆ®/rankfont.spr"], (rAct, rSpr) => {
+		const loadFiles = (files, callback) => whenDrawn(this._host, () => Client.loadFiles(files, callback));
+		loadFiles(["data/sprite/ÀÌÆÑÆ®/rankfont.act", "data/sprite/ÀÌÆÑÆ®/rankfont.spr"], (rAct, rSpr) => {
 			_rankfontAct = rAct;
 			_rankfontSpr = rSpr;
+			if (total > 0) renderRankText(`${ranking}/${total}`);
 		});
 		_rankCanvas = this.getRoot().querySelector(".pvp-rank-canvas");
 		if (!_rankCanvas) return;
@@ -348262,6 +350039,7 @@ function createWinLogin({ name, htmlText, cssText }) {
 		if (_preferences.ID.length) _inputPassword.focus();
 		else _inputUsername.focus();
 		Component.placeOnTop();
+		if (PerfProbe.enabled) PerfProbe.loginShown();
 	};
 	Component.onKeyDown = function onKeyDown(event) {
 		if (this._host.style.display === "none") return true;
@@ -348342,6 +350120,7 @@ var init_WinLoginCommon = __esmMin((() => {
 	init_KeyEventHandler();
 	init_UIManager();
 	init_GUIComponent();
+	init_PerfProbe();
 	init_Elements();
 	init_preload_helper();
 }));

@@ -348614,6 +348614,9 @@ var init_ReplayTypes = __esmMin((() => {
 		NAVI_PATH: 910,
 		NAVI_WAYPOINT: 911,
 		NAVI_TARGET: 912,
+		NAVIGATION_PATH: 910,
+		NAVIGATION_ARROW: 911,
+		NAVIGATION_ACTIVE: 912,
 		WINDOW_ACTION: 913,
 		CLOSE_WINDOW: 914
 	};
@@ -349646,8 +349649,10 @@ var init_ReplayParser = __esmMin((() => {
 				const view = new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength);
 				if (chunk.data.byteLength >= 4) {
 					const questId = view.getUint32(0, true);
+					const active = chunk.data.byteLength > 4 ? chunk.data[4] !== 0 : true;
 					quests.push({
 						questID: questId,
+						active,
 						data: chunk.data
 					});
 				}
@@ -349776,6 +349781,8 @@ var init_ReplayParser = __esmMin((() => {
 				startY: readU32ById(ReplayOpCodes.NaviStartY) ?? 0,
 				endX: readU32ById(ReplayOpCodes.NaviEndX) ?? 0,
 				endY: readU32ById(ReplayOpCodes.NaviEndY) ?? 0,
+				x: readU32ById(ReplayOpCodes.NaviEndX) ?? 0,
+				y: readU32ById(ReplayOpCodes.NaviEndY) ?? 0,
 				targetGid: readU32ById(ReplayOpCodes.NaviTargetGid) ?? 0,
 				targetType: readU32ById(ReplayOpCodes.NaviTargetType) ?? 0,
 				startMap: readStringById(ReplayOpCodes.NaviStartMap),
@@ -349824,6 +349831,7 @@ var init_ReplayParser = __esmMin((() => {
 			}
 			return {
 				actorNames,
+				actors: actorNames,
 				guildNames
 			};
 		}
@@ -350428,10 +350436,13 @@ var init_ReplayPlayer = __esmMin((() => {
 				SessionStorage_default.homunId = 0;
 				SessionStorage_default.homun = {};
 			}
-			if (s.mercenary && s.mercenary.gid) {
-				SessionStorage_default.mercenaryId = s.mercenary.gid;
+			if (s.mercenary && (s.mercenary.gid || s.mercenary.GID)) {
+				const mercId = s.mercenary.gid || s.mercenary.GID;
+				SessionStorage_default.mercId = mercId;
+				SessionStorage_default.mercenaryId = mercId;
 				SessionStorage_default.mercenary = s.mercenary;
 			} else {
+				SessionStorage_default.mercId = 0;
 				SessionStorage_default.mercenaryId = 0;
 				SessionStorage_default.mercenary = {};
 			}
@@ -350626,9 +350637,39 @@ var init_ReplayPlayer = __esmMin((() => {
 						for (const item of this._itemsBuffer.cart) cartUI.addItem(item);
 					} else if (typeof cartUI.setItems === "function") cartUI.setItems(this._itemsBuffer.cart);
 				}
-				const storageUI = StorageController?.getUI ? StorageController : null;
+				const storageUI = StorageController?.getUI ? StorageController.getUI() || StorageController : StorageController;
 				if (storageUI && this._itemsBuffer.storage?.length > 0) {
+					if (typeof storageUI.prepare === "function" && !storageUI.__loaded) storageUI.prepare();
 					if (typeof storageUI.setItems === "function") storageUI.setItems(this._itemsBuffer.storage);
+				}
+			}
+			if (this._sessionData?.pet) {
+				const petId = this._sessionData.pet.aid || this._sessionData.pet.AID;
+				if (petId) {
+					SessionStorage_default.petId = petId;
+					SessionStorage_default.pet = this._sessionData.pet;
+				}
+			}
+			if (this._sessionData?.homun) {
+				const homunId = this._sessionData.homun.gid || this._sessionData.homun.GID;
+				if (homunId) {
+					SessionStorage_default.homunId = homunId;
+					SessionStorage_default.homun = this._sessionData.homun;
+				}
+			}
+			if (this._sessionData?.mercenary) {
+				const mercId = this._sessionData.mercenary.gid || this._sessionData.mercenary.GID;
+				if (mercId) {
+					SessionStorage_default.mercId = mercId;
+					SessionStorage_default.mercenaryId = mercId;
+					SessionStorage_default.mercenary = this._sessionData.mercenary;
+				}
+			}
+			if (this._sessionData?.elemental) {
+				const eleId = this._sessionData.elemental.gid || this._sessionData.elemental.GID;
+				if (eleId) {
+					SessionStorage_default.elementalId = eleId;
+					SessionStorage_default.elemental = this._sessionData.elemental;
 				}
 			}
 			if (this._homunBuffer && typeof HomunInformations_default?.setInformations === "function") HomunInformations_default.setInformations(this._homunBuffer);
@@ -350636,25 +350677,61 @@ var init_ReplayPlayer = __esmMin((() => {
 			if (this._petBuffer && typeof PetInformations_default?.setInformations === "function") PetInformations_default.setInformations(this._petBuffer);
 			if (this._hotkeysBuffer?.length > 0 && typeof ShortCut_default?.setList === "function") ShortCut_default.setList(this._hotkeysBuffer);
 			if (this._groupAndFriendsBuffer) {
-				if (this._groupAndFriendsBuffer.groupInfo && typeof controller?.setParty === "function") controller.setParty(this._groupAndFriendsBuffer.groupName || "", this._groupAndFriendsBuffer.groupInfo);
-				if (this._groupAndFriendsBuffer.friendInfo && typeof controller?.setFriends === "function") controller.setFriends(this._groupAndFriendsBuffer.friendInfo);
+				if (this._groupAndFriendsBuffer.groupInfo?.length > 0 && typeof controller?.setParty === "function") controller.setParty(this._groupAndFriendsBuffer.groupName || "", this._groupAndFriendsBuffer.groupInfo);
+				if (this._groupAndFriendsBuffer.friendInfo?.length > 0 && typeof controller?.setFriends === "function") controller.setFriends(this._groupAndFriendsBuffer.friendInfo);
 			}
-			if (this._questsBuffer?.questInfo && typeof Controller$3?.setQuestList === "function") Controller$3.setQuestList(this._questsBuffer.questInfo);
-			if (this._actorNamesBuffer?.actors?.length > 0) for (const actor of this._actorNamesBuffer.actors) {
+			if (this._questsBuffer) {
+				const quests = this._questsBuffer.quests || this._questsBuffer.questInfo;
+				if (Array.isArray(quests) && quests.length > 0 && typeof Controller$3?.setQuestList === "function") {
+					const questList = {};
+					for (const q of quests) {
+						const questId = q.questID || q.id || q;
+						const questInfo = DB.getQuestInfo(questId) || {};
+						questList[questId] = {
+							questID: questId,
+							title: questInfo.Title || "",
+							summary: questInfo.Summary || "",
+							description: questInfo.Description || "",
+							icon: questInfo.IconName || "ico_nq.bmp",
+							npc_spr: questInfo.NpcSpr || null,
+							npc_navi: questInfo.NpcNavi || null,
+							npc_pos_x: questInfo.NpcPosX || null,
+							npc_pos_y: questInfo.NpcPosY || null,
+							reward_item_list: questInfo.RewardItemList || [],
+							reward_exp_base: questInfo.RewardEXP || 0,
+							reward_exp_job: questInfo.RewardJEXP || 0,
+							active: q.active !== void 0 ? q.active : q.data?.byteLength > 4 ? q.data[4] !== 0 : true,
+							start_time: 0,
+							end_time: 0,
+							count: 0,
+							hunt_list: []
+						};
+					}
+					Controller$3.setQuestList(questList);
+				} else if (quests && typeof quests === "object" && typeof Controller$3?.setQuestList === "function") Controller$3.setQuestList(quests);
+			}
+			const actors = this._actorNamesBuffer?.actorNames || this._actorNamesBuffer?.actors;
+			if (actors?.length > 0) for (const actor of actors) {
 				const entity = EntityManager.get(actor.gid);
 				if (entity?.display) entity.display.name = actor.name;
 			}
 			if (this._openWindowsBuffer?.length > 0) for (const win of this._openWindowsBuffer) {
 				const compName = WindowIdToComponent[win.windowId];
-				if (compName) {
+				if (compName) try {
 					const comp = UIManager.getComponent(compName);
 					if (comp) {
-						if (!comp.ui) comp.append();
-						else if (typeof comp.ui.show === "function") comp.ui.show();
+						if (!comp.__active || !comp._host?.parentNode) comp.append();
+						else if (typeof comp.ui?.show === "function") comp.ui.show();
 					}
+				} catch (e) {
+					replayLog(`[ReplayPlayer] Error opening window ${compName}:`, e);
 				}
 			}
-			if (this._navigationBuffer?.isPathActive && typeof Navigation_default?.setTargetCoordinatesText === "function") Navigation_default.setTargetCoordinatesText(this._navigationBuffer.x, this._navigationBuffer.y);
+			if (this._navigationBuffer?.isPathActive && typeof Navigation_default?.setTargetCoordinatesText === "function") {
+				const navX = this._navigationBuffer.endX ?? this._navigationBuffer.x;
+				const navY = this._navigationBuffer.endY ?? this._navigationBuffer.y;
+				if (navX !== void 0 && navY !== void 0) Navigation_default.setTargetCoordinatesText(navX, navY);
+			}
 			if (SessionStorage_default.Entity) {
 				if (BasicInfoController.update) {
 					BasicInfoController.update("blvl", SessionStorage_default.Entity.clevel);
@@ -350709,100 +350786,125 @@ var init_ReplayPlayer = __esmMin((() => {
 		*/
 		_handleReplayEvent(data) {
 			if (!data || data.byteLength < 6) return;
-			const reader = new BinaryReader(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
-			reader.seek(2, 2);
-			const len = reader.readUShort();
-			const subOpCode = reader.readUShort();
-			switch (subOpCode) {
-				case ReplayEventSubOpCode.WINDOW_MOVE: {
-					const windowId = reader.readUShort();
-					const x = reader.readShort();
-					const y = reader.readShort();
-					const compName = WindowIdToComponent[windowId];
-					if (compName) {
-						const comp = UIManager.getComponent(compName);
-						if (comp?.ui) comp.ui.css({
-							left: `${x}px`,
-							top: `${y}px`
-						});
+			try {
+				const reader = new BinaryReader(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+				reader.seek(2, 2);
+				const len = reader.readUShort();
+				const subOpCode = reader.readUShort();
+				const totalLen = data.byteLength;
+				if (len < 6 || len > totalLen) return;
+				switch (subOpCode) {
+					case ReplayEventSubOpCode.WINDOW_MOVE: {
+						if (totalLen < 12 || len < 12) return;
+						const windowId = reader.readUShort();
+						const x = reader.readShort();
+						const y = reader.readShort();
+						const compName = WindowIdToComponent[windowId];
+						if (compName) try {
+							const comp = UIManager.getComponent(compName);
+							if (comp?.ui) comp.ui.css({
+								left: `${x}px`,
+								top: `${y}px`
+							});
+						} catch (_e) {}
+						break;
 					}
-					break;
-				}
-				case ReplayEventSubOpCode.ITEM_DESC: {
-					const itid = reader.readUInt();
-					if (ItemInfo_default?.setItem) {
-						ItemInfo_default.setItem({
-							ITID: itid,
-							IsIdentified: true
-						});
-						if (!ItemInfo_default.ui) ItemInfo_default.append();
+					case ReplayEventSubOpCode.ITEM_DESC: {
+						if (totalLen < 10 || len < 10) return;
+						const itid = reader.readUInt();
+						if (ItemInfo_default?.setItem) {
+							if (!ItemInfo_default.__active) ItemInfo_default.append();
+							ItemInfo_default.setItem({
+								ITID: itid,
+								IsIdentified: true
+							});
+						}
+						break;
 					}
-					break;
-				}
-				case ReplayEventSubOpCode.WINDOW_MSG: {
-					reader.readUShort();
-					const msgLen = len > 8 ? len - 8 : 0;
-					if (msgLen > 0 && ChatBox_default?.addText) {
-						const text = reader.readBinaryString(msgLen);
-						ChatBox_default.addText(text, ChatBox_default.TYPE_INFO);
+					case ReplayEventSubOpCode.WINDOW_MSG: {
+						if (totalLen < 8 || len < 8) return;
+						reader.readUShort();
+						const msgLen = Math.min(len - 8, totalLen - 8);
+						if (msgLen > 0 && ChatBox_default?.addText) {
+							const text = reader.readBinaryString(msgLen);
+							ChatBox_default.addText(text, ChatBox_default.TYPE_INFO);
+						}
+						break;
 					}
-					break;
-				}
-				case ReplayEventSubOpCode.SET_TARGET: {
-					const targetGid = reader.readUInt();
-					if (SessionStorage_default.Entity) SessionStorage_default.Entity.target = targetGid ? EntityManager.get(targetGid) : null;
-					break;
-				}
-				case ReplayEventSubOpCode.SET_MAP_INFO:
-					replayLog(`[ReplayEvent] SET_MAP_INFO: ${reader.readBinaryString(16)}`);
-					break;
-				case ReplayEventSubOpCode.MAP_TRANSITION:
-					replayLog(`[ReplayEvent] MAP_TRANSITION: ${reader.readBinaryString(16)}`);
-					break;
-				case ReplayEventSubOpCode.SET_BGM_AMBIENT: {
-					const bgmLen = len > 6 ? len - 6 : 0;
-					if (bgmLen > 0) {
-						const bgmName = reader.readBinaryString(bgmLen);
-						if (BGM?.play && bgmName) BGM.play(bgmName);
+					case ReplayEventSubOpCode.SET_TARGET: {
+						if (totalLen < 10 || len < 10) return;
+						const targetGid = reader.readUInt();
+						if (SessionStorage_default.Entity) SessionStorage_default.Entity.target = targetGid ? EntityManager.get(targetGid) : null;
+						break;
 					}
-					break;
-				}
-				case ReplayEventSubOpCode.SET_SESSION_TEXT: {
-					const textLen = len > 6 ? len - 6 : 0;
-					if (textLen > 0) replayLog(`[ReplayEvent] SET_SESSION_TEXT: ${reader.readBinaryString(textLen)}`);
-					break;
-				}
-				case ReplayEventSubOpCode.NAVIGATION_PATH:
-				case ReplayEventSubOpCode.NAVIGATION_ARROW:
-				case ReplayEventSubOpCode.NAVIGATION_ACTIVE:
-					if (len >= 10 && typeof Navigation_default?.setTargetCoordinatesText === "function") {
-						const x = reader.readUShort();
-						const y = reader.readUShort();
-						Navigation_default.setTargetCoordinatesText(x, y);
+					case ReplayEventSubOpCode.SET_MAP_INFO:
+						if (totalLen < 22 || len < 22) return;
+						replayLog(`[ReplayEvent] SET_MAP_INFO: ${reader.readBinaryString(16)}`);
+						break;
+					case ReplayEventSubOpCode.MAP_TRANSITION:
+						if (totalLen < 22 || len < 22) return;
+						replayLog(`[ReplayEvent] MAP_TRANSITION: ${reader.readBinaryString(16)}`);
+						break;
+					case ReplayEventSubOpCode.SET_BGM_AMBIENT: {
+						const bgmLen = Math.min(len > 6 ? len - 6 : 0, totalLen > 6 ? totalLen - 6 : 0);
+						if (bgmLen > 0) {
+							const bgmName = reader.readBinaryString(bgmLen);
+							if (BGM?.play && bgmName) BGM.play(bgmName);
+						}
+						break;
 					}
-					break;
-				case ReplayEventSubOpCode.MAKE_WINDOW: {
-					const windowId = reader.readUShort();
-					const compName = WindowIdToComponent[windowId];
-					if (compName) {
-						const comp = UIManager.getComponent(compName);
-						if (comp && !comp.ui) comp.append();
+					case ReplayEventSubOpCode.SET_SESSION_TEXT: {
+						const textLen = Math.min(len > 6 ? len - 6 : 0, totalLen > 6 ? totalLen - 6 : 0);
+						if (textLen > 0) replayLog(`[ReplayEvent] SET_SESSION_TEXT: ${reader.readBinaryString(textLen)}`);
+						break;
 					}
-					break;
-				}
-				case ReplayEventSubOpCode.WINDOW_ACTION:
-					replayLog(`[ReplayEvent] WINDOW_ACTION: win=${reader.readUShort()}, action=${reader.readUShort()}`);
-					break;
-				case ReplayEventSubOpCode.CLOSE_WINDOW: {
-					const windowId = reader.readUShort();
-					const compName = WindowIdToComponent[windowId];
-					if (compName) {
-						const comp = UIManager.getComponent(compName);
-						if (comp?.ui) comp.remove();
+					case ReplayEventSubOpCode.NAVI_PATH:
+					case ReplayEventSubOpCode.NAVI_WAYPOINT:
+					case ReplayEventSubOpCode.NAVI_TARGET:
+					case ReplayEventSubOpCode.NAVIGATION_PATH:
+					case ReplayEventSubOpCode.NAVIGATION_ARROW:
+					case ReplayEventSubOpCode.NAVIGATION_ACTIVE:
+						if (totalLen >= 10 && len >= 10 && typeof Navigation_default?.setTargetCoordinatesText === "function") {
+							const x = reader.readUShort();
+							const y = reader.readUShort();
+							Navigation_default.setTargetCoordinatesText(x, y);
+						}
+						break;
+					case ReplayEventSubOpCode.MAKE_WINDOW: {
+						if (totalLen < 8 || len < 8) return;
+						const windowId = reader.readUShort();
+						const compName = WindowIdToComponent[windowId];
+						if (compName) try {
+							const comp = UIManager.getComponent(compName);
+							if (comp) {
+								if (!comp.__active || !comp._host?.parentNode) comp.append();
+								else if (comp.ui && typeof comp.ui.show === "function") comp.ui.show();
+							}
+						} catch (e) {
+							replayLog(`[ReplayEvent] MAKE_WINDOW error for ${compName}:`, e);
+						}
+						break;
 					}
-					break;
+					case ReplayEventSubOpCode.WINDOW_ACTION:
+						if (totalLen < 10 || len < 10) return;
+						replayLog(`[ReplayEvent] WINDOW_ACTION: win=${reader.readUShort()}, action=${reader.readUShort()}`);
+						break;
+					case ReplayEventSubOpCode.CLOSE_WINDOW: {
+						if (totalLen < 8 || len < 8) return;
+						const windowId = reader.readUShort();
+						const compName = WindowIdToComponent[windowId];
+						if (compName) try {
+							const comp = UIManager.getComponent(compName);
+							if (comp && (comp.__active || comp._host?.parentNode)) comp.remove();
+						} catch (e) {
+							replayLog(`[ReplayEvent] CLOSE_WINDOW error for ${compName}:`, e);
+						}
+						break;
+					}
+					default: replayLog(`[ReplayEvent] Unhandled subOpCode: ${subOpCode}`);
 				}
-				default: replayLog(`[ReplayEvent] Unhandled subOpCode: ${subOpCode}`);
+			} catch (e) {
+				console.warn("[ReplayPlayer] Error handling replay event:", e);
 			}
 		}
 		_getCurrentStreamChunk() {

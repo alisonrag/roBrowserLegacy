@@ -161909,7 +161909,7 @@ var init_PacketStructure = __esmMin((() => {
 	PACKET.ZC.SPRITE_CHANGE2 = function PACKET_ZC_SPRITE_CHANGE2(fp, end) {
 		this.GID = fp.readULong();
 		this.type = fp.readUChar();
-		if (PacketVerManager_default.value >= 20180704) {
+		if (PacketVerManager_default.value >= 20181121) {
 			this.value = fp.readULong();
 			this.value2 = fp.readULong();
 		} else {
@@ -161917,7 +161917,7 @@ var init_PacketStructure = __esmMin((() => {
 			this.value2 = fp.readShort();
 		}
 	};
-	PACKET.ZC.SPRITE_CHANGE2.size = PacketVerManager_default.value >= 20180704 ? 15 : 11;
+	PACKET.ZC.SPRITE_CHANGE2.size = PacketVerManager_default.value >= 20181121 ? 15 : 11;
 	PACKET.ZC.NOTIFY_STANDENTRY2 = function PACKET_ZC_NOTIFY_STANDENTRY2(fp, end) {
 		this.GID = fp.readULong();
 		this.speed = fp.readShort();
@@ -164481,7 +164481,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.job = fp.readShort();
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
-		if (PacketVerManager_default.value >= 20180704) this.shield = fp.readLong();
+		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
 		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.moveStartTime = fp.readULong();
@@ -164515,7 +164515,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.job = fp.readShort();
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
-		if (PacketVerManager_default.value >= 20180704) this.shield = fp.readLong();
+		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
 		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
@@ -164548,7 +164548,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.job = fp.readShort();
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
-		if (PacketVerManager_default.value >= 20180704) this.shield = fp.readLong();
+		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
 		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
@@ -166481,7 +166481,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.job = fp.readShort();
 		this.head = fp.readUShort();
 		this.weapon = fp.readULong();
-		if (PacketVerManager_default.value >= 20180704) this.shield = fp.readULong();
+		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readULong();
 		else this.shield = 0;
 		this.accessory = fp.readUShort();
 		this.moveStartTime = fp.readULong();
@@ -166520,7 +166520,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.job = fp.readShort();
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
-		if (PacketVerManager_default.value >= 20180704) this.shield = fp.readLong();
+		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
 		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
@@ -166558,7 +166558,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.job = fp.readShort();
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
-		if (PacketVerManager_default.value >= 20180704) this.shield = fp.readLong();
+		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
 		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
@@ -167229,8 +167229,8 @@ var init_PacketStructure = __esmMin((() => {
 		];
 		this.sex = fp.readUChar();
 		this.head = fp.readShort();
-		this.weapon = PacketVerManager_default.value >= 20180704 ? fp.readULong() : fp.readUShort();
-		this.shield = PacketVerManager_default.value >= 20180704 ? fp.readULong() : fp.readUShort();
+		this.weapon = PacketVerManager_default.value >= 20181121 ? fp.readULong() : fp.readUShort();
+		this.shield = PacketVerManager_default.value >= 20181121 ? fp.readULong() : fp.readUShort();
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
 		this.accessory3 = fp.readShort();
@@ -167790,8 +167790,8 @@ var init_PacketStructure = __esmMin((() => {
 		];
 		this.sex = fp.readUChar();
 		this.head = fp.readShort();
-		this.weapon = PacketVerManager_default.value >= 20180704 ? fp.readULong() : fp.readUShort();
-		this.shield = PacketVerManager_default.value >= 20180704 ? fp.readULong() : fp.readUShort();
+		this.weapon = PacketVerManager_default.value >= 20181121 ? fp.readULong() : fp.readUShort();
+		this.shield = PacketVerManager_default.value >= 20181121 ? fp.readULong() : fp.readUShort();
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
 		this.accessory3 = fp.readShort();
@@ -306534,8 +306534,10 @@ var init_DBManager = __esmMin((() => {
 		*
 		* When reliable offhand information is known (isOffhandWeapon === true/false),
 		* that flag distinguishes weapons from shields.
-		* When unknown (isOffhandWeapon === undefined), job-based dual-wield fallback is used:
-		* assassins with ambiguous view IDs (<= 500) fall back to offhand weapon.
+		* When explicitly marked (isOffhandWeapon is true/false), that classification is honored.
+		* When unknown (isOffhandWeapon === undefined), ambiguous view IDs (<= 500) are preserved
+		* as shields unless reliable weapon evidence is present (e.g. item ID > 500), rather than
+		* assuming every assassin's shield view is a weapon.
 		*
 		* @param {integer} id item id or view id
 		* @param {integer} [job] job id of the owner
@@ -306551,9 +306553,7 @@ var init_DBManager = __esmMin((() => {
 			if (isOffhandWeapon === false) return true;
 			if (DB.isShieldItem(num)) return true;
 			if (num > 500) return false;
-			if (!job || !DB.isAssassin(job)) return true;
-			if (num === 3 || num === 4) return true;
-			return false;
+			return true;
 		}
 		static getPCAttackMotion(job, sex, itemID, isDualWeapon) {
 			if (isDualWeapon) switch (job) {
@@ -328835,8 +328835,8 @@ var init_SkillAction = __esmMin((() => {
 *
 * Resolvable only for our own character (entity.GID === sessionEntity.GID).
 * For other entities, the server transmits only view IDs without equipment
-* type metadata, so we return undefined (unknown) so callers can apply the
-* job-based dual-wield fallback.
+* type metadata, so we return undefined (unknown) so callers can preserve
+* ambiguous offhand views as shields unless explicit weapon evidence is provided.
 *
 * @param {object} entity - Target entity
 * @param {object} sessionEntity - Local player entity (Session.Entity)

@@ -85906,6 +85906,19 @@ var init_WeaponAction = __esmMin((() => {
 		this[WeaponType_default.TWOHANDROD] = 1;
 		this[WeaponType_default.SHORTSWORD] = 2;
 	})()];
+	WeaponAction[JobConst_default.DO_SUMMONER] = {
+		[WeaponType_default.NONE]: 0,
+		[WeaponType_default.ROD]: 1,
+		[WeaponType_default.TWOHANDROD]: 1
+	};
+	WeaponAction[JobConst_default.DRUID] = {
+		[WeaponType_default.NONE]: 0,
+		[WeaponType_default.SHORTSWORD]: 1,
+		[WeaponType_default.AXE]: 2,
+		[WeaponType_default.TWOHANDAXE]: 2,
+		[WeaponType_default.MACE]: 2,
+		[WeaponType_default.TWOHANDMACE]: 2
+	};
 	duplicateEntry$4(JobConst_default.NOVICE, JobConst_default.NOVICE_H, JobConst_default.NOVICE_B);
 	duplicateEntry$4(JobConst_default.SWORDMAN, JobConst_default.SWORDMAN_H, JobConst_default.SWORDMAN_B);
 	duplicateEntry$4(JobConst_default.MAGICIAN, JobConst_default.MAGICIAN_H, JobConst_default.MAGICIAN_B);
@@ -85932,6 +85945,8 @@ var init_WeaponAction = __esmMin((() => {
 	duplicateEntry$4(JobConst_default.NINJA, JobConst_default.NINJA_B, JobConst_default.KAGEROU, JobConst_default.KAGEROU_B, JobConst_default.OBORO, JobConst_default.OBORO_B, JobConst_default.SHINKIRO, JobConst_default.SHIRANUI);
 	duplicateEntry$4(JobConst_default.GUNSLINGER, JobConst_default.GUNSLINGER_B, JobConst_default.REBELLION, JobConst_default.REBELLION_B, JobConst_default.NIGHT_WATCH);
 	duplicateEntry$4(JobConst_default.LINKER, JobConst_default.LINKER_B, JobConst_default.SOUL_REAPER, JobConst_default.SOUL_REAPER_B, JobConst_default.SOUL_ASCETIC);
+	duplicateEntry$4(JobConst_default.DO_SUMMONER, JobConst_default.DO_SUMMONER_B, JobConst_default.DO_CART_SUMMONER1, JobConst_default.SPIRIT_HANDLER, JobConst_default.SPIRIT_HANDLER_RIDING1);
+	duplicateEntry$4(JobConst_default.DRUID, JobConst_default.DRUID_B, JobConst_default.DRUID_RIDING, JobConst_default.KARNOS, JobConst_default.KARNOS_B, JobConst_default.KARNOS_RIDING, JobConst_default.ALITEA, JobConst_default.ALITEA_RIDING);
 }));
 // src/DB/Jobs/WeaponJobTable.js
 function duplicateEntry$3(origin) {
@@ -139089,11 +139104,20 @@ function keepBuiltInSkills(tree, jobIds, builtIn = BuiltInSkillTreeView) {
 		}
 	}
 }
-var isSkill, BuiltInSkillTreeView;
+var isSkill, BuiltInSkillTreeView, BuiltInTreeGroup;
 var init_SkillTreeMerge = __esmMin((() => {
 	init_SkillTreeView();
 	isSkill = (key) => /^\d+$/.test(key);
 	BuiltInSkillTreeView = Object.freeze(Object.fromEntries(Object.entries(SkillTreeView).map(([jobId, entry]) => [jobId, Object.freeze({ ...entry })])));
+	BuiltInTreeGroup = (() => {
+		const first = /* @__PURE__ */ new Map();
+		const group = {};
+		for (const [jobId, entry] of Object.entries(SkillTreeView)) {
+			if (!first.has(entry)) first.set(entry, jobId);
+			group[jobId] = first.get(entry);
+		}
+		return Object.freeze(group);
+	})();
 }));
 // src/DB/Jobs/JobHitSoundTable.js
 function duplicateEntry$1(origin) {
@@ -160051,10 +160075,10 @@ var init_PacketStructure = __esmMin((() => {
 		return pkt;
 	};
 	PACKET.ZC.SE_PC_BUY_CASHITEM_RESULT = function PACKET_ZC_SE_PC_BUY_CASHITEM_RESULT(fp, end) {
-		this.kafraPoints = fp.readUShort();
-		this.itemId = fp.readShort();
-		this.result = fp.readShort();
-		this.cashPoints = fp.readUShort();
+		this.itemId = fp.readULong();
+		this.result = fp.readUShort();
+		this.cashPoints = fp.readULong();
+		this.kafraPoints = fp.readULong();
 	};
 	PACKET.ZC.SE_PC_BUY_CASHITEM_RESULT.size = 16;
 	PACKET.CA.SSO_LOGIN_REQa = function PACKET_CA_SSO_LOGIN_REQa() {
@@ -162229,7 +162253,7 @@ var init_PacketStructure = __esmMin((() => {
 	PACKET.ZC.SPRITE_CHANGE2 = function PACKET_ZC_SPRITE_CHANGE2(fp, end) {
 		this.GID = fp.readULong();
 		this.type = fp.readUChar();
-		if (PacketVerManager_default.value >= 20180704) {
+		if (PacketVerManager_default.value >= 20181121) {
 			this.value = fp.readULong();
 			this.value2 = fp.readULong();
 		} else {
@@ -162237,7 +162261,7 @@ var init_PacketStructure = __esmMin((() => {
 			this.value2 = fp.readShort();
 		}
 	};
-	PACKET.ZC.SPRITE_CHANGE2.size = PacketVerManager_default.value >= 20180704 ? 15 : 11;
+	PACKET.ZC.SPRITE_CHANGE2.size = PacketVerManager_default.value >= 20181121 ? 15 : 11;
 	PACKET.ZC.NOTIFY_STANDENTRY2 = function PACKET_ZC_NOTIFY_STANDENTRY2(fp, end) {
 		this.GID = fp.readULong();
 		this.speed = fp.readShort();
@@ -164802,6 +164826,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
 		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
+		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.moveStartTime = fp.readULong();
 		this.accessory2 = fp.readShort();
@@ -164835,6 +164860,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
 		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
+		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
 		this.accessory3 = fp.readShort();
@@ -164867,6 +164893,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
 		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
+		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
 		this.accessory3 = fp.readShort();
@@ -166799,6 +166826,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.head = fp.readUShort();
 		this.weapon = fp.readULong();
 		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readULong();
+		else this.shield = 0;
 		this.accessory = fp.readUShort();
 		this.moveStartTime = fp.readULong();
 		this.accessory2 = fp.readUShort();
@@ -166837,6 +166865,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
 		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
+		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
 		this.accessory3 = fp.readShort();
@@ -166874,6 +166903,7 @@ var init_PacketStructure = __esmMin((() => {
 		this.head = fp.readShort();
 		this.weapon = fp.readLong();
 		if (PacketVerManager_default.value >= 20181121) this.shield = fp.readLong();
+		else this.shield = 0;
 		this.accessory = fp.readShort();
 		this.accessory2 = fp.readShort();
 		this.accessory3 = fp.readShort();
@@ -231976,6 +232006,146 @@ var init_GuildCompanion = __esmMin((() => {
 	GuildCompanion.needFocus = true;
 	GuildCompanion_default = UIManager.addComponent(GuildCompanion);
 }));
+// src/UI/Components/SkillList/SkillRequirements.js
+function getOwnedSkill(ownedSkills, skillId) {
+	return ownedSkills?.get?.(skillId) ?? ownedSkills?.[skillId] ?? null;
+}
+function getOwnedLevel(ownedSkills, skillId) {
+	return getOwnedSkill(ownedSkills, skillId)?.level ?? 0;
+}
+function getJobLineage(jobId, skillTreeView) {
+	const lineage = [];
+	const visited = /* @__PURE__ */ new Set();
+	let currentJobId = jobId;
+	while (currentJobId != null && !visited.has(currentJobId)) {
+		visited.add(currentJobId);
+		lineage.push(currentJobId);
+		const tree = skillTreeView[currentJobId];
+		if (!tree || tree.beforeJob == null) break;
+		currentJobId = tree.beforeJob;
+	}
+	return lineage;
+}
+/**
+* Find which of candidateJobIds applies to the character's job: the first one
+* met walking up the job's lineage (the job, then the job before it, and so
+* on). An alias matches its canonical job's entry: aliased jobs share one
+* tree object in SkillTreeView, and, once a reset or a client file has given
+* each its own copy, the same group in treeGroup. Returns the matching
+* candidate as given, or undefined.
+*/
+function findLineageJob(candidateJobIds, jobId, skillTreeView, treeGroup = BuiltInTreeGroup) {
+	const candidates = Array.from(candidateJobIds, String);
+	for (const lineageJobId of getJobLineage(jobId, skillTreeView)) {
+		if (candidates.includes(String(lineageJobId))) return String(lineageJobId);
+		const lineageTree = skillTreeView[lineageJobId];
+		const lineageGroup = treeGroup[lineageJobId];
+		const canonicalJobId = candidates.find((candidateJobId) => lineageTree && skillTreeView[candidateJobId] === lineageTree || lineageGroup !== void 0 && treeGroup[candidateJobId] === lineageGroup);
+		if (canonicalJobId !== void 0) return canonicalJobId;
+	}
+}
+/**
+* Resolve the requirements that apply to a skill for the active character job.
+* Job-specific entries override the generic list, including explicit empty
+* overrides.
+*/
+function resolveSkillRequirements(skill, jobId, skillTreeView) {
+	if (!skill) return [];
+	const jobRequirements = skill.NeedSkillList;
+	if (jobRequirements) {
+		const lineageJobId = findLineageJob(Object.keys(jobRequirements), jobId, skillTreeView);
+		if (lineageJobId !== void 0) return jobRequirements[lineageJobId];
+	}
+	return skill._NeedSkillList ?? [];
+}
+function clonePlan(plan) {
+	return new Map(Array.from(plan, ([skillId, choice]) => [skillId, { ...choice }]));
+}
+function calculatePlanCost(plan, ownedSkills) {
+	let cost = 0;
+	for (const [skillId, choice] of plan) if (!choice.isQuest) cost += Math.max(0, choice.count - getOwnedLevel(ownedSkills, skillId));
+	return cost;
+}
+function getPlannedLevel(plan, ownedSkills, skillId) {
+	return Math.max(plan.get(skillId)?.count ?? 0, getOwnedLevel(ownedSkills, skillId));
+}
+/**
+* Build a complete candidate plan for one more level of skillId. The input
+* plan is never mutated. A null result means the complete prerequisite chain
+* is invalid or cannot be afforded.
+*/
+function stageSkillPlan({ plan, skillId, ownedSkills, skillInfo, skillTreeView, jobId, availablePoints }) {
+	const candidate = clonePlan(plan);
+	const visiting = /* @__PURE__ */ new Set();
+	const stage = (currentSkillId, requiredLevel = null) => {
+		const info = skillInfo[currentSkillId];
+		if (!info || visiting.has(currentSkillId)) return false;
+		const ownedLevel = getOwnedLevel(ownedSkills, currentSkillId);
+		if (info.Type === "Quest" && ownedLevel <= 0) return requiredLevel == null;
+		const currentLevel = Math.max(candidate.get(currentSkillId)?.count ?? 0, ownedLevel);
+		const targetLevel = requiredLevel == null ? Math.min(currentLevel + 1, info.MaxLv) : Math.max(currentLevel, requiredLevel);
+		if (targetLevel > info.MaxLv) return false;
+		candidate.set(currentSkillId, {
+			count: targetLevel,
+			isQuest: false
+		});
+		visiting.add(currentSkillId);
+		for (const [requiredSkillId, level] of resolveSkillRequirements(info, jobId, skillTreeView)) if (!stage(requiredSkillId, level)) {
+			visiting.delete(currentSkillId);
+			return false;
+		}
+		visiting.delete(currentSkillId);
+		return true;
+	};
+	if (!stage(skillId)) return null;
+	const cost = calculatePlanCost(candidate, ownedSkills);
+	if (cost > availablePoints) return null;
+	return {
+		plan: candidate,
+		cost
+	};
+}
+function validateSkillPlan({ plan, ownedSkills, skillInfo, skillTreeView, jobId, availablePoints }) {
+	if (calculatePlanCost(plan, ownedSkills) > availablePoints) return false;
+	for (const [skillId, choice] of plan) {
+		const info = skillInfo[skillId];
+		const ownedLevel = getOwnedLevel(ownedSkills, skillId);
+		if (!info || choice.count < ownedLevel || choice.count > info.MaxLv) return false;
+		for (const [requiredSkillId, requiredLevel] of resolveSkillRequirements(info, jobId, skillTreeView)) if (getPlannedLevel(plan, ownedSkills, requiredSkillId) < requiredLevel) return false;
+	}
+	return true;
+}
+/**
+* Return one skill id per upgrade packet, ordered so every prerequisite is
+* upgraded before its dependants. A null result means the staged plan is no
+* longer valid against the authoritative skill state.
+*/
+function createSkillUpgradeOrder(options) {
+	if (!validateSkillPlan(options)) return null;
+	const { plan, ownedSkills, skillInfo, skillTreeView, jobId } = options;
+	const order = [];
+	const visited = /* @__PURE__ */ new Set();
+	const visiting = /* @__PURE__ */ new Set();
+	const visit = (skillId) => {
+		if (visited.has(skillId)) return true;
+		if (visiting.has(skillId)) return false;
+		const info = skillInfo[skillId];
+		if (!info) return false;
+		visiting.add(skillId);
+		for (const [requiredSkillId] of resolveSkillRequirements(info, jobId, skillTreeView)) if (plan.has(requiredSkillId) && !visit(requiredSkillId)) return false;
+		visiting.delete(skillId);
+		visited.add(skillId);
+		const count = plan.get(skillId)?.count ?? getOwnedLevel(ownedSkills, skillId);
+		const upgrades = Math.max(0, count - getOwnedLevel(ownedSkills, skillId));
+		for (let i = 0; i < upgrades; i++) order.push(skillId);
+		return true;
+	};
+	for (const skillId of plan.keys()) if (!visit(skillId)) return null;
+	return order;
+}
+var init_SkillRequirements = __esmMin((() => {
+	init_SkillTreeMerge();
+}));
 // src/UI/Components/SkillDescription/SkillDescription.html?raw
 var SkillDescription_default$2;
 var init_SkillDescription$2 = __esmMin((() => {
@@ -231988,19 +232158,49 @@ var init_SkillDescription$1 = __esmMin((() => {
 }));
 // src/UI/Components/SkillDescription/SkillDescription.js
 /**
+* Keep only the job-specific lines that apply to the character's job, without
+* their job id, as the official client does: a Sage reads "Requirement:
+* Seismic Weapon 1" and never sees the Wizard's line. When several of the
+* line's jobs are in the character's lineage, the nearest one wins, as it
+* does for the skill tree's own requirements. Lines for other jobs are left
+* out. Numbers in the monster id range are not job ids and stay as they are.
+*
+* @param {string} txt - skill description text
+* @param {number} jobId - the character's job
+* @returns {string}
+*/
+function _resolveJobLines(txt, jobId) {
+	const lines = txt.split("\n");
+	const lineJob = lines.map((line) => {
+		const id = line.match(_jobLineReg)?.[1];
+		const n = Number(id);
+		return id !== void 0 && (n < 1e3 || n >= 4e3) ? id : null;
+	});
+	const jobIds = new Set(lineJob.filter((id) => id !== null));
+	if (!jobIds.size) return txt;
+	const kept = jobId == null ? void 0 : findLineageJob(jobIds, jobId, SkillTreeView);
+	const out = [];
+	lines.forEach((line, i) => {
+		if (lineJob[i] === null) out.push(line);
+		else if (lineJob[i] === kept) out.push(line.slice(lineJob[i].length));
+	});
+	return out.join("\n");
+}
+/**
 * Sanitize and format RO text with ^rrggbb color codes, ^nItemID^NNN
 * item name substitution, and newline conversion.
 *
 * @param {string} value - raw skill description text
+* @param {?number} jobId - the character's job, for job-specific lines
 * @returns {string} safe HTML string
 */
-function _formatROText(value) {
+function _formatROText(value, jobId = null) {
 	const tmp = document.createElement("div");
 	tmp.innerHTML = String(value);
 	tmp.querySelectorAll("*").forEach((el) => {
 		if (!_allowedTags.has(el.tagName.toLowerCase())) el.replaceWith(...el.childNodes);
 	});
-	let txt = tmp.innerHTML;
+	let txt = _resolveJobLines(tmp.innerHTML, jobId);
 	let result;
 	const colorReg = /\^([a-fA-F0-9]{6})/;
 	while (result = colorReg.exec(txt)) txt = txt.replace(result[0], `<span style="color:#${result[1]}">`) + "</span>";
@@ -232009,10 +232209,13 @@ function _formatROText(value) {
 	txt = txt.replace(/\n/g, "<br/>");
 	return txt;
 }
-var _allowedTags, SkillDescription$1, SkillDescription_default;
+var _allowedTags, _jobLineReg, SkillDescription$1, SkillDescription_default;
 var init_SkillDescription = __esmMin((() => {
 	init_DBManager();
 	init_Renderer();
+	init_SessionStorage();
+	init_SkillTreeView();
+	init_SkillRequirements();
 	init_KeyEventHandler();
 	init_MouseEventHandler();
 	init_UIManager();
@@ -232024,6 +232227,7 @@ var init_SkillDescription = __esmMin((() => {
 		"i",
 		"b"
 	]);
+	_jobLineReg = /^(\d+)(?=\^[a-fA-F0-9]{6})/;
 	SkillDescription$1 = new GUIComponent("SkillDescription", SkillDescription_default$1);
 	SkillDescription$1.render = () => SkillDescription_default$2;
 	/**
@@ -232061,7 +232265,11 @@ var init_SkillDescription = __esmMin((() => {
 	SkillDescription$1.setSkill = function setSkill(id) {
 		this.uid = id;
 		const content = this.getRoot().querySelector(".content");
-		if (content) content.innerHTML = _formatROText(DB.getSkillDescription(id));
+		if (content) {
+			const entity = SessionStorage_default.Entity;
+			const jobId = entity ? entity._job || entity.job : null;
+			content.innerHTML = _formatROText(DB.getSkillDescription(id), jobId);
+		}
 		const hostWidth = this._host.getBoundingClientRect().width;
 		const hostHeight = this._host.getBoundingClientRect().height;
 		this._host.style.top = `${Math.min(Mouse.screen.y + 10, Renderer.height - hostHeight)}px`;
@@ -236035,135 +236243,6 @@ function attachTouchDrag(container, { itemSelector, getPayload, createGhost = nu
 	};
 }
 var init_TouchDrag = __esmMin((() => {}));
-// src/UI/Components/SkillList/SkillRequirements.js
-function getOwnedSkill(ownedSkills, skillId) {
-	return ownedSkills?.get?.(skillId) ?? ownedSkills?.[skillId] ?? null;
-}
-function getOwnedLevel(ownedSkills, skillId) {
-	return getOwnedSkill(ownedSkills, skillId)?.level ?? 0;
-}
-function getJobLineage(jobId, skillTreeView) {
-	const lineage = [];
-	const visited = /* @__PURE__ */ new Set();
-	let currentJobId = jobId;
-	while (currentJobId != null && !visited.has(currentJobId)) {
-		visited.add(currentJobId);
-		lineage.push(currentJobId);
-		const tree = skillTreeView[currentJobId];
-		if (!tree || tree.beforeJob == null) break;
-		currentJobId = tree.beforeJob;
-	}
-	return lineage;
-}
-/**
-* Resolve the requirements that apply to a skill for the active character job.
-* Job-specific entries override the generic list, including explicit empty
-* overrides. Aliased jobs in SkillTreeView share the same tree object, so an
-* alias can inherit the canonical job's override.
-*/
-function resolveSkillRequirements(skill, jobId, skillTreeView) {
-	if (!skill) return [];
-	const jobRequirements = skill.NeedSkillList;
-	if (jobRequirements) {
-		const requirementJobs = Object.keys(jobRequirements);
-		for (const lineageJobId of getJobLineage(jobId, skillTreeView)) {
-			if (Object.hasOwn(jobRequirements, lineageJobId)) return jobRequirements[lineageJobId];
-			const lineageTree = skillTreeView[lineageJobId];
-			if (!lineageTree) continue;
-			const canonicalJobId = requirementJobs.find((requirementJobId) => {
-				return skillTreeView[requirementJobId] === lineageTree;
-			});
-			if (canonicalJobId !== void 0) return jobRequirements[canonicalJobId];
-		}
-	}
-	return skill._NeedSkillList ?? [];
-}
-function clonePlan(plan) {
-	return new Map(Array.from(plan, ([skillId, choice]) => [skillId, { ...choice }]));
-}
-function calculatePlanCost(plan, ownedSkills) {
-	let cost = 0;
-	for (const [skillId, choice] of plan) if (!choice.isQuest) cost += Math.max(0, choice.count - getOwnedLevel(ownedSkills, skillId));
-	return cost;
-}
-function getPlannedLevel(plan, ownedSkills, skillId) {
-	return Math.max(plan.get(skillId)?.count ?? 0, getOwnedLevel(ownedSkills, skillId));
-}
-/**
-* Build a complete candidate plan for one more level of skillId. The input
-* plan is never mutated. A null result means the complete prerequisite chain
-* is invalid or cannot be afforded.
-*/
-function stageSkillPlan({ plan, skillId, ownedSkills, skillInfo, skillTreeView, jobId, availablePoints }) {
-	const candidate = clonePlan(plan);
-	const visiting = /* @__PURE__ */ new Set();
-	const stage = (currentSkillId, requiredLevel = null) => {
-		const info = skillInfo[currentSkillId];
-		if (!info || visiting.has(currentSkillId)) return false;
-		const ownedLevel = getOwnedLevel(ownedSkills, currentSkillId);
-		if (info.Type === "Quest" && ownedLevel <= 0) return requiredLevel == null;
-		const currentLevel = Math.max(candidate.get(currentSkillId)?.count ?? 0, ownedLevel);
-		const targetLevel = requiredLevel == null ? Math.min(currentLevel + 1, info.MaxLv) : Math.max(currentLevel, requiredLevel);
-		if (targetLevel > info.MaxLv) return false;
-		candidate.set(currentSkillId, {
-			count: targetLevel,
-			isQuest: false
-		});
-		visiting.add(currentSkillId);
-		for (const [requiredSkillId, level] of resolveSkillRequirements(info, jobId, skillTreeView)) if (!stage(requiredSkillId, level)) {
-			visiting.delete(currentSkillId);
-			return false;
-		}
-		visiting.delete(currentSkillId);
-		return true;
-	};
-	if (!stage(skillId)) return null;
-	const cost = calculatePlanCost(candidate, ownedSkills);
-	if (cost > availablePoints) return null;
-	return {
-		plan: candidate,
-		cost
-	};
-}
-function validateSkillPlan({ plan, ownedSkills, skillInfo, skillTreeView, jobId, availablePoints }) {
-	if (calculatePlanCost(plan, ownedSkills) > availablePoints) return false;
-	for (const [skillId, choice] of plan) {
-		const info = skillInfo[skillId];
-		const ownedLevel = getOwnedLevel(ownedSkills, skillId);
-		if (!info || choice.count < ownedLevel || choice.count > info.MaxLv) return false;
-		for (const [requiredSkillId, requiredLevel] of resolveSkillRequirements(info, jobId, skillTreeView)) if (getPlannedLevel(plan, ownedSkills, requiredSkillId) < requiredLevel) return false;
-	}
-	return true;
-}
-/**
-* Return one skill id per upgrade packet, ordered so every prerequisite is
-* upgraded before its dependants. A null result means the staged plan is no
-* longer valid against the authoritative skill state.
-*/
-function createSkillUpgradeOrder(options) {
-	if (!validateSkillPlan(options)) return null;
-	const { plan, ownedSkills, skillInfo, skillTreeView, jobId } = options;
-	const order = [];
-	const visited = /* @__PURE__ */ new Set();
-	const visiting = /* @__PURE__ */ new Set();
-	const visit = (skillId) => {
-		if (visited.has(skillId)) return true;
-		if (visiting.has(skillId)) return false;
-		const info = skillInfo[skillId];
-		if (!info) return false;
-		visiting.add(skillId);
-		for (const [requiredSkillId] of resolveSkillRequirements(info, jobId, skillTreeView)) if (plan.has(requiredSkillId) && !visit(requiredSkillId)) return false;
-		visiting.delete(skillId);
-		visited.add(skillId);
-		const count = plan.get(skillId)?.count ?? getOwnedLevel(ownedSkills, skillId);
-		const upgrades = Math.max(0, count - getOwnedLevel(ownedSkills, skillId));
-		for (let i = 0; i < upgrades; i++) order.push(skillId);
-		return true;
-	};
-	for (const skillId of plan.keys()) if (!visit(skillId)) return null;
-	return order;
-}
-var init_SkillRequirements = __esmMin((() => {}));
 // src/UI/Components/SkillList/SkillListCommon.js
 function _escapeHTML$2(text) {
 	const div = document.createElement("div");
@@ -237297,10 +237376,20 @@ function createQuest(config) {
 	* @param {number} huntID
 	*/
 	Quest.updateMissionHunt = function updateMissionHunt(hunt_info, questID, huntID) {
-		if (hunt_info.huntIDCount) _questList[questID].hunt_list[huntID].huntIDCount = hunt_info.huntIDCount;
-		if (hunt_info.maxCount) _questList[questID].hunt_list[huntID].maxCount = hunt_info.maxCount;
-		if (hunt_info.huntCount) _questList[questID].hunt_list[huntID].huntCount = hunt_info.huntCount;
-		if (hunt_info.mobGID) _questList[questID].hunt_list[huntID].mobGID = hunt_info.mobGID;
+		const hunt = _questList[questID].hunt_list[huntID];
+		const prevHuntCount = hunt.huntCount;
+		const prevMaxCount = hunt.maxCount;
+		if (hunt_info.huntIDCount) hunt.huntIDCount = hunt_info.huntIDCount;
+		if (hunt_info.maxCount) hunt.maxCount = hunt_info.maxCount;
+		if (typeof hunt_info.huntCount === "number") hunt.huntCount = hunt_info.huntCount;
+		if (hunt_info.mobGID) hunt.mobGID = hunt_info.mobGID;
+		if (hunt.huntCount === prevHuntCount && hunt.maxCount === prevMaxCount) {
+			if (questWindow) {
+				questWindow.ClearQuestList();
+				questWindow.setQuestList(_questList, _questNotShowList);
+			}
+			return;
+		}
 		const mob_name = _questList[questID].hunt_list[huntID].mobName;
 		const chat_quest_text = `Mission [${DB.getQuestInfo(questID).Title}], you killed [${mob_name}]. (${_questList[questID].hunt_list[huntID].huntCount}/${_questList[questID].hunt_list[huntID].maxCount})`;
 		let self_msg;
@@ -246761,12 +246850,12 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 	else Component.setCostumeConfig = function setCostumeConfig(_on) {};
 	Component.equip = function equip(item, location) {
 		const it = DB.getItemInfo(item.ITID);
-		if (entityRender) item.equipped = location;
-		_list[item.index] = item;
-		if (!entityRender && arguments.length === 1) {
+		if (!location && arguments.length === 1) {
 			if ("WearState" in item) location = item.WearState;
 			else if ("location" in item) location = item.location;
 		}
+		item.equipped = location;
+		_list[item.index] = item;
 		function add3Dots(string, limit) {
 			function stripHTML(str) {
 				const div = document.createElement("div");
@@ -246815,6 +246904,16 @@ function createEquipment({ name, htmlText, cssText, entityRender = true, enchant
 	};
 	Component.onLevelUp = function onLevelUp() {
 		if (UIVersionManager.getEquipmentVersion() > 0 && _btnLevelUp) document.body.appendChild(_btnLevelUp);
+	};
+	Component.getEquippedItem = function getEquippedItem(index) {
+		return _list[index] || null;
+	};
+	Component.getEquippedItemByLocation = function getEquippedItemByLocation(location) {
+		for (const key in _list) {
+			const item = _list[key];
+			if ((item ? item.equipped || item.WearState || item.location || item.WearLocation || 0 : 0) & location) return item;
+		}
+		return null;
 	};
 	Component.checkEquipLoc = function checkEquipLoc(location) {
 		if (!entityRender) return 0;
@@ -308346,16 +308445,45 @@ var init_DBManager = __esmMin((() => {
 			return "data/texture/" + (PetIllustration_default[id] || PetIllustration_default[1002]);
 		}
 		/**
+		* Is the item ID a shield item?
+		* Only checks inventory item IDs, never view IDs.
+		*
+		* @param {integer} id item id
+		* @return {boolean}
+		*/
+		static isShieldItem(id) {
+			const num = Number(id);
+			if (isNaN(num) || num <= 0) return false;
+			return num >= 2100 && num <= 2199 || num >= 28900 && num <= 28999 || num >= 46e4 && num <= 469999;
+		}
+		/**
 		* is shield checking
 		*
-		* @param {integer} id
+		* The left-hand slot can hold either an item ID or a view ID (ClassNum, <= 500).
+		* Shield views and weapon views share the same numeric range (1-500).
+		*
+		* When reliable offhand information is known (isOffhandWeapon === true/false),
+		* that flag distinguishes weapons from shields.
+		* When explicitly marked (isOffhandWeapon is true/false), that classification is honored.
+		* When unknown (isOffhandWeapon === undefined), ambiguous view IDs (<= 500) are preserved
+		* as shields unless reliable weapon evidence is present (e.g. item ID > 500), rather than
+		* assuming every assassin's shield view is a weapon.
+		*
+		* @param {integer} id item id or view id
+		* @param {integer} [job] job id of the owner
+		* @param {boolean} [isOffhandWeapon] explicitly marks whether the equipment is an offhand weapon
 		* @return {boolean} is shield?
 		*
 		* @author MrUnzO
 		*/
-		static isShield(id) {
-			if (id >= 2100 && id <= 2199 || id >= 28900 && id <= 28999 || id >= 46e4 && id <= 460099) return true;
-			return false;
+		static isShield(id, job, isOffhandWeapon) {
+			const num = Number(id);
+			if (isNaN(num) || num <= 0) return false;
+			if (isOffhandWeapon === true) return false;
+			if (isOffhandWeapon === false) return true;
+			if (DB.isShieldItem(num)) return true;
+			if (num > 500) return false;
+			return true;
 		}
 		static getPCAttackMotion(job, sex, itemID, isDualWeapon) {
 			if (isDualWeapon) switch (job) {
@@ -308882,11 +309010,17 @@ var init_DBManager = __esmMin((() => {
 		* @param {boolean} sex
 		*/
 		static getShieldPath(id, job, sex) {
-			if (id === 0) return null;
-			if (!DB.isShield(id)) return DB.getWeaponPath(id, job, sex);
+			if (!id || id <= 0) return null;
+			if (!DB.isShield(id, job, false)) return DB.getWeaponPath(id, job, sex);
 			const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
-			if (id in ItemTable_default && "ClassNum" in ItemTable_default[id]) id = ItemTable_default[id].ClassNum;
-			return "data/sprite/¹æÆÐ/" + baseClass + "/" + baseClass + "_" + SexTable[sex] + "_" + (ShieldTable_default[id] || ShieldTable_default[1]);
+			let viewId = id;
+			if (id in ItemTable_default && "ClassNum" in ItemTable_default[id]) viewId = ItemTable_default[id].ClassNum;
+			if (!viewId || viewId <= 0) return null;
+			let suffix = "";
+			if (viewId in ShieldTable_default) suffix = ShieldTable_default[viewId];
+			else if (viewId >= 5) suffix = viewId + "_¹æÆÐ";
+			else return null;
+			return "data/sprite/¹æÆÐ/" + baseClass + "/" + baseClass + "_" + SexTable[sex] + "_" + suffix;
 		}
 		/**
 		* @return {string} Path to weapon
@@ -309016,7 +309150,7 @@ var init_DBManager = __esmMin((() => {
 				case JobConst_default.DO_SUMMONER:
 				case JobConst_default.DO_SUMMONER_B:
 				case JobConst_default.SPIRIT_HANDLER:
-				case JobConst_default.SPIRIT_HANDLER_RIDING1: return {
+				case JobConst_default.SPIRIT_HANDLER_RIDING1: if (type === WeaponType_default.NONE) return {
 					frame: 0,
 					length: 4
 				};
@@ -313265,8 +313399,14 @@ function UpdateGeneric(type, func, fallback) {
 		let path;
 		const _this = this;
 		let _val = val;
-		if (val <= 0) {
+		let keepLook = false;
+		if (!val || val <= 0) {
 			this["_" + type] = 0;
+			if (this.files[type]) {
+				this.files[type].spr = null;
+				this.files[type].act = null;
+				this.files[type].pal = null;
+			}
 			return;
 		}
 		switch (type) {
@@ -313287,7 +313427,7 @@ function UpdateGeneric(type, func, fallback) {
 		function LoadView(filepath, final) {
 			Client.loadFile(filepath + ".act");
 			Client.loadFile(filepath + ".spr", function() {
-				_this["_" + type] = _val;
+				_this["_" + type] = keepLook ? val : _val;
 				if (!(type === "accessory" || type === "accessory2" || type === "accessory3") || !shouldSuppressHead.call(_this)) {
 					_this.files[type].spr = filepath + ".spr";
 					_this.files[type].act = filepath + ".act";
@@ -313307,6 +313447,11 @@ function UpdateGeneric(type, func, fallback) {
 				if (fallback && !final) {
 					_val = DB[fallback](val);
 					filepath = DB[func](_val, _this.job, _this._sex);
+					if (type === "weapon" && filepath === path) {
+						_val = DB.getWeaponType(val, true);
+						filepath = DB[func](_val, _this.job, _this._sex);
+						keepLook = true;
+					}
 					if (filepath) LoadView(filepath, true);
 				} else if (type === "robe" && !final) {
 					const fallbackPath = DB.getRobePathNoSex(val, _this.job, _this._sex);
@@ -325532,13 +325677,13 @@ function onClickSearch() {
 	const newList = [];
 	CashShop.isSearch = true;
 	CashShop.activeCashMenu = 9;
-	if (val && CashShop.cashShopListItem.length > 0) for (let i = 0; i < CashShop.cashShopListItem.length; ++i) {
-		const items = CashShop.cashShopListItem[i].items;
+	if (val && CashShop.cashShopListItem.length > 0) for (const tab of CashShop.cashShopListItem.filter(Boolean)) {
+		const items = tab.items;
 		for (let iit = 0; iit < items.length; ++iit) {
-			items[iit].tab = CashShop.cashShopListItem[i].tabNum;
+			items[iit].tab = tab.tabNum;
 			const it = DB.getItemInfo(items[iit].itemId);
 			if (it.identifiedDisplayName) {
-				if (new RegExp(val).test(it.identifiedDisplayName.toLowerCase())) newList.push(items[iit]);
+				if (it.identifiedDisplayName.toLowerCase().includes(val)) newList.push(items[iit]);
 			}
 		}
 	}
@@ -325715,7 +325860,7 @@ function onClickActionBuyItem() {
 */
 function onClickMenu(target) {
 	const root = _root$6();
-	const selectedMenu = target.dataset.index.toUpperCase();
+	const selectedMenu = parseInt(target.dataset.index, 10);
 	const searchInput = root.querySelector("#cashshop-search");
 	if (searchInput) searchInput.value = "";
 	if (selectedMenu !== CashShop.activeCashMenu) {
@@ -326000,6 +326145,14 @@ var init_CashShop$1 = __esmMin((() => {
 			});
 		}
 		container.addEventListener("dragover", stopPropagation$6);
+		const searchInput = root.querySelector(".cashshop-search");
+		if (searchInput) searchInput.addEventListener("keydown", (e) => {
+			if (e.isComposing || e.keyCode === 229) return;
+			if (e.which === KEYS.ENTER || e.key === "Enter") {
+				e.preventDefault();
+				onClickSearch();
+			}
+		});
 		const cartListItems = root.querySelector("#cart-list .items");
 		if (cartListItems && cartListItems.children.length > 0) onResetCartListCashShop();
 		CashShop.loadCashShopBanner();
@@ -326134,11 +326287,7 @@ var init_CashShop$1 = __esmMin((() => {
 						CashShop.checkCartItemLen = 0;
 						UIManager.showMessageBox("Successfully done buying items from cash shop!", "ok");
 						ChatBox_default.addText("Successfully done buying items from cash shop!", ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.PUBLIC_LOG);
-						const root = _root$6();
-						const cashpointSpan = root.querySelector("#cashpoint span");
-						if (cashpointSpan) cashpointSpan.textContent = res.cashPoints;
-						const cashpointFooter = root.querySelector(".cashpoint_footer");
-						if (cashpointFooter) cashpointFooter.textContent = res.cashPoints;
+						CashShop.readPoints(res.cashPoints, res.kafraPoints, CashShop.activeCashMenu);
 						onResetCartListCashShop();
 					}
 					break;
@@ -326156,12 +326305,26 @@ var init_CashShop$1 = __esmMin((() => {
 			}
 		}
 	};
-	CashShop.readCashShopItems = function readCashShopItems(items) {
-		CashShop.cashShopListItem.push({
-			count: items.count,
-			items: items.items,
-			tabNum: items.tabNum
-		});
+	/**
+	* Store a tab's items by its tab number, which is also the menu's data-index
+	*
+	* rAthena sends one ZC_ACK_SCHEDULER_CASHITEM per tab that has items, skipping
+	* empty tabs, and splits a tab too big for one packet over several.
+	*
+	* @param {object} pkt - PACKET.ZC.ACK_SCHEDULER_CASHITEM
+	*/
+	CashShop.readCashShopItems = function readCashShopItems(pkt) {
+		const tab = CashShop.cashShopListItem[pkt.tabNum];
+		if (tab) {
+			tab.items = tab.items.concat(pkt.items);
+			tab.count = tab.items.length;
+			return;
+		}
+		CashShop.cashShopListItem[pkt.tabNum] = {
+			count: pkt.count,
+			items: pkt.items,
+			tabNum: pkt.tabNum
+		};
 	};
 	/**
 	* Load Cash Shop Components
@@ -331555,6 +331718,92 @@ var init_SkillAction = __esmMin((() => {
 	};
 	SkillAction[SkillConst_default.NV_BASIC] = SkillAction[SkillConst_default.TF_BACKSLIDING] = SkillAction[SkillConst_default.NV_TRICKDEAD] = SkillAction[SkillConst_default.TK_READYSTORM] = SkillAction[SkillConst_default.TK_READYDOWN] = SkillAction[SkillConst_default.TK_READYTURN] = SkillAction[SkillConst_default.TK_READYCOUNTER] = SkillAction[SkillConst_default.TK_HIGHJUMP] = SkillAction[SkillConst_default.TK_DODGE] = SkillAction[SkillConst_default.LK_TENSIONRELAX] = SkillAction[SkillConst_default.NC_F_SIDESLIDE] = SkillAction[SkillConst_default.NC_B_SIDESLIDE] = SkillAction[SkillConst_default.SU_HIDE] = SkillAction[SkillConst_default.SU_STOOP] = false;
 }));
+// src/Engine/MapEngine/OffhandWeapon.js
+/**
+* Check whether the local player is currently holding an offhand weapon.
+*
+* Resolvable only for our own character (entity.GID === sessionEntity.GID).
+* For other entities, the server transmits only view IDs without equipment
+* type metadata, so we return undefined (unknown) so callers can preserve
+* ambiguous offhand views as shields unless explicit weapon evidence is provided.
+*
+* @param {object} entity - Target entity
+* @param {object} sessionEntity - Local player entity (Session.Entity)
+* @param {object} [inventory] - Inventory component
+* @param {object} [equipment] - Equipment component
+* @returns {boolean|undefined} true if own offhand is weapon, false if own offhand is not weapon, undefined if unknown/other entity
+*/
+function isOwnOffhandWeapon(entity, sessionEntity, inventory, equipment) {
+	if (!entity || !sessionEntity || entity.GID !== sessionEntity.GID) return;
+	if (equipment) {
+		if (typeof equipment.getEquippedItemByLocation === "function") {
+			const item = equipment.getEquippedItemByLocation(EquipmentLocation_default.SHIELD);
+			if (item) return item.type === ItemType_default.WEAPON;
+		}
+		if (typeof equipment.getEquippedItem === "function" && inventory) {
+			const indexes = inventory.equippedItems || [];
+			for (let i = 0; i < indexes.length; i++) {
+				const item = equipment.getEquippedItem(indexes[i]);
+				if ((item ? item.equipped || item.WearState || item.location || item.WearLocation || 0 : 0) & EquipmentLocation_default.SHIELD) return item.type === ItemType_default.WEAPON;
+			}
+		}
+	}
+	if (inventory) {
+		const indexes = inventory.equippedItems || [];
+		for (let i = 0; i < indexes.length; i++) {
+			const item = typeof inventory.getItemByIndex === "function" ? inventory.getItemByIndex(indexes[i]) : null;
+			if ((item ? item.equipped || item.WearState || item.location || item.WearLocation || 0 : 0) & EquipmentLocation_default.SHIELD) return item.type === ItemType_default.WEAPON;
+		}
+	}
+	return false;
+}
+/**
+* Resolve weapon and shield values for an entity given packet values.
+* Used by both spawn (onEntitySpam) and view change (onEntityViewChange) handling.
+*
+* @param {number} weaponVal - Weapon ID or view ID from packet
+* @param {number} shieldVal - Shield / offhand ID or view ID from packet
+* @param {object} entity - Entity being updated
+* @param {object} sessionEntity - Local player entity (Session.Entity)
+* @param {object} [inventory] - Inventory component
+* @param {object} [equipment] - Equipment component
+* @returns {{ weapon: number, shield: number }}
+*/
+function resolveEntityWeapons(weaponVal, shieldVal, entity, sessionEntity, inventory, equipment) {
+	let weapon = weaponVal || 0;
+	let shield = shieldVal || 0;
+	const offhand = isOwnOffhandWeapon(entity, sessionEntity, inventory, equipment);
+	const job = entity ? entity.job : void 0;
+	const isAssassin = typeof DB.isAssassin === "function" ? DB.isAssassin(job) : false;
+	const isShield = typeof DB.isShield === "function" ? DB.isShield(shield, job, offhand) : shield > 0;
+	const getWeaponType = typeof DB.getWeaponType === "function" ? (w, flag) => DB.getWeaponType(w, flag) : (w) => w;
+	const getWeaponViewID = typeof DB.getWeaponViewID === "function" ? (w) => DB.getWeaponViewID(w) : (w) => w;
+	const isKatar = typeof DB.isKatar === "function" ? (wt) => DB.isKatar(wt) : () => false;
+	const mountWeapon = typeof DB.mountWeapon === "function" ? (w1, w2) => DB.mountWeapon(w1, w2) : (w1, w2) => w1 << 7 | w2;
+	if (isAssassin && weapon === 0 && shield !== 0 && !isShield) {
+		weapon = shield;
+		shield = 0;
+	}
+	const weaponType = getWeaponType(weapon, true);
+	const viewId = getWeaponViewID(weapon);
+	if (isAssassin && shield !== 0 && !isShield && weapon !== 0) return {
+		weapon: mountWeapon(weaponType, getWeaponType(shield, true)),
+		shield: 0
+	};
+	if (isKatar(weaponType)) return {
+		weapon: viewId,
+		shield: viewId
+	};
+	return {
+		weapon: viewId,
+		shield
+	};
+}
+var init_OffhandWeapon = __esmMin((() => {
+	init_EquipmentLocation();
+	init_ItemType();
+	init_DBManager();
+}));
 // src/DB/Monsters/AttackEffectTable.js
 var AE, JOB;
 var init_AttackEffectTable = __esmMin((() => {
@@ -331761,23 +332010,9 @@ function onEntitySpam(pkt) {
 		EntityManager.add(entity.wug);
 	}
 	if (entity.objecttype === Entity.TYPE_PC) {
-		if (pkt.weapon == 0 && pkt.shield != 0 && !DB.isShield(pkt.shield)) {
-			pkt.weapon = pkt.shield;
-			pkt.shield = 0;
-		}
-		const weaponType = DB.getWeaponType(pkt.weapon, true);
-		const viewId = DB.getWeaponViewID(pkt.weapon);
-		if (DB.isAssassin(entity.job) && pkt.shield !== 0 && !DB.isShield(pkt.shield) && pkt.weapon !== 0) {
-			const secondaryWeaponType = DB.getWeaponType(pkt.shield, true);
-			entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
-			entity.shield = 0;
-		} else if (DB.isKatar(weaponType)) {
-			entity.weapon = viewId;
-			entity.shield = viewId;
-		} else {
-			entity.weapon = viewId;
-			entity.shield = pkt.shield;
-		}
+		const resolved = resolveEntityWeapons(pkt.weapon, pkt.shield, entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+		entity.weapon = resolved.weapon;
+		entity.shield = resolved.shield;
 		if (PacketVerManager_default.value > 20150513) {
 			if (entity.body !== pkt.body) entity.body = pkt.body;
 		}
@@ -332444,26 +332679,12 @@ function onEntityViewChange(pkt) {
 			break;
 		case 2:
 			if (pkt instanceof PACKET.ZC.SPRITE_CHANGE2) {
-				if (pkt.value === 0 && pkt.value2 !== 0 && !DB.isShield(pkt.value2)) {
-					pkt.value = pkt.value2;
-					pkt.value2 = 0;
-				}
-				const weaponType = DB.getWeaponType(pkt.value, true);
-				const viewId = DB.getWeaponViewID(pkt.value);
-				if (DB.isAssassin(entity.job) && pkt.value2 !== 0 && !DB.isShield(pkt.value2)) {
-					const secondaryWeaponType = DB.getWeaponType(pkt.value2, true);
-					entity.weapon = DB.mountWeapon(weaponType, secondaryWeaponType);
-					entity.shield = 0;
-				} else if (DB.isKatar(weaponType)) {
-					entity.weapon = viewId;
-					entity.shield = viewId;
-				} else {
-					entity.weapon = viewId;
-					entity.shield = pkt.value2;
-				}
+				const resolved = resolveEntityWeapons(pkt.value, pkt.value2, entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+				entity.weapon = resolved.weapon;
+				entity.shield = resolved.shield;
 			} else {
-				entity.weapon = pkt.value;
-				entity.shield = pkt.value2;
+				entity.weapon = DB.getWeaponViewID(pkt.value);
+				if (pkt.value2 !== void 0) entity.shield = pkt.value2;
 			}
 			entity.aura.load(EffectManager);
 			if (entity.falcon) entity.falcon.set({
@@ -333611,6 +333832,7 @@ var init_Entity = __esmMin((() => {
 	init_EffectConst();
 	init_PetMessageConst();
 	init_JobConst();
+	init_OffhandWeapon();
 	init_AttackEffectTable();
 	init_SoundManager();
 	init_Events();
@@ -335173,8 +335395,16 @@ function onEquipementTakeOff(pkt) {
 		if (pkt.wearLocation & EquipmentLocation_default.HEAD_MID) SessionStorage_default.Entity.accessory3 = EquipmentController.checkEquipLoc(EquipmentLocation_default.COSTUME_HEAD_MID);
 		if (pkt.wearLocation & EquipmentLocation_default.HEAD_BOTTOM) SessionStorage_default.Entity.accessory = EquipmentController.checkEquipLoc(EquipmentLocation_default.COSTUME_HEAD_BOTTOM);
 		if (pkt.wearLocation & EquipmentLocation_default.GARMENT) SessionStorage_default.Entity.robe = EquipmentController.checkEquipLoc(EquipmentLocation_default.COSTUME_ROBE);
-		if (pkt.wearLocation & EquipmentLocation_default.WEAPON) SessionStorage_default.Entity.weapon = 0;
-		if (pkt.wearLocation & EquipmentLocation_default.SHIELD) SessionStorage_default.Entity.shield = 0;
+		if (pkt.wearLocation & EquipmentLocation_default.WEAPON) {
+			const resolved = resolveEntityWeapons(0, SessionStorage_default.Entity.shield, SessionStorage_default.Entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+			SessionStorage_default.Entity.weapon = resolved.weapon;
+			SessionStorage_default.Entity.shield = resolved.shield;
+		}
+		if (pkt.wearLocation & EquipmentLocation_default.SHIELD) {
+			const resolved = resolveEntityWeapons(SessionStorage_default.Entity.weapon, 0, SessionStorage_default.Entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+			SessionStorage_default.Entity.weapon = resolved.weapon;
+			SessionStorage_default.Entity.shield = resolved.shield;
+		}
 		if (pkt.wearLocation & EquipmentLocation_default.COSTUME_HEAD_TOP) SessionStorage_default.Entity.accessory2 = EquipmentController.checkEquipLoc(EquipmentLocation_default.HEAD_TOP);
 		if (pkt.wearLocation & EquipmentLocation_default.COSTUME_HEAD_MID) SessionStorage_default.Entity.accessory3 = EquipmentController.checkEquipLoc(EquipmentLocation_default.HEAD_MID);
 		if (pkt.wearLocation & EquipmentLocation_default.COSTUME_HEAD_BOTTOM) SessionStorage_default.Entity.accessory = EquipmentController.checkEquipLoc(EquipmentLocation_default.HEAD_BOTTOM);
@@ -335192,6 +335422,7 @@ function onEquipementTakeOff(pkt) {
 function onItemEquip(pkt) {
 	if (pkt.result == 1) {
 		const item = InventoryController.removeItem(pkt.index, 1);
+		if (item && pkt.viewid !== void 0) item.wItemSpriteNumber = pkt.viewid;
 		EquipmentController.equip(item, pkt.wearLocation);
 		ChatBox_default.addText(DB.getItemName(item) + " " + DB.getMessage(170), ChatBox_default.TYPE.BLUE, ChatBox_default.FILTER.ITEM);
 		const CostumeCheckTop = EquipmentController.checkEquipLoc(EquipmentLocation_default.COSTUME_HEAD_TOP);
@@ -335202,8 +335433,11 @@ function onItemEquip(pkt) {
 		if (pkt.wearLocation & EquipmentLocation_default.HEAD_MID) SessionStorage_default.Entity.accessory3 = CostumeCheckMid ? CostumeCheckMid : pkt.viewid;
 		if (pkt.wearLocation & EquipmentLocation_default.HEAD_BOTTOM) SessionStorage_default.Entity.accessory = CostumeCheckBot ? CostumeCheckBot : pkt.viewid;
 		if (pkt.wearLocation & EquipmentLocation_default.GARMENT) SessionStorage_default.Entity.robe = CostumeCheckRobe ? CostumeCheckRobe : pkt.viewid;
-		if (pkt.wearLocation & EquipmentLocation_default.WEAPON) SessionStorage_default.Entity.weapon = pkt.viewid;
-		if (pkt.wearLocation & EquipmentLocation_default.SHIELD) SessionStorage_default.Entity.shield = pkt.viewid;
+		if (pkt.wearLocation & EquipmentLocation_default.WEAPON || pkt.wearLocation & EquipmentLocation_default.SHIELD) {
+			const resolved = resolveEntityWeapons(pkt.wearLocation & EquipmentLocation_default.WEAPON ? pkt.viewid : SessionStorage_default.Entity.weapon, pkt.wearLocation & EquipmentLocation_default.SHIELD ? pkt.viewid : SessionStorage_default.Entity.shield, SessionStorage_default.Entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
+			SessionStorage_default.Entity.weapon = resolved.weapon;
+			SessionStorage_default.Entity.shield = resolved.shield;
+		}
 		if (pkt.wearLocation & EquipmentLocation_default.COSTUME_HEAD_TOP) SessionStorage_default.Entity.accessory2 = pkt.viewid;
 		if (pkt.wearLocation & EquipmentLocation_default.COSTUME_HEAD_MID) SessionStorage_default.Entity.accessory3 = pkt.viewid;
 		if (pkt.wearLocation & EquipmentLocation_default.COSTUME_HEAD_BOTTOM) SessionStorage_default.Entity.accessory = pkt.viewid;
@@ -335612,6 +335846,7 @@ var init_Item = __esmMin((() => {
 	init_Equipment();
 	init_PlayerViewEquip();
 	init_SwitchEquip();
+	init_OffhandWeapon();
 	init_Storage$1();
 	init_MakeItemSelection();
 	init_ItemListWindowSelection();
@@ -344387,6 +344622,17 @@ var init_CharCreate$2 = __esmMin((() => {
 	CharCreate_default$1 = ":host {\r\n	width: 576px;\r\n	height: 342px;\r\n}\r\n\r\n#charcreate {\r\n	position: absolute;\r\n	width: 576px;\r\n	height: 342px;\r\n}\r\n\r\n/** Name **/\r\n#charcreate input {\r\n	position: absolute;\r\n	top: 244px;\r\n	left: 62px;\r\n	width: 97px;\r\n	height: 14px;\r\n	padding-top: 2px;\r\n	padding-left: 3px;\r\n	background-color: transparent;\r\n	border: 0;\r\n}\r\n\r\n/** Chargen **/\r\n#charcreate .chargen ui-button {\r\n	position: absolute;\r\n	width: 13px;\r\n	height: 13px;\r\n}\r\n#charcreate .chargen .left {\r\n	top: 135px;\r\n	left: 47px;\r\n}\r\n#charcreate .chargen .up {\r\n	top: 105px;\r\n	left: 87px;\r\n}\r\n#charcreate .chargen .right {\r\n	top: 135px;\r\n	left: 127px;\r\n}\r\n#charcreate .chargen canvas {\r\n	position: absolute;\r\n	top: 120px;\r\n	left: 62px;\r\n}\r\n\r\n/** Graph buttons **/\r\n#charcreate .graph ui-button {\r\n	position: absolute;\r\n	width: 36px;\r\n	height: 36px;\r\n}\r\n#charcreate .graph .str {\r\n	top: 50px;\r\n	left: 270px;\r\n}\r\n#charcreate .graph .int {\r\n	top: 243px;\r\n	left: 270px;\r\n}\r\n#charcreate .graph .vit {\r\n	top: 104px;\r\n	left: 348px;\r\n}\r\n#charcreate .graph .dex {\r\n	top: 190px;\r\n	left: 191px;\r\n}\r\n#charcreate .graph .agi {\r\n	top: 103px;\r\n	left: 191px;\r\n}\r\n#charcreate .graph .luk {\r\n	top: 190px;\r\n	left: 348px;\r\n}\r\n#charcreate .graph canvas {\r\n	position: absolute;\r\n	left: 209px;\r\n	top: 86px;\r\n}\r\n\r\n/** Stats infos **/\r\n#charcreate .info {\r\n	position: absolute;\r\n	top: 40px;\r\n	left: 480px;\r\n}\r\n#charcreate .info div {\r\n	position: absolute;\r\n	left: 0px;\r\n}\r\n#charcreate .info .str {\r\n	top: 0px;\r\n}\r\n#charcreate .info .agi {\r\n	top: 16px;\r\n}\r\n#charcreate .info .vit {\r\n	top: 32px;\r\n}\r\n#charcreate .info .int {\r\n	top: 48px;\r\n}\r\n#charcreate .info .dex {\r\n	top: 64px;\r\n}\r\n#charcreate .info .luk {\r\n	top: 80px;\r\n}\r\n\r\n/** Buttons **/\r\n#charcreate .btns {\r\n	position: absolute;\r\n	bottom: 4px;\r\n	width: 100%;\r\n	height: 20px;\r\n}\r\n#charcreate .btn {\r\n	position: absolute;\r\n	width: 42px;\r\n	height: 20px;\r\n}\r\n#charcreate .make {\r\n	right: 50px;\r\n}\r\n#charcreate .cancel {\r\n	right: 4px;\r\n}\r\n\r\n#charcreate .btns ui-button {\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: 0;\r\n	display: flex;\r\n	align-items: center;\r\n	justify-content: center;\r\n}\r\n";
 }));
 // src/UI/Components/CharCreate/CharCreateCommon.js
+/**
+* The buttons for one hairstyle, one in each race/gender list. A list with
+* fewer styles keeps empty .styleN cells to hold the grid; those get no frame.
+*
+* @param {HTMLElement} root
+* @param {number} style
+* @return {HTMLElement[]}
+*/
+function hairstyleButtons(root, style) {
+	return Array.from(root.querySelectorAll(`.style${style}`)).filter((el) => el.querySelector(".hstyle_button"));
+}
 function createCharCreate(config) {
 	const { name, htmlText, cssText, hostHeight = 342, hostWidth = 576, hasStats = false, hasRace = false, gridHairstyle = false, chargenCanvasSelector = ".content canvas", graphCanvasSelector = ".graph canvas", statButtonsSelector = ".graph ui-button", hairArrows = [], humanCanvasSelector = "#canvas_human", doramCanvasSelector = "#canvas_doram", modelCanvasSelector = "#canvas_model", nameInputSelector = "input", nameInputEvent = "mousedown", cancelSelectors = [".cancel"], makeSelector = ".make" } = config;
 	const Component = new GUIComponent(name, cssText);
@@ -344765,12 +345011,14 @@ function createCharCreate(config) {
 				if (el) el.style.backgroundImage = `url(${dataURI})`;
 			});
 			Client.loadFile(`${DB.INTERFACE_PATH}make_character_ver2/bt_hairstyle_normal.bmp`, (dataURI) => {
-				const el = root.querySelector(`.style${_prevhead}`);
-				if (el) el.style.backgroundImage = `url(${dataURI})`;
+				hairstyleButtons(root, _prevhead).forEach((el) => {
+					el.style.backgroundImage = `url(${dataURI})`;
+				});
 			});
 			Client.loadFile(`${DB.INTERFACE_PATH}make_character_ver2/bt_hairstyle_select.bmp`, (dataURI) => {
-				const el = root.querySelector(`.style${_curhead}`);
-				if (el) el.style.backgroundImage = `url(${dataURI})`;
+				hairstyleButtons(root, _curhead).forEach((el) => {
+					el.style.backgroundImage = `url(${dataURI})`;
+				});
 			});
 		}
 	}
@@ -344907,8 +345155,9 @@ function createCharCreate(config) {
 		const value = parseInt(target.getAttribute("for"));
 		_prevhead = _model.entity.head;
 		Client.loadFile(`${DB.INTERFACE_PATH}make_character_ver2/bt_hairstyle_normal.bmp`, (dataURI) => {
-			const el = root.querySelector(`.style${_prevhead}`);
-			if (el) el.style.backgroundImage = `url(${dataURI})`;
+			hairstyleButtons(root, _prevhead).forEach((el) => {
+				el.style.backgroundImage = `url(${dataURI})`;
+			});
 		});
 		_curhead = value;
 		updateCharacterGrid(type, value);
@@ -344955,8 +345204,9 @@ function createCharCreate(config) {
 			value = 4218;
 		}
 		for (let i = 1; i <= 24; i++) Client.loadFile(`${DB.INTERFACE_PATH}make_character_ver2/bt_hairstyle_normal.bmp`, (dataURI) => {
-			const el = root.querySelector(`.style${i}`);
-			if (el) el.style.backgroundImage = `url(${dataURI})`;
+			hairstyleButtons(root, i).forEach((el) => {
+				el.style.backgroundImage = `url(${dataURI})`;
+			});
 		});
 		_prevhead = 1;
 		_curhead = 1;

@@ -210066,6 +210066,39 @@ function fillImageData(imageData, frame, pal, color) {
 		}
 	}
 }
+function getFrameCanvas(_cache, frame, pal, color) {
+	let entry = _cache.get(frame);
+	if (!entry) {
+		entry = {
+			rgba: /* @__PURE__ */ new Map(),
+			byPalette: /* @__PURE__ */ new WeakMap()
+		};
+		_cache.set(frame, entry);
+	}
+	let byColor;
+	if (frame.type === 1 || !pal) byColor = entry.rgba;
+	else {
+		byColor = entry.byPalette.get(pal);
+		if (!byColor) {
+			byColor = /* @__PURE__ */ new Map();
+			entry.byPalette.set(pal, byColor);
+		}
+	}
+	const colorKey = `${color[0]},${color[1]},${color[2]},${color[3]}`;
+	let canvas = byColor.get(colorKey);
+	if (!canvas) {
+		if (byColor.size >= MAX_COLORS_PER_PALETTE) byColor.delete(byColor.keys().next().value);
+		canvas = document.createElement("canvas");
+		canvas.width = frame.width;
+		canvas.height = frame.height;
+		const ctx = canvas.getContext("2d");
+		const imageData = ctx.createImageData(frame.width, frame.height);
+		fillImageData(imageData, frame, pal, color);
+		ctx.putImageData(imageData, 0, 0);
+		byColor.set(colorKey, canvas);
+	}
+	return canvas;
+}
 /**
 * Set the depth test and depth write. Inside a batch only the state is kept:
 * each recorded sprite carries it, and SpriteBatch sets it when it draws.
@@ -210097,7 +210130,7 @@ function syncAfterBatch() {
 	_texture$4 = null;
 	_groupId++;
 }
-var mat4$23, RenderCanvas2D, _program$25, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
+var mat4$23, MAX_COLORS_PER_PALETTE, RenderCanvas2D, _program$25, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -210107,42 +210140,9 @@ var init_SpriteRenderer = __esmMin((() => {
 	init_SpriteRenderer$2();
 	init_SpriteRenderer$1();
 	mat4$23 = gl_matrix_default.mat4;
+	MAX_COLORS_PER_PALETTE = 8;
 	RenderCanvas2D = (function RenderCanvas2DClosure() {
 		const _cache = /* @__PURE__ */ new WeakMap();
-		const MAX_COLORS_PER_PALETTE = 8;
-		function getFrameCanvas(frame, pal, color) {
-			let entry = _cache.get(frame);
-			if (!entry) {
-				entry = {
-					rgba: /* @__PURE__ */ new Map(),
-					byPalette: /* @__PURE__ */ new WeakMap()
-				};
-				_cache.set(frame, entry);
-			}
-			let byColor;
-			if (frame.type === 1 || !pal) byColor = entry.rgba;
-			else {
-				byColor = entry.byPalette.get(pal);
-				if (!byColor) {
-					byColor = /* @__PURE__ */ new Map();
-					entry.byPalette.set(pal, byColor);
-				}
-			}
-			const colorKey = `${color[0]},${color[1]},${color[2]},${color[3]}`;
-			let canvas = byColor.get(colorKey);
-			if (!canvas) {
-				if (byColor.size >= MAX_COLORS_PER_PALETTE) byColor.delete(byColor.keys().next().value);
-				canvas = document.createElement("canvas");
-				canvas.width = frame.width;
-				canvas.height = frame.height;
-				const ctx = canvas.getContext("2d");
-				const imageData = ctx.createImageData(frame.width, frame.height);
-				fillImageData(imageData, frame, pal, color);
-				ctx.putImageData(imageData, 0, 0);
-				byColor.set(colorKey, canvas);
-			}
-			return canvas;
-		}
 		return function() {
 			if (this.sprite.width <= 0 || this.sprite.height <= 0) return;
 			let scale_x, scale_y;
@@ -210163,7 +210163,7 @@ var init_SpriteRenderer = __esmMin((() => {
 				scale_y *= -1;
 				_size$7[1] *= -1;
 			}
-			const canvas = getFrameCanvas(frame, pal, this.color);
+			const canvas = getFrameCanvas(_cache, frame, pal, this.color);
 			_ctx$4.save();
 			_ctx$4.translate(_x | 0, _y | 0);
 			_ctx$4.rotate(this.angle / 180 * Math.PI);
@@ -210192,6 +210192,22 @@ var init_SpriteRenderer = __esmMin((() => {
 	_size$7 = /* @__PURE__ */ new Float32Array(2);
 	_offset = /* @__PURE__ */ new Float32Array(2);
 	SpriteRenderer = class {
+		static get gl() {
+			return _gl$3;
+		}
+		static get is2D() {
+			return this.render === RenderCanvas2D;
+		}
+		static renderCanvas(canvas) {
+			if (this.render !== RenderCanvas2D) return false;
+			_ctx$4.save();
+			_ctx$4.translate(_pos$8[0] + this.offset[0], _pos$8[1] + this.offset[1] - 17.5);
+			_ctx$4.rotate(this.angle / 180 * Math.PI);
+			_ctx$4.scale(Math.sign(this.size[0]) || 1, Math.sign(this.size[1]) || 1);
+			_ctx$4.drawImage(canvas, -Math.abs(this.size[0]) / 2, -Math.abs(this.size[1]) / 2, Math.abs(this.size[0]), Math.abs(this.size[1]));
+			_ctx$4.restore();
+			return true;
+		}
 		/**
 		* @type {function} functions to use to render
 		*/
@@ -235017,7 +235033,7 @@ function onTogglePixelPerfect() {
 			for (let i = 0; i < sprFiles.length; i++) MemoryManager.remove(gl, sprFiles[i]);
 		}
 		reloadSprites();
-	} else ChatBox_default.addText("[System] Pixel Perfect is disabled. Reload the page (F5) to apply the changes.", ChatBox_default.TYPE.INFO, ChatBox_default.FILTER.PUBLIC_LOG);
+	}
 }
 /**
 * Post-Processing
@@ -235158,6 +235174,9 @@ function onResetToDefaults() {
 		if (defaultSettings.hasOwnProperty(key)) GraphicsSettings[key] = defaultSettings[key];
 	});
 	GraphicsSettings.save();
+	const gl = Renderer.getContext();
+	const sprFiles = MemoryManager.search(/\.spr$/i);
+	for (let i = 0; i < sprFiles.length; i++) MemoryManager.remove(gl, sprFiles[i]);
 	GraphicsOption.onAppend();
 }
 var GraphicsOption, _preferences$32, GraphicsOption_default;
@@ -235173,7 +235192,6 @@ var init_GraphicsOption = __esmMin((() => {
 	init_GraphicsOption$2();
 	init_GraphicsOption$1();
 	init_MemoryManager();
-	init_ChatBox();
 	GraphicsOption = new GUIComponent("GraphicsOption", GraphicsOption_default$1);
 	_preferences$32 = Preferences.get("GraphicsOption", {
 		x: 300,
@@ -252386,11 +252404,13 @@ var init_HomunInformations = __esmMin((() => {
 	* @param {object} homunculus info
 	*/
 	HomunInformations.setInformations = function setInformations(info) {
-		const root = HomunInformations.getRoot();
+		if (!info) return;
 		if (!this.__loaded) {
 			this.append();
 			this._host.style.display = "none";
 		}
+		const root = HomunInformations.getRoot();
+		if (!root) return;
 		if (info.szName) {
 			const nameInput = root.querySelector(".name");
 			if (nameInput) nameInput.value = info.szName;
@@ -252769,7 +252789,13 @@ var init_MercenaryInformations = __esmMin((() => {
 	* Update UI with mercenary data
 	*/
 	MercenaryInformations.setInformations = function setInformations(info) {
+		if (!info) return;
+		if (!this.__loaded) {
+			this.append();
+			this._host.style.display = "none";
+		}
 		const root = MercenaryInformations.getRoot();
+		if (!root) return;
 		const nameEl = root.querySelector(".name");
 		if (nameEl) nameEl.textContent = info.name || "";
 		const levelEl = root.querySelector(".level");
@@ -263461,7 +263487,7 @@ var init_MapRenderer = __esmMin((() => {
 				_nextMap = mapname;
 				return;
 			}
-			mapname = mapname.replace(/^(\d{3})(\d@)/, "$2").replace(/^\d{3}#/, "");
+			mapname = mapname.replace(/^(\w{3})(\d@)/, "$2").replace(/^\w{3}#/, "");
 			const loadId = ++this._loadId;
 			SoundManager.stop();
 			Renderer.stop();
@@ -264020,6 +264046,242 @@ var init_Camera = __esmMin((() => {
 		}
 	};
 }));
+// src/Renderer/Entity/EntityComposer.js
+function capture(entity, frame, palette, offset) {
+	if (!active || !frame || frame.width <= 0 || frame.height <= 0) return false;
+	const width = Math.abs(SpriteRenderer.size[0]);
+	const height = Math.abs(SpriteRenderer.size[1]);
+	const angle = SpriteRenderer.angle;
+	const radians = angle / 180 * Math.PI;
+	const boundsWidth = Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians));
+	const boundsHeight = Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians));
+	active.layers.push({
+		frame,
+		palette,
+		color: Array.from(SpriteRenderer.color),
+		angle,
+		width: SpriteRenderer.size[0],
+		height: SpriteRenderer.size[1],
+		x: offset[0],
+		y: offset[1],
+		boundsWidth,
+		boundsHeight
+	});
+	return true;
+}
+function makeKey(layers, width, height) {
+	const parts = [width, height];
+	for (const layer of layers) parts.push(layer.frame, layer.palette, layer.color[0], layer.color[1], layer.color[2], layer.color[3], layer.angle, layer.width, layer.height, layer.x, layer.y, layer.boundsWidth, layer.boundsHeight);
+	return parts;
+}
+function sameKey(a, b) {
+	if (!a || a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+	return true;
+}
+/**
+* Delete the texture of a composite.
+*
+* The texture is deleted with the context it was created with, not with the
+* current one: the two may differ after a context loss.
+*
+* @param {object} entry - the cache entry
+* @param {WebGLRenderingContext} gl - fallback context
+*/
+function releaseEntry(entry, gl) {
+	const ctx = entry && entry.gl || gl;
+	if (entry && entry.texture && ctx) ctx.deleteTexture(entry.texture);
+	if (entry) entry.texture = null;
+}
+function useEntry(entry) {
+	if (SpriteRenderer.renderCanvas(entry.canvas)) return;
+	SpriteRenderer.image.size[0] = entry.width;
+	SpriteRenderer.image.size[1] = entry.height;
+	SpriteRenderer.size[0] = entry.width;
+	SpriteRenderer.size[1] = entry.height;
+	SpriteRenderer.offset[0] = entry.offsetX;
+	SpriteRenderer.offset[1] = entry.offsetY;
+	SpriteRenderer.angle = 0;
+	SpriteRenderer.color.set([
+		1,
+		1,
+		1,
+		1
+	]);
+	SpriteRenderer.image.texture = entry.texture;
+	SpriteRenderer.image.palette = null;
+	SpriteRenderer.image.frame = null;
+	SpriteRenderer.image.spr = null;
+	SpriteRenderer.sprite = {
+		type: 1,
+		width: entry.width,
+		height: entry.height
+	};
+	SpriteRenderer.render(false);
+}
+var STALE_MS, MAX_TEXTURES, cache, canvasCache, pendingDeletion, active, cacheGL, EntityComposer;
+var init_EntityComposer = __esmMin((() => {
+	init_SpriteRenderer();
+	init_SpriteBatch();
+	init_Graphics();
+	STALE_MS = 2e3;
+	MAX_TEXTURES = 512;
+	cache = /* @__PURE__ */ new Map();
+	canvasCache = /* @__PURE__ */ new WeakMap();
+	pendingDeletion = [];
+	active = null;
+	cacheGL = null;
+	EntityComposer = class {
+		static begin(entity) {
+			active = SpriteRenderer.gl && !SpriteRenderer.is2D ? {
+				entity,
+				layers: []
+			} : null;
+		}
+		static get active() {
+			return !!active;
+		}
+		static suspend(callback) {
+			const current = active;
+			active = null;
+			try {
+				callback();
+			} finally {
+				active = current;
+			}
+		}
+		static capture(entity, frame, palette, offset) {
+			return capture(entity, frame, palette, offset);
+		}
+		static end() {
+			const work = active;
+			active = null;
+			if (!work || !work.layers.length) return;
+			let minX = Infinity;
+			let minY = Infinity;
+			let maxX = -Infinity;
+			let maxY = -Infinity;
+			for (const layer of work.layers) {
+				minX = Math.min(minX, layer.x - layer.boundsWidth / 2);
+				minY = Math.min(minY, layer.y - layer.boundsHeight / 2);
+				maxX = Math.max(maxX, layer.x + layer.boundsWidth / 2);
+				maxY = Math.max(maxY, layer.y + layer.boundsHeight / 2);
+			}
+			const width = Math.max(1, Math.ceil(maxX - minX));
+			const height = Math.max(1, Math.ceil(maxY - minY));
+			const key = makeKey(work.layers, width, height);
+			const gl = SpriteRenderer.gl;
+			let entry = cache.get(work.entity);
+			if (cacheGL !== gl) {
+				if (cacheGL && gl) for (const cached of cache.values()) cacheGL.deleteTexture(cached.texture);
+				cache.clear();
+				cacheGL = gl;
+				entry = null;
+			}
+			const now = Date.now();
+			if (gl && entry && sameKey(entry.key, key)) {
+				entry.lastUsed = now;
+				cache.delete(work.entity);
+				cache.set(work.entity, entry);
+				useEntry(entry);
+				return;
+			}
+			if (!entry) {
+				entry = {
+					texture: gl ? gl.createTexture() : null,
+					canvas: document.createElement("canvas"),
+					ctx: null,
+					gl,
+					lastUsed: now
+				};
+				entry.ctx = entry.canvas.getContext("2d");
+				cache.set(work.entity, entry);
+			} else entry.lastUsed = now;
+			if (entry.canvas.width !== width || entry.canvas.height !== height) {
+				entry.canvas.width = width;
+				entry.canvas.height = height;
+			}
+			entry.width = width;
+			entry.height = height;
+			entry.key = key;
+			entry.minX = minX;
+			entry.minY = minY;
+			entry.offsetX = minX + width / 2;
+			entry.offsetY = minY + height / 2;
+			entry.ctx.clearRect(0, 0, width, height);
+			for (const layer of work.layers) {
+				const source = getFrameCanvas(canvasCache, layer.frame, layer.palette, layer.color);
+				entry.ctx.save();
+				entry.ctx.translate(layer.x - minX, layer.y - minY);
+				entry.ctx.rotate(layer.angle / 180 * Math.PI);
+				entry.ctx.scale(Math.sign(layer.width) || 1, Math.sign(layer.height) || 1);
+				entry.ctx.drawImage(source, -Math.abs(layer.width) / 2, -Math.abs(layer.height) / 2, Math.abs(layer.width), Math.abs(layer.height));
+				entry.ctx.restore();
+			}
+			if (gl) {
+				gl.bindTexture(gl.TEXTURE_2D, entry.texture);
+				const filter = GraphicsSettings.pixelPerfectSprites ? gl.NEAREST : gl.LINEAR;
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+				gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+				gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, entry.canvas);
+			}
+			useEntry(entry);
+		}
+		/**
+		* Release the composites that were not drawn for a while.
+		*
+		* Call it once per frame, AFTER the batch has been drawn: a texture can
+		* only be deleted when no queued draw references it anymore. Deleting one
+		* earlier (while the entity pass is still recording) blanks the sprite it
+		* belongs to, since the draw only happens at flush time.
+		*
+		* @param {WebGLRenderingContext} gl
+		*/
+		static endFrame(gl) {
+			for (const entry of pendingDeletion) releaseEntry(entry, gl);
+			pendingDeletion.length = 0;
+			const now = Date.now();
+			for (const [entity, entry] of cache) if (now - entry.lastUsed > STALE_MS) {
+				cache.delete(entity);
+				releaseEntry(entry, gl);
+			}
+			if (cache.size > MAX_TEXTURES) {
+				const entries = [...cache.entries()].sort((a, b) => a[1].lastUsed - b[1].lastUsed);
+				for (let i = 0; i < entries.length - MAX_TEXTURES; i++) {
+					cache.delete(entries[i][0]);
+					releaseEntry(entries[i][1], gl);
+				}
+			}
+		}
+		/**
+		* Forget the composite of an entity that left the scene.
+		*
+		* The texture is deleted right away when no batch is recording, and after
+		* the next flush when a batch still holds a draw of it.
+		*
+		* @param {object} entity
+		*/
+		static remove(entity) {
+			const entry = cache.get(entity);
+			if (!entry) return;
+			cache.delete(entity);
+			if (SpriteBatch.active) pendingDeletion.push(entry);
+			else releaseEntry(entry);
+		}
+		/**
+		* Forget every composite: the WebGL context was lost, its textures are
+		* gone and cannot be deleted anymore.
+		*/
+		static reset() {
+			cache.clear();
+			pendingDeletion.length = 0;
+			cacheGL = null;
+		}
+	};
+}));
 // src/Renderer/Renderer.js
 var Renderer_exports = /* @__PURE__ */ __exportAll({ default: () => Renderer });
 var mat4$11, _requestAnimationFrame, _cancelAnimationFrame, Renderer;
@@ -264038,6 +264300,7 @@ var init_Renderer = __esmMin((() => {
 	init_MemoryManager();
 	init_PerfProbe();
 	init_SpriteBatch();
+	init_EntityComposer();
 	init_FramePacer();
 	init_preload_helper();
 	({mat4: mat4$11} = gl_matrix_default);
@@ -264171,6 +264434,7 @@ var init_Renderer = __esmMin((() => {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 			PostProcess.restartModules(gl);
 			SpriteBatch.contextRestored();
+			EntityComposer.reset();
 			this.resize();
 			this.render();
 		}
@@ -310309,6 +310573,7 @@ var init_PetInformations = __esmMin((() => {
 			const feeding = root.querySelector(".feeding");
 			if (feeding) feeding.style.display = "none";
 		}
+		if (!_preferences$18.show) this._host.style.display = "none";
 		this._host.style.top = `${Math.min(Math.max(0, _preferences$18.y), Renderer.height - this._host.getBoundingClientRect().height)}px`;
 		this._host.style.left = `${Math.min(Math.max(0, _preferences$18.x), Renderer.width - this._host.getBoundingClientRect().width)}px`;
 	};
@@ -310340,7 +310605,13 @@ var init_PetInformations = __esmMin((() => {
 	* @param {object} pet info
 	*/
 	PetInformations.setInformations = function setInformations(info) {
+		if (!info) return;
+		if (!this.__loaded) {
+			this.append();
+			this._host.style.display = "none";
+		}
 		const root = PetInformations.getRoot();
+		if (!root) return;
 		const nameInput = root.querySelector(".name");
 		if (nameInput) nameInput.value = info.szName;
 		const levelEl = root.querySelector(".level");
@@ -310396,7 +310667,9 @@ var init_PetInformations = __esmMin((() => {
 	* @param {number} intimacy
 	*/
 	PetInformations.setIntimacy = function setIntimacy(val) {
-		const el = PetInformations.getRoot().querySelector(".intimacy");
+		const root = PetInformations.getRoot();
+		if (!root) return;
+		const el = root.querySelector(".intimacy");
 		if (el) el.textContent = DB.getMessage(val < 100 ? 672 : val < 250 ? 673 : val < 600 ? 669 : val < 900 ? 674 : 675);
 	};
 	PetInformations.setFeedConfig = function setFeedConfig(flag) {
@@ -310413,7 +310686,9 @@ var init_PetInformations = __esmMin((() => {
 	* @param {number} hunger
 	*/
 	PetInformations.setHunger = function setHunger(val) {
-		const el = PetInformations.getRoot().querySelector(".hunger");
+		const root = PetInformations.getRoot();
+		if (!root) return;
+		const el = root.querySelector(".hunger");
 		if (el) el.textContent = DB.getMessage(val < 10 ? 667 : val < 25 ? 668 : val < 75 ? 669 : val < 90 ? 670 : 671);
 	};
 	/**
@@ -314299,6 +314574,7 @@ function renderLayer(layer, spr, pal, size, pos, type, isBlendModeOne) {
 	SpriteRenderer.image.texture = frame.texture;
 	SpriteRenderer.image.spr = spr;
 	SpriteRenderer.image.frame = frame;
+	if (EntityComposer.capture(this, frame, pal.palette, SpriteRenderer.offset)) return;
 	SpriteRenderer.render(isBlendModeOne);
 }
 /**
@@ -314322,6 +314598,7 @@ var init_EntityRender = __esmMin((() => {
 	init_DBManager();
 	init_Graphics();
 	init_GR2ModelRenderer();
+	init_EntityComposer();
 	WALK_DIST_TO_MOTION = 170.2;
 	_snapshotPool = [];
 	_scratchPosition = /* @__PURE__ */ new Float32Array(3);
@@ -314481,83 +314758,45 @@ var init_EntityRender = __esmMin((() => {
 				case Entity.TYPE_MERC:
 					SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
 					SpriteRenderer.runWithDepth(true, true, false, function() {
+						SpriteRenderer.zIndex = 150;
+						EntityComposer.begin(self);
 						let cartidx;
-						const RIDING_STATUS = self.effectState & (StatusState_default.EffectState.RIDING | StatusState_default.EffectState.DRAGON1 | StatusState_default.EffectState.DRAGON2 | StatusState_default.EffectState.DRAGON3 | StatusState_default.EffectState.DRAGON4 | StatusState_default.EffectState.DRAGON5 | StatusState_default.EffectState.WUGRIDER) || self.allRidingState;
-						function robeCorrection(lookingFront) {
-							if (self.robe > 0 && self.robeHeight && self.bodyHeight) {
-								if (self.robeHeight + (self.action === self.ACTION.SIT ? 0 : RIDING_STATUS && lookingFront ? 50 : 25) > self.bodyHeight + 64) {
-									if ((self.action === self.ACTION.ATTACK || self.action === self.ACTION.ATTACK1 || self.action === self.ACTION.ATTACK2 || self.action === self.ACTION.ATTACK3) && !lookingFront) return -450;
-									if (self.action === self.ACTION.SIT) return lookingFront ? -450 : RIDING_STATUS ? 1 : -100;
-									return lookingFront ? -300 : RIDING_STATUS ? 100 : 1;
-								}
-							}
-							if (self.action === self.ACTION.SIT) return lookingFront ? -100 : 550;
-							return lookingFront ? 1 : 400;
-						}
-						if (self.shield && behind) SpriteRenderer.runWithDepth(true, false, false, function() {
-							SpriteRenderer.zIndex = -1;
-							renderElement(self, self.files.shield, "shield", _position, true);
-						});
+						if (self.shield && behind) renderElement(self, self.files.shield, "shield", _position, true);
 						if (!isLookingBack(direction)) {
 							if (SessionStorage_default.Playing == true && self.hasCart == true) {
 								cartidx = DB.isSuperNovice(self._job) ? 0 : self.CartNum;
-								SpriteRenderer.runWithDepth(true, false, false, function() {
-									SpriteRenderer.zIndex = -1;
+								EntityComposer.suspend(() => {
+									SpriteRenderer.shadowQueue = true;
 									renderElement(self, self.files.cart_shadow, "cartshadow", _position, false);
-									SpriteRenderer.zIndex = 1;
-									renderElement(self, self.files.cart[cartidx], "cart", _position, false);
+									SpriteRenderer.shadowQueue = false;
 								});
+								renderElement(self, self.files.cart[cartidx], "cart", _position, false);
 							}
-							if (self.robe > 0) {
-								SpriteRenderer.zIndex = robeCorrection(true);
-								renderElement(self, self.files.robe, "robe", _position, true);
-							}
+							renderElement(self, self.files.robe, "robe", _position, true);
 						}
-						SpriteRenderer.zIndex = 150;
-						if (RIDING_STATUS && !isLookingBack(direction) && (self.action === self.ACTION.SIT || self.action === self.ACTION.WALK)) SpriteRenderer.zIndex *= 2;
 						renderElement(self, self.files.body, "body", _position, true);
-						let bodyZOffset = 250;
-						if (RIDING_STATUS) {
-							bodyZOffset *= 2;
-							if (self.action === self.ACTION.WALK && !(direction > 2 && direction < 6)) bodyZOffset += 250;
-						}
-						SpriteRenderer.zIndex = bodyZOffset + 50;
 						renderElement(self, self.files.head, "head", _position, false);
-						if (self.accessory3 > 0 && self.accessory3 !== self.accessory) {
-							SpriteRenderer.zIndex = bodyZOffset + 100;
-							renderElement(self, self.files.accessory3, "head", _position, false);
-						}
-						if (self.accessory2 > 0 && self.accessory2 !== self.accessory && self.accessory2 !== self.accessory3) {
-							SpriteRenderer.zIndex = bodyZOffset + 200;
-							renderElement(self, self.files.accessory2, "head", _position, false);
-						}
-						if (self.accessory > 0) {
-							SpriteRenderer.zIndex = bodyZOffset + 300;
-							renderElement(self, self.files.accessory, "head", _position, false);
-						}
+						if (self.accessory3 > 0 && self.accessory3 !== self.accessory) renderElement(self, self.files.accessory3, "head", _position, false);
+						if (self.accessory2 > 0 && self.accessory2 !== self.accessory && self.accessory2 !== self.accessory3) renderElement(self, self.files.accessory2, "head", _position, false);
+						if (self.accessory > 0) renderElement(self, self.files.accessory, "head", _position, false);
 						if (isLookingBack(direction)) {
-							if (self.robe > 0) {
-								SpriteRenderer.zIndex = bodyZOffset + robeCorrection(false);
-								renderElement(self, self.files.robe, "robe", _position, true);
-							}
+							if (self.robe > 0) renderElement(self, self.files.robe, "robe", _position, true);
 							if (SessionStorage_default.Playing == true && self.hasCart == true) {
-								SpriteRenderer.zIndex = bodyZOffset + 500;
 								cartidx = DB.isSuperNovice(self._job) ? 0 : self.CartNum;
-								SpriteRenderer.runWithDepth(true, false, false, function() {
+								EntityComposer.suspend(() => {
+									SpriteRenderer.shadowQueue = true;
 									renderElement(self, self.files.cart_shadow, "cartshadow", _position, false);
-									renderElement(self, self.files.cart[cartidx], "cart", _position, false);
+									SpriteRenderer.shadowQueue = false;
 								});
+								renderElement(self, self.files.cart[cartidx], "cart", _position, false);
 							}
 						}
 						if (self.weapon > 0) {
-							SpriteRenderer.zIndex = bodyZOffset + 250;
 							renderElement(self, self.files.weapon, "weapon", _position, true);
 							renderElement(self, self.files.weapon_trail, "weapon_trail", _position, true);
 						}
-						if (self.shield > 0 && !behind) {
-							SpriteRenderer.zIndex = bodyZOffset + 300;
-							renderElement(self, self.files.shield, "shield", _position, true);
-						}
+						if (self.shield > 0 && !behind) renderElement(self, self.files.shield, "shield", _position, true);
+						EntityComposer.end();
 					});
 					break;
 				case Entity.TYPE_HOM:
@@ -314656,11 +314895,13 @@ var init_EntityRender = __esmMin((() => {
 			const isOVERTHRUST = entity.getOpt3(StatusState_default.Status.OVERTHRUST);
 			const isEXPLOSIONSPIRITS = entity.getOpt3(StatusState_default.Status.EXPLOSIONSPIRITS);
 			const isBERSERK = entity.getOpt3(StatusState_default.Status.BERSERK);
-			renderSecondBody(entity, layers, spr, pal, files, type, _position, {
+			const renderSecondary = () => renderSecondBody(entity, layers, spr, pal, files, type, _position, {
 				enableHalo: entity.getOpt3(StatusState_default.Status.ASSUMPTIO) || !!entity._enableHalo,
 				enableTrail: isENERGYCOAT || isBUNSIN || isHALLUCINATIONWALK || isQUICKEN || isOVERTHRUST || isEXPLOSIONSPIRITS || isBERSERK || !!entity._fastMoveTrail || !!entity._enableTrail,
 				blurType: isBUNSIN ? 5 : isHALLUCINATIONWALK ? 3 : entity._blurType || 1
 			});
+			if (EntityComposer.active) EntityComposer.suspend(renderSecondary);
+			else renderSecondary();
 			for (let i = 0, count = layers.length; i < count; ++i) entity.renderLayer(layers[i], spr, pal, files.size, _position, type, isBlendModeOne);
 			if (is_main && animation.pos.length) {
 				position[0] = animation.pos[0].x;
@@ -316374,6 +316615,7 @@ function addEntity(entity) {
 function free$1() {
 	_list.forEach((entity) => {
 		releaseGr2(entity);
+		EntityComposer.remove(entity);
 		entity.clean();
 	});
 	_list.length = 0;
@@ -316400,6 +316642,7 @@ function removeEntity(gid) {
 	const entity = _gidMap.get(gid);
 	if (entity) {
 		releaseGr2(entity);
+		EntityComposer.remove(entity);
 		entity.clean();
 		_gidMap.delete(gid);
 		const index = _list.indexOf(entity);
@@ -316537,7 +316780,10 @@ function cull() {
 */
 function render$6(gl, modelView, projection, fog, renderEffects) {
 	const tick = Date.now();
-	if (!_list.length) return;
+	if (!_list.length) {
+		EntityComposer.endFrame(gl);
+		return;
+	}
 	_renderFrameCounter++;
 	if (_renderSortDirty || (GraphicsSettings.performanceMode ? _renderFrameCounter >= 6 : _renderFrameCounter >= 3)) {
 		_list.sort(sort);
@@ -316551,6 +316797,7 @@ function render$6(gl, modelView, projection, fog, renderEffects) {
 		renderList(modelView, projection, renderEffects, tick);
 	} finally {
 		SpriteRenderer.endBatch();
+		EntityComposer.endFrame(gl);
 	}
 	SpriteRenderer.unbind(gl);
 }
@@ -316568,6 +316815,7 @@ function renderList(modelView, projection, renderEffects, tick) {
 			}
 			_gidMap.delete(_list[i].GID);
 			releaseGr2(_list[i]);
+			EntityComposer.remove(_list[i]);
 			_list[i].clean();
 			_list.splice(i, 1);
 			i--;
@@ -316717,8 +316965,8 @@ var init_EntityManager = __esmMin((() => {
 	init_PathFinding();
 	init_Graphics();
 	init_Altitude();
-	init_Water();
 	init_GR2ModelRenderer();
+	init_EntityComposer();
 	_list = [];
 	_gidMap = /* @__PURE__ */ new Map();
 	_renderSortDirty = true;
@@ -347836,7 +348084,7 @@ var init_WinLogin$2 = __esmMin((() => {
 function replayLog(...args) {
 	if (Configs.get("development", false)) console.log(...args);
 }
-var ContainerType, ContainerTypeNames, ItemChunkKind, ItemRecordTag, ReplayOpCodes, ReplayOpCodeName, ReplayState;
+var ContainerType, ReplayEventSubOpCode, ContainerTypeNames, ItemChunkKind, ItemRecordTag, ReplayOpCodes, ReplayOpCodeName, ReplayState, WindowIdToComponent;
 var init_ReplayTypes = __esmMin((() => {
 	init_Configs();
 	ContainerType = {
@@ -347849,12 +348097,41 @@ var init_ReplayTypes = __esmMin((() => {
 		GroupAndFriends: 7,
 		Items: 8,
 		Companions: 9,
+		MemorialDungeon: 10,
+		Unused11: 11,
+		EntryQueue: 12,
+		Hotkeys: 13,
 		InitialPackets: 14,
 		InitialEntities: 15,
 		InitialFloorItems: 16,
-		Efst: 17,
+		SkillGroundUnits: 17,
 		EfstList: 18,
-		EntitiesInfo: 21
+		OpenWindows: 19,
+		WindowDragAll: 20,
+		EntitiesInfo: 21,
+		ActorNames: 22,
+		QuestFlag: 23,
+		Navigation: 24
+	};
+	ReplayEventSubOpCode = {
+		WINDOW_MOVE: 900,
+		ITEM_DESC: 901,
+		WINDOW_MSG: 902,
+		SET_TARGET: 903,
+		SET_MAP_INFO: 904,
+		MAP_TRANSITION: 905,
+		SET_BGM_AMBIENT: 906,
+		SET_SESSION_TEXT: 907,
+		NAVIGATION_MSG: 908,
+		MAKE_WINDOW: 909,
+		NAVI_PATH: 910,
+		NAVI_WAYPOINT: 911,
+		NAVI_TARGET: 912,
+		NAVIGATION_PATH: 910,
+		NAVIGATION_ARROW: 911,
+		NAVIGATION_ACTIVE: 912,
+		WINDOW_ACTION: 913,
+		CLOSE_WINDOW: 914
 	};
 	ContainerTypeNames = {};
 	for (const [name, code] of Object.entries(ContainerType)) ContainerTypeNames[code] = name;
@@ -347863,7 +348140,9 @@ var init_ReplayTypes = __esmMin((() => {
 		CART: 4516,
 		CART_MIRROR: 4518,
 		EQUIPPED: 4601,
-		EQUIPPED_COSTUME: 4603
+		EQUIPPED_COSTUME: 4603,
+		STORAGE: 4701,
+		GUILD_STORAGE: 4702
 	};
 	ItemRecordTag = {
 		START_CHAIN: 281,
@@ -347884,15 +348163,25 @@ var init_ReplayTypes = __esmMin((() => {
 		ZC_STORE_ENTRY: 202,
 		ZC_PROGRESS: 203,
 		ZC_BUYING_STORE_ENTRY: 204,
+		ZC_SKILL_POST_ENTRY: 205,
+		ZC_SKILL_GROUND_UNIT: 206,
 		ZC_ITEM_ENTRY: 207,
 		ZC_NOTIFY_MOVEENTRY8: 208,
 		ZC_NOTIFY_STANDENTRY7: 210,
+		ZC_NOTIFY_NEWENTRY5: 212,
+		ZC_NOTIFY_ACTENTRY: 213,
 		ZC_NOTIFY_MOVEENTRY11: 214,
+		ZC_NOTIFY_STANDENTRY10: 215,
+		ZC_NOTIFY_MOVEENTRY10: 216,
 		ZC_NOTIFY_STANDENTRY11: 217,
+		ZC_NOTIFY_MOVEENTRY: 218,
+		ZC_NPC_CHAT: 401,
 		Begin_950: 950,
 		End_950: 951,
+		TailMagic: 960,
 		Region: 961,
 		Service: 962,
+		ServerType: 963,
 		Sex: 963,
 		Charactername: 964,
 		Mapname: 965,
@@ -347900,7 +348189,11 @@ var init_ReplayTypes = __esmMin((() => {
 		PosX: 967,
 		PosY: 968,
 		Direction: 969,
+		TotalTimeMs: 970,
 		Length: 970,
+		PacketCount: 971,
+		EndFileOffset: 972,
+		SaveUiOptions: 973,
 		Begin_1000: 1e3,
 		End_1000: 1001,
 		Aid: 1010,
@@ -347984,11 +348277,77 @@ var init_ReplayTypes = __esmMin((() => {
 		Begin_4500: 4500,
 		End_4500: 4501,
 		InventoryItems: 4510,
+		CartItems: 4516,
+		CartMirrorItems: 4518,
 		EquippedItems: 4601,
 		EquippedShadowItems: 4603,
-		CartItems: 4516,
+		StorageItems: 4701,
+		GuildStorageItems: 4702,
 		Begin_5000: 5e3,
 		End_5000: 5001,
+		HomunGid: 5101,
+		HomunName: 5102,
+		HomunJob: 5103,
+		HomunLevel: 5104,
+		HomunFullness: 5105,
+		HomunRelation: 5106,
+		HomunHp: 5107,
+		HomunMaxHp: 5108,
+		HomunSp: 5109,
+		HomunMaxSp: 5110,
+		HomunAtk: 5111,
+		HomunMatk: 5112,
+		HomunHit: 5113,
+		HomunCritical: 5114,
+		HomunDef: 5115,
+		HomunMdef: 5116,
+		HomunFlee: 5117,
+		HomunAspd: 5118,
+		HomunExp: 5119,
+		HomunNextExp: 5120,
+		HomunSkillPoint: 5121,
+		HomunOldFullness: 5122,
+		HomunOldRelation: 5123,
+		HomunIsModified: 5124,
+		HomunIsModifiedName: 5125,
+		HomunState: 5126,
+		HomunAtkRange: 5127,
+		HomunClass: 5128,
+		HomunEvolution: 5129,
+		HomunEvolutionCost: 5130,
+		HomunBaseLevel: 5131,
+		HomunMaxLevel: 5132,
+		HomunAutoFeed: 5133,
+		HomunFoodId: 5134,
+		MercenaryGid: 5201,
+		MercenaryName: 5202,
+		MercenaryJob: 5203,
+		MercenaryLevel: 5204,
+		MercenaryHp: 5205,
+		MercenaryMaxHp: 5206,
+		MercenarySp: 5207,
+		MercenaryMaxSp: 5208,
+		MercenaryAtk: 5209,
+		MercenaryMatk: 5210,
+		MercenaryHit: 5211,
+		MercenaryCritical: 5212,
+		MercenaryDef: 5213,
+		MercenaryMdef: 5214,
+		MercenaryFlee: 5215,
+		MercenaryAspd: 5216,
+		MercenaryRemainTime: 5217,
+		MercenaryCalls: 5218,
+		MercenaryKillCount: 5219,
+		MercenaryState: 5220,
+		MercenaryAtkRange: 5221,
+		MercenaryClass: 5222,
+		MercenaryType: 5223,
+		MercenaryEndurance: 5224,
+		MercenarySkillPoint: 5225,
+		MercenaryContractTime: 5226,
+		MercenaryProperty: 5227,
+		MercenaryPropertyLevel: 5228,
+		MercenaryOldFullness: 5229,
 		Begin_5300: 5300,
 		PetGid: 5301,
 		PetIsNameModified: 5302,
@@ -348000,21 +348359,76 @@ var init_ReplayTypes = __esmMin((() => {
 		PetRelation: 5308,
 		PetEggIndex: 5309,
 		PetOldFullness: 5310,
+		ElementalGid: 5401,
+		ElementalName: 5402,
+		ElementalJob: 5403,
+		ElementalLevel: 5404,
+		ElementalRemainTime: 5405,
 		Begin_5500: 5500,
 		End_5500: 5501,
+		MemorialDungeonIsOpen: 5510,
+		MemorialDungeonWndX: 5511,
+		MemorialDungeonWndY: 5512,
+		MemorialDungeonFactor: 5513,
+		MemorialDungeonEnterTime: 5514,
+		MemorialDungeonName: 5515,
+		MemorialDungeonDestroyTime: 5516,
+		MemorialDungeonReEnterTime: 5517,
+		MemorialDungeonState: 5518,
 		Begin_6500: 6500,
 		End_6500: 6501,
+		EntryQueueSelected: 6511,
+		EntryQueueState: 6512,
+		EntryQueueInfo: 6513,
+		EntryQueueApply: 6514,
+		EntryQueueWnd: 6515,
+		EntryQueueStandByWnd: 6516,
+		EntryQueueParam1: 6517,
+		EntryQueueParam2: 6518,
 		Begin_7000: 7e3,
 		End_7000: 7001,
+		HotkeyBar1: 7100,
+		HotkeyBar2: 7101,
+		Begin_7500: 7500,
+		End_7500: 7501,
+		SkillNameEntry: 7502,
+		SkillItem: 7504,
+		SkillTreeItem: 7505,
 		Begin_8000: 8e3,
 		End_8000: 8001,
+		NaviAutoSearch: 8002,
+		NaviFindDistance: 8003,
+		NaviShowDistance: 8004,
+		NaviDrawNpcIcon: 8005,
+		NaviRoutePath: 8006,
+		NaviStartNode: 8007,
+		NaviEndNode: 8008,
+		NaviStartX: 8009,
+		NaviStartY: 8010,
+		NaviEndX: 8011,
+		NaviEndY: 8012,
+		NaviTargetGid: 8013,
+		NaviTargetType: 8014,
+		NaviStartMap: 8015,
+		NaviDestMap: 8016,
+		NaviRouteCost: 8017,
+		NaviScrollState: 8018,
+		NaviActiveTab: 8019,
+		NaviFilterState: 8020,
+		NaviWorldInfo: 8021,
+		NaviWaypointList: 8022,
+		NaviIsPathActive: 8023,
 		Begin_10000: 1e4,
 		End_10000: 10001,
 		Begin_13000: 13e3,
-		NameList: 13003,
 		End_13000: 13001,
+		ActorNameList: 13002,
+		GuildNameList: 13003,
+		GuildEmblemId: 13004,
+		GuildEmblemData: 13005,
 		Begin_14000: 14e3,
 		End_14000: 14001,
+		IsOnQuest: 14011,
 		Begin_15000: 15e3,
 		End_15000: 15001,
 		Begin_17000: 17e3,
@@ -348024,8 +348438,10 @@ var init_ReplayTypes = __esmMin((() => {
 		EfstInfo: 19011,
 		Begin_20000: 2e4,
 		End_20000: 20001,
+		OpenWindow_Base: 20100,
 		Begin_25000: 25e3,
 		End_25000: 25001,
+		IsDragAll: 25010,
 		Begin_26000: 26e3,
 		End_26000: 26001
 	};
@@ -348041,41 +348457,32 @@ var init_ReplayTypes = __esmMin((() => {
 		PLAYING_PACKET_STREAM: "PLAYING_PACKET_STREAM",
 		REPLAY_FINISHED: "REPLAY_FINISHED"
 	};
-}));
-// src/Engine/Replay/ReplaySocket.js
-var ReplaySocket;
-var init_ReplaySocket = __esmMin((() => {
-	ReplaySocket = class {
-		constructor(host, port) {
-			this.host = host;
-			this.port = port;
-			this.connected = false;
-			this.onMessage = null;
-			this.onClose = null;
-			this.onError = null;
-			this.onComplete = null;
-			setTimeout(() => {
-				this.connected = true;
-				if (this.onComplete) this.onComplete(true);
-			}, 10);
-		}
-		send(buffer) {}
-		close() {
-			this.connected = false;
-			if (this.onClose) this.onClose();
-		}
-		/**
-		* Feed data into NetworkManager
-		* @param {Uint8Array|ArrayBuffer} data
-		*/
-		push(data) {
-			if (!this.connected || !this.onMessage || !data) return;
-			let buffer;
-			if (data instanceof Uint8Array) buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-			else if (data instanceof ArrayBuffer) buffer = data;
-			else return;
-			this.onMessage(buffer);
-		}
+	WindowIdToComponent = {
+		0: "BasicInfo",
+		1: "ItemInfo",
+		2: "ItemSelection",
+		3: "Inventory",
+		4: "Equipment",
+		5: "WinStats",
+		6: "SkillList",
+		7: "ChatBox",
+		8: "ChatRoom",
+		9: "MiniMap",
+		10: "PartyFriends",
+		11: "Guild",
+		12: "Emoticons",
+		13: "ShortCut",
+		14: "GraphicsOption",
+		15: "Escape",
+		16: "Quest",
+		17: "NpcStore",
+		18: "PetInformations",
+		19: "HomunInformations",
+		20: "MercenaryInformations",
+		21: "CartItems",
+		22: "Storage",
+		23: "WorldMap",
+		24: "Navigation"
 	};
 }));
 // src/Engine/Replay/ReplayParser.js
@@ -348223,16 +348630,34 @@ var init_ReplayParser = __esmMin((() => {
 		buildBuffers() {
 			const sessionBuffer = this.buildSessionBuffer();
 			const itemsBuffer = this.buildItemsBuffer();
-			const petBuffer = this.buildPetBuffer();
+			const companionsBuffer = this.buildCompanionsBuffer();
+			const petBuffer = companionsBuffer.pet;
+			const homunBuffer = companionsBuffer.homunculus;
+			const mercenaryBuffer = companionsBuffer.mercenary;
+			const elementalBuffer = companionsBuffer.elemental;
 			const statusBuffer = this.buildStatusBuffer();
 			const efstListBuffer = this.buildEfstListBuffer();
+			const hotkeysBuffer = this.buildHotkeysBuffer();
+			const questsBuffer = this.buildQuestsBuffer();
+			const groupAndFriendsBuffer = this.buildGroupAndFriendsBuffer();
+			const memorialDungeonBuffer = this.buildMemorialDungeonBuffer();
+			const entryQueueBuffer = this.buildEntryQueueBuffer();
+			const navigationBuffer = this.buildNavigationBuffer();
+			const actorNamesBuffer = this.buildActorNamesBuffer();
+			const openWindowsBuffer = this.buildOpenWindowsBuffer();
+			const windowDragAllBuffer = this.buildWindowDragAllBuffer();
 			Object.assign(sessionBuffer, statusBuffer);
 			if (petBuffer) sessionBuffer.pet = petBuffer;
+			if (homunBuffer) sessionBuffer.homun = homunBuffer;
+			if (mercenaryBuffer) sessionBuffer.mercenary = mercenaryBuffer;
+			if (elementalBuffer) sessionBuffer.elemental = elementalBuffer;
+			if (questsBuffer.isOnQuest !== void 0) sessionBuffer.isOnQuest = questsBuffer.isOnQuest;
 			const initialBuffer = [];
 			const initialTypes = [
 				ContainerType.InitialPackets,
 				ContainerType.InitialEntities,
-				ContainerType.InitialFloorItems
+				ContainerType.InitialFloorItems,
+				ContainerType.SkillGroundUnits
 			];
 			for (const container of this.containers) {
 				if (!initialTypes.includes(container.type)) continue;
@@ -348259,9 +348684,22 @@ var init_ReplayParser = __esmMin((() => {
 				header: this.header,
 				sessionBuffer,
 				itemsBuffer,
+				companionsBuffer,
 				petBuffer,
+				homunBuffer,
+				mercenaryBuffer,
+				elementalBuffer,
 				statusBuffer,
 				efstListBuffer,
+				hotkeysBuffer,
+				questsBuffer,
+				groupAndFriendsBuffer,
+				memorialDungeonBuffer,
+				entryQueueBuffer,
+				navigationBuffer,
+				actorNamesBuffer,
+				openWindowsBuffer,
+				windowDragAllBuffer,
 				initialBuffer,
 				packetStreamBuffer,
 				durationMs
@@ -348313,6 +348751,22 @@ var init_ReplayParser = __esmMin((() => {
 				if (dir !== null) buf.startDir = dir;
 				const lengthMs = readU32ById(replayData, 970);
 				if (lengthMs !== null) buf.durationMs = lengthMs;
+				const tailMagic = readU32ById(replayData, ReplayOpCodes.TailMagic);
+				if (tailMagic !== null) buf.tailMagic = tailMagic;
+				const region = readU32ById(replayData, ReplayOpCodes.Region) ?? readU8ById(replayData, ReplayOpCodes.Region);
+				if (region !== null) buf.region = region;
+				const service = readU32ById(replayData, ReplayOpCodes.Service) ?? readU8ById(replayData, ReplayOpCodes.Service);
+				if (service !== null) buf.service = service;
+				const serverType = readU32ById(replayData, ReplayOpCodes.ServerType) ?? readU8ById(replayData, ReplayOpCodes.ServerType);
+				if (serverType !== null) buf.serverType = serverType;
+				const mapType = readU32ById(replayData, ReplayOpCodes.Maptype) ?? readU8ById(replayData, ReplayOpCodes.Maptype);
+				if (mapType !== null) buf.mapType = mapType;
+				const packetCount = readU32ById(replayData, ReplayOpCodes.PacketCount);
+				if (packetCount !== null) buf.packetCount = packetCount;
+				const endFileOffset = readU32ById(replayData, ReplayOpCodes.EndFileOffset);
+				if (endFileOffset !== null) buf.endFileOffset = endFileOffset;
+				const saveUiOptions = readU32ById(replayData, ReplayOpCodes.SaveUiOptions) ?? readU8ById(replayData, ReplayOpCodes.SaveUiOptions);
+				if (saveUiOptions !== null) buf.saveUiOptions = saveUiOptions;
 			}
 			const sessionContainer = this.containers.find((c) => c.type === ContainerType.Session);
 			if (sessionContainer) {
@@ -348502,36 +348956,424 @@ var init_ReplayParser = __esmMin((() => {
 			if (maxSp !== null) buf.maxSp = maxSp;
 			return buf;
 		}
-		buildPetBuffer() {
+		buildCompanionsBuffer() {
 			const compContainer = this.containers.find((c) => c.type === ContainerType.Companions);
-			if (!compContainer) return null;
+			if (!compContainer) return {
+				pet: null,
+				homunculus: null,
+				mercenary: null,
+				elemental: null
+			};
 			const readU32 = (chunk) => new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength).getUint32(0, true);
+			const readU8 = (chunk) => new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength).getUint8(0);
 			const readU32ById = (id) => {
 				const ch = compContainer.data.find((c) => c.id === id);
 				if (!ch || ch.data.byteLength < 4) return null;
 				return readU32(ch);
+			};
+			const readU8ById = (id) => {
+				const ch = compContainer.data.find((c) => c.id === id);
+				if (!ch || ch.data.byteLength < 1) return null;
+				return readU8(ch);
 			};
 			const readStringById = (id) => {
 				const ch = compContainer.data.find((c) => c.id === id);
 				if (!ch || ch.data.byteLength === 0) return "";
 				return this.readString(ch.data);
 			};
-			const aid = readU32ById(ReplayOpCodes.PetGid);
-			if (!aid) return null;
-			const name = readStringById(ReplayOpCodes.PetName);
-			const viewRaw = readU32ById(ReplayOpCodes.PetJob) ?? 0;
-			const level = readU32ById(ReplayOpCodes.PetLevel) ?? 1;
-			const hunger = readU32ById(ReplayOpCodes.PetFullness) ?? 0;
-			const intimacy = readU32ById(ReplayOpCodes.PetRelation) ?? 0;
-			return {
-				aid,
-				name,
-				view: viewRaw === 4294967295 ? -1 : viewRaw,
-				job: viewRaw === 4294967295 ? -1 : viewRaw,
-				level,
-				hunger,
-				intimacy
+			let pet = null;
+			const petAid = readU32ById(ReplayOpCodes.PetGid);
+			if (petAid) {
+				const name = readStringById(ReplayOpCodes.PetName);
+				const viewRaw = readU32ById(ReplayOpCodes.PetJob) ?? 0;
+				const level = readU32ById(ReplayOpCodes.PetLevel) ?? 1;
+				const hunger = readU32ById(ReplayOpCodes.PetFullness) ?? 0;
+				const intimacy = readU32ById(ReplayOpCodes.PetRelation) ?? 0;
+				const accessory = readU32ById(ReplayOpCodes.PetAccessory) ?? 0;
+				const isNameModified = readU32ById(ReplayOpCodes.PetIsNameModified) ?? readU8ById(ReplayOpCodes.PetIsNameModified) ?? 0;
+				const eggIndex = readU32ById(ReplayOpCodes.PetEggIndex) ?? 0;
+				const oldFullness = readU32ById(ReplayOpCodes.PetOldFullness) ?? 0;
+				pet = {
+					aid: petAid,
+					name,
+					szName: name,
+					view: viewRaw === 4294967295 ? -1 : viewRaw,
+					job: viewRaw === 4294967295 ? -1 : viewRaw,
+					level,
+					nLevel: level,
+					hunger,
+					nFullness: hunger,
+					intimacy,
+					nRelationship: intimacy,
+					accessory,
+					ITID: accessory,
+					bModified: isNameModified,
+					eggIndex,
+					oldFullness
+				};
+			}
+			let homunculus = null;
+			const homunGid = readU32ById(ReplayOpCodes.HomunGid);
+			if (homunGid) {
+				const szName = readStringById(ReplayOpCodes.HomunName) || "";
+				const level = readU32ById(ReplayOpCodes.HomunLevel) ?? 1;
+				const fullness = readU32ById(ReplayOpCodes.HomunFullness) ?? 0;
+				const relation = readU32ById(ReplayOpCodes.HomunRelation) ?? 0;
+				const hp = readU32ById(ReplayOpCodes.HomunHp) ?? 0;
+				const maxHp = readU32ById(ReplayOpCodes.HomunMaxHp) ?? 0;
+				const sp = readU32ById(ReplayOpCodes.HomunSp) ?? 0;
+				const maxSp = readU32ById(ReplayOpCodes.HomunMaxSp) ?? 0;
+				const exp = readU32ById(ReplayOpCodes.HomunExp) ?? 0;
+				const nextExp = readU32ById(ReplayOpCodes.HomunNextExp) ?? 0;
+				homunculus = {
+					gid: homunGid,
+					szName,
+					name: szName,
+					job: readU32ById(ReplayOpCodes.HomunJob) ?? 0,
+					nLevel: level,
+					level,
+					nFullness: fullness,
+					hunger: fullness,
+					nRelationship: relation,
+					intimacy: relation,
+					hp,
+					maxHP: maxHp,
+					sp,
+					maxSP: maxSp,
+					atk: readU32ById(ReplayOpCodes.HomunAtk) ?? 0,
+					Matk: readU32ById(ReplayOpCodes.HomunMatk) ?? 0,
+					hit: readU32ById(ReplayOpCodes.HomunHit) ?? 0,
+					critical: readU32ById(ReplayOpCodes.HomunCritical) ?? 0,
+					def: readU32ById(ReplayOpCodes.HomunDef) ?? 0,
+					Mdef: readU32ById(ReplayOpCodes.HomunMdef) ?? 0,
+					flee: readU32ById(ReplayOpCodes.HomunFlee) ?? 0,
+					aspd: readU32ById(ReplayOpCodes.HomunAspd) ?? 0,
+					exp,
+					maxEXP: nextExp,
+					skillPoint: readU32ById(ReplayOpCodes.HomunSkillPoint) ?? 0,
+					oldFullness: readU32ById(ReplayOpCodes.HomunOldFullness) ?? 0,
+					oldRelation: readU32ById(ReplayOpCodes.HomunOldRelation) ?? 0,
+					bModified: readU32ById(ReplayOpCodes.HomunIsModified) ?? 0,
+					state: readU32ById(ReplayOpCodes.HomunState) ?? 0,
+					atkRange: readU32ById(ReplayOpCodes.HomunAtkRange) ?? 0,
+					class_: readU32ById(ReplayOpCodes.HomunClass) ?? 0,
+					evolution: readU32ById(ReplayOpCodes.HomunEvolution) ?? 0,
+					evolutionCost: readU32ById(ReplayOpCodes.HomunEvolutionCost) ?? 0,
+					autoFeed: readU32ById(ReplayOpCodes.HomunAutoFeed) ?? 0,
+					foodId: readU32ById(ReplayOpCodes.HomunFoodId) ?? 0
+				};
+			}
+			let mercenary = null;
+			const mercGid = readU32ById(ReplayOpCodes.MercenaryGid);
+			if (mercGid) {
+				const name = readStringById(ReplayOpCodes.MercenaryName) || "";
+				const level = readU32ById(ReplayOpCodes.MercenaryLevel) ?? 1;
+				const hp = readU32ById(ReplayOpCodes.MercenaryHp) ?? 0;
+				const maxHp = readU32ById(ReplayOpCodes.MercenaryMaxHp) ?? 0;
+				const sp = readU32ById(ReplayOpCodes.MercenarySp) ?? 0;
+				const maxSp = readU32ById(ReplayOpCodes.MercenaryMaxSp) ?? 0;
+				mercenary = {
+					gid: mercGid,
+					name,
+					job: readU32ById(ReplayOpCodes.MercenaryJob) ?? 0,
+					level,
+					hp,
+					maxHP: maxHp,
+					sp,
+					maxSP: maxSp,
+					atk: readU32ById(ReplayOpCodes.MercenaryAtk) ?? 0,
+					Matk: readU32ById(ReplayOpCodes.MercenaryMatk) ?? 0,
+					hit: readU32ById(ReplayOpCodes.MercenaryHit) ?? 0,
+					critical: readU32ById(ReplayOpCodes.MercenaryCritical) ?? 0,
+					def: readU32ById(ReplayOpCodes.MercenaryDef) ?? 0,
+					Mdef: readU32ById(ReplayOpCodes.MercenaryMdef) ?? 0,
+					flee: readU32ById(ReplayOpCodes.MercenaryFlee) ?? 0,
+					aspd: readU32ById(ReplayOpCodes.MercenaryAspd) ?? 0,
+					ExpireDate: readU32ById(ReplayOpCodes.MercenaryRemainTime) ?? 0,
+					remainTime: readU32ById(ReplayOpCodes.MercenaryRemainTime) ?? 0,
+					calls: readU32ById(ReplayOpCodes.MercenaryCalls) ?? 0,
+					approval_monster_kill_counter: readU32ById(ReplayOpCodes.MercenaryKillCount) ?? 0,
+					killCount: readU32ById(ReplayOpCodes.MercenaryKillCount) ?? 0,
+					state: readU32ById(ReplayOpCodes.MercenaryState) ?? 0,
+					atkRange: readU32ById(ReplayOpCodes.MercenaryAtkRange) ?? 0,
+					class_: readU32ById(ReplayOpCodes.MercenaryClass) ?? 0,
+					type: readU32ById(ReplayOpCodes.MercenaryType) ?? 0,
+					faith: readU32ById(ReplayOpCodes.MercenaryEndurance) ?? 0,
+					endurance: readU32ById(ReplayOpCodes.MercenaryEndurance) ?? 0,
+					SKPoint: readU32ById(ReplayOpCodes.MercenarySkillPoint) ?? 0,
+					contractTime: readU32ById(ReplayOpCodes.MercenaryContractTime) ?? 0,
+					property: readU32ById(ReplayOpCodes.MercenaryProperty) ?? 0,
+					propertyLevel: readU32ById(ReplayOpCodes.MercenaryPropertyLevel) ?? 0,
+					oldFullness: readU32ById(ReplayOpCodes.MercenaryOldFullness) ?? 0
+				};
+			}
+			let elemental = null;
+			const elemGid = readU32ById(ReplayOpCodes.ElementalGid);
+			if (elemGid) elemental = {
+				gid: elemGid,
+				name: readStringById(ReplayOpCodes.ElementalName) || "",
+				job: readU32ById(ReplayOpCodes.ElementalJob) ?? 0,
+				level: readU32ById(ReplayOpCodes.ElementalLevel) ?? 1,
+				remainTime: readU32ById(ReplayOpCodes.ElementalRemainTime) ?? 0
 			};
+			return {
+				pet,
+				homunculus,
+				mercenary,
+				elemental
+			};
+		}
+		buildPetBuffer() {
+			return this.buildCompanionsBuffer().pet;
+		}
+		buildHotkeysBuffer() {
+			const hotkeysContainer = this.containers.find((c) => c.type === ContainerType.Hotkeys);
+			if (!hotkeysContainer) return [];
+			const list = [];
+			for (const chunk of hotkeysContainer.data) {
+				if (!chunk.data || chunk.data.byteLength < 7) continue;
+				const view = new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength);
+				const count = Math.floor(chunk.data.byteLength / 7);
+				for (let i = 0; i < count; i++) {
+					const offset = i * 7;
+					const isSkill = view.getUint8(offset) === 1;
+					const id = view.getUint32(offset + 1, true);
+					const countVal = view.getUint16(offset + 5, true);
+					list.push({
+						isSkill,
+						ID: id,
+						count: countVal
+					});
+				}
+			}
+			return list;
+		}
+		buildQuestsBuffer() {
+			const questsContainer = this.containers.find((c) => c.type === ContainerType.Quests);
+			const questFlagContainer = this.containers.find((c) => c.type === ContainerType.QuestFlag);
+			let isOnQuest = false;
+			if (questFlagContainer) {
+				const flagChunk = questFlagContainer.data.find((c) => c.id === ReplayOpCodes.IsOnQuest);
+				if (flagChunk && flagChunk.data.byteLength > 0) isOnQuest = flagChunk.data[0] !== 0;
+			}
+			const quests = [];
+			if (questsContainer) for (const chunk of questsContainer.data) {
+				if (!chunk.data || chunk.data.byteLength === 0) continue;
+				const view = new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength);
+				if (chunk.data.byteLength >= 4) {
+					const questId = view.getUint32(0, true);
+					const active = chunk.data.byteLength > 4 ? chunk.data[4] !== 0 : true;
+					quests.push({
+						questID: questId,
+						active,
+						data: chunk.data
+					});
+				}
+			}
+			return {
+				isOnQuest,
+				quests
+			};
+		}
+		buildGroupAndFriendsBuffer() {
+			const groupContainer = this.containers.find((c) => c.type === ContainerType.GroupAndFriends);
+			if (!groupContainer) return {
+				groupName: "",
+				groupInfo: [],
+				friendInfo: []
+			};
+			let groupName = "";
+			const nameChunk = groupContainer.data.find((c) => c.id === ReplayOpCodes.GroupName);
+			if (nameChunk && nameChunk.data?.byteLength > 0) groupName = this.readString(nameChunk.data);
+			const groupInfo = [];
+			const groupInfoChunk = groupContainer.data.find((c) => c.id === ReplayOpCodes.GroupInfo);
+			if (groupInfoChunk && groupInfoChunk.data?.byteLength >= 46) {
+				const data = groupInfoChunk.data;
+				const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+				const count = Math.floor(data.byteLength / 46);
+				for (let i = 0; i < count; i++) {
+					const offset = i * 46;
+					const aid = view.getUint32(offset, true);
+					const charName = this.readString(data.subarray(offset + 4, offset + 28));
+					const mapName = this.readString(data.subarray(offset + 28, offset + 44));
+					const role = view.getUint8(offset + 44);
+					const state = view.getUint8(offset + 45);
+					groupInfo.push({
+						AID: aid,
+						characterName: charName,
+						mapName,
+						role,
+						state
+					});
+				}
+			}
+			const friendInfo = [];
+			const friendInfoChunk = groupContainer.data.find((c) => c.id === ReplayOpCodes.FriendInfo);
+			if (friendInfoChunk && friendInfoChunk.data?.byteLength >= 32) {
+				const data = friendInfoChunk.data;
+				const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+				const count = Math.floor(data.byteLength / 32);
+				for (let i = 0; i < count; i++) {
+					const offset = i * 32;
+					const aid = view.getUint32(offset, true);
+					const gid = view.getUint32(offset + 4, true);
+					const name = this.readString(data.subarray(offset + 8, offset + 32));
+					friendInfo.push({
+						AID: aid,
+						GID: gid,
+						Name: name
+					});
+				}
+			}
+			return {
+				groupName,
+				groupInfo,
+				friendInfo
+			};
+		}
+		buildMemorialDungeonBuffer() {
+			const mdContainer = this.containers.find((c) => c.type === ContainerType.MemorialDungeon);
+			if (!mdContainer) return null;
+			const readU32ById = (id) => {
+				const ch = mdContainer.data.find((c) => c.id === id);
+				return ch && ch.data.byteLength >= 4 ? new DataView(ch.data.buffer, ch.data.byteOffset, ch.data.byteLength).getUint32(0, true) : null;
+			};
+			const readStringById = (id) => {
+				const ch = mdContainer.data.find((c) => c.id === id);
+				return ch && ch.data.byteLength > 0 ? this.readString(ch.data) : "";
+			};
+			return {
+				isOpen: (readU32ById(ReplayOpCodes.MemorialDungeonIsOpen) ?? 0) !== 0,
+				name: readStringById(ReplayOpCodes.MemorialDungeonName),
+				wndX: readU32ById(ReplayOpCodes.MemorialDungeonWndX) ?? 0,
+				wndY: readU32ById(ReplayOpCodes.MemorialDungeonWndY) ?? 0,
+				factor: readU32ById(ReplayOpCodes.MemorialDungeonFactor) ?? 0,
+				enterTime: readU32ById(ReplayOpCodes.MemorialDungeonEnterTime) ?? 0,
+				destroyTime: readU32ById(ReplayOpCodes.MemorialDungeonDestroyTime) ?? 0,
+				reEnterTime: readU32ById(ReplayOpCodes.MemorialDungeonReEnterTime) ?? 0,
+				state: readU32ById(ReplayOpCodes.MemorialDungeonState) ?? 0
+			};
+		}
+		buildEntryQueueBuffer() {
+			const eqContainer = this.containers.find((c) => c.type === ContainerType.EntryQueue);
+			if (!eqContainer) return null;
+			const readU32ById = (id) => {
+				const ch = eqContainer.data.find((c) => c.id === id);
+				return ch && ch.data.byteLength >= 4 ? new DataView(ch.data.buffer, ch.data.byteOffset, ch.data.byteLength).getUint32(0, true) : null;
+			};
+			return {
+				selected: readU32ById(ReplayOpCodes.EntryQueueSelected) ?? 0,
+				state: readU32ById(ReplayOpCodes.EntryQueueState) ?? 0,
+				info: readU32ById(ReplayOpCodes.EntryQueueInfo) ?? 0,
+				apply: readU32ById(ReplayOpCodes.EntryQueueApply) ?? 0,
+				wnd: readU32ById(ReplayOpCodes.EntryQueueWnd) ?? 0,
+				standByWnd: readU32ById(ReplayOpCodes.EntryQueueStandByWnd) ?? 0,
+				param1: readU32ById(ReplayOpCodes.EntryQueueParam1) ?? 0,
+				param2: readU32ById(ReplayOpCodes.EntryQueueParam2) ?? 0
+			};
+		}
+		buildNavigationBuffer() {
+			const navContainer = this.containers.find((c) => c.type === ContainerType.Navigation);
+			if (!navContainer) return null;
+			const readU32ById = (id) => {
+				const ch = navContainer.data.find((c) => c.id === id);
+				return ch && ch.data.byteLength >= 4 ? new DataView(ch.data.buffer, ch.data.byteOffset, ch.data.byteLength).getUint32(0, true) : null;
+			};
+			const readStringById = (id) => {
+				const ch = navContainer.data.find((c) => c.id === id);
+				return ch && ch.data.byteLength > 0 ? this.readString(ch.data) : "";
+			};
+			return {
+				autoSearch: (readU32ById(ReplayOpCodes.NaviAutoSearch) ?? 0) !== 0,
+				findDistance: readU32ById(ReplayOpCodes.NaviFindDistance) ?? 0,
+				showDistance: readU32ById(ReplayOpCodes.NaviShowDistance) ?? 0,
+				drawNpcIcon: (readU32ById(ReplayOpCodes.NaviDrawNpcIcon) ?? 0) !== 0,
+				startNode: readU32ById(ReplayOpCodes.NaviStartNode) ?? 0,
+				endNode: readU32ById(ReplayOpCodes.NaviEndNode) ?? 0,
+				startX: readU32ById(ReplayOpCodes.NaviStartX) ?? 0,
+				startY: readU32ById(ReplayOpCodes.NaviStartY) ?? 0,
+				endX: readU32ById(ReplayOpCodes.NaviEndX) ?? 0,
+				endY: readU32ById(ReplayOpCodes.NaviEndY) ?? 0,
+				x: readU32ById(ReplayOpCodes.NaviEndX) ?? 0,
+				y: readU32ById(ReplayOpCodes.NaviEndY) ?? 0,
+				targetGid: readU32ById(ReplayOpCodes.NaviTargetGid) ?? 0,
+				targetType: readU32ById(ReplayOpCodes.NaviTargetType) ?? 0,
+				startMap: readStringById(ReplayOpCodes.NaviStartMap),
+				destMap: readStringById(ReplayOpCodes.NaviDestMap),
+				routeCost: readU32ById(ReplayOpCodes.NaviRouteCost) ?? 0,
+				isPathActive: (readU32ById(ReplayOpCodes.NaviIsPathActive) ?? 0) !== 0
+			};
+		}
+		buildActorNamesBuffer() {
+			const namesContainer = this.containers.find((c) => c.type === ContainerType.ActorNames);
+			if (!namesContainer) return {
+				actorNames: [],
+				guildNames: []
+			};
+			const actorNames = [];
+			const actorChunk = namesContainer.data.find((c) => c.id === ReplayOpCodes.ActorNameList);
+			if (actorChunk && actorChunk.data?.byteLength >= 28) {
+				const data = actorChunk.data;
+				const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+				const count = Math.floor(data.byteLength / 28);
+				for (let i = 0; i < count; i++) {
+					const offset = i * 28;
+					const gid = view.getUint32(offset, true);
+					const name = this.readString(data.subarray(offset + 4, offset + 28));
+					actorNames.push({
+						gid,
+						name
+					});
+				}
+			}
+			const guildNames = [];
+			const guildChunk = namesContainer.data.find((c) => c.id === ReplayOpCodes.GuildNameList);
+			if (guildChunk && guildChunk.data?.byteLength >= 28) {
+				const data = guildChunk.data;
+				const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+				const count = Math.floor(data.byteLength / 28);
+				for (let i = 0; i < count; i++) {
+					const offset = i * 28;
+					const guildId = view.getUint32(offset, true);
+					const name = this.readString(data.subarray(offset + 4, offset + 28));
+					guildNames.push({
+						guildId,
+						name
+					});
+				}
+			}
+			return {
+				actorNames,
+				actors: actorNames,
+				guildNames
+			};
+		}
+		buildOpenWindowsBuffer() {
+			const winContainer = this.containers.find((c) => c.type === ContainerType.OpenWindows);
+			if (!winContainer) return [];
+			const openWindows = [];
+			for (const chunk of winContainer.data) if (chunk.id >= ReplayOpCodes.OpenWindow_Base && chunk.id < 20500) {
+				const windowId = chunk.id - ReplayOpCodes.OpenWindow_Base;
+				let x = null;
+				let y = null;
+				if (chunk.data && chunk.data.byteLength >= 4) {
+					const view = new DataView(chunk.data.buffer, chunk.data.byteOffset, chunk.data.byteLength);
+					x = view.getInt16(0, true);
+					y = view.getInt16(2, true);
+				}
+				openWindows.push({
+					windowId,
+					x,
+					y
+				});
+			}
+			return openWindows;
+		}
+		buildWindowDragAllBuffer() {
+			const dragContainer = this.containers.find((c) => c.type === ContainerType.WindowDragAll);
+			if (!dragContainer) return false;
+			const ch = dragContainer.data.find((c) => c.id === ReplayOpCodes.IsDragAll);
+			return ch && ch.data?.byteLength > 0 ? ch.data[0] !== 0 : false;
 		}
 		buildEfstListBuffer() {
 			const efstContainer = this.containers.find((c) => c.type === ContainerType.EfstList);
@@ -348555,8 +349397,11 @@ var init_ReplayParser = __esmMin((() => {
 			const out = {
 				inventory: [],
 				cart: [],
+				cartMirror: [],
 				equipped: [],
-				equippedCostume: []
+				equippedCostume: [],
+				storage: [],
+				guildStorage: []
 			};
 			const SKIP_CHUNKS = /* @__PURE__ */ new Set([
 				4602,
@@ -348684,7 +349529,7 @@ var init_ReplayParser = __esmMin((() => {
 					}
 					if (itemId > 0) {
 						let itemType = ItemType_default.ETC;
-						if (chunk.id === ItemChunkKind.EQUIPPED_COSTUME || equipped & (EquipmentLocation_default.COSTUME_HEAD_TOP | EquipmentLocation_default.COSTUME_HEAD_MID | EquipmentLocation_default.COSTUME_HEAD_BOTTOM | EquipmentLocation_default.COSTUME_ROBE | EquipmentLocation_default.COSTUME_FLOOR | EquipmentLocation_default.SHADOW_ARMOR | EquipmentLocation_default.SHADOW_WEAPON | EquipmentLocation_default.SHADOW_SHIELD | EquipmentLocation_default.SHADOW_SHOES | EquipmentLocation_default.SHADOW_R_ACCESSORY_SHADOW | EquipmentLocation_default.SHADOW_L_ACCESSORY_SHADOW)) itemType = ItemType_default.SHADOWGEAR;
+						if (chunk.id === ItemChunkKind.EQUIPPED_COSTUME || chunk.id === ReplayOpCodes.EquippedShadowItems || equipped & (EquipmentLocation_default.COSTUME_HEAD_TOP | EquipmentLocation_default.COSTUME_HEAD_MID | EquipmentLocation_default.COSTUME_HEAD_BOTTOM | EquipmentLocation_default.COSTUME_ROBE | EquipmentLocation_default.COSTUME_FLOOR | EquipmentLocation_default.SHADOW_ARMOR | EquipmentLocation_default.SHADOW_WEAPON | EquipmentLocation_default.SHADOW_SHIELD | EquipmentLocation_default.SHADOW_SHOES | EquipmentLocation_default.SHADOW_R_ACCESSORY_SHADOW | EquipmentLocation_default.SHADOW_L_ACCESSORY_SHADOW)) itemType = ItemType_default.SHADOWGEAR;
 						else if (equipped & EquipmentLocation_default.WEAPON) itemType = ItemType_default.WEAPON;
 						else if (equipped & EquipmentLocation_default.AMMO) itemType = ItemType_default.AMMO;
 						else if (equipped > 0) itemType = ItemType_default.ARMOR;
@@ -348743,13 +349588,25 @@ var init_ReplayParser = __esmMin((() => {
 						parseItemChunk(chunk, out.inventory);
 						break;
 					case ItemChunkKind.CART:
+						parseItemChunk(chunk, out.cart);
+						break;
 					case ItemChunkKind.CART_MIRROR:
+						parseItemChunk(chunk, out.cartMirror);
 						if (out.cart.length === 0) parseItemChunk(chunk, out.cart);
 						break;
 					case ItemChunkKind.EQUIPPED:
 						parseItemChunk(chunk, out.equipped);
 						break;
-					case ItemChunkKind.EQUIPPED_COSTUME: parseItemChunk(chunk, out.equippedCostume);
+					case ItemChunkKind.EQUIPPED_COSTUME:
+					case ReplayOpCodes.EquippedShadowItems:
+						parseItemChunk(chunk, out.equippedCostume);
+						break;
+					case ItemChunkKind.STORAGE:
+					case ReplayOpCodes.StorageItems:
+						parseItemChunk(chunk, out.storage);
+						break;
+					case ItemChunkKind.GUILD_STORAGE:
+					case ReplayOpCodes.GuildStorageItems: parseItemChunk(chunk, out.guildStorage);
 				}
 			}
 			return out;
@@ -348820,6 +349677,42 @@ var init_ReplayParser = __esmMin((() => {
 		}
 	};
 }));
+// src/Engine/Replay/ReplaySocket.js
+var ReplaySocket;
+var init_ReplaySocket = __esmMin((() => {
+	ReplaySocket = class {
+		constructor(host, port) {
+			this.host = host;
+			this.port = port;
+			this.connected = false;
+			this.onMessage = null;
+			this.onClose = null;
+			this.onError = null;
+			this.onComplete = null;
+			setTimeout(() => {
+				this.connected = true;
+				if (this.onComplete) this.onComplete(true);
+			}, 10);
+		}
+		send(buffer) {}
+		close() {
+			this.connected = false;
+			if (this.onClose) this.onClose();
+		}
+		/**
+		* Feed data into NetworkManager
+		* @param {Uint8Array|ArrayBuffer} data
+		*/
+		push(data) {
+			if (!this.connected || !this.onMessage || !data) return;
+			let buffer;
+			if (data instanceof Uint8Array) buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+			else if (data instanceof ArrayBuffer) buffer = data;
+			else return;
+			this.onMessage(buffer);
+		}
+	};
+}));
 // src/Engine/Replay/ReplayPlayer.js
 var ReplayPlayer_exports = /* @__PURE__ */ __exportAll({ default: () => ReplayPlayer });
 var ReplayPlayer;
@@ -348834,9 +349727,23 @@ var init_ReplayPlayer = __esmMin((() => {
 	init_WinStats();
 	init_Inventory();
 	init_CartItems();
+	init_ShortCut();
+	init_Storage$1();
+	init_PartyFriends();
+	init_Quest$1();
+	init_HomunInformations();
+	init_MercenaryInformations();
+	init_PetInformations();
+	init_Navigation();
+	init_ItemInfo();
+	init_ChatBox();
+	init_BGM();
+	init_EntityManager();
+	init_UIManager();
+	init_BinaryReader();
 	init_ReplayTypes();
-	init_ReplaySocket();
 	init_ReplayParser();
+	init_ReplaySocket();
 	ReplayPlayer = class {
 		constructor() {
 			this.parser = null;
@@ -348850,8 +349757,20 @@ var init_ReplayPlayer = __esmMin((() => {
 			this._sessionData = null;
 			this._itemsBuffer = null;
 			this._petBuffer = null;
+			this._homunBuffer = null;
+			this._mercenaryBuffer = null;
+			this._elementalBuffer = null;
 			this._statusBuffer = null;
 			this._efstListBuffer = [];
+			this._hotkeysBuffer = [];
+			this._questsBuffer = null;
+			this._groupAndFriendsBuffer = null;
+			this._memorialDungeonBuffer = null;
+			this._entryQueueBuffer = null;
+			this._navigationBuffer = null;
+			this._actorNamesBuffer = null;
+			this._openWindowsBuffer = [];
+			this._windowDragAll = null;
 			this._initialBuffer = [];
 			this._packetStreamBuffer = [];
 			this._initialGroupIndex = 0;
@@ -348872,8 +349791,20 @@ var init_ReplayPlayer = __esmMin((() => {
 			this._sessionData = result.sessionBuffer;
 			this._itemsBuffer = result.itemsBuffer;
 			this._petBuffer = result.petBuffer;
+			this._homunBuffer = result.homunBuffer;
+			this._mercenaryBuffer = result.mercenaryBuffer;
+			this._elementalBuffer = result.elementalBuffer;
 			this._statusBuffer = result.statusBuffer;
 			this._efstListBuffer = result.efstListBuffer || [];
+			this._hotkeysBuffer = result.hotkeysBuffer || [];
+			this._questsBuffer = result.questsBuffer || null;
+			this._groupAndFriendsBuffer = result.groupAndFriendsBuffer || null;
+			this._memorialDungeonBuffer = result.memorialDungeonBuffer || null;
+			this._entryQueueBuffer = result.entryQueueBuffer || null;
+			this._navigationBuffer = result.navigationBuffer || null;
+			this._actorNamesBuffer = result.actorNamesBuffer || null;
+			this._openWindowsBuffer = result.openWindowsBuffer || [];
+			this._windowDragAll = result.windowDragAll;
 			this._initialBuffer = result.initialBuffer;
 			this._packetStreamBuffer = result.packetStreamBuffer;
 			this.durationMs = result.durationMs || 0;
@@ -349011,6 +349942,40 @@ var init_ReplayPlayer = __esmMin((() => {
 				SessionStorage_default.petId = 0;
 				SessionStorage_default.pet = {};
 			}
+			if (s.homun && s.homun.gid) {
+				SessionStorage_default.homunId = s.homun.gid;
+				SessionStorage_default.homun = s.homun;
+			} else {
+				SessionStorage_default.homunId = 0;
+				SessionStorage_default.homun = {};
+			}
+			if (s.mercenary && (s.mercenary.gid || s.mercenary.GID)) {
+				const mercId = s.mercenary.gid || s.mercenary.GID;
+				SessionStorage_default.mercId = mercId;
+				SessionStorage_default.mercenaryId = mercId;
+				SessionStorage_default.mercenary = s.mercenary;
+			} else {
+				SessionStorage_default.mercId = 0;
+				SessionStorage_default.mercenaryId = 0;
+				SessionStorage_default.mercenary = {};
+			}
+			if (s.elemental && s.elemental.gid) {
+				SessionStorage_default.elementalId = s.elemental.gid;
+				SessionStorage_default.elemental = s.elemental;
+			} else {
+				SessionStorage_default.elementalId = 0;
+				SessionStorage_default.elemental = {};
+			}
+			if (s.tailMagic || s.region !== void 0 || s.service !== void 0 || s.serverType !== void 0) SessionStorage_default.replayMeta = {
+				tailMagic: s.tailMagic,
+				region: s.region,
+				service: s.service,
+				serverType: s.serverType,
+				mapType: s.mapType,
+				packetCount: s.packetCount,
+				endFileOffset: s.endFileOffset,
+				saveUiOptions: s.saveUiOptions
+			};
 			SessionStorage_default.Entity = new Player(playerInitData);
 			SessionStorage_default.Entity.display.name = charName;
 			SessionStorage_default.Entity.sex = sex;
@@ -349185,6 +350150,100 @@ var init_ReplayPlayer = __esmMin((() => {
 						for (const item of this._itemsBuffer.cart) cartUI.addItem(item);
 					} else if (typeof cartUI.setItems === "function") cartUI.setItems(this._itemsBuffer.cart);
 				}
+				const storageUI = StorageController?.getUI ? StorageController.getUI() || StorageController : StorageController;
+				if (storageUI && this._itemsBuffer.storage?.length > 0) {
+					if (typeof storageUI.prepare === "function" && !storageUI.__loaded) storageUI.prepare();
+					if (typeof storageUI.setItems === "function") storageUI.setItems(this._itemsBuffer.storage);
+				}
+			}
+			if (this._sessionData?.pet) {
+				const petId = this._sessionData.pet.aid || this._sessionData.pet.AID;
+				if (petId) {
+					SessionStorage_default.petId = petId;
+					SessionStorage_default.pet = this._sessionData.pet;
+				}
+			}
+			if (this._sessionData?.homun) {
+				const homunId = this._sessionData.homun.gid || this._sessionData.homun.GID;
+				if (homunId) {
+					SessionStorage_default.homunId = homunId;
+					SessionStorage_default.homun = this._sessionData.homun;
+				}
+			}
+			if (this._sessionData?.mercenary) {
+				const mercId = this._sessionData.mercenary.gid || this._sessionData.mercenary.GID;
+				if (mercId) {
+					SessionStorage_default.mercId = mercId;
+					SessionStorage_default.mercenaryId = mercId;
+					SessionStorage_default.mercenary = this._sessionData.mercenary;
+				}
+			}
+			if (this._sessionData?.elemental) {
+				const eleId = this._sessionData.elemental.gid || this._sessionData.elemental.GID;
+				if (eleId) {
+					SessionStorage_default.elementalId = eleId;
+					SessionStorage_default.elemental = this._sessionData.elemental;
+				}
+			}
+			if (this._homunBuffer && typeof HomunInformations_default?.setInformations === "function") HomunInformations_default.setInformations(this._homunBuffer);
+			if (this._mercenaryBuffer && typeof MercenaryInformations_default?.setInformations === "function") MercenaryInformations_default.setInformations(this._mercenaryBuffer);
+			if (this._petBuffer && typeof PetInformations_default?.setInformations === "function") PetInformations_default.setInformations(this._petBuffer);
+			if (this._hotkeysBuffer?.length > 0 && typeof ShortCut_default?.setList === "function") ShortCut_default.setList(this._hotkeysBuffer);
+			if (this._groupAndFriendsBuffer) {
+				if (this._groupAndFriendsBuffer.groupInfo?.length > 0 && typeof controller?.setParty === "function") controller.setParty(this._groupAndFriendsBuffer.groupName || "", this._groupAndFriendsBuffer.groupInfo);
+				if (this._groupAndFriendsBuffer.friendInfo?.length > 0 && typeof controller?.setFriends === "function") controller.setFriends(this._groupAndFriendsBuffer.friendInfo);
+			}
+			if (this._questsBuffer) {
+				const quests = this._questsBuffer.quests || this._questsBuffer.questInfo;
+				if (Array.isArray(quests) && quests.length > 0 && typeof Controller$3?.setQuestList === "function") {
+					const questList = {};
+					for (const q of quests) {
+						const questId = q.questID || q.id || q;
+						const questInfo = DB.getQuestInfo(questId) || {};
+						questList[questId] = {
+							questID: questId,
+							title: questInfo.Title || "",
+							summary: questInfo.Summary || "",
+							description: questInfo.Description || "",
+							icon: questInfo.IconName || "ico_nq.bmp",
+							npc_spr: questInfo.NpcSpr || null,
+							npc_navi: questInfo.NpcNavi || null,
+							npc_pos_x: questInfo.NpcPosX || null,
+							npc_pos_y: questInfo.NpcPosY || null,
+							reward_item_list: questInfo.RewardItemList || [],
+							reward_exp_base: questInfo.RewardEXP || 0,
+							reward_exp_job: questInfo.RewardJEXP || 0,
+							active: q.active !== void 0 ? q.active : q.data?.byteLength > 4 ? q.data[4] !== 0 : true,
+							start_time: 0,
+							end_time: 0,
+							count: 0,
+							hunt_list: []
+						};
+					}
+					Controller$3.setQuestList(questList);
+				} else if (quests && typeof quests === "object" && typeof Controller$3?.setQuestList === "function") Controller$3.setQuestList(quests);
+			}
+			const actors = this._actorNamesBuffer?.actorNames || this._actorNamesBuffer?.actors;
+			if (actors?.length > 0) for (const actor of actors) {
+				const entity = EntityManager.get(actor.gid);
+				if (entity?.display) entity.display.name = actor.name;
+			}
+			if (this._openWindowsBuffer?.length > 0) for (const win of this._openWindowsBuffer) {
+				const compName = WindowIdToComponent[win.windowId];
+				if (compName) try {
+					const comp = UIManager.getComponent(compName);
+					if (comp) {
+						if (!comp.__active || !comp._host?.parentNode) comp.append();
+						else if (typeof comp.ui?.show === "function") comp.ui.show();
+					}
+				} catch (e) {
+					replayLog(`[ReplayPlayer] Error opening window ${compName}:`, e);
+				}
+			}
+			if (this._navigationBuffer?.isPathActive && typeof Navigation_default?.setTargetCoordinatesText === "function") {
+				const navX = this._navigationBuffer.endX ?? this._navigationBuffer.x;
+				const navY = this._navigationBuffer.endY ?? this._navigationBuffer.y;
+				if (navX !== void 0 && navY !== void 0) Navigation_default.setTargetCoordinatesText(navX, navY);
 			}
 			if (SessionStorage_default.Entity) {
 				if (BasicInfoController.update) {
@@ -349223,7 +350282,8 @@ var init_ReplayPlayer = __esmMin((() => {
 			while (this._streamChunkIndex < this._packetStreamBuffer.length) {
 				const chunk = this._packetStreamBuffer[this._streamChunkIndex];
 				if (chunk.time <= logicalTime) {
-					this._pushPacket(chunk.data);
+					if (chunk.packetId === 2222 || chunk.packetId === 2222) this._handleReplayEvent(chunk.data);
+					else this._pushPacket(chunk.data);
 					this._streamChunkIndex++;
 				} else break;
 			}
@@ -349231,6 +350291,133 @@ var init_ReplayPlayer = __esmMin((() => {
 				replayLog("[Replay] Replay finished");
 				this._setState(ReplayState.REPLAY_FINISHED);
 				this.stop();
+			}
+		}
+		/**
+		* Handles synthetic replay events (Opcode 2222 / 0x08AE).
+		* Format: [packetId: Uint16 (2222), length: Uint16, subOpCode: Uint16, payload...]
+		*/
+		_handleReplayEvent(data) {
+			if (!data || data.byteLength < 6) return;
+			try {
+				const reader = new BinaryReader(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+				reader.seek(2, 2);
+				const len = reader.readUShort();
+				const subOpCode = reader.readUShort();
+				const totalLen = data.byteLength;
+				if (len < 6 || len > totalLen) return;
+				switch (subOpCode) {
+					case ReplayEventSubOpCode.WINDOW_MOVE: {
+						if (totalLen < 12 || len < 12) return;
+						const windowId = reader.readUShort();
+						const x = reader.readShort();
+						const y = reader.readShort();
+						const compName = WindowIdToComponent[windowId];
+						if (compName) try {
+							const comp = UIManager.getComponent(compName);
+							if (comp?.ui) comp.ui.css({
+								left: `${x}px`,
+								top: `${y}px`
+							});
+						} catch (_e) {}
+						break;
+					}
+					case ReplayEventSubOpCode.ITEM_DESC: {
+						if (totalLen < 10 || len < 10) return;
+						const itid = reader.readUInt();
+						if (ItemInfo_default?.setItem) {
+							if (!ItemInfo_default.__active) ItemInfo_default.append();
+							ItemInfo_default.setItem({
+								ITID: itid,
+								IsIdentified: true
+							});
+						}
+						break;
+					}
+					case ReplayEventSubOpCode.WINDOW_MSG: {
+						if (totalLen < 8 || len < 8) return;
+						reader.readUShort();
+						const msgLen = Math.min(len - 8, totalLen - 8);
+						if (msgLen > 0 && ChatBox_default?.addText) {
+							const text = reader.readBinaryString(msgLen);
+							ChatBox_default.addText(text, ChatBox_default.TYPE_INFO);
+						}
+						break;
+					}
+					case ReplayEventSubOpCode.SET_TARGET: {
+						if (totalLen < 10 || len < 10) return;
+						const targetGid = reader.readUInt();
+						if (SessionStorage_default.Entity) SessionStorage_default.Entity.target = targetGid ? EntityManager.get(targetGid) : null;
+						break;
+					}
+					case ReplayEventSubOpCode.SET_MAP_INFO:
+						if (totalLen < 22 || len < 22) return;
+						replayLog(`[ReplayEvent] SET_MAP_INFO: ${reader.readBinaryString(16)}`);
+						break;
+					case ReplayEventSubOpCode.MAP_TRANSITION:
+						if (totalLen < 22 || len < 22) return;
+						replayLog(`[ReplayEvent] MAP_TRANSITION: ${reader.readBinaryString(16)}`);
+						break;
+					case ReplayEventSubOpCode.SET_BGM_AMBIENT: {
+						const bgmLen = Math.min(len > 6 ? len - 6 : 0, totalLen > 6 ? totalLen - 6 : 0);
+						if (bgmLen > 0) {
+							const bgmName = reader.readBinaryString(bgmLen);
+							if (BGM?.play && bgmName) BGM.play(bgmName);
+						}
+						break;
+					}
+					case ReplayEventSubOpCode.SET_SESSION_TEXT: {
+						const textLen = Math.min(len > 6 ? len - 6 : 0, totalLen > 6 ? totalLen - 6 : 0);
+						if (textLen > 0) replayLog(`[ReplayEvent] SET_SESSION_TEXT: ${reader.readBinaryString(textLen)}`);
+						break;
+					}
+					case ReplayEventSubOpCode.NAVI_PATH:
+					case ReplayEventSubOpCode.NAVI_WAYPOINT:
+					case ReplayEventSubOpCode.NAVI_TARGET:
+					case ReplayEventSubOpCode.NAVIGATION_PATH:
+					case ReplayEventSubOpCode.NAVIGATION_ARROW:
+					case ReplayEventSubOpCode.NAVIGATION_ACTIVE:
+						if (totalLen >= 10 && len >= 10 && typeof Navigation_default?.setTargetCoordinatesText === "function") {
+							const x = reader.readUShort();
+							const y = reader.readUShort();
+							Navigation_default.setTargetCoordinatesText(x, y);
+						}
+						break;
+					case ReplayEventSubOpCode.MAKE_WINDOW: {
+						if (totalLen < 8 || len < 8) return;
+						const windowId = reader.readUShort();
+						const compName = WindowIdToComponent[windowId];
+						if (compName) try {
+							const comp = UIManager.getComponent(compName);
+							if (comp) {
+								if (!comp.__active || !comp._host?.parentNode) comp.append();
+								else if (comp.ui && typeof comp.ui.show === "function") comp.ui.show();
+							}
+						} catch (e) {
+							replayLog(`[ReplayEvent] MAKE_WINDOW error for ${compName}:`, e);
+						}
+						break;
+					}
+					case ReplayEventSubOpCode.WINDOW_ACTION:
+						if (totalLen < 10 || len < 10) return;
+						replayLog(`[ReplayEvent] WINDOW_ACTION: win=${reader.readUShort()}, action=${reader.readUShort()}`);
+						break;
+					case ReplayEventSubOpCode.CLOSE_WINDOW: {
+						if (totalLen < 8 || len < 8) return;
+						const windowId = reader.readUShort();
+						const compName = WindowIdToComponent[windowId];
+						if (compName) try {
+							const comp = UIManager.getComponent(compName);
+							if (comp && (comp.__active || comp._host?.parentNode)) comp.remove();
+						} catch (e) {
+							replayLog(`[ReplayEvent] CLOSE_WINDOW error for ${compName}:`, e);
+						}
+						break;
+					}
+					default: replayLog(`[ReplayEvent] Unhandled subOpCode: ${subOpCode}`);
+				}
+			} catch (e) {
+				console.warn("[ReplayPlayer] Error handling replay event:", e);
 			}
 		}
 		_getCurrentStreamChunk() {

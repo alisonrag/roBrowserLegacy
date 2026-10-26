@@ -314881,12 +314881,6 @@ var init_EntityRender = __esmMin((() => {
 					});
 					break;
 				case Entity.TYPE_CART:
-					SpriteRenderer.position[2] = SpriteRenderer.position[2] + .2;
-					SpriteRenderer.zIndex = 150;
-					SpriteRenderer.runWithDepth(true, true, false, function() {
-						renderElement(self, self.files.body, "body", _position, true);
-					});
-					break;
 				case Entity.TYPE_MOB:
 				case Entity.TYPE_NPC:
 				case Entity.TYPE_NPC2:

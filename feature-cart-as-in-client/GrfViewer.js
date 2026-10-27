@@ -332553,7 +332553,9 @@ function onEntityStatusChange(pkt) {
 				SessionStorage_default.hasCart = entity.hasCart;
 				SessionStorage_default.CartNum = entity.CartNum;
 			}
-			entity.setCart(entity.hasCart, entity.CartNum);
+			entity._statusCart = !!entity.hasCart;
+			if (entity._statusCart || !(entity.effectState & (StatusState_default.EffectState.CART1 | StatusState_default.EffectState.CART2 | StatusState_default.EffectState.CART3 | StatusState_default.EffectState.CART4 | StatusState_default.EffectState.CART5))) entity.setCart(entity._statusCart, entity.CartNum);
+			else entity.hasCart = true;
 			if (SessionStorage_default.Entity && entity.GID === SessionStorage_default.Entity.GID && entity.hasCart && !CartItems_default._host?.isConnected) CartItems_default.append();
 			break;
 		case StatusConst_default.HIDING: {
@@ -332932,7 +332934,7 @@ function onEntityOptionChange(pkt) {
 	else if (entity.effectState & StatusState_default.EffectState.CART3) statusCartNum = 3;
 	else if (entity.effectState & StatusState_default.EffectState.CART4) statusCartNum = 4;
 	else if (entity.effectState & StatusState_default.EffectState.CART5) statusCartNum = 5;
-	const keepViaFlag = entity === SessionStorage_default.Entity && entity.hasCart;
+	const keepViaFlag = !!entity._statusCart || entity === SessionStorage_default.Entity && entity.hasCart;
 	if (statusCartNum > 0 || keepViaFlag) {
 		const realCartNum = DB.isSuperNovice(entity._job) ? 0 : statusCartNum || entity.CartNum || 1;
 		entity.setCart(true, realCartNum);

@@ -78097,37 +78097,43 @@ var init_SessionStorage = __esmMin((() => {
 		}
 	};
 }));
-// src/Loaders/wasm/targa.js
-var TARGA_WASM_BASE64, base64ToUint8Array$2, _wasmInstance$2, _wasmFailed$2, getTargaWasm;
-var init_targa = __esmMin((() => {
-	TARGA_WASM_BASE64 = "AGFzbQEAAAABCgFgBX9/f39/AX8DAgEABQMBAAEHFgIGbWVtb3J5AgAJZGVjb2RlUkxFAAAKuwIBuAIBCn9BACEFQQAhDAJAA0AgDCADTw0BQQAhBiAFIAJJBEAgACAFai0AACEGCyAFQQFqIQUgBkH/AHEhByAHQQFqIQcgBkGAAXEEQCAFIQsgACALaiEKIAUgBGohBSAMIAcgBGxqIANLBEBBfw8LQQAhCQJAA0AgCSAHTw0BIAwgA08NAUEAIQgCQANAIAggBE8NASAMIANPDQFBACEOIAsgCGogAkkEQCAKIAhqLQAAIQ4LIAEgDGogDjoAACAMQQFqIQwgCEEBaiEIDAALCyAJQQFqIQkMAAsLBSAHIARsIQ1BACEIAkADQCAIIA1PDQEgDCADTw0BQQAhDiAFIAJJBEAgACAFai0AACEOCyABIAxqIA46AAAgBUEBaiEFIAxBAWohDCAIQQFqIQgMAAsLCwwACwsgDAs=";
-	base64ToUint8Array$2 = (base64) => {
+// src/Utils/wasmLoader.js
+var base64ToUint8Array, createWasmLoader;
+var init_wasmLoader = __esmMin((() => {
+	base64ToUint8Array = (base64) => {
 		const binaryString = atob(base64);
 		const len = binaryString.length;
 		const bytes = new Uint8Array(len);
 		for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
 		return bytes;
 	};
-	_wasmInstance$2 = null;
-	_wasmFailed$2 = false;
-	getTargaWasm = () => {
-		if (_wasmInstance$2) return _wasmInstance$2;
-		if (_wasmFailed$2) return null;
-		if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
-			_wasmFailed$2 = true;
-			return null;
-		}
-		try {
-			const wasmBytes = base64ToUint8Array$2(TARGA_WASM_BASE64);
-			const module = new WebAssembly.Module(wasmBytes);
-			_wasmInstance$2 = new WebAssembly.Instance(module);
-			return _wasmInstance$2;
-		} catch (e) {
-			_wasmFailed$2 = true;
-			console.warn("Loaders/wasm/targa - Failed to instantiate WASM module:", e);
-			return null;
-		}
+	createWasmLoader = (base64, name, imports = {}) => {
+		let instance = null;
+		let failed = false;
+		return () => {
+			if (instance) return instance;
+			if (failed) return null;
+			if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
+				failed = true;
+				return null;
+			}
+			try {
+				instance = new WebAssembly.Instance(new WebAssembly.Module(base64ToUint8Array(base64)), imports);
+				return instance;
+			} catch (e) {
+				failed = true;
+				console.warn(`Loaderswasm${name} - Failed to instantiate WASM module`, e);
+				return null;
+			}
+		};
 	};
+}));
+// src/Loaders/wasm/targa.js
+var TARGA_WASM_BASE64, getTargaWasm;
+var init_targa = __esmMin((() => {
+	init_wasmLoader();
+	TARGA_WASM_BASE64 = "AGFzbQEAAAABCgFgBX9/f39/AX8DAgEABQMBAAEHFgIGbWVtb3J5AgAJZGVjb2RlUkxFAAAKuwIBuAIBCn9BACEFQQAhDAJAA0AgDCADTw0BQQAhBiAFIAJJBEAgACAFai0AACEGCyAFQQFqIQUgBkH/AHEhByAHQQFqIQcgBkGAAXEEQCAFIQsgACALaiEKIAUgBGohBSAMIAcgBGxqIANLBEBBfw8LQQAhCQJAA0AgCSAHTw0BIAwgA08NAUEAIQgCQANAIAggBE8NASAMIANPDQFBACEOIAsgCGogAkkEQCAKIAhqLQAAIQ4LIAEgDGogDjoAACAMQQFqIQwgCEEBaiEIDAALCyAJQQFqIQkMAAsLBSAHIARsIQ1BACEIAkADQCAIIA1PDQEgDCADTw0BQQAhDiAFIAJJBEAgACAFai0AACEOCyABIAxqIA46AAAgBUEBaiEFIAxBAWohDCAIQQFqIQgMAAsLCwwACwsgDAs=";
+	getTargaWasm = createWasmLoader(TARGA_WASM_BASE64, "targa");
 }));
 // src/Loaders/Targa.js
 /**
@@ -78592,68 +78598,18 @@ var init_Graphics = __esmMin((() => {
 	GraphicsSettings.defaults = cleanDefaults;
 }));
 // src/Loaders/wasm/paletteConvert.js
-var PALETTE_CONVERT_WASM_BASE64, base64ToUint8Array$1, _wasmInstance$1, _wasmFailed$1, getPaletteConvertWasm;
+var PALETTE_CONVERT_WASM_BASE64, getPaletteConvertWasm;
 var init_paletteConvert = __esmMin((() => {
+	init_wasmLoader();
 	PALETTE_CONVERT_WASM_BASE64 = "AGFzbQEAAAABCQFgBX9/f39/AAMCAQAFAwEAAQcXAgZtZW1vcnkCAApjb252ZXJ0UGFsAAAKdwF1AQV/IANBAnQhCUEAIQUCQANAIAUgBE8NASABIAUgA2xqIQcgAiAEIAVrQQFrIAlsaiEIQQAhBgJAA0AgBiADTw0BIAggBkECdGogACAHIAZqLQAAQQJ0aigCADYCACAGQQFqIQYMAAsLIAVBAWohBQwACwsL";
-	base64ToUint8Array$1 = (base64) => {
-		const binaryString = atob(base64);
-		const len = binaryString.length;
-		const bytes = new Uint8Array(len);
-		for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
-		return bytes;
-	};
-	_wasmInstance$1 = null;
-	_wasmFailed$1 = false;
-	getPaletteConvertWasm = () => {
-		if (_wasmInstance$1) return _wasmInstance$1;
-		if (_wasmFailed$1) return null;
-		if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
-			_wasmFailed$1 = true;
-			return null;
-		}
-		try {
-			const wasmBytes = base64ToUint8Array$1(PALETTE_CONVERT_WASM_BASE64);
-			const module = new WebAssembly.Module(wasmBytes);
-			_wasmInstance$1 = new WebAssembly.Instance(module);
-			return _wasmInstance$1;
-		} catch (e) {
-			_wasmFailed$1 = true;
-			console.warn("Loaders/wasm/paletteConvert - Failed to instantiate WASM module:", e);
-			return null;
-		}
-	};
+	getPaletteConvertWasm = createWasmLoader(PALETTE_CONVERT_WASM_BASE64, "paletteConvert");
 }));
 // src/Loaders/wasm/spriteCompile.js
-var SPRITE_COMPILE_WASM_BASE64, base64ToUint8Array, _wasmInstance, _wasmFailed, getSpriteCompileWasm;
+var SPRITE_COMPILE_WASM_BASE64, getSpriteCompileWasm;
 var init_spriteCompile = __esmMin((() => {
+	init_wasmLoader();
 	SPRITE_COMPILE_WASM_BASE64 = "AGFzbQEAAAABJgRgCX9/f39/f39/fwBgB39/f39/f38AYAR/f39/AGAFf39/f38AAwUEAAECAwUDAQABB0wFBm1lbW9yeQIACmNvbXBpbGVQYWwAAAtjb21waWxlUmdiYQABEWZyYW1lUmdiYVRvQ2FudmFzAAIQZnJhbWVQYWxUb0NhbnZhcwADCqcEBIQBAQV/QQAhCQJAA0AgCSAETw0BIAEgCSADbGohCyACIAkgCGogBWwgB2pqIQxBACEKAkADQCAKIANPDQEgCyAKai0AACENIAAgDUECdGooAgBB/4F8RgRAIAwgCmpBADoAAAUgDCAKaiANOgAACyAKQQFqIQoMAAsLIAlBAWohCQwACwsLsQEBCX8gAkECdCEJQQAhBwJAA0AgByADTw0BIAAgAyAHa0EBayAJbGohCiABIAcgBmogBGwgBWpBAnRqIQtBACEIAkADQCAIIAJPDQEgCiAIQQJ0aiEMIAsgCEECdGohDSAMLQAAIQ4gDkUEQCANQQA2AgAFIA5BGHQgDC0AAUEQdHIgDC0AAkEIdCAMLQADcnIhDyANIA82AgALIAhBAWohCAwACwsgB0EBaiEHDAALCwuhAQEHfyACQQJ0IQZBACEEAkADQCAEIANPDQEgACAEIAZsaiEHIAEgAyAEa0EBayAGbGohCEEAIQUCQANAIAUgAk8NASAHIAVBAnRqKAIAIQkgCUH/AXFBGHQgCUGA/gNxQQh0ciAJQYCA/AdxQQh2IAlBgICAeHFBGHZyciEKIAggBUECdGogCjYCACAFQQFqIQUMAAsLIARBAWohBAwACwsLSQEEfyADIARsIQZBACEFAkADQCAFIAZPDQEgASAFai0AACEHIAAgB0ECdGooAgAhCCACIAVBAnRqIAg2AgAgBUEBaiEFDAALCws=";
-	base64ToUint8Array = (base64) => {
-		const binaryString = atob(base64);
-		const len = binaryString.length;
-		const bytes = new Uint8Array(len);
-		for (let i = 0; i < len; ++i) bytes[i] = binaryString.charCodeAt(i);
-		return bytes;
-	};
-	_wasmInstance = null;
-	_wasmFailed = false;
-	getSpriteCompileWasm = () => {
-		if (_wasmInstance) return _wasmInstance;
-		if (_wasmFailed) return null;
-		if (typeof WebAssembly !== "object" || typeof WebAssembly.Module !== "function") {
-			_wasmFailed = true;
-			return null;
-		}
-		try {
-			const wasmBytes = base64ToUint8Array(SPRITE_COMPILE_WASM_BASE64);
-			const module = new WebAssembly.Module(wasmBytes);
-			_wasmInstance = new WebAssembly.Instance(module);
-			return _wasmInstance;
-		} catch (e) {
-			_wasmFailed = true;
-			console.warn("Loaders/wasm/spriteCompile - Failed to instantiate WASM module:", e);
-			return null;
-		}
-	};
+	getSpriteCompileWasm = createWasmLoader(SPRITE_COMPILE_WASM_BASE64, "spriteCompile");
 }));
 // src/Loaders/Sprite.js
 var SPR;
@@ -78788,12 +78744,12 @@ var init_Sprite = __esmMin((() => {
 		*
 		* The exact byte layout depends on the chosen packing below.
 		*/
-		convert32bPal(pal, flip = false) {
+		convert32bPal(flip = false) {
 			const pal32 = /* @__PURE__ */ new Uint32Array(256);
 			for (let i = 0; i < 256; i++) {
-				const r = pal[i * 4 + 0];
-				const g = pal[i * 4 + 1];
-				const b = pal[i * 4 + 2];
+				const r = this.palette[i * 4 + 0];
+				const g = this.palette[i * 4 + 1];
+				const b = this.palette[i * 4 + 2];
 				const a = i === 0 ? 0 : 255;
 				if (flip === true) pal32[i] = a << 24 | b << 16 | g << 8 | r;
 				else pal32[i] = r << 24 | g << 16 | b << 8 | a;
@@ -78805,8 +78761,8 @@ var init_Sprite = __esmMin((() => {
 		* (why keep palette for hat/weapon/shield/monster ?)
 		*/
 		switchToRGBA() {
-			const frames = this.frames, pal = this.palette;
-			const pal32 = this.convert32bPal(pal, false);
+			const frames = this.frames;
+			const pal32 = this.convert32bPal(false);
 			const wasmInstance = getPaletteConvertWasm();
 			if (wasmInstance) {
 				const memory = wasmInstance.exports.memory;
@@ -78826,10 +78782,23 @@ var init_Sprite = __esmMin((() => {
 					}
 					const dstPtr = srcPtr + pixelCount;
 					const totalBytesNeeded = dstPtr + pixelCount * 4;
-					if (memory.buffer.byteLength < totalBytesNeeded) {
+					if (memory.buffer.byteLength < totalBytesNeeded) try {
 						const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
 						memory.grow(additionalPages);
 						new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
+					} catch (_e) {
+						const frameWidth = frame.width, frameHeight = frame.height;
+						const data = frame.data;
+						const out = new Uint8Array(frameWidth * frameHeight * 4);
+						const out32 = new Uint32Array(out.buffer);
+						for (let y = 0; y < frameHeight; ++y) {
+							const srcRowStart = y * frameWidth;
+							const dstRowStart = (frameHeight - y - 1) * frameWidth;
+							for (let x = 0; x < frameWidth; ++x) out32[dstRowStart + x] = pal32[data[srcRowStart + x]];
+						}
+						frame.data = out;
+						frame.type = SPR.TYPE_RGBA;
+						continue;
 					}
 					new Uint8Array(memory.buffer, srcPtr, pixelCount).set(frame.data);
 					convertPal(palPtr, srcPtr, dstPtr, width, height);
@@ -78889,9 +78858,27 @@ var init_Sprite = __esmMin((() => {
 					const srcPtr = 1024;
 					const dstPtr = srcPtr + srcBytes;
 					const totalBytesNeeded = dstPtr + dstBytes;
-					if (memory.buffer.byteLength < totalBytesNeeded) {
+					if (memory.buffer.byteLength < totalBytesNeeded) try {
 						const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
 						memory.grow(additionalPages);
+					} catch (_e) {
+						const data32 = new Uint32Array(imageData.data.buffer);
+						let frameData32;
+						if ((frame.data.byteOffset & 3) === 0) frameData32 = new Uint32Array(frame.data.buffer, frame.data.byteOffset, pixelCount);
+						else {
+							frameData32 = new Uint32Array(pixelCount);
+							new Uint8Array(frameData32.buffer).set(new Uint8Array(frame.data.buffer, frame.data.byteOffset, pixelCount * 4));
+						}
+						for (let y = 0; y < height; ++y) {
+							const srcRow = y * width;
+							const dstRow = (height - y - 1) * width;
+							for (let x = 0; x < width; ++x) {
+								const pixel = frameData32[srcRow + x];
+								data32[dstRow + x] = (pixel & 255) << 24 | (pixel & 65280) << 8 | (pixel & 16711680) >> 8 | (pixel & 4278190080) >>> 24;
+							}
+						}
+						ctx.putImageData(imageData, 0, 0);
+						return canvas;
 					}
 					const frameBytes = new Uint8Array(frame.data.buffer, frame.data.byteOffset, srcBytes);
 					new Uint8Array(memory.buffer, srcPtr, srcBytes).set(frameBytes);
@@ -78915,8 +78902,8 @@ var init_Sprite = __esmMin((() => {
 					}
 				}
 			} else {
-				if (!this._pal32Canvas && this.palette) this._pal32Canvas = this.convert32bPal(this.palette, true);
-				const pal32 = this._pal32Canvas || this.convert32bPal(this.palette, true);
+				if (!this._pal32Canvas && this.palette) this._pal32Canvas = this.convert32bPal(true);
+				const pal32 = this._pal32Canvas || this.convert32bPal(true);
 				const pixelCount = width * height;
 				const srcBytes = pixelCount;
 				const dstBytes = pixelCount * 4;
@@ -78926,9 +78913,21 @@ var init_Sprite = __esmMin((() => {
 					const srcPtr = 1024;
 					const dstPtr = srcPtr + srcBytes;
 					const totalBytesNeeded = dstPtr + dstBytes;
-					if (memory.buffer.byteLength < totalBytesNeeded) {
+					if (memory.buffer.byteLength < totalBytesNeeded) try {
 						const additionalPages = Math.ceil((totalBytesNeeded - memory.buffer.byteLength) / 65536);
 						memory.grow(additionalPages);
+					} catch (_e) {
+						const data32 = new Uint32Array(imageData.data.buffer);
+						const frameIndices = new Uint8Array(frame.data.buffer, frame.data.byteOffset, pixelCount);
+						for (let y = 0; y < height; ++y) {
+							const rowStart = y * width;
+							for (let x = 0; x < width; ++x) {
+								const idx = frameIndices[rowStart + x];
+								data32[rowStart + x] = pal32[idx];
+							}
+						}
+						ctx.putImageData(imageData, 0, 0);
+						return canvas;
 					}
 					new Uint32Array(memory.buffer, palPtr, 256).set(pal32);
 					const frameBytes = new Uint8Array(frame.data.buffer, frame.data.byteOffset, srcBytes);
@@ -78983,16 +78982,36 @@ var init_Sprite = __esmMin((() => {
 				start_x = Math.floor((gl_width - width) * .5);
 				start_y = Math.floor((gl_height - height) * .5);
 				if (frame.type === SPR.TYPE_PAL) {
-					if (!pal32) pal32 = this.convert32bPal(this.palette, true);
+					if (!pal32) pal32 = this.convert32bPal(true);
 					if (width <= 0 || height <= 0) out = new Uint8Array(gl_width * gl_height);
 					else if (wasmInstance) {
 						const srcBytes = width * height;
 						const dstBytes = gl_width * gl_height;
 						const dstPtr = wasmSrcPtr + srcBytes;
 						const totalBytesNeeded = dstPtr + dstBytes;
-						if (wasmMem.buffer.byteLength < totalBytesNeeded) {
+						if (wasmMem.buffer.byteLength < totalBytesNeeded) try {
 							const additionalPages = Math.ceil((totalBytesNeeded - wasmMem.buffer.byteLength) / 65536);
 							wasmMem.grow(additionalPages);
+						} catch (_e) {
+							out = new Uint8Array(gl_width * gl_height);
+							for (let y = 0; y < height; ++y) {
+								const srcRow = y * width;
+								const dstRow = (y + start_y) * gl_width + start_x;
+								for (let x = 0; x < width; ++x) {
+									const idx = data[srcRow + x];
+									if (pal32[idx] === MAGENTA) out[dstRow + x] = 0;
+									else out[dstRow + x] = idx;
+								}
+							}
+							output[i] = {
+								type: frame.type,
+								width: gl_width,
+								height: gl_height,
+								originalWidth: width,
+								originalHeight: height,
+								data: out
+							};
+							continue;
 						}
 						if (!wasmPalInitialized) {
 							new Uint32Array(wasmMem.buffer, wasmPalPtr, 256).set(pal32);
@@ -79020,9 +79039,40 @@ var init_Sprite = __esmMin((() => {
 					const dstBytes = gl_width * gl_height * 4;
 					const dstPtr = wasmSrcPtr + srcBytes;
 					const totalBytesNeeded = dstPtr + dstBytes;
-					if (wasmMem.buffer.byteLength < totalBytesNeeded) {
+					if (wasmMem.buffer.byteLength < totalBytesNeeded) try {
 						const additionalPages = Math.ceil((totalBytesNeeded - wasmMem.buffer.byteLength) / 65536);
 						wasmMem.grow(additionalPages);
+					} catch (_e) {
+						out = new Uint8Array(gl_width * gl_height * 4);
+						const out32 = new Uint32Array(out.buffer);
+						for (let y = 0; y < height; ++y) {
+							const srcRow = (height - y - 1) * width * 4;
+							const dstRow = (y + start_y) * gl_width + start_x;
+							for (let x = 0; x < width; ++x) {
+								const srcIdx = srcRow + x * 4;
+								/**
+								* OLD LOGIC: Manual per-channel assignments (out[dst+0]=... out[dst+3]=...). 4 loads + 4 stores + branches.
+								* NEW LOGIC: Reads RGBA bytes, remaps color channels using bitwise operations, and writes the result as a single 32-bit integer. 4 loads + 1 store.
+								*/
+								const a = data[srcIdx];
+								if (a === 0) out32[dstRow + x] = 0;
+								else {
+									const r = data[srcIdx + 3];
+									const g = data[srcIdx + 2];
+									const b = data[srcIdx + 1];
+									out32[dstRow + x] = a << 24 | b << 16 | g << 8 | r;
+								}
+							}
+						}
+						output[i] = {
+							type: frame.type,
+							width: gl_width,
+							height: gl_height,
+							originalWidth: width,
+							originalHeight: height,
+							data: out
+						};
+						continue;
 					}
 					new Uint8Array(wasmMem.buffer, dstPtr, dstBytes).fill(0);
 					new Uint8Array(wasmMem.buffer, wasmSrcPtr, srcBytes).set(data);
@@ -79220,7 +79270,7 @@ var init_Controls = __esmMin((() => {
 	}, 1);
 }));
 // src/Vendors/gl-matrix.js
-var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$8, mat2$1, mat2d, mat3$6, mat4$25, quat$2;
+var exports$3, GLMAT_EPSILON, GLMAT_ARRAY_TYPE, GLMAT_RANDOM, glMatrix, vec2$4, vec3$8, vec4$9, mat2$1, mat2d, mat3$6, mat4$26, quat$2;
 var init_gl_matrix$1 = __esmMin((() => {
 	exports$3 = {};
 	if (!GLMAT_EPSILON) GLMAT_EPSILON = 1e-6;
@@ -80098,13 +80148,13 @@ var init_gl_matrix$1 = __esmMin((() => {
 		return "vec3(" + a[0] + ", " + a[1] + ", " + a[2] + ")";
 	};
 	if (typeof exports$3 !== "undefined") exports$3.vec3 = vec3$8;
-	vec4$8 = {};
+	vec4$9 = {};
 	/**
 	* Creates a new, empty vec4
 	*
 	* @returns {vec4} a new 4D vector
 	*/
-	vec4$8.create = function() {
+	vec4$9.create = function() {
 		var out = new GLMAT_ARRAY_TYPE(4);
 		out[0] = 0;
 		out[1] = 0;
@@ -80118,7 +80168,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} a vector to clone
 	* @returns {vec4} a new 4D vector
 	*/
-	vec4$8.clone = function(a) {
+	vec4$9.clone = function(a) {
 		var out = new GLMAT_ARRAY_TYPE(4);
 		out[0] = a[0];
 		out[1] = a[1];
@@ -80135,7 +80185,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} w W component
 	* @returns {vec4} a new 4D vector
 	*/
-	vec4$8.fromValues = function(x, y, z, w) {
+	vec4$9.fromValues = function(x, y, z, w) {
 		var out = new GLMAT_ARRAY_TYPE(4);
 		out[0] = x;
 		out[1] = y;
@@ -80150,7 +80200,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} a the source vector
 	* @returns {vec4} out
 	*/
-	vec4$8.copy = function(out, a) {
+	vec4$9.copy = function(out, a) {
 		out[0] = a[0];
 		out[1] = a[1];
 		out[2] = a[2];
@@ -80167,7 +80217,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} w W component
 	* @returns {vec4} out
 	*/
-	vec4$8.set = function(out, x, y, z, w) {
+	vec4$9.set = function(out, x, y, z, w) {
 		out[0] = x;
 		out[1] = y;
 		out[2] = z;
@@ -80182,7 +80232,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {vec4} out
 	*/
-	vec4$8.add = function(out, a, b) {
+	vec4$9.add = function(out, a, b) {
 		out[0] = a[0] + b[0];
 		out[1] = a[1] + b[1];
 		out[2] = a[2] + b[2];
@@ -80197,7 +80247,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {vec4} out
 	*/
-	vec4$8.subtract = function(out, a, b) {
+	vec4$9.subtract = function(out, a, b) {
 		out[0] = a[0] - b[0];
 		out[1] = a[1] - b[1];
 		out[2] = a[2] - b[2];
@@ -80208,7 +80258,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.subtract}
 	* @function
 	*/
-	vec4$8.sub = vec4$8.subtract;
+	vec4$9.sub = vec4$9.subtract;
 	/**
 	* Multiplies two vec4's
 	*
@@ -80217,7 +80267,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {vec4} out
 	*/
-	vec4$8.multiply = function(out, a, b) {
+	vec4$9.multiply = function(out, a, b) {
 		out[0] = a[0] * b[0];
 		out[1] = a[1] * b[1];
 		out[2] = a[2] * b[2];
@@ -80228,7 +80278,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.multiply}
 	* @function
 	*/
-	vec4$8.mul = vec4$8.multiply;
+	vec4$9.mul = vec4$9.multiply;
 	/**
 	* Divides two vec4's
 	*
@@ -80237,7 +80287,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {vec4} out
 	*/
-	vec4$8.divide = function(out, a, b) {
+	vec4$9.divide = function(out, a, b) {
 		out[0] = a[0] / b[0];
 		out[1] = a[1] / b[1];
 		out[2] = a[2] / b[2];
@@ -80248,7 +80298,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.divide}
 	* @function
 	*/
-	vec4$8.div = vec4$8.divide;
+	vec4$9.div = vec4$9.divide;
 	/**
 	* Returns the minimum of two vec4's
 	*
@@ -80257,7 +80307,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {vec4} out
 	*/
-	vec4$8.min = function(out, a, b) {
+	vec4$9.min = function(out, a, b) {
 		out[0] = Math.min(a[0], b[0]);
 		out[1] = Math.min(a[1], b[1]);
 		out[2] = Math.min(a[2], b[2]);
@@ -80272,7 +80322,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {vec4} out
 	*/
-	vec4$8.max = function(out, a, b) {
+	vec4$9.max = function(out, a, b) {
 		out[0] = Math.max(a[0], b[0]);
 		out[1] = Math.max(a[1], b[1]);
 		out[2] = Math.max(a[2], b[2]);
@@ -80287,7 +80337,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} b amount to scale the vector by
 	* @returns {vec4} out
 	*/
-	vec4$8.scale = function(out, a, b) {
+	vec4$9.scale = function(out, a, b) {
 		out[0] = a[0] * b;
 		out[1] = a[1] * b;
 		out[2] = a[2] * b;
@@ -80303,7 +80353,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} scale the amount to scale b by before adding
 	* @returns {vec4} out
 	*/
-	vec4$8.scaleAndAdd = function(out, a, b, scale) {
+	vec4$9.scaleAndAdd = function(out, a, b, scale) {
 		out[0] = a[0] + b[0] * scale;
 		out[1] = a[1] + b[1] * scale;
 		out[2] = a[2] + b[2] * scale;
@@ -80317,7 +80367,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {Number} distance between a and b
 	*/
-	vec4$8.distance = function(a, b) {
+	vec4$9.distance = function(a, b) {
 		var x = b[0] - a[0], y = b[1] - a[1], z = b[2] - a[2], w = b[3] - a[3];
 		return Math.sqrt(x * x + y * y + z * z + w * w);
 	};
@@ -80325,7 +80375,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.distance}
 	* @function
 	*/
-	vec4$8.dist = vec4$8.distance;
+	vec4$9.dist = vec4$9.distance;
 	/**
 	* Calculates the squared euclidian distance between two vec4's
 	*
@@ -80333,7 +80383,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {Number} squared distance between a and b
 	*/
-	vec4$8.squaredDistance = function(a, b) {
+	vec4$9.squaredDistance = function(a, b) {
 		var x = b[0] - a[0], y = b[1] - a[1], z = b[2] - a[2], w = b[3] - a[3];
 		return x * x + y * y + z * z + w * w;
 	};
@@ -80341,14 +80391,14 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.squaredDistance}
 	* @function
 	*/
-	vec4$8.sqrDist = vec4$8.squaredDistance;
+	vec4$9.sqrDist = vec4$9.squaredDistance;
 	/**
 	* Calculates the length of a vec4
 	*
 	* @param {vec4} a vector to calculate length of
 	* @returns {Number} length of a
 	*/
-	vec4$8.length = function(a) {
+	vec4$9.length = function(a) {
 		var x = a[0], y = a[1], z = a[2], w = a[3];
 		return Math.sqrt(x * x + y * y + z * z + w * w);
 	};
@@ -80356,14 +80406,14 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.length}
 	* @function
 	*/
-	vec4$8.len = vec4$8.length;
+	vec4$9.len = vec4$9.length;
 	/**
 	* Calculates the squared length of a vec4
 	*
 	* @param {vec4} a vector to calculate squared length of
 	* @returns {Number} squared length of a
 	*/
-	vec4$8.squaredLength = function(a) {
+	vec4$9.squaredLength = function(a) {
 		var x = a[0], y = a[1], z = a[2], w = a[3];
 		return x * x + y * y + z * z + w * w;
 	};
@@ -80371,7 +80421,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link vec4.squaredLength}
 	* @function
 	*/
-	vec4$8.sqrLen = vec4$8.squaredLength;
+	vec4$9.sqrLen = vec4$9.squaredLength;
 	/**
 	* Negates the components of a vec4
 	*
@@ -80379,7 +80429,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} a vector to negate
 	* @returns {vec4} out
 	*/
-	vec4$8.negate = function(out, a) {
+	vec4$9.negate = function(out, a) {
 		out[0] = -a[0];
 		out[1] = -a[1];
 		out[2] = -a[2];
@@ -80393,7 +80443,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} a vector to normalize
 	* @returns {vec4} out
 	*/
-	vec4$8.normalize = function(out, a) {
+	vec4$9.normalize = function(out, a) {
 		var x = a[0], y = a[1], z = a[2], w = a[3];
 		var len = x * x + y * y + z * z + w * w;
 		if (len > 0) {
@@ -80412,7 +80462,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} b the second operand
 	* @returns {Number} dot product of a and b
 	*/
-	vec4$8.dot = function(a, b) {
+	vec4$9.dot = function(a, b) {
 		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
 	};
 	/**
@@ -80424,7 +80474,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} t interpolation amount between the two inputs
 	* @returns {vec4} out
 	*/
-	vec4$8.lerp = function(out, a, b, t) {
+	vec4$9.lerp = function(out, a, b, t) {
 		var ax = a[0], ay = a[1], az = a[2], aw = a[3];
 		out[0] = ax + t * (b[0] - ax);
 		out[1] = ay + t * (b[1] - ay);
@@ -80439,14 +80489,14 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} [scale] Length of the resulting vector. If ommitted, a unit vector will be returned
 	* @returns {vec4} out
 	*/
-	vec4$8.random = function(out, scale) {
+	vec4$9.random = function(out, scale) {
 		scale = scale || 1;
 		out[0] = GLMAT_RANDOM();
 		out[1] = GLMAT_RANDOM();
 		out[2] = GLMAT_RANDOM();
 		out[3] = GLMAT_RANDOM();
-		vec4$8.normalize(out, out);
-		vec4$8.scale(out, out, scale);
+		vec4$9.normalize(out, out);
+		vec4$9.scale(out, out, scale);
 		return out;
 	};
 	/**
@@ -80457,7 +80507,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} m matrix to transform with
 	* @returns {vec4} out
 	*/
-	vec4$8.transformMat4 = function(out, a, m) {
+	vec4$9.transformMat4 = function(out, a, m) {
 		var x = a[0], y = a[1], z = a[2], w = a[3];
 		out[0] = m[0] * x + m[4] * y + m[8] * z + m[12] * w;
 		out[1] = m[1] * x + m[5] * y + m[9] * z + m[13] * w;
@@ -80473,7 +80523,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {quat} q quaternion to transform with
 	* @returns {vec4} out
 	*/
-	vec4$8.transformQuat = function(out, a, q) {
+	vec4$9.transformQuat = function(out, a, q) {
 		var x = a[0], y = a[1], z = a[2], qx = q[0], qy = q[1], qz = q[2], qw = q[3], ix = qw * x + qy * z - qz * y, iy = qw * y + qz * x - qx * z, iz = qw * z + qx * y - qy * x, iw = -qx * x - qy * y - qz * z;
 		out[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
 		out[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
@@ -80492,8 +80542,8 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {Array} a
 	* @function
 	*/
-	vec4$8.forEach = (function() {
-		var vec = vec4$8.create();
+	vec4$9.forEach = (function() {
+		var vec = vec4$9.create();
 		return function(a, stride, offset, count, fn, arg) {
 			var i, l;
 			if (!stride) stride = 4;
@@ -80520,10 +80570,10 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec4} vec vector to represent as a string
 	* @returns {String} string representation of the vector
 	*/
-	vec4$8.str = function(a) {
+	vec4$9.str = function(a) {
 		return "vec4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ")";
 	};
-	if (typeof exports$3 !== "undefined") exports$3.vec4 = vec4$8;
+	if (typeof exports$3 !== "undefined") exports$3.vec4 = vec4$9;
 	mat2$1 = {};
 	/**
 	* Creates a new identity mat2
@@ -81219,13 +81269,13 @@ var init_gl_matrix$1 = __esmMin((() => {
 		return "mat3(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ")";
 	};
 	if (typeof exports$3 !== "undefined") exports$3.mat3 = mat3$6;
-	mat4$25 = {};
+	mat4$26 = {};
 	/**
 	* Creates a new identity mat4
 	*
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$25.create = function() {
+	mat4$26.create = function() {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = 1;
 		out[1] = 0;
@@ -81251,7 +81301,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a matrix to clone
 	* @returns {mat4} a new 4x4 matrix
 	*/
-	mat4$25.clone = function(a) {
+	mat4$26.clone = function(a) {
 		var out = new GLMAT_ARRAY_TYPE(16);
 		out[0] = a[0];
 		out[1] = a[1];
@@ -81278,7 +81328,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$25.copy = function(out, a) {
+	mat4$26.copy = function(out, a) {
 		out[0] = a[0];
 		out[1] = a[1];
 		out[2] = a[2];
@@ -81303,7 +81353,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} out the receiving matrix
 	* @returns {mat4} out
 	*/
-	mat4$25.identity = function(out) {
+	mat4$26.identity = function(out) {
 		out[0] = 1;
 		out[1] = 0;
 		out[2] = 0;
@@ -81329,7 +81379,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$25.transpose = function(out, a) {
+	mat4$26.transpose = function(out, a) {
 		if (out === a) {
 			var a01 = a[1], a02 = a[2], a03 = a[3], a12 = a[6], a13 = a[7], a23 = a[11];
 			out[1] = a[4];
@@ -81371,7 +81421,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$25.invert = function(out, a) {
+	mat4$26.invert = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31, b11 = a22 * a33 - a23 * a32, det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 		if (!det) return null;
 		det = 1 / det;
@@ -81400,7 +81450,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {mat4} out
 	*/
-	mat4$25.adjoint = function(out, a) {
+	mat4$26.adjoint = function(out, a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		out[0] = a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22);
 		out[1] = -(a01 * (a22 * a33 - a23 * a32) - a21 * (a02 * a33 - a03 * a32) + a31 * (a02 * a23 - a03 * a22));
@@ -81426,7 +81476,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} a the source matrix
 	* @returns {Number} determinant of a
 	*/
-	mat4$25.determinant = function(a) {
+	mat4$26.determinant = function(a) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15], b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12, b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31;
 		return b00 * (a22 * a33 - a23 * a32) - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 	};
@@ -81438,7 +81488,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} b the second operand
 	* @returns {mat4} out
 	*/
-	mat4$25.multiply = function(out, a, b) {
+	mat4$26.multiply = function(out, a, b) {
 		var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11], a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
 		var b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
 		out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
@@ -81475,7 +81525,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* Alias for {@link mat4.multiply}
 	* @function
 	*/
-	mat4$25.mul = mat4$25.multiply;
+	mat4$26.mul = mat4$26.multiply;
 	/**
 	* Translate a mat4 by the given vector
 	*
@@ -81484,7 +81534,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v vector to translate by
 	* @returns {mat4} out
 	*/
-	mat4$25.translate = function(out, a, v) {
+	mat4$26.translate = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2], a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23;
 		if (a === out) {
 			out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
@@ -81531,7 +81581,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v the vec3 to scale the matrix by
 	* @returns {mat4} out
 	**/
-	mat4$25.scale = function(out, a, v) {
+	mat4$26.scale = function(out, a, v) {
 		var x = v[0], y = v[1], z = v[2];
 		out[0] = a[0] * x;
 		out[1] = a[1] * x;
@@ -81560,7 +81610,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} axis the axis to rotate around
 	* @returns {mat4} out
 	*/
-	mat4$25.rotate = function(out, a, rad, axis) {
+	mat4$26.rotate = function(out, a, rad, axis) {
 		var x = axis[0], y = axis[1], z = axis[2], len = Math.sqrt(x * x + y * y + z * z), s, c, t, a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, b00, b01, b02, b10, b11, b12, b20, b21, b22;
 		if (Math.abs(len) < GLMAT_EPSILON) return null;
 		len = 1 / len;
@@ -81619,7 +81669,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$25.rotateX = function(out, a, rad) {
+	mat4$26.rotateX = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[0] = a[0];
@@ -81649,7 +81699,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$25.rotateY = function(out, a, rad) {
+	mat4$26.rotateY = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
 		if (a !== out) {
 			out[4] = a[4];
@@ -81679,7 +81729,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} rad the angle to rotate the matrix by
 	* @returns {mat4} out
 	*/
-	mat4$25.rotateZ = function(out, a, rad) {
+	mat4$26.rotateZ = function(out, a, rad) {
 		var s = Math.sin(rad), c = Math.cos(rad), a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3], a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
 		if (a !== out) {
 			out[8] = a[8];
@@ -81716,7 +81766,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} v Translation vector
 	* @returns {mat4} out
 	*/
-	mat4$25.fromRotationTranslation = function(out, q, v) {
+	mat4$26.fromRotationTranslation = function(out, q, v) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81744,7 +81794,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	*
 	* @returns {mat4} out
 	*/
-	mat4$25.fromQuat = function(out, q) {
+	mat4$26.fromQuat = function(out, q) {
 		var x = q[0], y = q[1], z = q[2], w = q[3], x2 = x + x, y2 = y + y, z2 = z + z, xx = x * x2, xy = x * y2, xz = x * z2, yy = y * y2, yz = y * z2, zz = z * z2, wx = w * x2, wy = w * y2, wz = w * z2;
 		out[0] = 1 - (yy + zz);
 		out[1] = xy + wz;
@@ -81776,7 +81826,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {Number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$25.frustum = function(out, left, right, bottom, top, near, far) {
+	mat4$26.frustum = function(out, left, right, bottom, top, near, far) {
 		var rl = 1 / (right - left), tb = 1 / (top - bottom), nf = 1 / (near - far);
 		out[0] = near * 2 * rl;
 		out[1] = 0;
@@ -81806,7 +81856,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$25.perspective = function(out, fovy, aspect, near, far) {
+	mat4$26.perspective = function(out, fovy, aspect, near, far) {
 		var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
 		out[0] = f / aspect;
 		out[1] = 0;
@@ -81838,7 +81888,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {number} far Far bound of the frustum
 	* @returns {mat4} out
 	*/
-	mat4$25.ortho = function(out, left, right, bottom, top, near, far) {
+	mat4$26.ortho = function(out, left, right, bottom, top, near, far) {
 		var lr = 1 / (left - right), bt = 1 / (bottom - top), nf = 1 / (near - far);
 		out[0] = -2 * lr;
 		out[1] = 0;
@@ -81867,9 +81917,9 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {vec3} up vec3 pointing up
 	* @returns {mat4} out
 	*/
-	mat4$25.lookAt = function(out, eye, center, up) {
+	mat4$26.lookAt = function(out, eye, center, up) {
 		var x0, x1, x2, y0, y1, y2, z0, z1, z2, len, eyex = eye[0], eyey = eye[1], eyez = eye[2], upx = up[0], upy = up[1], upz = up[2], centerx = center[0], centery = center[1], centerz = center[2];
-		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$25.identity(out);
+		if (Math.abs(eyex - centerx) < GLMAT_EPSILON && Math.abs(eyey - centery) < GLMAT_EPSILON && Math.abs(eyez - centerz) < GLMAT_EPSILON) return mat4$26.identity(out);
 		z0 = eyex - centerx;
 		z1 = eyey - centery;
 		z2 = eyez - centerz;
@@ -81929,10 +81979,10 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @param {mat4} mat matrix to represent as a string
 	* @returns {String} string representation of the matrix
 	*/
-	mat4$25.str = function(a) {
+	mat4$26.str = function(a) {
 		return "mat4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + ", " + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + ")";
 	};
-	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$25;
+	if (typeof exports$3 !== "undefined") exports$3.mat4 = mat4$26;
 	quat$2 = {};
 	/**
 	* Creates a new identity quat
@@ -82018,7 +82068,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} a new quaternion
 	* @function
 	*/
-	quat$2.clone = vec4$8.clone;
+	quat$2.clone = vec4$9.clone;
 	/**
 	* Creates a new quat initialized with the given values
 	*
@@ -82029,7 +82079,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} a new quaternion
 	* @function
 	*/
-	quat$2.fromValues = vec4$8.fromValues;
+	quat$2.fromValues = vec4$9.fromValues;
 	/**
 	* Copy the values from one quat to another
 	*
@@ -82038,7 +82088,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	* @function
 	*/
-	quat$2.copy = vec4$8.copy;
+	quat$2.copy = vec4$9.copy;
 	/**
 	* Set the components of a quat to the given values
 	*
@@ -82050,7 +82100,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	* @function
 	*/
-	quat$2.set = vec4$8.set;
+	quat$2.set = vec4$9.set;
 	/**
 	* Set a quat to the identity quaternion
 	*
@@ -82091,7 +82141,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	* @function
 	*/
-	quat$2.add = vec4$8.add;
+	quat$2.add = vec4$9.add;
 	/**
 	* Multiplies two quat's
 	*
@@ -82122,7 +82172,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	* @function
 	*/
-	quat$2.scale = vec4$8.scale;
+	quat$2.scale = vec4$9.scale;
 	/**
 	* Rotates a quaternion by the given angle about the X axis
 	*
@@ -82199,7 +82249,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {Number} dot product of a and b
 	* @function
 	*/
-	quat$2.dot = vec4$8.dot;
+	quat$2.dot = vec4$9.dot;
 	/**
 	* Performs a linear interpolation between two quat's
 	*
@@ -82210,7 +82260,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	* @function
 	*/
-	quat$2.lerp = vec4$8.lerp;
+	quat$2.lerp = vec4$9.lerp;
 	/**
 	* Performs a spherical linear interpolation between two quat
 	*
@@ -82282,7 +82332,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {Number} length of a
 	* @function
 	*/
-	quat$2.length = vec4$8.length;
+	quat$2.length = vec4$9.length;
 	/**
 	* Alias for {@link quat.length}
 	* @function
@@ -82295,7 +82345,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {Number} squared length of a
 	* @function
 	*/
-	quat$2.squaredLength = vec4$8.squaredLength;
+	quat$2.squaredLength = vec4$9.squaredLength;
 	/**
 	* Alias for {@link quat.squaredLength}
 	* @function
@@ -82309,7 +82359,7 @@ var init_gl_matrix$1 = __esmMin((() => {
 	* @returns {quat} out
 	* @function
 	*/
-	quat$2.normalize = vec4$8.normalize;
+	quat$2.normalize = vec4$9.normalize;
 	/**
 	* Creates a quaternion from the given 3x3 rotation matrix.
 	*
@@ -83911,7 +83961,7 @@ var init_PostProcess = __esmMin((() => {
 	};
 }));
 // src/Renderer/Effects/Shaders/VerticalFlip.js
-var _program$28, _buffer$21, _active$4, VerticalFlip;
+var _program$34, _buffer$21, _active$4, VerticalFlip;
 var init_VerticalFlip = __esmMin((() => {
 	init_VerticalFlip$2();
 	init_VerticalFlip$1();
@@ -83920,9 +83970,9 @@ var init_VerticalFlip = __esmMin((() => {
 	_active$4 = false;
 	VerticalFlip = class {
 		static init(gl) {
-			if (_program$28) return;
+			if (_program$34) return;
 			try {
-				_program$28 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
+				_program$34 = WebGL_default.createShaderProgram(gl, VerticalFlip_default$1, VerticalFlip_default);
 			} catch (e) {
 				console.error("Error when compiling shader VerticalFlip.", e);
 				return;
@@ -83955,19 +84005,19 @@ var init_VerticalFlip = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$21 || !_program$28 || !_active$4) return;
+			if (!_buffer$21 || !_program$34 || !_active$4) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$28);
+			gl.useProgram(_program$34);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$21);
-			let posLoc = _program$28.attribute.aPosition;
+			let posLoc = _program$34.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 0);
-			posLoc = _program$28.attribute.aTextureCoord;
+			posLoc = _program$34.attribute.aTextureCoord;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 8);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$28.uniform.uTexture, 0);
+			gl.uniform1i(_program$34.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 			PostProcess.afterRenderPass(gl);
 		}
@@ -83975,13 +84025,13 @@ var init_VerticalFlip = __esmMin((() => {
 		* @returns {WebGLProgram} Shader program
 		*/
 		static program() {
-			return _program$28;
+			return _program$34;
 		}
 		/** Resets effect state */
 		static clean(gl) {
 			_active$4 = false;
 			if (_buffer$21) gl.deleteBuffer(_buffer$21);
-			_program$28 = _buffer$21 = null;
+			_program$34 = _buffer$21 = null;
 		}
 		/** @returns {boolean} Whether the effect is active */
 		static isActive() {
@@ -83994,7 +84044,7 @@ var init_VerticalFlip = __esmMin((() => {
 	};
 }));
 // src/Renderer/Map/Altitude.js
-var _cells, _types$1, mat4$24, vec3$7, vec4$7, _from, _to, _unit, _matrix$7, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
+var _cells, _types$1, mat4$25, vec3$7, vec4$8, _from, _to, _unit, _matrix$8, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
 var init_Altitude = __esmMin((() => {
 	init_gl_matrix$1();
 	init_PathFinding();
@@ -84002,11 +84052,11 @@ var init_Altitude = __esmMin((() => {
 	init_VerticalFlip();
 	_cells = null;
 	_types$1 = null;
-	({mat4: mat4$24, vec3: vec3$7, vec4: vec4$7} = exports$3);
+	({mat4: mat4$25, vec3: vec3$7, vec4: vec4$8} = exports$3);
 	_from = vec3$7.create();
-	_to = vec4$7.create();
+	_to = vec4$8.create();
 	_unit = vec3$7.create();
-	_matrix$7 = mat4$24.create();
+	_matrix$8 = mat4$25.create();
 	buffer1x1 = /* @__PURE__ */ new Float32Array(30);
 	buffer5x5 = /* @__PURE__ */ new Float32Array(750);
 	buffer7x7 = /* @__PURE__ */ new Float32Array(1470);
@@ -84103,18 +84153,18 @@ var init_Altitude = __esmMin((() => {
 		static intersect(modelView, projection, out) {
 			let i;
 			const count = Altitude.MAX_INTERSECT_COUNT;
-			mat4$24.invert(_matrix$7, modelView);
-			_from[0] = _matrix$7[12];
-			_from[1] = _matrix$7[13];
-			_from[2] = _matrix$7[14];
+			mat4$25.invert(_matrix$8, modelView);
+			_from[0] = _matrix$8[12];
+			_from[1] = _matrix$8[13];
+			_from[2] = _matrix$8[14];
 			_to[0] = Mouse.screen.x / Mouse.screen.width * 2 - 1;
 			_to[1] = -(Mouse.screen.y / Mouse.screen.height) * 2 + 1;
 			if (VerticalFlip.isActive()) _to[1] = -_to[1];
 			_to[2] = 1;
 			_to[3] = 1;
-			mat4$24.multiply(_matrix$7, projection, modelView);
-			mat4$24.invert(_matrix$7, _matrix$7);
-			vec4$7.transformMat4(_to, _to, _matrix$7);
+			mat4$25.multiply(_matrix$8, projection, modelView);
+			mat4$25.invert(_matrix$8, _matrix$8);
+			vec4$8.transformMat4(_to, _to, _matrix$8);
 			_to[0] /= _to[3];
 			_to[1] /= _to[3];
 			_to[2] /= _to[3];
@@ -139028,6 +139078,1504 @@ var init_SkillTreeView = __esmMin((() => {
 	duplicateEntry$2(JobConst_default.IMPERIAL_GUARD, JobConst_default.IMPERIAL_GUARD2);
 	duplicateEntry$2(JobConst_default.SKY_EMPEROR, JobConst_default.SKY_EMPEROR2);
 }));
+// src/DB/Skills/SkillUnitConst.js
+var SkillUnitConst_default;
+var init_SkillUnitConst = __esmMin((() => {
+	SkillUnitConst_default = {
+		UNT_SAFETYWALL: 126,
+		UNT_FIREWALL: 127,
+		UNT_WARPPORTAL: 128,
+		UNT_PRE_WARPPORTAL: 129,
+		UNT_BENEDICTIO: 130,
+		UNT_SANCTUARY: 131,
+		UNT_MAGNUS: 132,
+		UNT_PNEUMA: 133,
+		UNT_DUMMYSKILL: 134,
+		UNT_FIREPILLAR_WAITING: 135,
+		UNT_FIREPILLAR_ACTIVE: 136,
+		UNT_HIDDEN_TRAP: 137,
+		UNT_TRAP: 138,
+		UNT_HIDDEN_WARP_NPC: 139,
+		UNT_USED_TRAPS: 140,
+		UNT_ICEWALL: 141,
+		UNT_QUAGMIRE: 142,
+		UNT_BLASTMINE: 143,
+		UNT_SKIDTRAP: 144,
+		UNT_ANKLESNARE: 145,
+		UNT_VENOMDUST: 146,
+		UNT_LANDMINE: 147,
+		UNT_SHOCKWAVE: 148,
+		UNT_SANDMAN: 149,
+		UNT_FLASHER: 150,
+		UNT_FREEZINGTRAP: 151,
+		UNT_CLAYMORETRAP: 152,
+		UNT_TALKIEBOX: 153,
+		UNT_VOLCANO: 154,
+		UNT_DELUGE: 155,
+		UNT_VIOLENTGALE: 156,
+		UNT_LANDPROTECTOR: 157,
+		UNT_LULLABY: 158,
+		UNT_RICHMANKIM: 159,
+		UNT_ETERNALCHAOS: 160,
+		UNT_DRUMBATTLEFIELD: 161,
+		UNT_RINGNIBELUNGEN: 162,
+		UNT_ROKISWEIL: 163,
+		UNT_INTOABYSS: 164,
+		UNT_SIEGFRIED: 165,
+		UNT_DISSONANCE: 166,
+		UNT_WHISTLE: 167,
+		UNT_ASSASSINCROSS: 168,
+		UNT_POEMBRAGI: 169,
+		UNT_APPLEIDUN: 170,
+		UNT_UGLYDANCE: 171,
+		UNT_HUMMING: 172,
+		UNT_DONTFORGETME: 173,
+		UNT_FORTUNEKISS: 174,
+		UNT_SERVICEFORYOU: 175,
+		UNT_GRAFFITI: 176,
+		UNT_DEMONSTRATION: 177,
+		UNT_CALLFAMILY: 178,
+		UNT_GOSPEL: 179,
+		UNT_BASILICA: 180,
+		UNT_MOONLIT: 181,
+		UNT_FOGWALL: 182,
+		UNT_SPIDERWEB: 183,
+		UNT_GRAVITATION: 184,
+		UNT_HERMODE: 185,
+		UNT_KAENSIN: 186,
+		UNT_SUITON: 187,
+		UNT_TATAMIGAESHI: 188,
+		UNT_KAEN: 189,
+		UNT_GROUNDDRIFT_WIND: 190,
+		UNT_GROUNDDRIFT_DARK: 191,
+		UNT_GROUNDDRIFT_POISON: 192,
+		UNT_GROUNDDRIFT_WATER: 193,
+		UNT_GROUNDDRIFT_FIRE: 194,
+		UNT_DEATHWAVE: 195,
+		UNT_WATERATTACK: 196,
+		UNT_WINDATTACK: 197,
+		UNT_EARTHQUAKE: 198,
+		UNT_EVILLAND: 199,
+		UNT_DARK_RUNNER: 200,
+		UNT_DARK_TRANSFER: 201,
+		UNT_EPICLESIS: 202,
+		UNT_EARTHSTRAIN: 203,
+		UNT_MANHOLE: 204,
+		UNT_DIMENSIONDOOR: 205,
+		UNT_CHAOSPANIC: 206,
+		UNT_MAELSTROM: 207,
+		UNT_BLOODYLUST: 208,
+		UNT_FEINTBOMB: 209,
+		UNT_MAGENTATRAP: 210,
+		UNT_COBALTTRAP: 211,
+		UNT_MAIZETRAP: 212,
+		UNT_VERDURETRAP: 213,
+		UNT_FIRINGTRAP: 214,
+		UNT_ICEBOUNDTRAP: 215,
+		UNT_ELECTRICSHOCKER: 216,
+		UNT_CLUSTERBOMB: 217,
+		UNT_REVERBERATION: 218,
+		UNT_SEVERE_RAINSTORM: 219,
+		UNT_FIREWALK: 220,
+		UNT_ELECTRICWALK: 221,
+		UNT_NETHERWORLD: 222,
+		UNT_PSYCHIC_WAVE: 223,
+		UNT_CLOUD_KILL: 224,
+		UNT_POISONSMOKE: 225,
+		UNT_NEUTRALBARRIER: 226,
+		UNT_STEALTHFIELD: 227,
+		UNT_WARMER: 228,
+		UNT_THORNS_TRAP: 229,
+		UNT_WALLOFTHORN: 230,
+		UNT_DEMONIC_FIRE: 231,
+		UNT_FIRE_EXPANSION_SMOKE_POWDER: 232,
+		UNT_FIRE_EXPANSION_TEAR_GAS: 233,
+		UNT_HELLS_PLANT: 234,
+		UNT_VACUUM_EXTREME: 235,
+		UNT_BANDING: 236,
+		UNT_FIRE_MANTLE: 237,
+		UNT_WATER_BARRIER: 238,
+		UNT_ZEPHYR: 239,
+		UNT_POWER_OF_GAIA: 240,
+		UNT_FIRE_INSIGNIA: 241,
+		UNT_WATER_INSIGNIA: 242,
+		UNT_WIND_INSIGNIA: 243,
+		UNT_EARTH_INSIGNIA: 244,
+		UNT_POISON_MIST: 245,
+		UNT_LAVA_SLIDE: 246,
+		UNT_VOLCANIC_ASH: 247,
+		UNT_ZENKAI_WATER: 248,
+		UNT_ZENKAI_LAND: 249,
+		UNT_ZENKAI_FIRE: 250,
+		UNT_ZENKAI_WIND: 251,
+		UNT_MAKIBISHI: 252,
+		UNT_VENOMFOG: 253,
+		UNT_ICEMINE: 254,
+		UNT_FLAMECROSS: 255,
+		UNT_HELLBURNING: 256,
+		UNT_MAGMA_ERUPTION: 257,
+		UNT_KINGS_GRACE: 258,
+		UNT_GLITTERING_GREED: 259,
+		UNT_B_TRAP: 260,
+		UNT_FIRE_RAIN: 261,
+		UNT_CATNIPPOWDER: 262,
+		UNT_NYANGGRASS: 263,
+		UNT_GROUNDDRIFT_NEUTRAL: 264,
+		UNT_CREATINGSTAR: 265,
+		UNT_RAIN_OF_CRYSTAL: 266,
+		UNT_MYSTERY_ILLUSION: 267,
+		UNT_STRANTUM_TREMOR: 269,
+		UNT_VIOLENT_QUAKE: 270,
+		UNT_ALL_BLOOM: 271,
+		UNT_TORNADO_STORM: 272,
+		UNT_FLORAL_FLARE_ROAD: 273,
+		UNT_ASTRAL_STRIKE: 274,
+		UNT_CROSS_RAIN: 275,
+		UNT_PNEUMATICUS_PROCELLA: 276,
+		UNT_ABYSS_SQUARE: 277,
+		UNT_ACIDIFIED_ZONE_WATER: 278,
+		UNT_ACIDIFIED_ZONE_GROUND: 279,
+		UNT_ACIDIFIED_ZONE_WIND: 280,
+		UNT_ACIDIFIED_ZONE_FIRE: 281,
+		UNT_LIGHTNING_LAND: 282,
+		UNT_VENOM_SWAMP: 283,
+		UNT_CONFLAGRATION: 284,
+		UNT_CANE_OF_EVIL_EYE: 285,
+		UNT_TWINKLING_GALAXY: 286,
+		UNT_STAR_CANNON: 287,
+		UNT_GRENADES_DROPPING: 288,
+		UNT_FUUMASHOUAKU: 290,
+		UNT_MISSION_BOMBARD: 291,
+		UNT_TOTEM_OF_TUTELARY: 292,
+		UNT_HYUN_ROKS_BREEZE: 293,
+		UNT_SHINKIROU: 294,
+		UNT_JACK_FROST_NOVA: 295,
+		UNT_GROUND_GRAVITATION: 296,
+		UNT_KUNAIWAIKYOKU: 298,
+		UNT_DEEPBLINDTRAP: 20852,
+		UNT_SOLIDTRAP: 20853,
+		UNT_SWIFTTRAP: 20854,
+		UNT_FLAMETRAP: 20855,
+		UNT_GD_LEADERSHIP: 193,
+		UNT_GD_GLORYWOUNDS: 194,
+		UNT_GD_SOULCOLD: 195,
+		UNT_GD_HAWKEYES: 196,
+		UNT_MAX: 400
+	};
+}));
+// src/DB/Effects/EffectConst.js
+var EffectConst_default;
+var init_EffectConst = __esmMin((() => {
+	EffectConst_default = {
+		EF_NONE: -1,
+		EF_HIT1: 0,
+		EF_HIT2: 1,
+		EF_HIT3: 2,
+		EF_HIT4: 3,
+		EF_HIT5: 4,
+		EF_HIT6: 5,
+		EF_ENTRY: 6,
+		EF_EXIT: 7,
+		EF_WARP: 8,
+		EF_ENHANCE: 9,
+		EF_COIN: 10,
+		EF_ENDURE: 11,
+		EF_BEGINSPELL: 12,
+		EF_GLASSWALL: 13,
+		EF_HEALSP: 14,
+		EF_SOULSTRIKE: 15,
+		EF_BASH: 16,
+		EF_MAGNUMBREAK: 17,
+		EF_STEAL: 18,
+		EF_HIDING: 19,
+		EF_PATTACK: 20,
+		EF_DETOXICATION: 21,
+		EF_SIGHT: 22,
+		EF_STONECURSE: 23,
+		EF_FIREBALL: 24,
+		EF_FIREWALL: 25,
+		EF_ICEARROW: 26,
+		EF_FROSTDIVER: 27,
+		EF_FROSTDIVER2: 28,
+		EF_LIGHTBOLT: 29,
+		EF_THUNDERSTORM: 30,
+		EF_FIREARROW: 31,
+		EF_NAPALMBEAT: 32,
+		EF_RUWACH: 33,
+		EF_TELEPORTATION: 34,
+		EF_READYPORTAL: 35,
+		EF_PORTAL: 36,
+		EF_INCAGILITY: 37,
+		EF_DECAGILITY: 38,
+		EF_AQUA: 39,
+		EF_SIGNUM: 40,
+		EF_ANGELUS: 41,
+		EF_BLESSING: 42,
+		EF_INCAGIDEX: 43,
+		EF_SMOKE: 44,
+		EF_FIREFLY: 45,
+		EF_SANDWIND: 46,
+		EF_TORCH: 47,
+		EF_SPRAYPOND: 48,
+		EF_FIREHIT: 49,
+		EF_FIRESPLASHHIT: 50,
+		EF_COLDHIT: 51,
+		EF_WINDHIT: 52,
+		EF_POISONHIT: 53,
+		EF_BEGINSPELL2: 54,
+		EF_BEGINSPELL3: 55,
+		EF_BEGINSPELL4: 56,
+		EF_BEGINSPELL5: 57,
+		EF_BEGINSPELL6: 58,
+		EF_BEGINSPELL7: 59,
+		EF_LOCKON: 60,
+		EF_WARPZONE: 61,
+		EF_SIGHTRASHER: 62,
+		EF_BARRIER: 63,
+		EF_ARROWSHOT: 64,
+		EF_INVENOM: 65,
+		EF_CURE: 66,
+		EF_PROVOKE: 67,
+		EF_MVP: 68,
+		EF_SKIDTRAP: 69,
+		EF_BRANDISHSPEAR: 70,
+		EF_CONE: 71,
+		EF_SPHERE: 72,
+		EF_BOWLINGBASH: 73,
+		EF_ICEWALL: 74,
+		EF_GLORIA: 75,
+		EF_MAGNIFICAT: 76,
+		EF_RESURRECTION: 77,
+		EF_RECOVERY: 78,
+		EF_EARTHSPIKE: 79,
+		EF_SPEARBMR: 80,
+		EF_PIERCE: 81,
+		EF_TURNUNDEAD: 82,
+		EF_SANCTUARY: 83,
+		EF_IMPOSITIO: 84,
+		EF_LEXAETERNA: 85,
+		EF_ASPERSIO: 86,
+		EF_LEXDIVINA: 87,
+		EF_SUFFRAGIUM: 88,
+		EF_STORMGUST: 89,
+		EF_LORD: 90,
+		EF_BENEDICTIO: 91,
+		EF_METEORSTORM: 92,
+		EF_YUFITEL: 93,
+		EF_YUFITELHIT: 94,
+		EF_QUAGMIRE: 95,
+		EF_FIREPILLAR: 96,
+		EF_FIREPILLARBOMB: 97,
+		EF_HASTEUP: 98,
+		EF_FLASHER: 99,
+		EF_REMOVETRAP: 100,
+		EF_REPAIRWEAPON: 101,
+		EF_CRASHEARTH: 102,
+		EF_PERFECTION: 103,
+		EF_MAXPOWER: 104,
+		EF_BLASTMINE: 105,
+		EF_BLASTMINEBOMB: 106,
+		EF_CLAYMORE: 107,
+		EF_FREEZING: 108,
+		EF_BUBBLE: 109,
+		EF_GASPUSH: 110,
+		EF_SPRINGTRAP: 111,
+		EF_KYRIE: 112,
+		EF_MAGNUS: 113,
+		EF_BOTTOM: 114,
+		EF_BLITZBEAT: 115,
+		EF_WATERBALL: 116,
+		EF_WATERBALL2: 117,
+		EF_FIREIVY: 118,
+		EF_DETECTING: 119,
+		EF_CLOAKING: 120,
+		EF_SONICBLOW: 121,
+		EF_SONICBLOWHIT: 122,
+		EF_GRIMTOOTH: 123,
+		EF_VENOMDUST: 124,
+		EF_ENCHANTPOISON: 125,
+		EF_POISONREACT: 126,
+		EF_POISONREACT2: 127,
+		EF_OVERTHRUST: 128,
+		EF_SPLASHER: 129,
+		EF_TWOHANDQUICKEN: 130,
+		EF_AUTOCOUNTER: 131,
+		EF_GRIMTOOTHATK: 132,
+		EF_FREEZE: 133,
+		EF_FREEZED: 134,
+		EF_ICECRASH: 135,
+		EF_SLOWPOISON: 136,
+		EF_BOTTOM2: 137,
+		EF_FIREPILLARON: 138,
+		EF_SANDMAN: 139,
+		EF_REVIVE: 140,
+		EF_PNEUMA: 141,
+		EF_HEAVENSDRIVE: 142,
+		EF_SONICBLOW2: 143,
+		EF_BRANDISH2: 144,
+		EF_SHOCKWAVE: 145,
+		EF_SHOCKWAVEHIT: 146,
+		EF_EARTHHIT: 147,
+		EF_PIERCESELF: 148,
+		EF_BOWLINGSELF: 149,
+		EF_SPEARSTABSELF: 150,
+		EF_SPEARBMRSELF: 151,
+		EF_HOLYHIT: 152,
+		EF_CONCENTRATION: 153,
+		EF_REFINEOK: 154,
+		EF_REFINEFAIL: 155,
+		EF_JOBCHANGE: 156,
+		EF_LVUP: 157,
+		EF_JOBLVUP: 158,
+		EF_TOPRANK: 159,
+		EF_PARTY: 160,
+		EF_RAIN: 161,
+		EF_SNOW: 162,
+		EF_SAKURA: 163,
+		EF_STATUS_STATE: 164,
+		EF_BANJJAKII: 165,
+		EF_MAKEBLUR: 166,
+		EF_TAMINGSUCCESS: 167,
+		EF_TAMINGFAILED: 168,
+		EF_ENERGYCOAT: 169,
+		EF_CARTREVOLUTION: 170,
+		EF_VENOMDUST2: 171,
+		EF_CHANGEDARK: 172,
+		EF_CHANGEFIRE: 173,
+		EF_CHANGECOLD: 174,
+		EF_CHANGEWIND: 175,
+		EF_CHANGEFLAME: 176,
+		EF_CHANGEEARTH: 177,
+		EF_CHAINGEHOLY: 178,
+		EF_CHANGEPOISON: 179,
+		EF_HITDARK: 180,
+		EF_MENTALBREAK: 181,
+		EF_MAGICALATTHIT: 182,
+		EF_SUI_EXPLOSION: 183,
+		EF_DARKATTACK: 184,
+		EF_SUICIDE: 185,
+		EF_COMBOATTACK1: 186,
+		EF_COMBOATTACK2: 187,
+		EF_COMBOATTACK3: 188,
+		EF_COMBOATTACK4: 189,
+		EF_COMBOATTACK5: 190,
+		EF_GUIDEDATTACK: 191,
+		EF_POISONATTACK: 192,
+		EF_SILENCEATTACK: 193,
+		EF_STUNATTACK: 194,
+		EF_PETRIFYATTACK: 195,
+		EF_CURSEATTACK: 196,
+		EF_SLEEPATTACK: 197,
+		EF_TELEKHIT: 198,
+		EF_PONG: 199,
+		EF_LEVEL99: 200,
+		EF_LEVEL99_2: 201,
+		EF_LEVEL99_3: 202,
+		EF_GUMGANG: 203,
+		EF_POTION1: 204,
+		EF_POTION2: 205,
+		EF_POTION3: 206,
+		EF_POTION4: 207,
+		EF_POTION5: 208,
+		EF_POTION6: 209,
+		EF_POTION7: 210,
+		EF_POTION8: 211,
+		EF_DARKBREATH: 212,
+		EF_DEFFENDER: 213,
+		EF_KEEPING: 214,
+		EF_SUMMONSLAVE: 215,
+		EF_BLOODDRAIN: 216,
+		EF_ENERGYDRAIN: 217,
+		EF_POTION_CON: 218,
+		EF_POTION_: 219,
+		EF_POTION_BERSERK: 220,
+		EF_POTIONPILLAR: 221,
+		EF_DEFENDER: 222,
+		EF_GANBANTEIN: 223,
+		EF_WIND: 224,
+		EF_VOLCANO: 225,
+		EF_GRANDCROSS: 226,
+		EF_INTIMIDATE: 227,
+		EF_CHOOKGI: 228,
+		EF_CLOUD: 229,
+		EF_CLOUD2: 230,
+		EF_MAPPILLAR: 231,
+		EF_LINELINK: 232,
+		EF_CLOUD3: 233,
+		EF_SPELLBREAKER: 234,
+		EF_DISPELL: 235,
+		EF_DELUGE: 236,
+		EF_VIOLENTGALE: 237,
+		EF_LANDPROTECTOR: 238,
+		EF_BOTTOM_VO: 239,
+		EF_BOTTOM_DE: 240,
+		EF_BOTTOM_VI: 241,
+		EF_BOTTOM_LA: 242,
+		EF_FASTMOVE: 243,
+		EF_MAGICROD: 244,
+		EF_HOLYCROSS: 245,
+		EF_SHIELDCHARGE: 246,
+		EF_MAPPILLAR2: 247,
+		EF_PROVIDENCE: 248,
+		EF_SHIELDBOOMERANG: 249,
+		EF_SPEARQUICKEN: 250,
+		EF_DEVOTION: 251,
+		EF_REFLECTSHIELD: 252,
+		EF_ABSORBSPIRITS: 253,
+		EF_STEELBODY: 254,
+		EF_FLAMELAUNCHER: 255,
+		EF_FROSTWEAPON: 256,
+		EF_LIGHTNINGLOADER: 257,
+		EF_SEISMICWEAPON: 258,
+		EF_MAPPILLAR3: 259,
+		EF_MAPPILLAR4: 260,
+		EF_GUMGANG2: 261,
+		EF_TEIHIT1: 262,
+		EF_GUMGANG3: 263,
+		EF_TEIHIT2: 264,
+		EF_TANJI: 265,
+		EF_TEIHIT1X: 266,
+		EF_CHIMTO: 267,
+		EF_STEALCOIN: 268,
+		EF_STRIPWEAPON: 269,
+		EF_STRIPSHIELD: 270,
+		EF_STRIPARMOR: 271,
+		EF_STRIPHELM: 272,
+		EF_CHAINCOMBO: 273,
+		EF_RG_COIN: 274,
+		EF_BACKSTAP: 275,
+		EF_TEIHIT3: 276,
+		EF_BOTTOM_DISSONANCE: 277,
+		EF_BOTTOM_LULLABY: 278,
+		EF_BOTTOM_RICHMANKIM: 279,
+		EF_BOTTOM_ETERNALCHAOS: 280,
+		EF_BOTTOM_DRUMBATTLEFIELD: 281,
+		EF_BOTTOM_RINGNIBELUNGEN: 282,
+		EF_BOTTOM_ROKISWEIL: 283,
+		EF_BOTTOM_INTOABYSS: 284,
+		EF_BOTTOM_SIEGFRIED: 285,
+		EF_BOTTOM_WHISTLE: 286,
+		EF_BOTTOM_ASSASSINCROSS: 287,
+		EF_BOTTOM_POEMBRAGI: 288,
+		EF_BOTTOM_APPLEIDUN: 289,
+		EF_BOTTOM_UGLYDANCE: 290,
+		EF_BOTTOM_HUMMING: 291,
+		EF_BOTTOM_DONTFORGETME: 292,
+		EF_BOTTOM_FORTUNEKISS: 293,
+		EF_BOTTOM_SERVICEFORYOU: 294,
+		EF_TALK_FROSTJOKE: 295,
+		EF_TALK_SCREAM: 296,
+		EF_POKJUK: 297,
+		EF_THROWITEM: 298,
+		EF_THROWITEM2: 299,
+		EF_CHEMICALPROTECTION: 300,
+		EF_POKJUK_SOUND: 301,
+		EF_DEMONSTRATION: 302,
+		EF_CHEMICAL2: 303,
+		EF_TELEPORTATION2: 304,
+		EF_PHARMACY_OK: 305,
+		EF_PHARMACY_FAIL: 306,
+		EF_FORESTLIGHT: 307,
+		EF_THROWITEM3: 308,
+		EF_FIRSTAID: 309,
+		EF_SPRINKLESAND: 310,
+		EF_LOUD: 311,
+		EF_HEAL: 312,
+		EF_HEAL2: 313,
+		EF_EXIT2: 314,
+		EF_GLASSWALL2: 315,
+		EF_READYPORTAL2: 316,
+		EF_PORTAL2: 317,
+		EF_BOTTOM_MAG: 318,
+		EF_BOTTOM_SANC: 319,
+		EF_HEAL3: 320,
+		EF_WARPZONE2: 321,
+		EF_FORESTLIGHT2: 322,
+		EF_FORESTLIGHT3: 323,
+		EF_FORESTLIGHT4: 324,
+		EF_HEAL4: 325,
+		EF_FOOT: 326,
+		EF_FOOT2: 327,
+		EF_BEGINASURA: 328,
+		EF_TRIPLEATTACK: 329,
+		EF_HITLINE: 330,
+		EF_HPTIME: 331,
+		EF_SPTIME: 332,
+		EF_MAPLE: 333,
+		EF_BLIND: 334,
+		EF_POISON: 335,
+		EF_GUARD: 336,
+		EF_JOBLVUP50: 337,
+		EF_ANGEL2: 338,
+		EF_MAGNUM2: 339,
+		EF_CALLZONE: 340,
+		EF_PORTAL3: 341,
+		EF_COUPLECASTING: 342,
+		EF_HEARTCASTING: 343,
+		EF_ENTRY2: 344,
+		EF_SAINTWING: 345,
+		EF_SPHEREWIND: 346,
+		EF_COLORPAPER: 347,
+		EF_LIGHTSPHERE: 348,
+		EF_WATERFALL: 349,
+		EF_WATERFALL_90: 350,
+		EF_WATERFALL_SMALL: 351,
+		EF_WATERFALL_SMALL_90: 352,
+		EF_WATERFALL_T2: 353,
+		EF_WATERFALL_T2_90: 354,
+		EF_WATERFALL_SMALL_T2: 355,
+		EF_WATERFALL_SMALL_T2_90: 356,
+		EF_MINI_TETRIS: 357,
+		EF_GHOST: 358,
+		EF_BAT: 359,
+		EF_BAT2: 360,
+		EF_SOULBREAKER: 361,
+		EF_LEVEL99_4: 362,
+		EF_VALLENTINE: 363,
+		EF_VALLENTINE2: 364,
+		EF_PRESSURE: 365,
+		EF_BASH3D: 366,
+		EF_AURABLADE: 367,
+		EF_REDBODY: 368,
+		EF_LKCONCENTRATION: 369,
+		EF_BOTTOM_GOSPEL: 370,
+		EF_ANGEL: 371,
+		EF_DEVIL: 372,
+		EF_DRAGONSMOKE: 373,
+		EF_BOTTOM_BASILICA: 374,
+		EF_ASSUMPTIO: 375,
+		EF_HITLINE2: 376,
+		EF_BASH3D2: 377,
+		EF_ENERGYDRAIN2: 378,
+		EF_TRANSBLUEBODY: 379,
+		EF_MAGICCRASHER: 380,
+		EF_LIGHTSPHERE2: 381,
+		EF_LIGHTBLADE: 382,
+		EF_ENERGYDRAIN3: 383,
+		EF_LINELINK2: 384,
+		EF_LINKLIGHT: 385,
+		EF_TRUESIGHT: 386,
+		EF_FALCONASSAULT: 387,
+		EF_TRIPLEATTACK2: 388,
+		EF_PORTAL4: 389,
+		EF_MELTDOWN: 390,
+		EF_CARTBOOST: 391,
+		EF_REJECTSWORD: 392,
+		EF_TRIPLEATTACK3: 393,
+		EF_SPHEREWIND2: 394,
+		EF_LINELINK3: 395,
+		EF_PINKBODY: 396,
+		EF_LEVEL99_5: 397,
+		EF_LEVEL99_6: 398,
+		EF_BASH3D3: 399,
+		EF_BASH3D4: 400,
+		EF_NAPALMVALCAN: 401,
+		EF_PORTAL5: 402,
+		EF_MAGICCRASHER2: 403,
+		EF_BOTTOM_SPIDER: 404,
+		EF_BOTTOM_FOGWALL: 405,
+		EF_SOULBURN: 406,
+		EF_SOULCHANGE: 407,
+		EF_BABY: 408,
+		EF_SOULBREAKER2: 409,
+		EF_RAINBOW: 410,
+		EF_PEONG: 411,
+		EF_TANJI2: 412,
+		EF_PRESSEDBODY: 413,
+		EF_SPINEDBODY: 414,
+		EF_KICKEDBODY: 415,
+		EF_AIRTEXTURE: 416,
+		EF_HITBODY: 417,
+		EF_DOUBLEGUMGANG: 418,
+		EF_REFLECTBODY: 419,
+		EF_BABYBODY: 420,
+		EF_BABYBODY2: 421,
+		EF_GIANTBODY: 422,
+		EF_GIANTBODY2: 423,
+		EF_ASURABODY: 424,
+		EF_4WAYBODY: 425,
+		EF_QUAKEBODY: 426,
+		EF_ASURABODY_MONSTER: 427,
+		EF_HITLINE3: 428,
+		EF_HITLINE4: 429,
+		EF_HITLINE5: 430,
+		EF_HITLINE6: 431,
+		EF_ELECTRIC: 432,
+		EF_ELECTRIC2: 433,
+		EF_HITLINE7: 434,
+		EF_STORMKICK: 435,
+		EF_HALFSPHERE: 436,
+		EF_ATTACKENERGY: 437,
+		EF_ATTACKENERGY2: 438,
+		EF_CHEMICAL3: 439,
+		EF_ASSUMPTIO2: 440,
+		EF_BLUECASTING: 441,
+		EF_RUN: 442,
+		EF_STOPRUN: 443,
+		EF_STOPEFFECT: 444,
+		EF_JUMPBODY: 445,
+		EF_LANDBODY: 446,
+		EF_FOOT3: 447,
+		EF_FOOT4: 448,
+		EF_TAE_READY: 449,
+		EF_GRANDCROSS2: 450,
+		EF_SOULSTRIKE2: 451,
+		EF_YUFITEL2: 452,
+		EF_NPC_STOP: 453,
+		EF_DARKCASTING: 454,
+		EF_GUMGANGNPC: 455,
+		EF_AGIUP: 456,
+		EF_JUMPKICK: 457,
+		EF_QUAKEBODY2: 458,
+		EF_STORMKICK1: 459,
+		EF_STORMKICK2: 460,
+		EF_STORMKICK3: 461,
+		EF_STORMKICK4: 462,
+		EF_STORMKICK5: 463,
+		EF_STORMKICK6: 464,
+		EF_STORMKICK7: 465,
+		EF_SPINEDBODY2: 466,
+		EF_BEGINASURA1: 467,
+		EF_BEGINASURA2: 468,
+		EF_BEGINASURA3: 469,
+		EF_BEGINASURA4: 470,
+		EF_BEGINASURA5: 471,
+		EF_BEGINASURA6: 472,
+		EF_BEGINASURA7: 473,
+		EF_AURABLADE2: 474,
+		EF_DEVIL1: 475,
+		EF_DEVIL2: 476,
+		EF_DEVIL3: 477,
+		EF_DEVIL4: 478,
+		EF_DEVIL5: 479,
+		EF_DEVIL6: 480,
+		EF_DEVIL7: 481,
+		EF_DEVIL8: 482,
+		EF_DEVIL9: 483,
+		EF_DEVIL10: 484,
+		EF_DOUBLEGUMGANG2: 485,
+		EF_DOUBLEGUMGANG3: 486,
+		EF_BLACKDEVIL: 487,
+		EF_FLOWERCAST: 488,
+		EF_FLOWERCAST2: 489,
+		EF_FLOWERCAST3: 490,
+		EF_MOCHI: 491,
+		EF_LAMADAN: 492,
+		EF_EDP: 493,
+		EF_SHIELDBOOMERANG2: 494,
+		EF_RG_COIN2: 495,
+		EF_GUARD2: 496,
+		EF_SLIM: 497,
+		EF_SLIM2: 498,
+		EF_SLIM3: 499,
+		EF_CHEMICALBODY: 500,
+		EF_CASTSPIN: 501,
+		EF_PIERCEBODY: 502,
+		EF_SOULLINK: 503,
+		EF_CHOOKGI2: 504,
+		EF_MEMORIZE: 505,
+		EF_SOULLIGHT: 506,
+		EF_MAPAE: 507,
+		EF_ITEMPOKJUK: 508,
+		EF_05VAL: 509,
+		EF_BEGINASURA11: 510,
+		EF_NIGHT: 511,
+		EF_CHEMICAL2DASH: 512,
+		EF_GROUNDSAMPLE: 513,
+		EF_GI_EXPLOSION: 514,
+		EF_CLOUD4: 515,
+		EF_CLOUD5: 516,
+		EF_BOTTOM_HERMODE: 517,
+		EF_CARTTER: 518,
+		EF_ITEMFAST: 519,
+		EF_SHIELDBOOMERANG3: 520,
+		EF_DOUBLECASTBODY: 521,
+		EF_GRAVITATION: 522,
+		EF_TAROTCARD1: 523,
+		EF_TAROTCARD2: 524,
+		EF_TAROTCARD3: 525,
+		EF_TAROTCARD4: 526,
+		EF_TAROTCARD5: 527,
+		EF_TAROTCARD6: 528,
+		EF_TAROTCARD7: 529,
+		EF_TAROTCARD8: 530,
+		EF_TAROTCARD9: 531,
+		EF_TAROTCARD10: 532,
+		EF_TAROTCARD11: 533,
+		EF_TAROTCARD12: 534,
+		EF_TAROTCARD13: 535,
+		EF_TAROTCARD14: 536,
+		EF_ACIDDEMON: 537,
+		EF_GREENBODY: 538,
+		EF_THROWITEM4: 539,
+		EF_BABYBODY_BACK: 540,
+		EF_THROWITEM5: 541,
+		EF_BLUEBODY: 542,
+		EF_HATED: 543,
+		EF_REDLIGHTBODY: 544,
+		EF_RO2YEAR: 545,
+		EF_SMA_READY: 546,
+		EF_STIN: 547,
+		EF_RED_HIT: 548,
+		EF_BLUE_HIT: 549,
+		EF_QUAKEBODY3: 550,
+		EF_SMA: 551,
+		EF_SMA2: 552,
+		EF_STIN2: 553,
+		EF_HITTEXTURE: 554,
+		EF_STIN3: 555,
+		EF_SMA3: 556,
+		EF_BLUEFALL: 557,
+		EF_BLUEFALL_90: 558,
+		EF_FASTBLUEFALL: 559,
+		EF_FASTBLUEFALL_90: 560,
+		EF_BIG_PORTAL: 561,
+		EF_BIG_PORTAL2: 562,
+		EF_SCREEN_QUAKE: 563,
+		EF_HOMUNCASTING: 564,
+		EF_HFLIMOON1: 565,
+		EF_HFLIMOON2: 566,
+		EF_HFLIMOON3: 567,
+		EF_HO_UP: 568,
+		EF_HAMIDEFENCE: 569,
+		EF_HAMICASTLE: 570,
+		EF_HAMIBLOOD: 571,
+		EF_HATED2: 572,
+		EF_TWILIGHT1: 573,
+		EF_TWILIGHT2: 574,
+		EF_TWILIGHT3: 575,
+		EF_ITEM_THUNDER: 576,
+		EF_ITEM_CLOUD: 577,
+		EF_ITEM_CURSE: 578,
+		EF_ITEM_ZZZ: 579,
+		EF_ITEM_RAIN: 580,
+		EF_ITEM_LIGHT: 581,
+		EF_ANGEL3: 582,
+		EF_M01: 583,
+		EF_M02: 584,
+		EF_M03: 585,
+		EF_M04: 586,
+		EF_M05: 587,
+		EF_M06: 588,
+		EF_M07: 589,
+		EF_KAIZEL: 590,
+		EF_KAAHI: 591,
+		EF_CLOUD6: 592,
+		EF_FOOD01: 593,
+		EF_FOOD02: 594,
+		EF_FOOD03: 595,
+		EF_FOOD04: 596,
+		EF_FOOD05: 597,
+		EF_FOOD06: 598,
+		EF_SHRINK: 599,
+		EF_THROWITEM6: 600,
+		EF_SIGHT2: 601,
+		EF_QUAKEBODY4: 602,
+		EF_FIREHIT2: 603,
+		EF_NPC_STOP2: 604,
+		EF_NPC_STOP2_DEL: 605,
+		EF_FVOICE: 606,
+		EF_WINK: 607,
+		EF_COOKING_OK: 608,
+		EF_COOKING_FAIL: 609,
+		EF_TEMP_OK: 610,
+		EF_TEMP_FAIL: 611,
+		EF_HAPGYEOK: 612,
+		EF_THROWITEM7: 613,
+		EF_THROWITEM8: 614,
+		EF_THROWITEM9: 615,
+		EF_THROWITEM10: 616,
+		EF_BUNSINJYUTSU: 617,
+		EF_KOUENKA: 618,
+		EF_HYOUSENSOU: 619,
+		EF_BOTTOM_SUITON: 620,
+		EF_STIN4: 621,
+		EF_THUNDERSTORM2: 622,
+		EF_CHEMICAL4: 623,
+		EF_STIN5: 624,
+		EF_MADNESS_BLUE: 625,
+		EF_MADNESS_RED: 626,
+		EF_RG_COIN3: 627,
+		EF_BASH3D5: 628,
+		EF_CHOOKGI3: 629,
+		EF_KIRIKAGE: 630,
+		EF_TATAMI: 631,
+		EF_KASUMIKIRI: 632,
+		EF_ISSEN: 633,
+		EF_KAEN: 634,
+		EF_BAKU: 635,
+		EF_HYOUSYOURAKU: 636,
+		EF_DESPERADO: 637,
+		EF_LIGHTNING_S: 638,
+		EF_BLIND_S: 639,
+		EF_POISON_S: 640,
+		EF_FREEZING_S: 641,
+		EF_FLARE_S: 642,
+		EF_RAPIDSHOWER: 643,
+		EF_MAGICALBULLET: 644,
+		EF_SPREADATTACK: 645,
+		EF_TRACKCASTING: 646,
+		EF_TRACKING: 647,
+		EF_TRIPLEACTION: 648,
+		EF_BULLSEYE: 649,
+		EF_MAP_MAGICZONE: 650,
+		EF_MAP_MAGICZONE2: 651,
+		EF_DAMAGE1: 652,
+		EF_DAMAGE1_2: 653,
+		EF_DAMAGE1_3: 654,
+		EF_UNDEADBODY: 655,
+		EF_UNDEADBODY_DEL: 656,
+		EF_GREEN_NUMBER: 657,
+		EF_BLUE_NUMBER: 658,
+		EF_RED_NUMBER: 659,
+		EF_PURPLE_NUMBER: 660,
+		EF_BLACK_NUMBER: 661,
+		EF_WHITE_NUMBER: 662,
+		EF_YELLOW_NUMBER: 663,
+		EF_PINK_NUMBER: 664,
+		EF_BUBBLE_DROP: 665,
+		EF_NPC_EARTHQUAKE: 666,
+		EF_DA_SPACE: 667,
+		EF_DRAGONFEAR: 668,
+		EF_BLEEDING: 669,
+		EF_WIDECONFUSE: 670,
+		EF_BOTTOM_RUNNER: 671,
+		EF_BOTTOM_TRANSFER: 672,
+		EF_CRYSTAL_BLUE: 673,
+		EF_BOTTOM_EVILLAND: 674,
+		EF_GUARD3: 675,
+		EF_NPC_SLOWCAST: 676,
+		EF_CRITICALWOUND: 677,
+		EF_GREEN99_3: 678,
+		EF_GREEN99_5: 679,
+		EF_GREEN99_6: 680,
+		EF_MAPSPHERE: 681,
+		EF_POK_LOVE: 682,
+		EF_POK_WHITE: 683,
+		EF_POK_VALEN: 684,
+		EF_POK_BIRTH: 685,
+		EF_POK_CHRISTMAS: 686,
+		EF_MAP_MAGICZONE3: 687,
+		EF_MAP_MAGICZONE4: 688,
+		EF_DUST: 689,
+		EF_TORCH_RED: 690,
+		EF_TORCH_GREEN: 691,
+		EF_MAP_GHOST: 692,
+		EF_GLOW1: 693,
+		EF_GLOW2: 694,
+		EF_GLOW4: 695,
+		EF_TORCH_PURPLE: 696,
+		EF_CLOUD7: 697,
+		EF_CLOUD8: 698,
+		EF_FLOWERLEAF: 699,
+		EF_MAPSPHERE2: 700,
+		EF_GLOW11: 701,
+		EF_GLOW12: 702,
+		EF_CIRCLELIGHT: 703,
+		EF_ITEM315: 704,
+		EF_ITEM316: 705,
+		EF_ITEM317: 706,
+		EF_ITEM318: 707,
+		EF_STORM_MIN: 708,
+		EF_POK_JAP: 709,
+		EF_MAP_GREENLIGHT: 710,
+		EF_MAP_MAGICWALL: 711,
+		EF_MAP_GREENLIGHT2: 712,
+		EF_YELLOWFLY1: 713,
+		EF_YELLOWFLY2: 714,
+		EF_BOTTOM_BLUE: 715,
+		EF_BOTTOM_BLUE2: 716,
+		EF_WEWISH: 717,
+		EF_FIREPILLARON2: 718,
+		EF_FORESTLIGHT5: 719,
+		EF_SOULBREAKER3: 720,
+		EF_ADO_STR: 721,
+		EF_IGN_STR: 722,
+		EF_CHIMTO2: 723,
+		EF_WINDCUTTER: 724,
+		EF_DETECT2: 725,
+		EF_FROSTMYSTY: 726,
+		EF_CRIMSON_STR: 727,
+		EF_HELL_STR: 728,
+		EF_SPR_MASH: 729,
+		EF_SPR_SOULE: 730,
+		EF_DHOWL_STR: 731,
+		EF_EARTHWALL: 732,
+		EF_SOULBREAKER4: 733,
+		EF_CHAINL_STR: 734,
+		EF_CHOOKGI_FIRE: 735,
+		EF_CHOOKGI_WIND: 736,
+		EF_CHOOKGI_WATER: 737,
+		EF_CHOOKGI_GROUND: 738,
+		EF_MAGENTA_TRAP: 739,
+		EF_COBALT_TRAP: 740,
+		EF_MAIZE_TRAP: 741,
+		EF_VERDURE_TRAP: 742,
+		EF_NORMAL_TRAP: 743,
+		EF_CLOAKING2: 744,
+		EF_AIMED_STR: 745,
+		EF_ARROWSTORM_STR: 746,
+		EF_LAULAMUS_STR: 747,
+		EF_LAUAGNUS_STR: 748,
+		EF_MILSHIELD_STR: 749,
+		EF_CONCENTRATION2: 750,
+		EF_FIREBALL2: 751,
+		EF_BUNSINJYUTSU2: 752,
+		EF_CLEARTIME: 753,
+		EF_GLASSWALL3: 754,
+		EF_ORATIO: 755,
+		EF_POTION_BERSERK2: 756,
+		EF_CIRCLEPOWER: 757,
+		EF_ROLLING1: 758,
+		EF_ROLLING2: 759,
+		EF_ROLLING3: 760,
+		EF_ROLLING4: 761,
+		EF_ROLLING5: 762,
+		EF_ROLLING6: 763,
+		EF_ROLLING7: 764,
+		EF_ROLLING8: 765,
+		EF_ROLLING9: 766,
+		EF_ROLLING10: 767,
+		EF_PURPLEBODY: 768,
+		EF_STIN6: 769,
+		EF_RG_COIN4: 770,
+		EF_POISONWAV: 771,
+		EF_POISONSMOKE: 772,
+		EF_GUMGANG4: 773,
+		EF_SHIELDBOOMERANG4: 774,
+		EF_CASTSPIN2: 775,
+		EF_VULCANWAV: 776,
+		EF_AGIUP2: 777,
+		EF_DETECT3: 778,
+		EF_AGIUP3: 779,
+		EF_DETECT4: 780,
+		EF_ELECTRIC3: 781,
+		EF_GUARD4: 782,
+		EF_BOTTOM_BARRIER: 783,
+		EF_BOTTOM_STEALTH: 784,
+		EF_REPAIRTIME: 785,
+		EF_NC_ANAL: 786,
+		EF_FIRETHROW: 787,
+		EF_VENOMIMPRESS: 788,
+		EF_FROSTMISTY: 789,
+		EF_BURNING: 790,
+		EF_COLDTHROW: 791,
+		EF_MAKEHALLU: 792,
+		EF_HALLUTIME: 793,
+		EF_INFRAREDSCAN: 794,
+		EF_CRASHAXE: 795,
+		EF_GTHUNDER: 796,
+		EF_STONERING: 797,
+		EF_INTIMIDATE2: 798,
+		EF_STASIS: 799,
+		EF_REDLINE: 800,
+		EF_FROSTDIVER3: 801,
+		EF_BOTTOM_BASILICA2: 802,
+		EF_RECOGNIZED: 803,
+		EF_TETRA: 804,
+		EF_TETRACASTING: 805,
+		EF_FIREBALL3: 806,
+		EF_INTIMIDATE3: 807,
+		EF_RECOGNIZED2: 808,
+		EF_CLOAKING3: 809,
+		EF_INTIMIDATE4: 810,
+		EF_STRETCH: 811,
+		EF_BLACKBODY: 812,
+		EF_ENERVATION: 813,
+		EF_ENERVATION2: 814,
+		EF_ENERVATION3: 815,
+		EF_ENERVATION4: 816,
+		EF_ENERVATION5: 817,
+		EF_ENERVATION6: 818,
+		EF_LINELINK4: 819,
+		EF_RG_COIN5: 820,
+		EF_WATERFALL_ANI: 821,
+		EF_BOTTOM_MANHOLE: 822,
+		EF_MANHOLE: 823,
+		EF_MAKEFEINT: 824,
+		EF_FORESTLIGHT6: 825,
+		EF_DARKCASTING2: 826,
+		EF_BOTTOM_ANI: 827,
+		EF_BOTTOM_MAELSTROM: 828,
+		EF_BOTTOM_BLOODYLUST: 829,
+		EF_BEGINSPELL_N1: 830,
+		EF_BEGINSPELL_N2: 831,
+		EF_HEAL_N: 832,
+		EF_CHOOKGI_N: 833,
+		EF_JOBLVUP50_2: 834,
+		EF_CHEMICAL2DASH2: 835,
+		EF_CHEMICAL2DASH3: 836,
+		EF_ROLLINGCAST: 837,
+		EF_WATER_BELOW: 838,
+		EF_WATER_FADE: 839,
+		EF_BEGINSPELL_N3: 840,
+		EF_BEGINSPELL_N4: 841,
+		EF_BEGINSPELL_N5: 842,
+		EF_BEGINSPELL_N6: 843,
+		EF_BEGINSPELL_N7: 844,
+		EF_BEGINSPELL_N8: 845,
+		EF_WATER_SMOKE: 846,
+		EF_DANCE1: 847,
+		EF_DANCE2: 848,
+		EF_LINKPARTICLE: 849,
+		EF_SOULLIGHT2: 850,
+		EF_SPR_PARTICLE: 851,
+		EF_SPR_PARTICLE2: 852,
+		EF_SPR_PLANT: 853,
+		EF_CHEMICAL_V: 854,
+		EF_SHOOTPARTICLE: 855,
+		EF_BOT_REVERB: 856,
+		EF_RAIN_PARTICLE: 857,
+		EF_CHEMICAL_V2: 858,
+		EF_SECRA: 859,
+		EF_BOT_REVERB2: 860,
+		EF_CIRCLEPOWER2: 861,
+		EF_SECRA2: 862,
+		EF_CHEMICAL_V3: 863,
+		EF_ENERVATION7: 864,
+		EF_CIRCLEPOWER3: 865,
+		EF_SPR_PLANT2: 866,
+		EF_CIRCLEPOWER4: 867,
+		EF_SPR_PLANT3: 868,
+		EF_RG_COIN6: 869,
+		EF_SPR_PLANT4: 870,
+		EF_CIRCLEPOWER5: 871,
+		EF_SPR_PLANT5: 872,
+		EF_CIRCLEPOWER6: 873,
+		EF_SPR_PLANT6: 874,
+		EF_CIRCLEPOWER7: 875,
+		EF_SPR_PLANT7: 876,
+		EF_CIRCLEPOWER8: 877,
+		EF_SPR_PLANT8: 878,
+		EF_HEARTASURA: 879,
+		EF_BEGINSPELL_150: 880,
+		EF_LEVEL99_150: 881,
+		EF_PRIMECHARGE: 882,
+		EF_GLASSWALL4: 883,
+		EF_GRADIUS_LASER: 884,
+		EF_BASH3D6: 885,
+		EF_GUMGANG5: 886,
+		EF_HITLINE8: 887,
+		EF_ELECTRIC4: 888,
+		EF_TEIHIT1T: 889,
+		EF_SPINMOVE: 890,
+		EF_FIREBALL4: 891,
+		EF_TRIPLEATTACK4: 892,
+		EF_CHEMICAL3S: 893,
+		EF_GROUNDSHAKE: 894,
+		EF_DQ9_CHARGE: 895,
+		EF_DQ9_CHARGE2: 896,
+		EF_DQ9_CHARGE3: 897,
+		EF_DQ9_CHARGE4: 898,
+		EF_BLUELINE: 899,
+		EF_SELFSCROLL: 900,
+		EF_SPR_LIGHTPRINT: 901,
+		EF_PNG_TEST: 902,
+		EF_BEGINSPELL_YB: 903,
+		EF_CHEMICAL2DASH4: 904,
+		EF_GROUNDSHAKE2: 905,
+		EF_PRESSURE2: 906,
+		EF_RG_COIN7: 907,
+		EF_PRIMECHARGE2: 908,
+		EF_PRIMECHARGE3: 909,
+		EF_PRIMECHARGE4: 910,
+		EF_GREENCASTING: 911,
+		EF_WALLOFTHORN: 912,
+		EF_FIREBALL5: 913,
+		EF_THROWITEM11: 914,
+		EF_SPR_PLANT9: 915,
+		EF_DEMONICFIRE: 916,
+		EF_DEMONICFIRE2: 917,
+		EF_DEMONICFIRE3: 918,
+		EF_HELLSPLANT: 919,
+		EF_FIREWALL2: 920,
+		EF_VACUUM: 921,
+		EF_SPR_PLANT10: 922,
+		EF_SPR_LIGHTPRINT2: 923,
+		EF_POISONSMOKE2: 924,
+		EF_MAKEHALLU2: 925,
+		EF_SHOCKWAVE2: 926,
+		EF_SPR_PLANT11: 927,
+		EF_COLDTHROW2: 928,
+		EF_DEMONICFIRE4: 929,
+		EF_PRESSURE3: 930,
+		EF_LINKPARTICLE2: 931,
+		EF_SOULLIGHT3: 932,
+		EF_CHAREFFECT: 933,
+		EF_GUMGANG6: 934,
+		EF_FIREBALL6: 935,
+		EF_GUMGANG7: 936,
+		EF_GUMGANG8: 937,
+		EF_GUMGANG9: 938,
+		EF_BOTTOM_DE2: 939,
+		EF_COLDSTATUS: 940,
+		EF_SPR_LIGHTPRINT3: 941,
+		EF_WATERBALL3: 942,
+		EF_HEAL_N2: 943,
+		EF_RAIN_PARTICLE2: 944,
+		EF_CLOUD9: 945,
+		EF_YELLOWFLY3: 946,
+		EF_EL_GUST: 947,
+		EF_EL_BLAST: 948,
+		EF_EL_AQUAPLAY: 949,
+		EF_EL_UPHEAVAL: 950,
+		EF_EL_WILD_STORM: 951,
+		EF_EL_CHILLY_AIR: 952,
+		EF_EL_CURSED_SOIL: 953,
+		EF_EL_COOLER: 954,
+		EF_EL_TROPIC: 955,
+		EF_EL_PYROTECHNIC: 956,
+		EF_EL_PETROLOGY: 957,
+		EF_EL_HEATER: 958,
+		EF_POISON_MIST: 959,
+		EF_ERASER_CUTTER: 960,
+		EF_SILENT_BREEZE: 961,
+		EF_MAGMA_FLOW: 962,
+		EF_GRAYBODY: 963,
+		EF_LAVA_SLIDE: 964,
+		EF_SONIC_CLAW: 965,
+		EF_TINDER_BREAKER: 966,
+		EF_MIDNIGHT_FRENZY: 967,
+		EF_MACRO: 968,
+		EF_CHEMICAL_ALLRANGE: 969,
+		EF_TETRA_FIRE: 970,
+		EF_TETRA_WATER: 971,
+		EF_TETRA_WIND: 972,
+		EF_TETRA_GROUND: 973,
+		EF_EMITTER: 974,
+		EF_VOLCANIC_ASH: 975,
+		EF_LEVEL99_ORB1: 976,
+		EF_LEVEL99_ORB2: 977,
+		EF_LEVEL150: 978,
+		EF_LEVEL150_SUB: 979,
+		EF_THROWITEM4_1: 980,
+		EF_THROW_HAPPOKUNAI: 981,
+		EF_THROW_MULTIPLE_COIN: 982,
+		EF_THROW_BAKURETSU: 983,
+		EF_ROTATE_HUUMARANKA: 984,
+		EF_ROTATE_BG: 985,
+		EF_ROTATE_LINE_GRAY: 986,
+		EF_2011RWC: 987,
+		EF_2011RWC2: 988,
+		EF_KAIHOU: 989,
+		EF_GROUND_EXPLOSION: 990,
+		EF_KG_KAGEHUMI: 991,
+		EF_KO_ZENKAI_WATER: 992,
+		EF_KO_ZENKAI_LAND: 993,
+		EF_KO_ZENKAI_FIRE: 994,
+		EF_KO_ZENKAI_WIND: 995,
+		EF_KO_JYUMONJIKIRI: 996,
+		EF_KO_SETSUDAN: 997,
+		EF_RED_CROSS: 998,
+		EF_KO_IZAYOI: 999,
+		EF_ROTATE_LINE_BLUE: 1e3,
+		EF_KG_KYOMU: 1001,
+		EF_KO_HUUMARANKA: 1002,
+		EF_BLUELIGHTBODY: 1003,
+		EF_KAGEMUSYA: 1004,
+		EF_OB_GENSOU: 1005,
+		EF_NO100_FIRECRACKER: 1006,
+		EF_KO_MAKIBISHI: 1007,
+		EF_KAIHOU1: 1008,
+		EF_AKAITSUKI: 1009,
+		EF_ZANGETSU: 1010,
+		EF_GENSOU: 1011,
+		EF_HAT_EFFECT: 1012,
+		EF_CHERRYBLOSSOM: 1013,
+		EF_EVENT_CLOUD: 1014,
+		EF_RUN_MAKE_OK: 1015,
+		EF_RUN_MAKE_FAILURE: 1016,
+		EF_MIRESULT_MAKE_OK: 1017,
+		EF_MIRESULT_MAKE_FAIL: 1018,
+		EF_ALL_RAY_OF_PROTECTION: 1019,
+		EF_VENOMFOG: 1020,
+		EF_DUSTSTORM: 1021,
+		EF_LEVEL160: 1022,
+		EF_LEVEL160_SUB: 1023,
+		EF_MAPCHAIN: 1024,
+		EF_MAGIC_FLOOR: 1025,
+		EF_ICEMINE: 1026,
+		EF_FLAMECORSS: 1027,
+		EF_ICEMINE_1: 1028,
+		EF_DANCE_BLADE_ATK: 1029,
+		EF_DARKPIERCING: 1030,
+		EF_INVINCIBLEOFF2: 1031,
+		EF_MAXPAIN: 1032,
+		EF_DEATHSUMMON: 1033,
+		EF_MOONSTAR: 1034,
+		EF_STRANGELIGHTS: 1035,
+		EF_SUPER_STAR: 1036,
+		EF_YELLOBODY: 1037,
+		EF_COLORPAPER2: 1038,
+		EF_EVILS_PAW: 1039,
+		EF_GC_DARKCROW: 1040,
+		EF_RK_DRAGONBREATH_WATER: 1041,
+		EF_ALL_FULL_THROTTLE: 1042,
+		EF_SR_FLASHCOMBO: 1043,
+		EF_RK_LUXANIMA: 1044,
+		EF_CLOUD10: 1045,
+		EF_SO_ELEMENTAL_SHIELD: 1046,
+		EF_AB_OFFERTORIUM: 1047,
+		EF_WL_TELEKINESIS_INTENSE: 1048,
+		EF_GN_ILLUSIONDOPING: 1049,
+		EF_NC_MAGMA_ERUPTION: 1050,
+		EF_LG_KINGS_GRACE: 1051,
+		EF_BLOODDRAIN2: 1052,
+		EF_NPC_WIDEWEB: 1053,
+		EF_NPC_BURNT: 1054,
+		EF_NPC_CHILL: 1055,
+		EF_RA_UNLIMIT: 1056,
+		EF_AB_OFFERTORIUM_RING: 1057,
+		EF_SC_ESCAPE: 1058,
+		EF_WM_FRIGG_SONG: 1059,
+		EF_FLICKER: 1060,
+		EF_C_MAKER: 1061,
+		EF_HAMMER_OF_GOD: 1062,
+		EF_MASS_SPIRAL: 1063,
+		EF_FIRE_RAIN: 1064,
+		EF_WHITEBODY: 1065,
+		EF_BANISHING_BUSTER: 1066,
+		EF_SLUGSHOT: 1067,
+		EF_D_TAIL: 1068,
+		EF_BIND_TRAP1: 1069,
+		EF_BIND_TRAP2: 1070,
+		EF_BIND_TRAP3: 1071,
+		EF_JUMPBODY1: 1072,
+		EF_ANIMATED_EMITTER: 1073,
+		EF_RL_EXPLOSION: 1074,
+		EF_C_MAKER_1: 1075,
+		EF_QD_SHOT: 1076,
+		EF_P_ALTER: 1077,
+		EF_S_STORM: 1078,
+		EF_MUSIC_HAT: 1079,
+		EF_CLOUD_KILL: 1080,
+		EF_ESCAPE: 1081,
+		EF_XENO_SLASHER: 1082,
+		EF_FLOWERSMOKE: 1083,
+		EF_FSTONE: 1084,
+		EF_QSCARABA: 1085,
+		EF_LJOSALFAR: 1086,
+		EF_HAPPINESSSTAR: 1087,
+		EF_POWER_OF_GAIA: 1088,
+		EF_MAPLE_FALLS: 1089,
+		EF_MARKING_USE_CHANGEMONSTER: 1090,
+		EF_MAGICAL_FEATHER: 1091,
+		EF_MERMAID_LONGING: 1092,
+		EF_GIFT_OF_SNOW: 1093,
+		EF_ACH_COMPLETE: 1094,
+		EF_TIME_ACCESSORY: 1095,
+		EF_SPRITEMABLE: 1096,
+		EF_TUNAPARTY: 1097,
+		EF_FRESHSHRIMP: 1098,
+		EF_SU_GROOMING: 1123,
+		EF_SU_CHATTERING: 1124,
+		EF_BAKURETSU_HADOU: 1130,
+		EF_FIREDANCE: 1133,
+		EF_RICHS_COIN_A: 1134,
+		EF_E_CHAIN: 1137,
+		EF_HEAT_BARREL: 1138,
+		EF_H_MINE: 1139,
+		EF_FALLEN_ANGEL: 1140,
+		EF_IMMUNE_PROPERTY: 1149,
+		EF_MOVE_COORDINATE: 1150,
+		DROPEFFECT_PINK: 1186,
+		DROPEFFECT_YELLOW: 1189,
+		DROPEFFECT_PURPLE: 1190,
+		EF_LIGHTSPHERE_SUN: 1197,
+		EF_LIGHTSPHERE_MOON: 1198,
+		EF_LIGHTSPHERE_STAR: 1199,
+		EF_NOVAEXPLOSING: 1202,
+		EF_STAR_EMPEROR: 1203,
+		EF_SMA_BLACK: 1204,
+		EF_ENERGYDRAIN_BLACK: 1208,
+		EF_BLINK_BODY: 1209,
+		EF_SOLARBURST: 1218,
+		EF_SJ_DOCUMENT: 1219,
+		EF_FALLING_STAR: 1220,
+		EF_STORMKICK8: 1223,
+		EF_NEWMOON_KICK: 1229,
+		EF_FULLMOON_KICK: 1230,
+		EF_BOOK_OF_DIMENSION: 1231,
+		EF_CURSE_EXPLOSION: 1233,
+		EF_SOUL_REAPER: 1234,
+		EF_DIGITAL_SPACE: 1240,
+		EF_SOUL_EXPLOSION: 1242,
+		DROPEFFECT_BLUE: 1869,
+		DROPEFFECT_GREEN: 1870,
+		DROPEFFECT_RED: 1871,
+		EF_NEW_SUCCESS: 1872,
+		EF_NEW_FAILURE: 1873,
+		EF_NEW_INTRO: 1874,
+		EF_UI_ENCHANT_INTRO_YELLOW: 1875,
+		EF_UI_ENCHANT_SUCCESS: 1876,
+		EF_UI_ENCHANT_FAIL: 1877,
+		EF_UI_ENCHANT_INTRO_BLUE: 1878,
+		EF_UI_ENCHANT_UP_SUCCESS: 1879,
+		EF_UI_ENCHANT_UP_FAIL: 1880,
+		EF_UI_ENCHANT_INTRO_GREEN: 1881,
+		EF_UI_ENCHANT_RESET_SUCCESS: 1882,
+		EF_UI_ENCHANT_RESET_FAIL: 1883,
+		EF_MAX: 1884
+	};
+}));
+// src/DB/Skills/SkillUnit.js
+var SkillUnit, SkillUnitFallback, SkillUnitEnd;
+var init_SkillUnit = __esmMin((() => {
+	init_SkillUnitConst();
+	init_EffectConst();
+	SkillUnit = {};
+	SkillUnit[SkillUnitConst_default.UNT_SAFETYWALL] = EffectConst_default.EF_GLASSWALL2;
+	SkillUnit[SkillUnitConst_default.UNT_FIREWALL] = EffectConst_default.EF_FIREWALL;
+	SkillUnit[SkillUnitConst_default.UNT_WARPPORTAL] = EffectConst_default.EF_PORTAL2;
+	SkillUnit[SkillUnitConst_default.UNT_PRE_WARPPORTAL] = EffectConst_default.EF_READYPORTAL2;
+	SkillUnit[SkillUnitConst_default.UNT_SANCTUARY] = EffectConst_default.EF_BOTTOM_SANC;
+	SkillUnit[SkillUnitConst_default.UNT_MAGNUS] = EffectConst_default.EF_BOTTOM_MAG;
+	SkillUnit[SkillUnitConst_default.UNT_PNEUMA] = EffectConst_default.EF_PNEUMA;
+	SkillUnit[SkillUnitConst_default.UNT_FIREPILLAR_WAITING] = EffectConst_default.EF_FIREPILLARON;
+	SkillUnit[SkillUnitConst_default.UNT_ICEWALL] = EffectConst_default.EF_ICEWALL;
+	SkillUnit[SkillUnitConst_default.UNT_QUAGMIRE] = EffectConst_default.EF_QUAGMIRE;
+	SkillUnit[SkillUnitConst_default.UNT_BLASTMINE] = "ef_trap_03_3";
+	SkillUnit[SkillUnitConst_default.UNT_SKIDTRAP] = "ef_trap_02";
+	SkillUnit[SkillUnitConst_default.UNT_ANKLESNARE] = "ef_trap_01";
+	SkillUnit[SkillUnitConst_default.UNT_VENOMDUST] = EffectConst_default.EF_VENOMDUST2;
+	SkillUnit[SkillUnitConst_default.UNT_LANDMINE] = "ef_trap_03";
+	SkillUnit[SkillUnitConst_default.UNT_SHOCKWAVE] = "ef_trap_03_6";
+	SkillUnit[SkillUnitConst_default.UNT_SANDMAN] = "ef_trap_03_4";
+	SkillUnit[SkillUnitConst_default.UNT_FLASHER] = "ef_trap_03_5";
+	SkillUnit[SkillUnitConst_default.UNT_FREEZINGTRAP] = "ef_trap_03_2";
+	SkillUnit[SkillUnitConst_default.UNT_CLAYMORETRAP] = "ef_trap_04";
+	SkillUnit[SkillUnitConst_default.UNT_TALKIEBOX] = "ef_trap_05";
+	SkillUnit[SkillUnitConst_default.UNT_VOLCANO] = EffectConst_default.EF_BOTTOM_VO;
+	SkillUnit[SkillUnitConst_default.UNT_DELUGE] = EffectConst_default.EF_BOTTOM_DE;
+	SkillUnit[SkillUnitConst_default.UNT_VIOLENTGALE] = EffectConst_default.EF_BOTTOM_VI;
+	SkillUnit[SkillUnitConst_default.UNT_LANDPROTECTOR] = EffectConst_default.EF_BOTTOM_LA;
+	SkillUnit[SkillUnitConst_default.UNT_LULLABY] = "278_ground";
+	SkillUnit[SkillUnitConst_default.UNT_RICHMANKIM] = "279_ground";
+	SkillUnit[SkillUnitConst_default.UNT_ETERNALCHAOS] = "280_ground";
+	SkillUnit[SkillUnitConst_default.UNT_DRUMBATTLEFIELD] = "281_ground";
+	SkillUnit[SkillUnitConst_default.UNT_RINGNIBELUNGEN] = "282_ground";
+	SkillUnit[SkillUnitConst_default.UNT_ROKISWEIL] = "283_ground";
+	SkillUnit[SkillUnitConst_default.UNT_INTOABYSS] = "284_ground";
+	SkillUnit[SkillUnitConst_default.UNT_SIEGFRIED] = "285_ground";
+	SkillUnit[SkillUnitConst_default.UNT_DISSONANCE] = "277_ground";
+	SkillUnit[SkillUnitConst_default.UNT_WHISTLE] = "286_ground";
+	SkillUnit[SkillUnitConst_default.UNT_ASSASSINCROSS] = "287_ground";
+	SkillUnit[SkillUnitConst_default.UNT_POEMBRAGI] = "288_ground";
+	SkillUnit[SkillUnitConst_default.UNT_APPLEIDUN] = "289_ground";
+	SkillUnit[SkillUnitConst_default.UNT_UGLYDANCE] = "290_ground";
+	SkillUnit[SkillUnitConst_default.UNT_HUMMING] = "291_ground";
+	SkillUnit[SkillUnitConst_default.UNT_DONTFORGETME] = "292_ground";
+	SkillUnit[SkillUnitConst_default.UNT_FORTUNEKISS] = "293_ground";
+	SkillUnit[SkillUnitConst_default.UNT_SERVICEFORYOU] = "294_ground";
+	SkillUnit[SkillUnitConst_default.UNT_GRAFFITI] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_DEMONSTRATION] = EffectConst_default.EF_DEMONSTRATION;
+	SkillUnit[SkillUnitConst_default.UNT_GOSPEL] = "370_ground";
+	SkillUnit[SkillUnitConst_default.UNT_BASILICA] = EffectConst_default.EF_BOTTOM_BASILICA;
+	SkillUnit[SkillUnitConst_default.UNT_MOONLIT] = "394_ground";
+	SkillUnit[SkillUnitConst_default.UNT_FOGWALL] = "405_ground";
+	SkillUnit[SkillUnitConst_default.UNT_SPIDERWEB] = EffectConst_default.EF_BOTTOM_SPIDER;
+	SkillUnit[SkillUnitConst_default.UNT_GRAVITATION] = "522_ground";
+	SkillUnit[SkillUnitConst_default.UNT_HERMODE] = EffectConst_default.EF_BOTTOM_HERMODE;
+	SkillUnit[SkillUnitConst_default.UNT_SUITON] = EffectConst_default.EF_BOTTOM_SUITON;
+	SkillUnit[SkillUnitConst_default.UNT_TATAMIGAESHI] = EffectConst_default.EF_TATAMI;
+	SkillUnit[SkillUnitConst_default.UNT_KAEN] = EffectConst_default.EF_KAEN;
+	SkillUnit[SkillUnitConst_default.UNT_GROUNDDRIFT_WIND] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_GROUNDDRIFT_WATER] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_GROUNDDRIFT_FIRE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_DEATHWAVE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_WATERATTACK] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_EVILLAND] = EffectConst_default.EF_BOTTOM_EVILLAND;
+	SkillUnit[SkillUnitConst_default.UNT_EPICLESIS] = EffectConst_default.EF_GLASSWALL3;
+	SkillUnit[SkillUnitConst_default.UNT_EARTHSTRAIN] = EffectConst_default.EF_EARTHWALL;
+	SkillUnit[SkillUnitConst_default.UNT_MANHOLE] = EffectConst_default.EF_BOTTOM_MANHOLE;
+	SkillUnit[SkillUnitConst_default.UNT_DIMENSIONDOOR] = EffectConst_default.EF_FORESTLIGHT6;
+	SkillUnit[SkillUnitConst_default.UNT_CHAOSPANIC] = EffectConst_default.EF_BOTTOM_ANI;
+	SkillUnit[SkillUnitConst_default.UNT_MAELSTROM] = EffectConst_default.EF_BOTTOM_MAELSTROM;
+	SkillUnit[SkillUnitConst_default.UNT_BLOODYLUST] = EffectConst_default.EF_BOTTOM_BLOODYLUST;
+	SkillUnit[SkillUnitConst_default.UNT_FEINTBOMB] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_MAGENTATRAP] = "ef_trap_3_magenta";
+	SkillUnit[SkillUnitConst_default.UNT_COBALTTRAP] = "ef_trap_3_cobalt";
+	SkillUnit[SkillUnitConst_default.UNT_MAIZETRAP] = "ef_trap_3_maze";
+	SkillUnit[SkillUnitConst_default.UNT_VERDURETRAP] = "ef_trap_3_verdure";
+	SkillUnit[SkillUnitConst_default.UNT_FIRINGTRAP] = "ef_trap_3_fire";
+	SkillUnit[SkillUnitConst_default.UNT_ICEBOUNDTRAP] = "ef_trap_3_ice";
+	SkillUnit[SkillUnitConst_default.UNT_ELECTRICSHOCKER] = "ef_trap_3_shock";
+	SkillUnit[SkillUnitConst_default.UNT_CLUSTERBOMB] = "ef_trap_3_cluster";
+	SkillUnit[SkillUnitConst_default.UNT_REVERBERATION] = EffectConst_default.EF_BOT_REVERB;
+	SkillUnit[SkillUnitConst_default.UNT_SEVERE_RAINSTORM] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_FIREWALK] = EffectConst_default.EF_FIREWALL2;
+	SkillUnit[SkillUnitConst_default.UNT_ELECTRICWALK] = EffectConst_default.EF_SHOCKWAVE2;
+	SkillUnit[SkillUnitConst_default.UNT_NETHERWORLD] = EffectConst_default.EF_BOT_REVERB2;
+	SkillUnit[SkillUnitConst_default.UNT_PSYCHIC_WAVE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_CLOUD_KILL] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_POISONSMOKE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_NEUTRALBARRIER] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_STEALTHFIELD] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_WARMER] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_THORNS_TRAP] = "ef_trap_3_thorn";
+	SkillUnit[SkillUnitConst_default.UNT_WALLOFTHORN] = EffectConst_default.EF_WALLOFTHORN;
+	SkillUnit[SkillUnitConst_default.UNT_DEMONIC_FIRE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_FIRE_EXPANSION_SMOKE_POWDER] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_FIRE_EXPANSION_TEAR_GAS] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_HELLS_PLANT] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_VACUUM_EXTREME] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_BANDING] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_FIRE_MANTLE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_WATER_BARRIER] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_ZEPHYR] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_POWER_OF_GAIA] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_FIRE_INSIGNIA] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_WATER_INSIGNIA] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_WIND_INSIGNIA] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_EARTH_INSIGNIA] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_POISON_MIST] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_LAVA_SLIDE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_VOLCANIC_ASH] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_ZENKAI_WATER] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_MAKIBISHI] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_VENOMFOG] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_ICEMINE] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_MAGMA_ERUPTION] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_B_TRAP] = EffectConst_default.EF_NONE;
+	SkillUnit[SkillUnitConst_default.UNT_JACK_FROST_NOVA] = [
+		"jack_frost_nova_start_bottom",
+		"jack_frost_nova_start",
+		"jack_frost_nova_loop_bottom",
+		"jack_frost_nova_loop"
+	];
+	SkillUnit[SkillUnitConst_default.UNT_GROUND_GRAVITATION] = [
+		"ground_gravitation_bottom_start",
+		"ground_gravitation_start",
+		"ground_gravitation_bottom_loop",
+		"ground_gravitation_loop"
+	];
+	SkillUnit[SkillUnitConst_default.UNT_TOTEM_OF_TUTELARY] = [
+		"totem_of_tutelary_bottom_start",
+		"totem_of_tutelary_start",
+		"totem_of_tutelary_bottom_loop",
+		"totem_of_tutelary_loop"
+	];
+	SkillUnit[SkillUnitConst_default.UNT_HYUN_ROKS_BREEZE] = ["hyun_roks_breeze_bottom", "hyun_roks_breeze"];
+	SkillUnit[SkillUnitConst_default.UNT_MISSION_BOMBARD] = [
+		"mission_bombard",
+		"mission_bombard_fire",
+		"mission_bombard_fire_bottom",
+		"ef_nw_mission_bombard_field"
+	];
+	SkillUnit[SkillUnitConst_default.UNT_CROSS_RAIN] = ["new_cross_rain_bottom", "ef_ig_cross_rain_field"];
+	SkillUnit[SkillUnitConst_default.UNT_KUNAIWAIKYOKU] = ["kunaiarea_01_start", "kunaiarea_01_loop"];
+	SkillUnit[SkillUnitConst_default.UNT_SHINKIROU] = ["shinkirou_idle_start", "shinkirou_idle_loop"];
+	SkillUnitFallback = {};
+	SkillUnitFallback[SkillUnitConst_default.UNT_JACK_FROST_NOVA] = ["ef_hn_jack_frost_nova"];
+	SkillUnitFallback[SkillUnitConst_default.UNT_GROUND_GRAVITATION] = ["ef_hn_ground_gravitation"];
+	SkillUnitFallback[SkillUnitConst_default.UNT_TOTEM_OF_TUTELARY] = ["ef_soa_totem_of_tutelary"];
+	SkillUnitFallback[SkillUnitConst_default.UNT_HYUN_ROKS_BREEZE] = ["ef_sh_hyun_roks_breeze"];
+	SkillUnitEnd = {};
+	SkillUnitEnd[SkillUnitConst_default.UNT_JACK_FROST_NOVA] = ["jack_frost_nova_end"];
+	SkillUnitEnd[SkillUnitConst_default.UNT_TOTEM_OF_TUTELARY] = ["totem_of_tutelary_bottom_end", "totem_of_tutelary_end"];
+	SkillUnitEnd[SkillUnitConst_default.UNT_KUNAIWAIKYOKU] = ["kunaiarea_01_end"];
+	SkillUnitEnd[SkillUnitConst_default.UNT_SHINKIROU] = ["shinkirou_idle_end"];
+}));
 // src/DB/Skills/SkillTreeMerge.js
 /**
 * Put the tree back to the built-in layout, dropping every job and position a
@@ -145291,6 +146839,39 @@ var init_StatusInfo = __esmMin((() => {
 			["%s", COLOR_TIME],
 			["Increases your resistance to the Undead Property"]
 		]
+	};
+}));
+// src/DB/Status/StatusEffectTable.js
+var StatusEffectTable_default;
+var init_StatusEffectTable = __esmMin((() => {
+	init_StatusConst();
+	StatusEffectTable_default = {
+		[StatusConst_default.UNLIMIT]: { loop: ["unlimit_loop_bottom", "unlimit_loop"] },
+		[StatusConst_default.SERVANT_SIGN]: { loop: ["servant_sign_bottom", "servant_sign"] },
+		[StatusConst_default.VIGOR]: { loop: ["vigor_buff"] },
+		[StatusConst_default.DANCING_KNIFE]: {
+			start: ["dancing_knife_skill_bottom_begin", "dancing_knife_skill_begin"],
+			loop: ["dancing_knife_skill_bottom_loop", "dancing_knife_skill_loop"]
+		},
+		[StatusConst_default.GUARD_STANCE]: { loop: ["new_guard_stance_loop_bottom"] },
+		[StatusConst_default.ATTACK_STANCE]: { loop: ["new_attack_stance_loop_bottom"] },
+		[StatusConst_default.GUARDIAN_S]: {
+			start: ["new_guardianshield_buff_start"],
+			loop: ["new_guardianshield_buff_loop"]
+		},
+		[StatusConst_default.HOLY_S]: { loop: ["new_holy_shield_loop", "new_holy_shield_loop_bottom"] },
+		[StatusConst_default.ULTIMATE_S]: { loop: ["ultimate_sacrifice_buff"] },
+		[StatusConst_default.SPEAR_SCAR]: { loop: ["new_grand_judgement_buff"] },
+		[StatusConst_default.CALAMITYGALE]: { loop: ["calumitygale_loop"] },
+		[StatusConst_default.MYSTIC_SYMPHONY]: { loop: ["mysticsymphony_note"] },
+		[StatusConst_default.HIDDEN_CARD]: { loop: ["hiddencard_thunder"] },
+		[StatusConst_default.T_FIVETH_GOD]: { loop: ["circle_directions_elements_loop"] },
+		[StatusConst_default.HEAVEN_AND_EARTH]: { loop: ["soul_of_heaven_and_earth_buff"] },
+		[StatusConst_default.HOGOGONG]: { loop: ["howling_of_chul_ho_scared"] },
+		[StatusConst_default.TEMPORARY_COMMUNION]: { loop: ["temporary_communion_buff_bottom", "temporary_communion_buff"] },
+		[StatusConst_default.BREAKINGLIMIT]: { loop: ["breakinglimit_buff"] },
+		[StatusConst_default.RULEBREAK]: { loop: ["rulebreak_buff"] },
+		[StatusConst_default.NIGHTMARE]: { loop: ["efst_nightmare"] }
 	};
 }));
 // src/Vendors/xmlparse.js
@@ -208726,8 +210307,8 @@ function init$14(gl) {
 			ctx.fillStyle = "rgb( 50, 240, 160)";
 			ctx.globalCompositeOperation = "source-atop";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			_texture$5 = gl.createTexture();
-			gl.bindTexture(gl.TEXTURE_2D, _texture$5);
+			_texture$6 = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, _texture$6);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -208735,7 +210316,7 @@ function init$14(gl) {
 		});
 	});
 	_buffer$20 = gl.createBuffer();
-	_program$27 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
+	_program$33 = WebGL_default.createShaderProgram(gl, GridSelector_default$2, GridSelector_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$20);
 	gl.bufferData(gl.ARRAY_BUFFER, _buffer_data.byteLength, gl.DYNAMIC_DRAW);
 }
@@ -208750,11 +210331,11 @@ function init$14(gl) {
 * @param {number} y
 */
 function render$14(gl, modelView, projection, fog, x, y) {
-	if (!_texture$5) return;
-	const uniform = _program$27.uniform;
-	const attribute = _program$27.attribute;
+	if (!_texture$6) return;
+	const uniform = _program$33.uniform;
+	const attribute = _program$33.attribute;
 	let z;
-	gl.useProgram(_program$27);
+	gl.useProgram(_program$33);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -208781,7 +210362,7 @@ function render$14(gl, modelView, projection, fog, x, y) {
 		_buffer_data[16] = z[3];
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, _buffer_data);
 	}
-	gl.bindTexture(gl.TEXTURE_2D, _texture$5);
+	gl.bindTexture(gl.TEXTURE_2D, _texture$6);
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	gl.disableVertexAttribArray(attribute.aPosition);
 	gl.disableVertexAttribArray(attribute.aTextCoord);
@@ -208796,16 +210377,16 @@ function free$8(gl) {
 		gl.deleteBuffer(_buffer$20);
 		_buffer$20 = null;
 	}
-	if (_texture$5) {
-		gl.deleteTexture(_texture$5);
-		_texture$5 = null;
+	if (_texture$6) {
+		gl.deleteTexture(_texture$6);
+		_texture$6 = null;
 	}
-	if (_program$27) {
-		gl.deleteProgram(_program$27);
-		_program$27 = null;
+	if (_program$33) {
+		gl.deleteProgram(_program$33);
+		_program$33 = null;
 	}
 }
-var _program$27, _buffer$20, _texture$5, _xy, _buffer_data, GridSelector_default;
+var _program$33, _buffer$20, _texture$6, _xy, _buffer_data, GridSelector_default;
 var init_GridSelector = __esmMin((() => {
 	init_Altitude();
 	init_Client();
@@ -208814,9 +210395,9 @@ var init_GridSelector = __esmMin((() => {
 	init_Configs();
 	init_GridSelector$2();
 	init_GridSelector$1();
-	_program$27 = null;
+	_program$33 = null;
 	_buffer$20 = null;
-	_texture$5 = null;
+	_texture$6 = null;
 	_xy = null;
 	_buffer_data = new Float32Array([
 		0,
@@ -208923,9 +210504,9 @@ var init_Ground$1 = __esmMin((() => {
 * @param {object} light structure
 */
 function render$13(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$26.uniform;
-	const attribute = _program$26.attribute;
-	gl.useProgram(_program$26);
+	const uniform = _program$32.uniform;
+	const attribute = _program$32.attribute;
+	gl.useProgram(_program$32);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -209096,7 +210677,7 @@ function init$13(gl, data) {
 	data.height;
 	_shadowMap = data.shadowMap;
 	if (!_buffer$19) _buffer$19 = gl.createBuffer();
-	if (!_program$26) _program$26 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
+	if (!_program$32) _program$32 = WebGL_default.createShaderProgram(gl, Ground_default$2, Ground_default$1);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$19);
 	gl.bufferData(gl.ARRAY_BUFFER, data.mesh, gl.STATIC_DRAW);
 	initLightmap(gl, data.lightmap, data.lightmapSize);
@@ -209147,7 +210728,7 @@ function getShadowFactor(x, y) {
 	for (y = -3; y < 3; ++y) for (x = -3; x < 3; ++x) factor += _shadowMap[_x + x + (_y + y) * _width * 8];
 	return factor / 36 / 255;
 }
-var procCanvas$2, procCtx$2, _program$26, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
+var procCanvas$2, procCtx$2, _program$32, _buffer$19, _lightmap, _tileColor, _textureAtlas, _shadowMap, _vertCount$1, _width, Ground_default;
 var init_Ground = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -209157,7 +210738,7 @@ var init_Ground = __esmMin((() => {
 	init_Ground$1();
 	procCanvas$2 = document.createElement("canvas");
 	procCtx$2 = procCanvas$2.getContext("2d", { willReadFrequently: true });
-	_program$26 = null;
+	_program$32 = null;
 	_buffer$19 = null;
 	_lightmap = null;
 	_tileColor = null;
@@ -209535,7 +211116,7 @@ var init_SpriteBatch$1 = __esmMin((() => {
 */
 function init$12(gl) {
 	_gl$4 = gl;
-	_program$25 = WebGL_default.createShaderProgram(gl, SpriteBatch_default$1, SpriteBatch_default);
+	_program$31 = WebGL_default.createShaderProgram(gl, SpriteBatch_default$1, SpriteBatch_default);
 	_quad = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, _quad);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -209558,7 +211139,7 @@ function init$12(gl) {
 	]), gl.STATIC_DRAW);
 	_instanceBuffer = gl.createBuffer();
 	_vao = gl.createVertexArray();
-	const attribute = _program$25.attribute;
+	const attribute = _program$31.attribute;
 	gl.bindVertexArray(_vao);
 	gl.bindBuffer(gl.ARRAY_BUFFER, _quad);
 	gl.enableVertexAttribArray(attribute.aPosition);
@@ -209588,7 +211169,7 @@ function init$12(gl) {
 */
 function pointInstances(first) {
 	const gl = _gl$4;
-	const attribute = _program$25.attribute;
+	const attribute = _program$31.attribute;
 	const base = first * STRIDE;
 	gl.vertexAttribPointer(attribute.aPositionZIndex, 4, gl.FLOAT, false, STRIDE, base);
 	gl.vertexAttribPointer(attribute.aOffsetSize, 4, gl.FLOAT, false, STRIDE, base + 16);
@@ -209597,14 +211178,14 @@ function pointInstances(first) {
 	gl.vertexAttribPointer(attribute.aAngleDepthShadowCap, 4, gl.FLOAT, false, STRIDE, base + 64);
 	gl.vertexAttribPointer(attribute.aSource, 3, gl.FLOAT, false, STRIDE, base + 80);
 }
-var mat4$23, FLOATS, STRIDE, SOURCE_OWN, SOURCE_INDEX, SOURCE_RGBA, PALETTE_NONE, PALETTE_OWN, QUEUE_SHADOW, QUEUE_MAIN, Queue$1, Run, _gl$4, _program$25, _vao, _quad, _instanceBuffer, _upload, _active$3, _queues, _modelView$1, _viewModel, _projection, _fogColor, _frame, _glState, SpriteBatch;
+var mat4$24, FLOATS, STRIDE, SOURCE_OWN, SOURCE_INDEX, SOURCE_RGBA, PALETTE_NONE, PALETTE_OWN, QUEUE_SHADOW, QUEUE_MAIN, Queue$1, Run, _gl$4, _program$31, _vao, _quad, _instanceBuffer, _upload, _active$3, _queues, _modelView$3, _viewModel, _projection, _fogColor, _frame, _glState, SpriteBatch;
 var init_SpriteBatch = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
 	init_SpriteAtlas();
 	init_SpriteBatch$2();
 	init_SpriteBatch$1();
-	mat4$23 = gl_matrix_default.mat4;
+	mat4$24 = gl_matrix_default.mat4;
 	FLOATS = 24;
 	STRIDE = 96;
 	SOURCE_OWN = 0;
@@ -209649,14 +211230,14 @@ var init_SpriteBatch = __esmMin((() => {
 		}
 	};
 	_gl$4 = null;
-	_program$25 = null;
+	_program$31 = null;
 	_vao = null;
 	_quad = null;
 	_instanceBuffer = null;
 	_upload = /* @__PURE__ */ new Float32Array(0);
 	_active$3 = false;
 	_queues = [new Queue$1(), new Queue$1()];
-	_modelView$1 = /* @__PURE__ */ new Float32Array(16);
+	_modelView$3 = /* @__PURE__ */ new Float32Array(16);
 	_viewModel = /* @__PURE__ */ new Float32Array(16);
 	_projection = /* @__PURE__ */ new Float32Array(16);
 	_fogColor = /* @__PURE__ */ new Float32Array(3);
@@ -209700,9 +211281,9 @@ var init_SpriteBatch = __esmMin((() => {
 		* recorded after it.
 		*/
 		static setFrame(modelView, projection, fog, zoom) {
-			_modelView$1.set(modelView);
+			_modelView$3.set(modelView);
 			_projection.set(projection);
-			mat4$23.invert(_viewModel, _modelView$1);
+			mat4$24.invert(_viewModel, _modelView$3);
 			_frame.fogUse = !!(fog.use && fog.exist);
 			_frame.fogNear = fog.near;
 			_frame.fogFar = fog.far;
@@ -209718,7 +211299,7 @@ var init_SpriteBatch = __esmMin((() => {
 		*/
 		static open(gl, state) {
 			if (!SpriteBatch.enabled || _active$3 || typeof gl.drawArraysInstanced !== "function") return false;
-			if (!_program$25 || _gl$4 !== gl) init$12(gl);
+			if (!_program$31 || _gl$4 !== gl) init$12(gl);
 			SpriteAtlas.init(gl);
 			SpriteAtlas.recyclePalettes();
 			_glState.depthTest = state.depthTest;
@@ -209772,7 +211353,7 @@ var init_SpriteBatch = __esmMin((() => {
 		*/
 		static contextRestored() {
 			_gl$4 = null;
-			_program$25 = null;
+			_program$31 = null;
 			_vao = null;
 			_quad = null;
 			_instanceBuffer = null;
@@ -209833,16 +211414,16 @@ var init_SpriteBatch = __esmMin((() => {
 			const total = shadow.count + main.count;
 			if (!_active$3 || !total) return 0;
 			const gl = _gl$4;
-			const uniform = _program$25.uniform;
+			const uniform = _program$31.uniform;
 			if (_upload.length < total * FLOATS) _upload = new Float32Array(total * FLOATS * 2);
 			_upload.set(shadow.data.subarray(0, shadow.count * FLOATS), 0);
 			_upload.set(main.data.subarray(0, main.count * FLOATS), shadow.count * FLOATS);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _instanceBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, _upload, gl.STREAM_DRAW, 0, total * FLOATS);
-			gl.useProgram(_program$25);
+			gl.useProgram(_program$31);
 			gl.bindVertexArray(_vao);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, _projection);
-			gl.uniformMatrix4fv(uniform.uModelViewMat, false, _modelView$1);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, _modelView$3);
 			gl.uniformMatrix4fv(uniform.uViewModelMat, false, _viewModel);
 			gl.uniform1f(uniform.uCameraZoom, _frame.zoom);
 			gl.uniform1i(uniform.uFogUse, _frame.fogUse);
@@ -209931,7 +211512,7 @@ function RenderCanvas3D(isBlendModeOne) {
 		RecordCanvas3D.call(this, isBlendModeOne);
 		return;
 	}
-	const uniform = _program$24.uniform;
+	const uniform = _program$30.uniform;
 	const gl = _gl$3;
 	const use_pal = this.image.palette !== null;
 	if (isBlendModeOne) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -209955,9 +211536,9 @@ function RenderCanvas3D(isBlendModeOne) {
 	gl.uniform1f(uniform.uSpriteRendererZindex, this.zIndex++);
 	if (this.angle !== _angle) {
 		_angle = this.angle;
-		mat4$22.identity(_matrix$6);
-		if (_angle) mat4$22.rotateZ(_matrix$6, _matrix$6, -_angle / 180 * Math.PI);
-		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$6);
+		mat4$23.identity(_matrix$7);
+		if (_angle) mat4$23.rotateZ(_matrix$7, _matrix$7, -_angle / 180 * Math.PI);
+		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$7);
 	}
 	_offset[0] = this.offset[0] / 175 * this.xSize;
 	_offset[1] = this.offset[1] / 175 * this.ySize - .5;
@@ -209967,9 +211548,9 @@ function RenderCanvas3D(isBlendModeOne) {
 	gl.uniform2fv(uniform.uSpriteRendererSize, _size$7);
 	gl.uniform2fv(uniform.uSpriteRendererOffset, _offset);
 	gl.uniform1i(uniform.uIsRGBA, this.sprite ? this.sprite.type : 1);
-	if (_groupId !== _lastGroupId || _texture$4 !== this.image.texture) {
+	if (_groupId !== _lastGroupId || _texture$5 !== this.image.texture) {
 		_lastGroupId = _groupId;
-		gl.bindTexture(gl.TEXTURE_2D, _texture$4 = this.image.texture);
+		gl.bindTexture(gl.TEXTURE_2D, _texture$5 = this.image.texture);
 	}
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
@@ -210155,12 +211736,12 @@ function setDepth(depthTest, depthMask) {
 * the bound texture.
 */
 function syncAfterBatch() {
-	_gl$3.useProgram(_program$24);
+	_gl$3.useProgram(_program$30);
 	_gl$3.activeTexture(_gl$3.TEXTURE0);
-	_texture$4 = null;
+	_texture$5 = null;
 	_groupId++;
 }
-var mat4$22, MAX_COLORS_PER_PALETTE, RenderCanvas2D, _program$24, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$4, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
+var mat4$23, MAX_COLORS_PER_PALETTE, RenderCanvas2D, _program$30, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$5, _usepal, _pos$8, _matrix$7, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -210169,7 +211750,7 @@ var init_SpriteRenderer = __esmMin((() => {
 	init_SpriteBatch();
 	init_SpriteRenderer$2();
 	init_SpriteRenderer$1();
-	mat4$22 = gl_matrix_default.mat4;
+	mat4$23 = gl_matrix_default.mat4;
 	MAX_COLORS_PER_PALETTE = 8;
 	RenderCanvas2D = (function RenderCanvas2DClosure() {
 		const _cache = /* @__PURE__ */ new WeakMap();
@@ -210202,7 +211783,7 @@ var init_SpriteRenderer = __esmMin((() => {
 			_ctx$4.restore();
 		};
 	})();
-	_program$24 = null;
+	_program$30 = null;
 	_buffer$18 = null;
 	_ctx$4 = null;
 	_gl$3 = null;
@@ -210215,10 +211796,10 @@ var init_SpriteRenderer = __esmMin((() => {
 	_depthMask = true;
 	_depthTest = true;
 	_blendOne = null;
-	_texture$4 = null;
+	_texture$5 = null;
 	_usepal = null;
 	_pos$8 = /* @__PURE__ */ new Int16Array(2);
-	_matrix$6 = /* @__PURE__ */ new Float32Array(16);
+	_matrix$7 = /* @__PURE__ */ new Float32Array(16);
 	_size$7 = /* @__PURE__ */ new Float32Array(2);
 	_offset = /* @__PURE__ */ new Float32Array(2);
 	SpriteRenderer = class {
@@ -210340,7 +211921,7 @@ var init_SpriteRenderer = __esmMin((() => {
 					1
 				]), gl.STATIC_DRAW);
 			}
-			if (!_program$24) _program$24 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
+			if (!_program$30) _program$30 = WebGL_default.createShaderProgram(gl, SpriteRenderer_default$1, SpriteRenderer_default);
 			SpriteBatch.enabled = Configs.get("spriteBatching", true) !== false;
 		}
 		/**
@@ -210352,17 +211933,17 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {object} fog structure
 		*/
 		static bind3DContext(gl, modelView, projection, fog) {
-			const attribute = _program$24.attribute;
-			const uniform = _program$24.uniform;
+			const attribute = _program$30.attribute;
+			const uniform = _program$30.uniform;
 			if (SpriteBatch.active) {
 				this.flushBatch();
 				SpriteBatch.invalidate();
 			}
 			SpriteBatch.setFrame(modelView, projection, fog, Camera.zoom);
-			gl.useProgram(_program$24);
+			gl.useProgram(_program$30);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
-			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$22.invert(_matrix$6, modelView));
+			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$23.invert(_matrix$7, modelView));
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -210391,7 +211972,7 @@ var init_SpriteRenderer = __esmMin((() => {
 		* @param {object} gl context
 		*/
 		static unbind(gl) {
-			const attribute = _program$24.attribute;
+			const attribute = _program$30.attribute;
 			gl.disableVertexAttribArray(attribute.aPosition);
 			gl.disableVertexAttribArray(attribute.aTextureCoord);
 		}
@@ -210506,12 +212087,12 @@ function init$11(gl, water) {
 	_wavePitch = water.wavePitch;
 	_waterOpacity = water.type !== 4 && water.type !== 6 ? .8 : 1;
 	if (!_vertCount) return;
-	if (!_program$23) _program$23 = WebGL_default.createShaderProgram(gl, Water_default$2, Water_default$1);
+	if (!_program$29) _program$29 = WebGL_default.createShaderProgram(gl, Water_default$2, Water_default$1);
 	_buffer$17 = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$17);
 	gl.bufferData(gl.ARRAY_BUFFER, water.mesh, gl.STATIC_DRAW);
 	function onTextureLoaded(texture, index) {
-		_textures$1[index] = texture;
+		_textures$5[index] = texture;
 	}
 	for (let i = 0; i < 32; ++i) WebGL_default.texture(gl, water.images[i], onTextureLoaded, i);
 }
@@ -210527,10 +212108,10 @@ function init$11(gl, water) {
 */
 function render$12(gl, modelView, projection, fog, light, tick) {
 	if (!_vertCount) return;
-	const uniform = _program$23.uniform;
-	const attribute = _program$23.attribute;
+	const uniform = _program$29.uniform;
+	const attribute = _program$29.attribute;
 	const frame = tick / (1e3 / 60);
-	gl.useProgram(_program$23);
+	gl.useProgram(_program$29);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -210548,7 +212129,7 @@ function render$12(gl, modelView, projection, fog, light, tick) {
 	gl.uniform1f(uniform.uOpacity, _waterOpacity);
 	gl.uniform1f(uniform.uWavePitch, _wavePitch);
 	gl.uniform1f(uniform.uWaterOffset, frame * _waveSpeed % 360 - 180);
-	gl.bindTexture(gl.TEXTURE_2D, _textures$1[frame / _animSpeed % 32 | 0]);
+	gl.bindTexture(gl.TEXTURE_2D, _textures$5[frame / _animSpeed % 32 | 0]);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	SpriteRenderer.runWithDepth(true, false, false, function() {
 		gl.drawArrays(gl.TRIANGLES, 0, _vertCount);
@@ -210567,26 +212148,26 @@ function free$6(gl) {
 		gl.deleteBuffer(_buffer$17);
 		_buffer$17 = null;
 	}
-	if (_program$23) {
-		gl.deleteProgram(_program$23);
-		_program$23 = null;
+	if (_program$29) {
+		gl.deleteProgram(_program$29);
+		_program$29 = null;
 	}
-	for (i = 0; i < 32; ++i) if (_textures$1[i]) {
-		gl.deleteTexture(_textures$1[i]);
-		_textures$1[i] = null;
+	for (i = 0; i < 32; ++i) if (_textures$5[i]) {
+		gl.deleteTexture(_textures$5[i]);
+		_textures$5[i] = null;
 	}
 	_vertCount = 0;
 }
-var _program$23, _buffer$17, _vertCount, _textures$1, _waveSpeed, _waveHeight, _wavePitch, _animSpeed, _waterOpacity, Water_default;
+var _program$29, _buffer$17, _vertCount, _textures$5, _waveSpeed, _waveHeight, _wavePitch, _animSpeed, _waterOpacity, Water_default;
 var init_Water = __esmMin((() => {
 	init_WebGL();
 	init_SpriteRenderer();
 	init_Water$2();
 	init_Water$1();
-	_program$23 = null;
+	_program$29 = null;
 	_buffer$17 = null;
 	_vertCount = 0;
-	_textures$1 = new Array(32);
+	_textures$5 = new Array(32);
 	_waveSpeed = 0;
 	_waveHeight = 0;
 	_wavePitch = 0;
@@ -210614,14 +212195,14 @@ var init_OccluderFade$1 = __esmMin((() => {
 	OccluderFade_default = "// Fades world geometry lying between the camera and the followed entity\r\n// (third person camera). Included by the model fragment shaders.\r\n//\r\n// uOccluderFadeMode:\r\n//   0 - disabled\r\n//   1 - dither (screen-door, single opaque pass)\r\n//   2 - alpha, opaque pass: discard fragments inside the fade capsule\r\n//   3 - alpha, blend pass: draw only fragments inside the fade capsule, translucent\r\n//   4 - line of sight query: keep only fragments inside the (narrow) capsule,\r\n//       used with an occlusion query to detect geometry covering the entity\r\n\r\nuniform int   uOccluderFadeMode;\r\nuniform vec3  uOccluderFadeEye;\r\nuniform vec3  uOccluderFadeFocus;\r\nuniform float uOccluderFadeRadius;\r\nuniform float uOccluderFadeOpacity;\r\nuniform float uOccluderFadeStrength;\r\n\r\nconst float OCCLUDER_FADE_BAYER[16] = float[16](\r\n	 0.0,  8.0,  2.0, 10.0,\r\n	12.0,  4.0, 14.0,  6.0,\r\n	 3.0, 11.0,  1.0,  9.0,\r\n	15.0,  7.0, 13.0,  5.0\r\n);\r\n\r\n// The faded region is a cylinder of constant radius from the eye to the focus,\r\n// cut by a vertical plane through the focus (so a raised camera never fades\r\n// anything behind the player); it closes over this distance (cells) before it.\r\nconst float OCCLUDER_FADE_END = 0.5;\r\n\r\n// x: distance to the eye->focus axis,\r\n// y: signed horizontal distance past the focus, along the view direction\r\nvec2 occluderFadeCylinder(vec3 worldPos) {\r\n	vec3 axis = uOccluderFadeFocus - uOccluderFadeEye;\r\n	vec3 rel  = worldPos - uOccluderFadeEye;\r\n	float len  = max(length(axis), 0.01);\r\n	float t    = clamp(dot(rel, axis) / (len * len), 0.0, 1.0);\r\n	// cut plane normal: horizontal view direction, tilting back to the view\r\n	// axis as the camera gets steep (a vertical plane is meaningless top-down)\r\n	vec3 level = vec3(axis.x, 0.0, axis.z);\r\n	float flatness = length(level) / len;\r\n	vec3 hdir  = level / max(length(level), 0.01);\r\n	vec3 cut   = normalize(mix(axis / len, hdir, smoothstep(0.3, 0.6, flatness)));\r\n	return vec2(length(rel - axis * t), dot(worldPos - uOccluderFadeFocus, cut));\r\n}\r\n\r\n// 0.0 = untouched, 1.0 = fully inside the cylinder between eye and focus\r\nfloat occluderFadeAmount(vec3 worldPos) {\r\n	vec2 c = occluderFadeCylinder(worldPos);\r\n	float radial = 1.0 - smoothstep(uOccluderFadeRadius * 0.5, uOccluderFadeRadius, c.x);\r\n	float along  = 1.0 - smoothstep(-OCCLUDER_FADE_END, 0.0, c.y);\r\n	return radial * along * uOccluderFadeStrength;\r\n}\r\n\r\n// Applies the fade to the fragment alpha. Returns false when the fragment must be discarded.\r\nbool occluderFade(vec3 worldPos, inout float alpha) {\r\n	if (uOccluderFadeMode == 0) {\r\n		return true;\r\n	}\r\n\r\n	if (uOccluderFadeMode == 4) {\r\n		vec2 c = occluderFadeCylinder(worldPos);\r\n		// stop short of the focus so the floor under the entity does not count\r\n		return c.x < uOccluderFadeRadius && c.y < -0.5;\r\n	}\r\n\r\n	float fade = occluderFadeAmount(worldPos);\r\n	float visibility = 1.0 - fade * (1.0 - uOccluderFadeOpacity);\r\n\r\n	if (uOccluderFadeMode == 1) {\r\n		ivec2 p = ivec2(gl_FragCoord.xy) & 3;\r\n		float threshold = (OCCLUDER_FADE_BAYER[p.x + p.y * 4] + 0.5) / 16.0;\r\n		return visibility > threshold;\r\n	}\r\n\r\n	if (uOccluderFadeMode == 2) {\r\n		return fade < 0.01;\r\n	}\r\n\r\n	if (fade < 0.01) {\r\n		return false;\r\n	}\r\n	alpha *= visibility;\r\n	return true;\r\n}\r\n";
 }));
 // src/Renderer/Map/OccluderFade.js
-var mat4$21, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick$1, OccluderFade;
+var mat4$22, vec3$6, SHADER_INCLUDE, MODE, SETTING, QUERY, QUERY_RADIUS, FADE_IN_MS, FADE_OUT_MS, _inverse, _eye, _queries, _queryPending, _queryHit, _strength, _lastTick$1, OccluderFade;
 var init_OccluderFade = __esmMin((() => {
 	init_OccluderFade$1();
 	init_Camera();
 	init_Graphics();
 	init_SpriteRenderer();
 	init_gl_matrix();
-	({mat4: mat4$21, vec3: vec3$6} = gl_matrix_default);
+	({mat4: mat4$22, vec3: vec3$6} = gl_matrix_default);
 	SHADER_INCLUDE = "// #include OccluderFade.glsl";
 	MODE = {
 		OFF: 0,
@@ -210642,7 +212223,7 @@ var init_OccluderFade = __esmMin((() => {
 	QUERY_RADIUS = .7;
 	FADE_IN_MS = 150;
 	FADE_OUT_MS = 300;
-	_inverse = mat4$21.create();
+	_inverse = mat4$22.create();
 	_eye = vec3$6.create();
 	_queries = [null, null];
 	_queryPending = [false, false];
@@ -210704,7 +212285,7 @@ var init_OccluderFade = __esmMin((() => {
 		* @param {number} tick
 		*/
 		static beginFrame(gl, modelView, tick) {
-			mat4$21.invert(_inverse, modelView);
+			mat4$22.invert(_inverse, modelView);
 			_eye[0] = _inverse[12];
 			_eye[1] = _inverse[13];
 			_eye[2] = _inverse[14];
@@ -210865,7 +212446,7 @@ function init$10(gl, data) {
 	_batchesReady = false;
 	_pendingTextures = count;
 	if (!_buffer$16) _buffer$16 = gl.createBuffer();
-	if (!_program$22) _program$22 = WebGL_default.createShaderProgram(gl, Models_default$2, OccluderFade.injectShader(Models_default$1));
+	if (!_program$28) _program$28 = WebGL_default.createShaderProgram(gl, Models_default$2, OccluderFade.injectShader(Models_default$1));
 	gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$16);
 	gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
 	function onTextureLoaded(texture, index) {
@@ -210913,9 +212494,9 @@ function drawMeshes(gl) {
 * @param {object} light structure
 */
 function bind$1(gl, modelView, projection, fog, light) {
-	const uniform = _program$22.uniform;
-	const attribute = _program$22.attribute;
-	gl.useProgram(_program$22);
+	const uniform = _program$28.uniform;
+	const attribute = _program$28.attribute;
+	gl.useProgram(_program$28);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform3fv(uniform.uLightDirection, light.direction);
@@ -210946,7 +212527,7 @@ function bind$1(gl, modelView, projection, fog, light) {
 * @param {object} gl context
 */
 function unbind(gl) {
-	const attribute = _program$22.attribute;
+	const attribute = _program$28.attribute;
 	gl.disableVertexAttribArray(attribute.aPosition);
 	gl.disableVertexAttribArray(attribute.aVertexNormal);
 	gl.disableVertexAttribArray(attribute.aTextureCoord);
@@ -210964,8 +212545,8 @@ function unbind(gl) {
 */
 function render$11(gl, modelView, projection, normalMat, fog, light) {
 	bind$1(gl, modelView, projection, fog, light);
-	OccluderFade.renderOpaque(gl, _program$22.uniform, () => drawMeshes(gl));
-	OccluderFade.renderQuery(gl, _program$22.uniform, () => drawMeshes(gl), OccluderFade.QUERY.MODELS);
+	OccluderFade.renderOpaque(gl, _program$28.uniform, () => drawMeshes(gl));
+	OccluderFade.renderQuery(gl, _program$28.uniform, () => drawMeshes(gl), OccluderFade.QUERY.MODELS);
 	unbind(gl);
 }
 /**
@@ -210982,7 +212563,7 @@ function render$11(gl, modelView, projection, normalMat, fog, light) {
 function renderFaded$1(gl, modelView, projection, normalMat, fog, light) {
 	if (!OccluderFade.needsBlendPass()) return;
 	bind$1(gl, modelView, projection, fog, light);
-	OccluderFade.renderBlend(gl, _program$22.uniform, () => drawMeshes(gl));
+	OccluderFade.renderBlend(gl, _program$28.uniform, () => drawMeshes(gl));
 	unbind(gl);
 }
 /**
@@ -210996,23 +212577,23 @@ function free$5(gl) {
 		gl.deleteBuffer(_buffer$16);
 		_buffer$16 = null;
 	}
-	if (_program$22) {
-		gl.deleteProgram(_program$22);
-		_program$22 = null;
+	if (_program$28) {
+		gl.deleteProgram(_program$28);
+		_program$28 = null;
 	}
 	for (i = 0, count = _objects.length; i < count; ++i) gl.deleteTexture(_objects[i].texture);
 	_objects.length = 0;
 	_batches.length = 0;
 	_batchesReady = false;
 }
-var _program$22, _buffer$16, _objects, _batches, _batchesReady, _pendingTextures, Models_default;
+var _program$28, _buffer$16, _objects, _batches, _batchesReady, _pendingTextures, Models_default;
 var init_Models = __esmMin((() => {
 	init_Models$2();
 	init_Models$1();
 	init_WebGL();
 	init_Map();
 	init_OccluderFade();
-	_program$22 = null;
+	_program$28 = null;
 	_buffer$16 = null;
 	_objects = [];
 	_batches = [];
@@ -211040,35 +212621,35 @@ var init_AnimatedModels$1 = __esmMin((() => {
 * Initialize shader program
 */
 function init$9(gl) {
-	_program$21 = WebGL_default.createShaderProgram(gl, AnimatedModels_default$2, OccluderFade.injectShader(AnimatedModels_default$1));
-	_program$21.uniform = {
-		uModelViewMat: gl.getUniformLocation(_program$21, "uModelViewMat"),
-		uProjectionMat: gl.getUniformLocation(_program$21, "uProjectionMat"),
-		uNormalMat: gl.getUniformLocation(_program$21, "uNormalMat"),
-		uLightDirection: gl.getUniformLocation(_program$21, "uLightDirection"),
-		uLightOpacity: gl.getUniformLocation(_program$21, "uLightOpacity"),
-		uLightAmbient: gl.getUniformLocation(_program$21, "uLightAmbient"),
-		uLightDiffuse: gl.getUniformLocation(_program$21, "uLightDiffuse"),
-		uLightEnv: gl.getUniformLocation(_program$21, "uLightEnv"),
-		uFogUse: gl.getUniformLocation(_program$21, "uFogUse"),
-		uFogNear: gl.getUniformLocation(_program$21, "uFogNear"),
-		uFogFar: gl.getUniformLocation(_program$21, "uFogFar"),
-		uFogColor: gl.getUniformLocation(_program$21, "uFogColor"),
-		uDiffuse: gl.getUniformLocation(_program$21, "uDiffuse"),
-		uMatrixTexture: gl.getUniformLocation(_program$21, "uMatrixTexture"),
-		uOccluderFadeMode: gl.getUniformLocation(_program$21, "uOccluderFadeMode"),
-		uOccluderFadeEye: gl.getUniformLocation(_program$21, "uOccluderFadeEye"),
-		uOccluderFadeFocus: gl.getUniformLocation(_program$21, "uOccluderFadeFocus"),
-		uOccluderFadeRadius: gl.getUniformLocation(_program$21, "uOccluderFadeRadius"),
-		uOccluderFadeOpacity: gl.getUniformLocation(_program$21, "uOccluderFadeOpacity"),
-		uOccluderFadeStrength: gl.getUniformLocation(_program$21, "uOccluderFadeStrength")
+	_program$27 = WebGL_default.createShaderProgram(gl, AnimatedModels_default$2, OccluderFade.injectShader(AnimatedModels_default$1));
+	_program$27.uniform = {
+		uModelViewMat: gl.getUniformLocation(_program$27, "uModelViewMat"),
+		uProjectionMat: gl.getUniformLocation(_program$27, "uProjectionMat"),
+		uNormalMat: gl.getUniformLocation(_program$27, "uNormalMat"),
+		uLightDirection: gl.getUniformLocation(_program$27, "uLightDirection"),
+		uLightOpacity: gl.getUniformLocation(_program$27, "uLightOpacity"),
+		uLightAmbient: gl.getUniformLocation(_program$27, "uLightAmbient"),
+		uLightDiffuse: gl.getUniformLocation(_program$27, "uLightDiffuse"),
+		uLightEnv: gl.getUniformLocation(_program$27, "uLightEnv"),
+		uFogUse: gl.getUniformLocation(_program$27, "uFogUse"),
+		uFogNear: gl.getUniformLocation(_program$27, "uFogNear"),
+		uFogFar: gl.getUniformLocation(_program$27, "uFogFar"),
+		uFogColor: gl.getUniformLocation(_program$27, "uFogColor"),
+		uDiffuse: gl.getUniformLocation(_program$27, "uDiffuse"),
+		uMatrixTexture: gl.getUniformLocation(_program$27, "uMatrixTexture"),
+		uOccluderFadeMode: gl.getUniformLocation(_program$27, "uOccluderFadeMode"),
+		uOccluderFadeEye: gl.getUniformLocation(_program$27, "uOccluderFadeEye"),
+		uOccluderFadeFocus: gl.getUniformLocation(_program$27, "uOccluderFadeFocus"),
+		uOccluderFadeRadius: gl.getUniformLocation(_program$27, "uOccluderFadeRadius"),
+		uOccluderFadeOpacity: gl.getUniformLocation(_program$27, "uOccluderFadeOpacity"),
+		uOccluderFadeStrength: gl.getUniformLocation(_program$27, "uOccluderFadeStrength")
 	};
-	_program$21.attribute = {
-		aPosition: gl.getAttribLocation(_program$21, "aPosition"),
-		aNormal: gl.getAttribLocation(_program$21, "aNormal"),
-		aTextureCoord: gl.getAttribLocation(_program$21, "aTextureCoord"),
-		aAlpha: gl.getAttribLocation(_program$21, "aAlpha"),
-		aMatrixIndex: gl.getAttribLocation(_program$21, "aMatrixIndex")
+	_program$27.attribute = {
+		aPosition: gl.getAttribLocation(_program$27, "aPosition"),
+		aNormal: gl.getAttribLocation(_program$27, "aNormal"),
+		aTextureCoord: gl.getAttribLocation(_program$27, "aTextureCoord"),
+		aAlpha: gl.getAttribLocation(_program$27, "aAlpha"),
+		aMatrixIndex: gl.getAttribLocation(_program$27, "aMatrixIndex")
 	};
 }
 /**
@@ -211172,11 +212753,11 @@ function isNodeStatic(node) {
 */
 function add$2(gl, modelData) {
 	if (!modelData || !modelData.nodes || modelData.nodes.length === 0) return;
-	if (!_program$21) init$9(gl);
+	if (!_program$27) init$9(gl);
 	const instances = [];
 	for (let i = 0; i < modelData.instances.length; i++) {
 		const instArray = modelData.instances[i];
-		const matrix = mat4$20.create();
+		const matrix = mat4$21.create();
 		for (let j = 0; j < 16; j++) matrix[j] = instArray[j];
 		instances.push(matrix);
 	}
@@ -211206,20 +212787,20 @@ function add$2(gl, modelData) {
 			_isStatic: !hasAnyAnimation,
 			_index: n,
 			_cache: {
-				local: mat4$20.create(),
-				final: mat4$20.create(),
+				local: mat4$21.create(),
+				final: mat4$21.create(),
 				instances: new Array(instances.length)
 			}
 		};
 		if (node._isStatic) {
-			const local = mat4$20.create();
-			mat4$20.identity(local);
-			mat4$20.translate(local, local, node.pos);
-			mat4$20.rotate(local, local, node.rotangle, node.rotaxis);
-			mat4$20.scale(local, local, node.scale);
+			const local = mat4$21.create();
+			mat4$21.identity(local);
+			mat4$21.translate(local, local, node.pos);
+			mat4$21.rotate(local, local, node.rotangle, node.rotaxis);
+			mat4$21.scale(local, local, node.scale);
 			node._staticLocalMatrix = local;
 		}
-		for (let k = 0; k < instances.length; k++) node._cache.instances[k] = mat4$20.create();
+		for (let k = 0; k < instances.length; k++) node._cache.instances[k] = mat4$21.create();
 		if (node.rotKeyframes) for (let rk = 0; rk < node.rotKeyframes.length; rk++) {
 			const kf = node.rotKeyframes[rk];
 			totalAnimationLength = Math.max(totalAnimationLength, kf.frame || 0);
@@ -211235,10 +212816,10 @@ function add$2(gl, modelData) {
 			totalAnimationLength = Math.max(totalAnimationLength, kf.Frame || 0);
 			kf._vec = vec3$5.fromValues(kf.Scale[0], kf.Scale[1], kf.Scale[2]);
 		}
-		const suffixMat = mat4$20.create();
-		mat4$20.identity(suffixMat);
-		if (!node.is_only) mat4$20.translate(suffixMat, suffixMat, node.offset);
-		mat4$20.multiply(suffixMat, suffixMat, mat3$5.toMat4(node.mat3, _tempMat4Node));
+		const suffixMat = mat4$21.create();
+		mat4$21.identity(suffixMat);
+		if (!node.is_only) mat4$21.translate(suffixMat, suffixMat, node.offset);
+		mat4$21.multiply(suffixMat, suffixMat, mat3$5.toMat4(node.mat3, _tempMat4Node));
 		node._cachedSuffix = suffixMat;
 		nodes.push(node);
 	}
@@ -211356,24 +212937,24 @@ function add$2(gl, modelData) {
 		_nodeMap: {},
 		_globalMatrices: new Array(nodes.length)
 	};
-	animModel._boxMat = mat4$20.create();
-	mat4$20.identity(animModel._boxMat);
-	mat4$20.translate(animModel._boxMat, animModel._boxMat, [
+	animModel._boxMat = mat4$21.create();
+	mat4$21.identity(animModel._boxMat);
+	mat4$21.translate(animModel._boxMat, animModel._boxMat, [
 		-animModel.box.center[0],
 		-animModel.box.max[1],
 		-animModel.box.center[2]
 	]);
 	for (let n = 0; n < nodes.length; n++) {
 		animModel._nodeMap[nodes[n].name] = nodes[n];
-		animModel._globalMatrices[n] = mat4$20.create();
+		animModel._globalMatrices[n] = mat4$21.create();
 	}
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, staticBuffer, gl.STATIC_DRAW);
-	for (let t = 0; t < modelData.textures.length; t++) loadTexture$1(gl, animModel, "data\\texture\\" + modelData.textures[t], t);
+	for (let t = 0; t < modelData.textures.length; t++) loadTexture$6(gl, animModel, "data\\texture\\" + modelData.textures[t], t);
 	animModel.vao = gl.createVertexArray();
 	gl.bindVertexArray(animModel.vao);
 	gl.bindBuffer(gl.ARRAY_BUFFER, animModel.buffer);
-	const attribute = _program$21.attribute;
+	const attribute = _program$27.attribute;
 	const stride = 40;
 	gl.enableVertexAttribArray(attribute.aPosition);
 	gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, stride, 0);
@@ -211392,7 +212973,7 @@ function add$2(gl, modelData) {
 /**
 * Load a texture for a model
 */
-function loadTexture$1(gl, model, path, index) {
+function loadTexture$6(gl, model, path, index) {
 	Client.loadFile(path, function(data) {
 		WebGL_default.texture(gl, data, function(texture) {
 			model.textureObjects[index] = texture;
@@ -211515,24 +213096,24 @@ function updateModelBuffer(gl, model, frame, force) {
 		const globalMatrix = globalMatrices[n];
 		if (node.parentname && nodeMap[node.parentname] && node.parentname !== node.name) {
 			const parentIdx = nodeMap[node.parentname]._index;
-			mat4$20.copy(globalMatrix, globalMatrices[parentIdx]);
-		} else mat4$20.identity(globalMatrix);
-		if (node._isStatic) mat4$20.multiply(globalMatrix, globalMatrix, node._staticLocalMatrix);
+			mat4$21.copy(globalMatrix, globalMatrices[parentIdx]);
+		} else mat4$21.identity(globalMatrix);
+		if (node._isStatic) mat4$21.multiply(globalMatrix, globalMatrix, node._staticLocalMatrix);
 		else {
 			const animPos = getPositionAtFrame$2(node.posKeyframes, frame, _tempVec3);
-			mat4$20.translate(globalMatrix, globalMatrix, animPos || node.pos);
+			mat4$21.translate(globalMatrix, globalMatrix, animPos || node.pos);
 			const animRot = getRotationAtFrame$2(node.rotKeyframes, frame, _tempQuat);
 			if (animRot) {
-				mat4$20.fromQuat(_tempMat4, animRot);
-				mat4$20.multiply(globalMatrix, globalMatrix, _tempMat4);
-			} else mat4$20.rotate(globalMatrix, globalMatrix, node.rotangle, node.rotaxis);
+				mat4$21.fromQuat(_tempMat4, animRot);
+				mat4$21.multiply(globalMatrix, globalMatrix, _tempMat4);
+			} else mat4$21.rotate(globalMatrix, globalMatrix, node.rotangle, node.rotaxis);
 			const animScale = getScaleAtFrame$2(node.scaleKeyFrames, frame, _tempVec3Scale);
-			mat4$20.scale(globalMatrix, globalMatrix, animScale || node.scale);
+			mat4$21.scale(globalMatrix, globalMatrix, animScale || node.scale);
 		}
 		const finalNodeMatrix = node._cache.final;
-		mat4$20.copy(finalNodeMatrix, model._boxMat);
-		mat4$20.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
-		mat4$20.multiply(finalNodeMatrix, finalNodeMatrix, node._cachedSuffix);
+		mat4$21.copy(finalNodeMatrix, model._boxMat);
+		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, globalMatrix);
+		mat4$21.multiply(finalNodeMatrix, finalNodeMatrix, node._cachedSuffix);
 		node.finalMatrix = finalNodeMatrix;
 	}
 	const matrixData = model.matrixData;
@@ -211541,7 +213122,7 @@ function updateModelBuffer(gl, model, frame, force) {
 		const node = model.nodes[n];
 		for (let i = 0; i < numInstances; i++) {
 			const destMat = node._cache.instances[i];
-			mat4$20.multiply(destMat, model.instances[i], node.finalMatrix);
+			mat4$21.multiply(destMat, model.instances[i], node.finalMatrix);
 			const matrixIndex = n * numInstances + i;
 			matrixData.set(destMat, matrixIndex * 16);
 		}
@@ -211554,8 +213135,8 @@ function updateModelBuffer(gl, model, frame, force) {
 * Bind program and per-frame uniforms shared by both model passes
 */
 function bind(gl, modelView, projection, normalMat, fog, light) {
-	const uniform = _program$21.uniform;
-	gl.useProgram(_program$21);
+	const uniform = _program$27.uniform;
+	gl.useProgram(_program$27);
 	gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniformMatrix3fv(uniform.uNormalMat, false, normalMat);
@@ -211599,14 +213180,14 @@ function drawModels(gl) {
 */
 function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 	if (_animatedModels.length === 0) return;
-	if (!_program$21) init$9(gl);
+	if (!_program$27) init$9(gl);
 	bind(gl, modelView, projection, normalMat, fog, light);
 	for (let m = 0; m < _animatedModels.length; m++) {
 		const model = _animatedModels[m];
 		updateModelBuffer(gl, model, tick % (model.animLen || 1), false);
 	}
-	OccluderFade.renderOpaque(gl, _program$21.uniform, () => drawModels(gl));
-	OccluderFade.renderQuery(gl, _program$21.uniform, () => drawModels(gl), OccluderFade.QUERY.ANIMATED);
+	OccluderFade.renderOpaque(gl, _program$27.uniform, () => drawModels(gl));
+	OccluderFade.renderQuery(gl, _program$27.uniform, () => drawModels(gl), OccluderFade.QUERY.ANIMATED);
 	gl.bindVertexArray(null);
 }
 /**
@@ -211614,9 +213195,9 @@ function render$10(gl, modelView, projection, normalMat, fog, light, tick) {
 * Reuses the vertex data uploaded by render() this frame.
 */
 function renderFaded(gl, modelView, projection, normalMat, fog, light) {
-	if (_animatedModels.length === 0 || !_program$21 || !OccluderFade.needsBlendPass()) return;
+	if (_animatedModels.length === 0 || !_program$27 || !OccluderFade.needsBlendPass()) return;
 	bind(gl, modelView, projection, normalMat, fog, light);
-	OccluderFade.renderBlend(gl, _program$21.uniform, () => drawModels(gl));
+	OccluderFade.renderBlend(gl, _program$27.uniform, () => drawModels(gl));
 	gl.bindVertexArray(null);
 }
 /**
@@ -211625,7 +213206,7 @@ function renderFaded(gl, modelView, projection, normalMat, fog, light) {
 function hasAnimatedModels() {
 	return _animatedModels.length > 0;
 }
-var mat3$5, mat4$20, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _tempMat4Node, _program$21, _animatedModels, AnimatedModels_default;
+var mat3$5, mat4$21, vec3$5, quat$1, _tempVec3, _tempVec3Scale, _tempQuat, _tempMat4, _tempMat4Node, _program$27, _animatedModels, AnimatedModels_default;
 var init_AnimatedModels = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -211635,15 +213216,15 @@ var init_AnimatedModels = __esmMin((() => {
 	init_AnimatedModels$1();
 	init_OccluderFade();
 	mat3$5 = gl_matrix_default.mat3;
-	mat4$20 = gl_matrix_default.mat4;
+	mat4$21 = gl_matrix_default.mat4;
 	vec3$5 = gl_matrix_default.vec3;
 	quat$1 = gl_matrix_default.quat;
 	_tempVec3 = vec3$5.create();
 	_tempVec3Scale = vec3$5.create();
 	_tempQuat = quat$1.create();
-	_tempMat4 = mat4$20.create();
-	_tempMat4Node = mat4$20.create();
-	_program$21 = null;
+	_tempMat4 = mat4$21.create();
+	_tempMat4Node = mat4$21.create();
+	_program$27 = null;
 	_animatedModels = [];
 	AnimatedModels_default = {
 		init: init$9,
@@ -215331,31 +216912,31 @@ function grayBroadcast(src, out) {
 * Initialize the shader program.
 */
 function init$8(gl) {
-	_program$20 = WebGL_default.createShaderProgram(gl, GR2Model_default$1, GR2Model_default);
-	_program$20.uniform = {
-		uModelViewMat: gl.getUniformLocation(_program$20, "uModelViewMat"),
-		uProjectionMat: gl.getUniformLocation(_program$20, "uProjectionMat"),
-		uNormalMat: gl.getUniformLocation(_program$20, "uNormalMat"),
-		uBones: gl.getUniformLocation(_program$20, "uBones[0]"),
-		uLightDirection: gl.getUniformLocation(_program$20, "uLightDirection"),
-		uLightOpacity: gl.getUniformLocation(_program$20, "uLightOpacity"),
-		uLightAmbient: gl.getUniformLocation(_program$20, "uLightAmbient"),
-		uLightDiffuse: gl.getUniformLocation(_program$20, "uLightDiffuse"),
-		uLightEnv: gl.getUniformLocation(_program$20, "uLightEnv"),
-		uAlphaRef: gl.getUniformLocation(_program$20, "uAlphaRef"),
-		uAlpha: gl.getUniformLocation(_program$20, "uAlpha"),
-		uFogUse: gl.getUniformLocation(_program$20, "uFogUse"),
-		uFogNear: gl.getUniformLocation(_program$20, "uFogNear"),
-		uFogFar: gl.getUniformLocation(_program$20, "uFogFar"),
-		uFogColor: gl.getUniformLocation(_program$20, "uFogColor"),
-		uDiffuse: gl.getUniformLocation(_program$20, "uDiffuse")
+	_program$26 = WebGL_default.createShaderProgram(gl, GR2Model_default$1, GR2Model_default);
+	_program$26.uniform = {
+		uModelViewMat: gl.getUniformLocation(_program$26, "uModelViewMat"),
+		uProjectionMat: gl.getUniformLocation(_program$26, "uProjectionMat"),
+		uNormalMat: gl.getUniformLocation(_program$26, "uNormalMat"),
+		uBones: gl.getUniformLocation(_program$26, "uBones[0]"),
+		uLightDirection: gl.getUniformLocation(_program$26, "uLightDirection"),
+		uLightOpacity: gl.getUniformLocation(_program$26, "uLightOpacity"),
+		uLightAmbient: gl.getUniformLocation(_program$26, "uLightAmbient"),
+		uLightDiffuse: gl.getUniformLocation(_program$26, "uLightDiffuse"),
+		uLightEnv: gl.getUniformLocation(_program$26, "uLightEnv"),
+		uAlphaRef: gl.getUniformLocation(_program$26, "uAlphaRef"),
+		uAlpha: gl.getUniformLocation(_program$26, "uAlpha"),
+		uFogUse: gl.getUniformLocation(_program$26, "uFogUse"),
+		uFogNear: gl.getUniformLocation(_program$26, "uFogNear"),
+		uFogFar: gl.getUniformLocation(_program$26, "uFogFar"),
+		uFogColor: gl.getUniformLocation(_program$26, "uFogColor"),
+		uDiffuse: gl.getUniformLocation(_program$26, "uDiffuse")
 	};
-	_program$20.attribute = {
-		aPosition: gl.getAttribLocation(_program$20, "aPosition"),
-		aNormal: gl.getAttribLocation(_program$20, "aNormal"),
-		aTextureCoord: gl.getAttribLocation(_program$20, "aTextureCoord"),
-		aBoneIndex: gl.getAttribLocation(_program$20, "aBoneIndex"),
-		aBoneWeight: gl.getAttribLocation(_program$20, "aBoneWeight")
+	_program$26.attribute = {
+		aPosition: gl.getAttribLocation(_program$26, "aPosition"),
+		aNormal: gl.getAttribLocation(_program$26, "aNormal"),
+		aTextureCoord: gl.getAttribLocation(_program$26, "aTextureCoord"),
+		aBoneIndex: gl.getAttribLocation(_program$26, "aBoneIndex"),
+		aBoneWeight: gl.getAttribLocation(_program$26, "aBoneWeight")
 	};
 }
 /**
@@ -215513,7 +217094,7 @@ function acquire(path) {
 */
 function buildTypeGL(gl, type) {
 	type.textures = makeTypeTextures(gl, type.parsed);
-	const attr = _program$20.attribute;
+	const attr = _program$26.attribute;
 	type.submeshes = type.meshes.map(function(mesh) {
 		const vao = gl.createVertexArray();
 		gl.bindVertexArray(vao);
@@ -215633,13 +217214,13 @@ function normalize3(v) {
 function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 	_gl$2 = gl;
 	if (_instances.length === 0 || !light) return;
-	if (!_program$20) init$8(gl);
+	if (!_program$26) init$8(gl);
 	for (const path in _types) {
 		const type = _types[path];
 		if (type.cpuReady && !type.glReady) buildTypeGL(gl, type);
 	}
-	const uniform = _program$20.uniform;
-	gl.useProgram(_program$20);
+	const uniform = _program$26.uniform;
+	gl.useProgram(_program$26);
 	gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 	gl.uniform1f(uniform.uLightOpacity, light.opacity != null ? light.opacity : 1);
 	gl.uniform3fv(uniform.uLightEnv, light.env || _phaseEnv);
@@ -215706,8 +217287,8 @@ function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 				bones = flattenPose(_r(type.parsed, idx, sampleT), type.boneCount);
 			}
 			seen[key] = bones;
-			mat4$19.multiply(_mv, modelView, inst.world);
-			mat4$19.toInverseMat3(_mv, _nmat);
+			mat4$20.multiply(_mv, modelView, inst.world);
+			mat4$20.toInverseMat3(_mv, _nmat);
 			mat3$4.transpose(_nmat, _nmat);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, _mv);
 			gl.uniformMatrix3fv(uniform.uNormalMat, false, _nmat);
@@ -215730,7 +217311,7 @@ function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 					x2: 0,
 					y2: 0
 				});
-				mat4$19.multiply(_mvp, projection, _mv);
+				mat4$20.multiply(_mvp, projection, _mv);
 				if (!computeBaseSphereRect(_mvp, projection, box)) inst.screenRect = null;
 			}
 			let alpha = 1;
@@ -215738,7 +217319,7 @@ function render$9(gl, modelView, projection, normalMat, fog, light, tick) {
 			if (e) {
 				alpha = e.effectColor[3];
 				if (e.remove_tick && e.remove_delay) {
-					if (e.action === e.ACTION.DIE ? FADE.death : FADE.vanish) alpha *= 1 - (Date.now() - e.remove_tick) / e.remove_delay;
+					if (e.action === e.ACTION.DIE ? FADE$1.death : FADE$1.vanish) alpha *= 1 - (Date.now() - e.remove_tick) / e.remove_delay;
 				}
 				alpha = alpha < 0 ? 0 : alpha > 1 ? 1 : alpha;
 			}
@@ -215988,7 +217569,7 @@ function clear() {
 	for (let i = 0; i < insts.length; i++) detach(insts[i]);
 	_poseCache = {};
 }
-var mat3$4, mat4$19, ALPHA_REF, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$20, _gl$2, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv, _mvp, _nmat, _lightView, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE, TEX_MISSING_PX, TEX_GREY_PX, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE, GR2_VERTEX_LAYOUT, GR2ModelRenderer_default;
+var mat3$4, mat4$20, ALPHA_REF, _phaseDiffuse, _phaseAmbient, _phaseEnv, _gr2FlagDiffuse, _gr2EmpDiffuse, _gr2EmpAmbient, _gr2FlagAmbient, GR2_ROSTER, _program$26, _gl$2, _types, _missing, _instances, _poseCache, _dbgCellTile, _dbgTileInst, _dbgCellInited, _debugCell, BASE_SPHERE_HALF_EXTENT, _readyPromise, _mv, _mvp, _nmat, _lightView, _clip, CULL_MARGIN, CLIP_W_EPS, DIR_STEP_DEG, FADE$1, TEX_MISSING_PX, TEX_GREY_PX, A4_NIBBLE_EXPAND, _emblemCanvas, GR2_VERTEX_STRIDE, GR2_VERTEX_LAYOUT, GR2ModelRenderer_default;
 var init_GR2ModelRenderer = __esmMin((() => {
 	init_Client();
 	init_gl_matrix();
@@ -216006,7 +217587,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 	init_GR2Model$1();
 	init_GR2Model();
 	mat3$4 = gl_matrix_default.mat3;
-	mat4$19 = gl_matrix_default.mat4;
+	mat4$20 = gl_matrix_default.mat4;
 	ALPHA_REF = 207 / 255;
 	_phaseDiffuse = new Float32Array([
 		128 / 255,
@@ -216047,7 +217628,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 		sguardian90_9: "emp",
 		treasurebox_2: "emp"
 	};
-	_program$20 = null;
+	_program$26 = null;
 	_gl$2 = null;
 	_types = {};
 	_missing = {};
@@ -216068,15 +217649,15 @@ var init_GR2ModelRenderer = __esmMin((() => {
 	_debugCell = false;
 	BASE_SPHERE_HALF_EXTENT = Math.sqrt(2);
 	_readyPromise = null;
-	_mv = mat4$19.create();
-	_mvp = mat4$19.create();
+	_mv = mat4$20.create();
+	_mvp = mat4$20.create();
 	_nmat = mat3$4.create();
 	_lightView = /* @__PURE__ */ new Float32Array(3);
 	_clip = /* @__PURE__ */ new Float32Array(4);
 	CULL_MARGIN = .2;
 	CLIP_W_EPS = 1e-6;
 	DIR_STEP_DEG = 45;
-	FADE = {
+	FADE$1 = {
 		death: false,
 		vanish: false
 	};
@@ -216137,7 +217718,7 @@ var init_GR2ModelRenderer = __esmMin((() => {
 		spawn,
 		spawnMany,
 		clear,
-		FADE,
+		FADE: FADE$1,
 		get debugCell() {
 			return _debugCell;
 		},
@@ -216420,18 +218001,48 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.AS_SPLASHER] = { effectId: 129 };
 	SkillEffect[SkillConst_default.NV_FIRSTAID] = { effectId: 309 };
 	SkillEffect[SkillConst_default.NV_TRICKDEAD] = {};
-	SkillEffect[SkillConst_default.HN_DOUBLEBOWLINGBASH] = { effectId: "ef_hn_doublebowlingbash" };
+	SkillEffect[SkillConst_default.HN_DOUBLEBOWLINGBASH] = {
+		effectId: "ef_hn_doublebowlingbash",
+		castAuraEffectId: 12
+	};
 	SkillEffect[SkillConst_default.HN_MEGA_SONIC_BLOW] = { effectId: "ef_hn_mega_sonic_blow" };
-	SkillEffect[SkillConst_default.HN_SHIELD_CHAIN_RUSH] = { effectId: "ef_hn_shield_chain_rush" };
-	SkillEffect[SkillConst_default.HN_SPIRAL_PIERCE_MAX] = { effectId: "ef_hn_spiral_pierce_max" };
-	SkillEffect[SkillConst_default.HN_METEOR_STORM_BUSTER] = { effectId: "ef_hn_meteor_storm_buster" };
-	SkillEffect[SkillConst_default.HN_JUPITEL_THUNDER_STORM] = { effectId: "ef_hn_jupitel_thunder_storm" };
-	SkillEffect[SkillConst_default.HN_JACK_FROST_NOVA] = { effectId: "ef_hn_jack_frost_nova" };
-	SkillEffect[SkillConst_default.HN_HELLS_DRIVE] = { effectId: "ef_hn_hells_drive" };
-	SkillEffect[SkillConst_default.HN_GROUND_GRAVITATION] = { effectId: "ef_hn_ground_gravitation" };
-	SkillEffect[SkillConst_default.HN_NAPALM_VULCAN_STRIKE] = { effectId: "ef_hn_napalm_vulcan_strike" };
-	SkillEffect[SkillConst_default.HN_BREAKINGLIMIT] = { effectId: "ef_hn_breakinglimit" };
-	SkillEffect[SkillConst_default.HN_RULEBREAK] = { effectId: "ef_hn_rulebreak" };
+	SkillEffect[SkillConst_default.HN_SHIELD_CHAIN_RUSH] = {
+		effectId: "ef_hn_shield_chain_rush",
+		castAuraEffectId: 58
+	};
+	SkillEffect[SkillConst_default.HN_SPIRAL_PIERCE_MAX] = {
+		effectId: "ef_hn_spiral_pierce_max",
+		castAuraEffectId: 502
+	};
+	SkillEffect[SkillConst_default.HN_METEOR_STORM_BUSTER] = {
+		effectId: "ef_hn_meteor_storm_buster",
+		castAuraEffectId: "ef_cast_circle_red"
+	};
+	SkillEffect[SkillConst_default.HN_JUPITEL_THUNDER_STORM] = {
+		effectId: "ef_hn_jupitel_thunder_storm",
+		castAuraEffectId: "ef_cast_circle_yellow"
+	};
+	SkillEffect[SkillConst_default.HN_JACK_FROST_NOVA] = {
+		castAuraEffectId: 1449,
+		beginCastEffectId: 1446
+	};
+	SkillEffect[SkillConst_default.HN_HELLS_DRIVE] = {
+		effectId: "ef_hn_hells_drive",
+		castAuraEffectId: 1709
+	};
+	SkillEffect[SkillConst_default.HN_GROUND_GRAVITATION] = { castAuraEffectId: [9, 12] };
+	SkillEffect[SkillConst_default.HN_NAPALM_VULCAN_STRIKE] = {
+		effectId: "ef_hn_napalm_vulcan_strike",
+		castAuraEffectId: 58
+	};
+	SkillEffect[SkillConst_default.HN_BREAKINGLIMIT] = {
+		effectId: "ef_hn_breakinglimit",
+		castAuraEffectId: 2369
+	};
+	SkillEffect[SkillConst_default.HN_RULEBREAK] = {
+		effectId: "ef_hn_rulebreak",
+		castAuraEffectId: 2369
+	};
 	SkillEffect[5505] = { effectId: "ef_hn_overcoming_crisis" };
 	SkillEffect[SkillConst_default.SM_AUTOBERSERK] = {};
 	SkillEffect[SkillConst_default.AC_MAKINGARROW] = {};
@@ -217443,30 +219054,56 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.RL_R_TRIP_PLUSATK] = {};
 	SkillEffect[SkillConst_default.NW_INTENSIVE_AIM] = { effectId: "ef_nw_intensive_aim" };
 	SkillEffect[SkillConst_default.NW_GRENADE_FRAGMENT] = { effectId: "ef_nw_grenade_fragment" };
-	SkillEffect[SkillConst_default.NW_THE_VIGILANTE_AT_NIGHT] = { effectId: "ef_nw_the_vigilante_at_night" };
+	SkillEffect[SkillConst_default.NW_THE_VIGILANTE_AT_NIGHT] = {
+		effectId: "ef_nw_the_vigilante_at_night",
+		castAuraEffectId: 2367
+	};
 	SkillEffect[SkillConst_default.NW_ONLY_ONE_BULLET] = {
 		effectId: "ef_nw_only_one_bullet",
-		hitEffectId: "ef_nw_only_one_bullet_hit"
+		hitEffectId: "ef_nw_only_one_bullet_hit",
+		castAuraEffectId: 2367
 	};
-	SkillEffect[SkillConst_default.NW_SPIRAL_SHOOTING] = { effectId: "ef_nw_spiral_shooting" };
-	SkillEffect[SkillConst_default.NW_MAGAZINE_FOR_ONE] = { effectId: "ef_nw_magazine_for_one" };
-	SkillEffect[SkillConst_default.NW_WILD_FIRE] = { effectId: "ef_nw_wild_fire" };
-	SkillEffect[SkillConst_default.NW_BASIC_GRENADE] = { effectId: "ef_nw_basic_grenade" };
-	SkillEffect[SkillConst_default.NW_GRENADES_DROPPING] = { effectId: "ef_nw_grenades_dropping" };
-	SkillEffect[SkillConst_default.NW_AUTO_FIRING_LAUNCHER] = { effectId: "ef_nw_auto_firing_launcher" };
-	SkillEffect[SkillConst_default.NW_HIDDEN_CARD] = { effectId: "ef_nw_hidden_card" };
+	SkillEffect[SkillConst_default.NW_SPIRAL_SHOOTING] = {
+		effectId: "ef_nw_spiral_shooting",
+		castAuraEffectId: 2367
+	};
+	SkillEffect[SkillConst_default.NW_MAGAZINE_FOR_ONE] = {
+		effectId: "ef_nw_magazine_for_one",
+		castAuraEffectId: 2367
+	};
+	SkillEffect[SkillConst_default.NW_WILD_FIRE] = {
+		effectId: "ef_nw_wild_fire",
+		castAuraEffectId: 2367
+	};
+	SkillEffect[SkillConst_default.NW_BASIC_GRENADE] = {
+		effectId: "ef_nw_basic_grenade",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.NW_HASTY_FIRE_IN_THE_HOLE] = { castAuraEffectId: 830 };
+	SkillEffect[SkillConst_default.NW_GRENADES_DROPPING] = {
+		effectId: "ef_nw_grenades_dropping",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.NW_AUTO_FIRING_LAUNCHER] = {
+		effectId: "ef_nw_auto_firing_launcher",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.NW_HIDDEN_CARD] = {
+		effectId: "ef_nw_hidden_card",
+		castAuraEffectId: 840
+	};
 	SkillEffect[SkillConst_default.NW_MISSION_BOMBARD] = {
-		effectId: "ef_nw_mission_bombard",
-		hitEffectId: "ef_nw_mission_bombard_hit"
+		hitEffectId: "ef_nw_mission_bombard_hit",
+		castAuraEffectId: 840
 	};
 	SkillEffect[5500] = {
 		effectId: "ef_nw_wild_shot",
-		effectIdOnCaster: "ef_nw_wild_shot_cast",
+		beginCastEffectId: "ef_nw_wild_shot_cast",
 		hitEffectId: "ef_nw_wild_shot_hit"
 	};
 	SkillEffect[5501] = {
 		effectId: "ef_nw_midnight_fallen",
-		effectIdOnCaster: "ef_nw_midnight_fallen_cast"
+		beginCastEffectId: "ef_nw_midnight_fallen_cast"
 	};
 	SkillEffect[SkillConst_default.KO_YAMIKUMO] = {};
 	SkillEffect[SkillConst_default.KO_JYUMONJIKIRI] = { effectId: "ef_ko_jyumonjikiri" };
@@ -217490,52 +219127,136 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.KO_IZAYOI] = {};
 	SkillEffect[SkillConst_default.SS_TOKEDASU] = { effectId: "ef_ss_tokedasu" };
 	SkillEffect[SkillConst_default.SS_SHIMIRU] = { effectId: "ef_ss_shimiru" };
-	SkillEffect[SkillConst_default.SS_AKUMUKESU] = { effectId: "ef_ss_akumukesu" };
+	SkillEffect[SkillConst_default.SS_AKUMUKESU] = {
+		effectId: "ef_ss_akumukesu",
+		castAuraEffectId: 934
+	};
+	SkillEffect[SkillConst_default.SS_SHINKIROU] = {
+		beginCastEffectId: 1774,
+		castAuraEffectId: 2373
+	};
 	SkillEffect[SkillConst_default.SS_KAGEGARI] = { effectId: "ef_ss_kagegari" };
-	SkillEffect[SkillConst_default.SS_KAGENOMAI] = { effectId: "ef_ss_kagenomai" };
+	SkillEffect[SkillConst_default.SS_KAGENOMAI] = {
+		effectId: "ef_ss_kagenomai",
+		castAuraEffectId: 454
+	};
 	SkillEffect[SkillConst_default.SS_KAGEGISSEN] = {
 		effectId: "ef_ss_kagegissen",
-		hitEffectId: "ef_ss_kagegissen_hit"
+		hitEffectId: "ef_ss_kagegissen_hit",
+		castAuraEffectId: 454
 	};
-	SkillEffect[SkillConst_default.SS_FUUMASHOUAKU] = { effectId: "ef_ss_fuumashouaku" };
-	SkillEffect[SkillConst_default.SS_FUUMAKOUCHIKU] = { effectId: "ef_ss_fuumakouchiku" };
-	SkillEffect[SkillConst_default.SS_KUNAIWAIKYOKU] = { effectId: "ef_ss_kunaiwaikyoku" };
+	SkillEffect[SkillConst_default.SS_FUUMASHOUAKU] = {
+		effectId: "ef_ss_fuumashouaku",
+		castAuraEffectId: [986, 454]
+	};
+	SkillEffect[SkillConst_default.SS_FUUMAKOUCHIKU] = {
+		effectId: "ef_ss_fuumakouchiku",
+		castAuraEffectId: [986, 454]
+	};
+	SkillEffect[SkillConst_default.SS_KUNAIWAIKYOKU] = {
+		effectId: "ef_ss_kunaiwaikyoku",
+		castAuraEffectId: [986, 454]
+	};
 	SkillEffect[SkillConst_default.SS_KUNAIKAITEN] = { effectId: "ef_ss_kunaikaiten" };
-	SkillEffect[SkillConst_default.SS_KUNAIKUSSETSU] = { effectId: "ef_ss_kunaikussetsu" };
-	SkillEffect[SkillConst_default.SS_SEKIENHOU] = { effectId: "ef_ss_sekienhou" };
-	SkillEffect[SkillConst_default.SS_REIKETSUHOU] = { effectId: "ef_ss_reiketsuhou" };
+	SkillEffect[SkillConst_default.SS_KUNAIKUSSETSU] = {
+		effectId: "ef_ss_kunaikussetsu",
+		castAuraEffectId: [986, 454]
+	};
+	SkillEffect[SkillConst_default.SS_SEKIENHOU] = {
+		effectId: "ef_ss_sekienhou",
+		castAuraEffectId: "ef_cast_circle_red"
+	};
+	SkillEffect[SkillConst_default.SS_REIKETSUHOU] = {
+		effectId: "ef_ss_reiketsuhou",
+		castAuraEffectId: "ef_cast_circle_blue"
+	};
 	SkillEffect[SkillConst_default.SS_RAIDENPOU] = {
 		effectId: "ef_ss_raidenpou",
-		effectIdOnCaster: "ef_ss_raidenpou_cast",
+		beginCastEffectId: "ef_ss_raidenpou_cast",
 		hitEffectId: "ef_ss_raidenpou_hit"
 	};
 	SkillEffect[SkillConst_default.SS_KINRYUUHOU] = {
 		effectId: "ef_ss_kinryuuhou",
-		hitEffectId: "ef_ss_kinryuuhou_hit"
+		hitEffectId: "ef_ss_kinryuuhou_hit",
+		castAuraEffectId: 58
 	};
-	SkillEffect[SkillConst_default.SS_ANTENPOU] = { effectId: "ef_ss_antenpou" };
-	SkillEffect[SkillConst_default.SS_KAGEAKUMU] = { effectId: "ef_ss_kageakumu" };
-	SkillEffect[SkillConst_default.SS_HITOUAKUMU] = { effectId: "ef_ss_hitouakumu" };
-	SkillEffect[SkillConst_default.SS_ANKOKURYUUAKUMU] = { effectId: "ef_ss_ankokuryuuakumu" };
+	SkillEffect[SkillConst_default.SS_ANTENPOU] = {
+		effectId: "ef_ss_antenpou",
+		castAuraEffectId: "ef_cast_circle_violet"
+	};
+	SkillEffect[SkillConst_default.SS_KAGEAKUMU] = {
+		effectId: "ef_ss_kageakumu",
+		castAuraEffectId: 812
+	};
+	SkillEffect[SkillConst_default.SS_HITOUAKUMU] = {
+		effectId: "ef_ss_hitouakumu",
+		castAuraEffectId: 812
+	};
+	SkillEffect[SkillConst_default.SS_ANKOKURYUUAKUMU] = {
+		effectId: "ef_ss_ankokuryuuakumu",
+		castAuraEffectId: 812
+	};
 	SkillEffect[5499] = { effectId: "ef_ss_four_charm" };
 	SkillEffect[SkillConst_default.KG_KAGEHUMI] = {};
 	SkillEffect[SkillConst_default.KG_KYOMU] = {};
 	SkillEffect[SkillConst_default.KG_KAGEMUSYA] = {};
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_PROTECTION] = { effectId: "ef_soa_talisman_of_protection" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_WARRIOR] = { effectId: "ef_soa_talisman_of_warrior" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_MAGICIAN] = { effectId: "ef_soa_talisman_of_magician" };
-	SkillEffect[SkillConst_default.SOA_SOUL_GATHERING] = { effectId: "ef_soa_soul_gathering" };
-	SkillEffect[SkillConst_default.SOA_TOTEM_OF_TUTELARY] = { effectId: "ef_soa_totem_of_tutelary" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_FIVE_ELEMENTS] = { effectId: "ef_soa_talisman_of_five_elements" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_SOUL_STEALING] = { effectId: "ef_soa_talisman_of_soul_stealing" };
-	SkillEffect[SkillConst_default.SOA_EXORCISM_OF_MALICIOUS_SOUL] = { effectId: "ef_soa_exorcism_of_malicious_soul" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_BLUE_DRAGON] = { effectId: "ef_soa_talisman_of_blue_dragon" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_WHITE_TIGER] = { effectId: "ef_soa_talisman_of_white_tiger" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_RED_PHOENIX] = { effectId: "ef_soa_talisman_of_red_phoenix" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_BLACK_TORTOISE] = { effectId: "ef_soa_talisman_of_black_tortoise" };
-	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_FOUR_BEARING_GOD] = { effectId: "ef_soa_talisman_of_four_bearing_god" };
-	SkillEffect[SkillConst_default.SOA_CIRCLE_OF_DIRECTIONS_AND_ELEMENTALS] = { effectId: "ef_soa_circle_of_directions_and_elementals" };
-	SkillEffect[SkillConst_default.SOA_SOUL_OF_HEAVEN_AND_EARTH] = { effectId: "ef_soa_soul_of_heaven_and_earth" };
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_PROTECTION] = {
+		effectId: "ef_soa_talisman_of_protection",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_WARRIOR] = {
+		effectId: "ef_soa_talisman_of_warrior",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_MAGICIAN] = {
+		effectId: "ef_soa_talisman_of_magician",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.SOA_SOUL_GATHERING] = {
+		effectId: "ef_soa_soul_gathering",
+		castAuraEffectId: 454
+	};
+	SkillEffect[SkillConst_default.SOA_TOTEM_OF_TUTELARY] = { castAuraEffectId: 911 };
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_FIVE_ELEMENTS] = {
+		effectId: "ef_soa_talisman_of_five_elements",
+		castAuraEffectId: 830
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_SOUL_STEALING] = {
+		effectId: "ef_soa_talisman_of_soul_stealing",
+		castAuraEffectId: 441
+	};
+	SkillEffect[SkillConst_default.SOA_EXORCISM_OF_MALICIOUS_SOUL] = {
+		effectId: "ef_soa_exorcism_of_malicious_soul",
+		castAuraEffectId: 2367
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_BLUE_DRAGON] = {
+		effectId: "ef_soa_talisman_of_blue_dragon",
+		castAuraEffectId: 845
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_WHITE_TIGER] = {
+		effectId: "ef_soa_talisman_of_white_tiger",
+		castAuraEffectId: 843
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_RED_PHOENIX] = {
+		effectId: "ef_soa_talisman_of_red_phoenix",
+		castAuraEffectId: 840
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_BLACK_TORTOISE] = {
+		effectId: "ef_soa_talisman_of_black_tortoise",
+		castAuraEffectId: 2368
+	};
+	SkillEffect[SkillConst_default.SOA_TALISMAN_OF_FOUR_BEARING_GOD] = {
+		effectId: "ef_soa_talisman_of_four_bearing_god",
+		castAuraEffectId: 2369
+	};
+	SkillEffect[SkillConst_default.SOA_CIRCLE_OF_DIRECTIONS_AND_ELEMENTALS] = {
+		effectId: "ef_soa_circle_of_directions_and_elementals",
+		castAuraEffectId: 1565
+	};
+	SkillEffect[SkillConst_default.SOA_SOUL_OF_HEAVEN_AND_EARTH] = {
+		effectId: "ef_soa_soul_of_heaven_and_earth",
+		castAuraEffectId: 1556
+	};
 	SkillEffect[SkillConst_default.OB_ZANGETSU] = {};
 	SkillEffect[SkillConst_default.OB_OBOROGENSOU] = {};
 	SkillEffect[SkillConst_default.OB_OBOROGENSOU_TRANSITION_ATK] = {};
@@ -217543,21 +219264,43 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.SKE_RISING_SUN] = { effectId: "ef_ske_rising_sun" };
 	SkillEffect[SkillConst_default.SKE_NOON_BLAST] = { effectId: "ef_ske_noon_blast" };
 	SkillEffect[SkillConst_default.SKE_SUNSET_BLAST] = { effectId: "ef_ske_sunset_blast" };
-	SkillEffect[SkillConst_default.SKE_MIDNIGHT_KICK] = { effectId: "ef_ske_midnight_kick" };
-	SkillEffect[SkillConst_default.SKE_DAWN_BREAK] = { effectId: "ef_ske_dawn_break" };
-	SkillEffect[SkillConst_default.SKE_TWINKLING_GALAXY] = { effectId: "ef_ske_twinkling_galaxy" };
-	SkillEffect[SkillConst_default.SKE_STAR_BURST] = { effectId: "ef_ske_star_burst" };
-	SkillEffect[SkillConst_default.SKE_STAR_CANNON] = { effectId: "ef_ske_star_cannon" };
-	SkillEffect[SkillConst_default.SKE_ALL_IN_THE_SKY] = { effectId: "ef_ske_all_in_the_sky" };
-	SkillEffect[SkillConst_default.SKE_ENCHANTING_SKY] = { effectId: "ef_ske_enchanting_sky" };
+	SkillEffect[SkillConst_default.SKE_MIDNIGHT_KICK] = {
+		effectId: "ef_ske_midnight_kick",
+		castAuraEffectId: 58
+	};
+	SkillEffect[SkillConst_default.SKE_DAWN_BREAK] = {
+		effectId: "ef_ske_dawn_break",
+		castAuraEffectId: 58
+	};
+	SkillEffect[SkillConst_default.SKE_TWINKLING_GALAXY] = {
+		effectId: "ef_ske_twinkling_galaxy",
+		castAuraEffectId: 441
+	};
+	SkillEffect[SkillConst_default.SKE_STAR_BURST] = {
+		effectId: "ef_ske_star_burst",
+		castAuraEffectId: 441
+	};
+	SkillEffect[SkillConst_default.SKE_STAR_CANNON] = {
+		effectId: "ef_ske_star_cannon",
+		castAuraEffectId: 441
+	};
+	SkillEffect[SkillConst_default.SKE_ALL_IN_THE_SKY] = {
+		effectId: "ef_ske_all_in_the_sky",
+		castAuraEffectId: 845
+	};
+	SkillEffect[SkillConst_default.SKE_ENCHANTING_SKY] = {
+		effectId: "ef_ske_enchanting_sky",
+		castAuraEffectId: 831
+	};
 	SkillEffect[5502] = {
 		effectId: "ef_ske_sky_sun",
 		hitEffectId: "ef_ske_sky_sun_hit"
 	};
 	SkillEffect[5503] = {
 		effectId: "ef_ske_sky_moon",
-		effectIdOnCaster: "ef_ske_sky_moon_cast",
-		hitEffectId: "ef_ske_sky_moon_hit"
+		beginCastEffectId: "ef_ske_sky_moon_cast",
+		hitEffectId: "ef_ske_sky_moon_hit",
+		hideCastAura: true
 	};
 	SkillEffect[5504] = {
 		effectId: "ef_ske_star_light_kick",
@@ -217626,7 +219369,10 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.BO_HELLTREE] = { effectIdOnCaster: "ef_bo_helltree_cast" };
 	SkillEffect[5385] = { hitEffectId: "ef_bo_wooden_attack_hit" };
 	SkillEffect[SkillConst_default.BO_EXPLOSIVE_POWDER] = { effectId: "ef_bo_explosive_powder" };
-	SkillEffect[SkillConst_default.BO_MAYHEMIC_THORNS] = { effectId: "ef_bo_mayhemic_thorns" };
+	SkillEffect[SkillConst_default.BO_MAYHEMIC_THORNS] = {
+		effectId: "ef_bo_mayhemic_thorns",
+		beginCastEffectId: [2228, 2229]
+	};
 	SkillEffect[6509] = {
 		effectId: "ef_bo_mystery_powder",
 		hitEffectId: "ef_bo_mystery_powder_hit"
@@ -217703,7 +219449,8 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.DK_STORMSLASH] = { hitEffectId: "ef_dk_stormslash_hit" };
 	SkillEffect[SkillConst_default.DK_DRAGONIC_BREATH] = {
 		effectId: "ef_dk_dragonic_breath",
-		hitEffectId: "ef_dk_dragonic_breath_hit"
+		hitEffectId: "ef_dk_dragonic_breath_hit",
+		castAuraEffectId: 12
 	};
 	SkillEffect[6502] = {
 		effectId: "ef_dk_dragonic_pierce",
@@ -217735,8 +219482,14 @@ var init_SkillEffect = __esmMin((() => {
 		effectIdOnCaster: "ef_mt_summon_abr_infinity_cast",
 		hitEffectId: "ef_mt_summon_abr_infinity_hit"
 	};
-	SkillEffect[SkillConst_default.MT_SPARK_BLASTER] = { effectId: "ef_mt_spark_blaster" };
-	SkillEffect[SkillConst_default.MT_TRIPLE_LASER] = { effectId: "ef_mt_triple_laser" };
+	SkillEffect[SkillConst_default.MT_SPARK_BLASTER] = {
+		effectId: "ef_mt_spark_blaster",
+		castAuraEffectId: 1938
+	};
+	SkillEffect[SkillConst_default.MT_TRIPLE_LASER] = {
+		effectId: "ef_mt_triple_laser",
+		castAuraEffectId: 1938
+	};
 	SkillEffect[SkillConst_default.MT_MIGHTY_SMASH] = { effectId: "ef_mt_mighty_smash" };
 	SkillEffect[6506] = { effectId: "ef_mt_rush_strike" };
 	SkillEffect[6507] = {
@@ -218166,10 +219919,7 @@ var init_SkillEffect = __esmMin((() => {
 		effectIdOnCaster: "ef_ig_overslash_cast",
 		hitEffectId: "ef_ig_overslash_hit"
 	};
-	SkillEffect[SkillConst_default.IG_CROSS_RAIN] = {
-		effectId: "ef_ig_cross_rain",
-		effectIdOnCaster: "ef_ig_cross_rain_cast"
-	};
+	SkillEffect[SkillConst_default.IG_CROSS_RAIN] = { effectIdOnCaster: "ef_ig_cross_rain_cast" };
 	SkillEffect[6503] = { effectIdOnCaster: "ef_ig_radiant_spear_cast" };
 	SkillEffect[6504] = { effectId: "ef_ig_imperial_cross" };
 	SkillEffect[6505] = {
@@ -218210,25 +219960,55 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.WE_ONEFOREVER] = {};
 	SkillEffect[SkillConst_default.WE_CHEERUP] = {};
 	SkillEffect[SkillConst_default.SH_CHUL_HO_SONIC_CLAW] = { effectId: "ef_sh_chul_ho_sonic_claw" };
-	SkillEffect[SkillConst_default.SH_HOWLING_OF_CHUL_HO] = { effectId: "ef_sh_howling_of_chul_ho" };
-	SkillEffect[SkillConst_default.SH_HOGOGONG_STRIKE] = { effectId: "ef_sh_hogogong_strike" };
-	SkillEffect[SkillConst_default.SH_KI_SUL_WATER_SPRAYING] = { effectId: "ef_sh_ki_sul_water_spraying" };
-	SkillEffect[SkillConst_default.SH_MARINE_FESTIVAL_OF_KI_SUL] = { effectId: "ef_sh_marine_festival_of_ki_sul" };
-	SkillEffect[SkillConst_default.SH_SANDY_FESTIVAL_OF_KI_SUL] = { effectId: "ef_sh_sandy_festival_of_ki_sul" };
-	SkillEffect[SkillConst_default.SH_KI_SUL_RAMPAGE] = { effectId: "ef_sh_ki_sul_rampage" };
-	SkillEffect[SkillConst_default.SH_COLORS_OF_HYUN_ROK] = { effectId: "ef_sh_colors_of_hyun_rok" };
-	SkillEffect[SkillConst_default.SH_HYUN_ROKS_BREEZE] = { effectId: "ef_sh_hyun_roks_breeze" };
-	SkillEffect[SkillConst_default.SH_HYUN_ROK_CANNON] = { effectId: "ef_sh_hyun_rok_cannon" };
-	SkillEffect[SkillConst_default.SH_TEMPORARY_COMMUNION] = { effectId: "ef_sh_temporary_communion" };
-	SkillEffect[SkillConst_default.SH_BLESSING_OF_MYSTICAL_CREATURES] = { effectId: "ef_sh_blessing_of_mystical_creatures" };
+	SkillEffect[SkillConst_default.SH_HOWLING_OF_CHUL_HO] = {
+		effectId: "ef_sh_howling_of_chul_ho",
+		castAuraEffectId: 840
+	};
+	SkillEffect[SkillConst_default.SH_HOGOGONG_STRIKE] = {
+		effectId: "ef_sh_hogogong_strike",
+		castAuraEffectId: 840
+	};
+	SkillEffect[SkillConst_default.SH_KI_SUL_WATER_SPRAYING] = {
+		effectId: "ef_sh_ki_sul_water_spraying",
+		castAuraEffectId: 58
+	};
+	SkillEffect[SkillConst_default.SH_MARINE_FESTIVAL_OF_KI_SUL] = {
+		effectId: "ef_sh_marine_festival_of_ki_sul",
+		castAuraEffectId: 845
+	};
+	SkillEffect[SkillConst_default.SH_SANDY_FESTIVAL_OF_KI_SUL] = {
+		effectId: "ef_sh_sandy_festival_of_ki_sul",
+		castAuraEffectId: 842
+	};
+	SkillEffect[SkillConst_default.SH_KI_SUL_RAMPAGE] = {
+		effectId: "ef_sh_ki_sul_rampage",
+		castAuraEffectId: 831
+	};
+	SkillEffect[SkillConst_default.SH_COLORS_OF_HYUN_ROK] = {
+		effectId: "ef_sh_colors_of_hyun_rok",
+		castAuraEffectId: 58
+	};
+	SkillEffect[SkillConst_default.SH_HYUN_ROKS_BREEZE] = { castAuraEffectId: 841 };
+	SkillEffect[SkillConst_default.SH_HYUN_ROK_CANNON] = {
+		effectId: "ef_sh_hyun_rok_cannon",
+		castAuraEffectId: 841
+	};
+	SkillEffect[SkillConst_default.SH_TEMPORARY_COMMUNION] = {
+		effectId: "ef_sh_temporary_communion",
+		castAuraEffectId: 2367
+	};
+	SkillEffect[SkillConst_default.SH_BLESSING_OF_MYSTICAL_CREATURES] = {
+		effectId: "ef_sh_blessing_of_mystical_creatures",
+		castAuraEffectId: 2367
+	};
 	SkillEffect[5506] = {
 		effectId: "ef_sh_chul_ho_battering",
-		effectIdOnCaster: "ef_sh_chul_ho_battering_cast",
+		beginCastEffectId: "ef_sh_chul_ho_battering_cast",
 		hitEffectId: "ef_sh_chul_ho_battering_hit"
 	};
 	SkillEffect[5507] = {
 		effectId: "ef_sh_hyun_rok_spirit_power",
-		effectIdOnCaster: "ef_sh_hyun_rok_spirit_power_cast",
+		beginCastEffectId: "ef_sh_hyun_rok_spirit_power_cast",
 		hitEffectId: "ef_sh_hyun_rok_spirit_power_hit"
 	};
 	SkillEffect[SkillConst_default.HLIF_HEAL] = SkillEffect[SkillConst_default.AL_HEAL];
@@ -218371,1466 +220151,6 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.SP_SOULCURSE] = { effectId: "ef_sp_soulcurse" };
 	SkillEffect[SkillConst_default.SP_SOULREVOLVE] = { effectId: "ef_sp_soulrevolve" };
 	SkillEffect[SkillConst_default.NV_HELPANGEL] = { effectId: "ef_nv_helpangel" };
-}));
-// src/DB/Skills/SkillUnitConst.js
-var SkillUnitConst_default;
-var init_SkillUnitConst = __esmMin((() => {
-	SkillUnitConst_default = {
-		UNT_SAFETYWALL: 126,
-		UNT_FIREWALL: 127,
-		UNT_WARPPORTAL: 128,
-		UNT_PRE_WARPPORTAL: 129,
-		UNT_BENEDICTIO: 130,
-		UNT_SANCTUARY: 131,
-		UNT_MAGNUS: 132,
-		UNT_PNEUMA: 133,
-		UNT_DUMMYSKILL: 134,
-		UNT_FIREPILLAR_WAITING: 135,
-		UNT_FIREPILLAR_ACTIVE: 136,
-		UNT_HIDDEN_TRAP: 137,
-		UNT_TRAP: 138,
-		UNT_HIDDEN_WARP_NPC: 139,
-		UNT_USED_TRAPS: 140,
-		UNT_ICEWALL: 141,
-		UNT_QUAGMIRE: 142,
-		UNT_BLASTMINE: 143,
-		UNT_SKIDTRAP: 144,
-		UNT_ANKLESNARE: 145,
-		UNT_VENOMDUST: 146,
-		UNT_LANDMINE: 147,
-		UNT_SHOCKWAVE: 148,
-		UNT_SANDMAN: 149,
-		UNT_FLASHER: 150,
-		UNT_FREEZINGTRAP: 151,
-		UNT_CLAYMORETRAP: 152,
-		UNT_TALKIEBOX: 153,
-		UNT_VOLCANO: 154,
-		UNT_DELUGE: 155,
-		UNT_VIOLENTGALE: 156,
-		UNT_LANDPROTECTOR: 157,
-		UNT_LULLABY: 158,
-		UNT_RICHMANKIM: 159,
-		UNT_ETERNALCHAOS: 160,
-		UNT_DRUMBATTLEFIELD: 161,
-		UNT_RINGNIBELUNGEN: 162,
-		UNT_ROKISWEIL: 163,
-		UNT_INTOABYSS: 164,
-		UNT_SIEGFRIED: 165,
-		UNT_DISSONANCE: 166,
-		UNT_WHISTLE: 167,
-		UNT_ASSASSINCROSS: 168,
-		UNT_POEMBRAGI: 169,
-		UNT_APPLEIDUN: 170,
-		UNT_UGLYDANCE: 171,
-		UNT_HUMMING: 172,
-		UNT_DONTFORGETME: 173,
-		UNT_FORTUNEKISS: 174,
-		UNT_SERVICEFORYOU: 175,
-		UNT_GRAFFITI: 176,
-		UNT_DEMONSTRATION: 177,
-		UNT_CALLFAMILY: 178,
-		UNT_GOSPEL: 179,
-		UNT_BASILICA: 180,
-		UNT_MOONLIT: 181,
-		UNT_FOGWALL: 182,
-		UNT_SPIDERWEB: 183,
-		UNT_GRAVITATION: 184,
-		UNT_HERMODE: 185,
-		UNT_KAENSIN: 186,
-		UNT_SUITON: 187,
-		UNT_TATAMIGAESHI: 188,
-		UNT_KAEN: 189,
-		UNT_GROUNDDRIFT_WIND: 190,
-		UNT_GROUNDDRIFT_DARK: 191,
-		UNT_GROUNDDRIFT_POISON: 192,
-		UNT_GROUNDDRIFT_WATER: 193,
-		UNT_GROUNDDRIFT_FIRE: 194,
-		UNT_DEATHWAVE: 195,
-		UNT_WATERATTACK: 196,
-		UNT_WINDATTACK: 197,
-		UNT_EARTHQUAKE: 198,
-		UNT_EVILLAND: 199,
-		UNT_DARK_RUNNER: 200,
-		UNT_DARK_TRANSFER: 201,
-		UNT_EPICLESIS: 202,
-		UNT_EARTHSTRAIN: 203,
-		UNT_MANHOLE: 204,
-		UNT_DIMENSIONDOOR: 205,
-		UNT_CHAOSPANIC: 206,
-		UNT_MAELSTROM: 207,
-		UNT_BLOODYLUST: 208,
-		UNT_FEINTBOMB: 209,
-		UNT_MAGENTATRAP: 210,
-		UNT_COBALTTRAP: 211,
-		UNT_MAIZETRAP: 212,
-		UNT_VERDURETRAP: 213,
-		UNT_FIRINGTRAP: 214,
-		UNT_ICEBOUNDTRAP: 215,
-		UNT_ELECTRICSHOCKER: 216,
-		UNT_CLUSTERBOMB: 217,
-		UNT_REVERBERATION: 218,
-		UNT_SEVERE_RAINSTORM: 219,
-		UNT_FIREWALK: 220,
-		UNT_ELECTRICWALK: 221,
-		UNT_NETHERWORLD: 222,
-		UNT_PSYCHIC_WAVE: 223,
-		UNT_CLOUD_KILL: 224,
-		UNT_POISONSMOKE: 225,
-		UNT_NEUTRALBARRIER: 226,
-		UNT_STEALTHFIELD: 227,
-		UNT_WARMER: 228,
-		UNT_THORNS_TRAP: 229,
-		UNT_WALLOFTHORN: 230,
-		UNT_DEMONIC_FIRE: 231,
-		UNT_FIRE_EXPANSION_SMOKE_POWDER: 232,
-		UNT_FIRE_EXPANSION_TEAR_GAS: 233,
-		UNT_HELLS_PLANT: 234,
-		UNT_VACUUM_EXTREME: 235,
-		UNT_BANDING: 236,
-		UNT_FIRE_MANTLE: 237,
-		UNT_WATER_BARRIER: 238,
-		UNT_ZEPHYR: 239,
-		UNT_POWER_OF_GAIA: 240,
-		UNT_FIRE_INSIGNIA: 241,
-		UNT_WATER_INSIGNIA: 242,
-		UNT_WIND_INSIGNIA: 243,
-		UNT_EARTH_INSIGNIA: 244,
-		UNT_POISON_MIST: 245,
-		UNT_LAVA_SLIDE: 246,
-		UNT_VOLCANIC_ASH: 247,
-		UNT_ZENKAI_WATER: 248,
-		UNT_ZENKAI_LAND: 249,
-		UNT_ZENKAI_FIRE: 250,
-		UNT_ZENKAI_WIND: 251,
-		UNT_MAKIBISHI: 252,
-		UNT_VENOMFOG: 253,
-		UNT_ICEMINE: 254,
-		UNT_FLAMECROSS: 255,
-		UNT_HELLBURNING: 256,
-		UNT_MAGMA_ERUPTION: 257,
-		UNT_KINGS_GRACE: 258,
-		UNT_GLITTERING_GREED: 259,
-		UNT_B_TRAP: 260,
-		UNT_FIRE_RAIN: 261,
-		UNT_CATNIPPOWDER: 262,
-		UNT_NYANGGRASS: 263,
-		UNT_GROUNDDRIFT_NEUTRAL: 264,
-		UNT_CREATINGSTAR: 265,
-		UNT_RAIN_OF_CRYSTAL: 266,
-		UNT_MYSTERY_ILLUSION: 267,
-		UNT_STRANTUM_TREMOR: 269,
-		UNT_VIOLENT_QUAKE: 270,
-		UNT_ALL_BLOOM: 271,
-		UNT_TORNADO_STORM: 272,
-		UNT_FLORAL_FLARE_ROAD: 273,
-		UNT_ASTRAL_STRIKE: 274,
-		UNT_CROSS_RAIN: 275,
-		UNT_PNEUMATICUS_PROCELLA: 276,
-		UNT_ABYSS_SQUARE: 277,
-		UNT_ACIDIFIED_ZONE_WATER: 278,
-		UNT_ACIDIFIED_ZONE_GROUND: 279,
-		UNT_ACIDIFIED_ZONE_WIND: 280,
-		UNT_ACIDIFIED_ZONE_FIRE: 281,
-		UNT_LIGHTNING_LAND: 282,
-		UNT_VENOM_SWAMP: 283,
-		UNT_CONFLAGRATION: 284,
-		UNT_CANE_OF_EVIL_EYE: 285,
-		UNT_TWINKLING_GALAXY: 286,
-		UNT_STAR_CANNON: 287,
-		UNT_GRENADES_DROPPING: 288,
-		UNT_FUUMASHOUAKU: 290,
-		UNT_MISSION_BOMBARD: 291,
-		UNT_TOTEM_OF_TUTELARY: 292,
-		UNT_HYUN_ROKS_BREEZE: 293,
-		UNT_SHINKIROU: 294,
-		UNT_JACK_FROST_NOVA: 295,
-		UNT_GROUND_GRAVITATION: 296,
-		UNT_KUNAIWAIKYOKU: 298,
-		UNT_DEEPBLINDTRAP: 20852,
-		UNT_SOLIDTRAP: 20853,
-		UNT_SWIFTTRAP: 20854,
-		UNT_FLAMETRAP: 20855,
-		UNT_GD_LEADERSHIP: 193,
-		UNT_GD_GLORYWOUNDS: 194,
-		UNT_GD_SOULCOLD: 195,
-		UNT_GD_HAWKEYES: 196,
-		UNT_MAX: 400
-	};
-}));
-// src/DB/Effects/EffectConst.js
-var EffectConst_default;
-var init_EffectConst = __esmMin((() => {
-	EffectConst_default = {
-		EF_NONE: -1,
-		EF_HIT1: 0,
-		EF_HIT2: 1,
-		EF_HIT3: 2,
-		EF_HIT4: 3,
-		EF_HIT5: 4,
-		EF_HIT6: 5,
-		EF_ENTRY: 6,
-		EF_EXIT: 7,
-		EF_WARP: 8,
-		EF_ENHANCE: 9,
-		EF_COIN: 10,
-		EF_ENDURE: 11,
-		EF_BEGINSPELL: 12,
-		EF_GLASSWALL: 13,
-		EF_HEALSP: 14,
-		EF_SOULSTRIKE: 15,
-		EF_BASH: 16,
-		EF_MAGNUMBREAK: 17,
-		EF_STEAL: 18,
-		EF_HIDING: 19,
-		EF_PATTACK: 20,
-		EF_DETOXICATION: 21,
-		EF_SIGHT: 22,
-		EF_STONECURSE: 23,
-		EF_FIREBALL: 24,
-		EF_FIREWALL: 25,
-		EF_ICEARROW: 26,
-		EF_FROSTDIVER: 27,
-		EF_FROSTDIVER2: 28,
-		EF_LIGHTBOLT: 29,
-		EF_THUNDERSTORM: 30,
-		EF_FIREARROW: 31,
-		EF_NAPALMBEAT: 32,
-		EF_RUWACH: 33,
-		EF_TELEPORTATION: 34,
-		EF_READYPORTAL: 35,
-		EF_PORTAL: 36,
-		EF_INCAGILITY: 37,
-		EF_DECAGILITY: 38,
-		EF_AQUA: 39,
-		EF_SIGNUM: 40,
-		EF_ANGELUS: 41,
-		EF_BLESSING: 42,
-		EF_INCAGIDEX: 43,
-		EF_SMOKE: 44,
-		EF_FIREFLY: 45,
-		EF_SANDWIND: 46,
-		EF_TORCH: 47,
-		EF_SPRAYPOND: 48,
-		EF_FIREHIT: 49,
-		EF_FIRESPLASHHIT: 50,
-		EF_COLDHIT: 51,
-		EF_WINDHIT: 52,
-		EF_POISONHIT: 53,
-		EF_BEGINSPELL2: 54,
-		EF_BEGINSPELL3: 55,
-		EF_BEGINSPELL4: 56,
-		EF_BEGINSPELL5: 57,
-		EF_BEGINSPELL6: 58,
-		EF_BEGINSPELL7: 59,
-		EF_LOCKON: 60,
-		EF_WARPZONE: 61,
-		EF_SIGHTRASHER: 62,
-		EF_BARRIER: 63,
-		EF_ARROWSHOT: 64,
-		EF_INVENOM: 65,
-		EF_CURE: 66,
-		EF_PROVOKE: 67,
-		EF_MVP: 68,
-		EF_SKIDTRAP: 69,
-		EF_BRANDISHSPEAR: 70,
-		EF_CONE: 71,
-		EF_SPHERE: 72,
-		EF_BOWLINGBASH: 73,
-		EF_ICEWALL: 74,
-		EF_GLORIA: 75,
-		EF_MAGNIFICAT: 76,
-		EF_RESURRECTION: 77,
-		EF_RECOVERY: 78,
-		EF_EARTHSPIKE: 79,
-		EF_SPEARBMR: 80,
-		EF_PIERCE: 81,
-		EF_TURNUNDEAD: 82,
-		EF_SANCTUARY: 83,
-		EF_IMPOSITIO: 84,
-		EF_LEXAETERNA: 85,
-		EF_ASPERSIO: 86,
-		EF_LEXDIVINA: 87,
-		EF_SUFFRAGIUM: 88,
-		EF_STORMGUST: 89,
-		EF_LORD: 90,
-		EF_BENEDICTIO: 91,
-		EF_METEORSTORM: 92,
-		EF_YUFITEL: 93,
-		EF_YUFITELHIT: 94,
-		EF_QUAGMIRE: 95,
-		EF_FIREPILLAR: 96,
-		EF_FIREPILLARBOMB: 97,
-		EF_HASTEUP: 98,
-		EF_FLASHER: 99,
-		EF_REMOVETRAP: 100,
-		EF_REPAIRWEAPON: 101,
-		EF_CRASHEARTH: 102,
-		EF_PERFECTION: 103,
-		EF_MAXPOWER: 104,
-		EF_BLASTMINE: 105,
-		EF_BLASTMINEBOMB: 106,
-		EF_CLAYMORE: 107,
-		EF_FREEZING: 108,
-		EF_BUBBLE: 109,
-		EF_GASPUSH: 110,
-		EF_SPRINGTRAP: 111,
-		EF_KYRIE: 112,
-		EF_MAGNUS: 113,
-		EF_BOTTOM: 114,
-		EF_BLITZBEAT: 115,
-		EF_WATERBALL: 116,
-		EF_WATERBALL2: 117,
-		EF_FIREIVY: 118,
-		EF_DETECTING: 119,
-		EF_CLOAKING: 120,
-		EF_SONICBLOW: 121,
-		EF_SONICBLOWHIT: 122,
-		EF_GRIMTOOTH: 123,
-		EF_VENOMDUST: 124,
-		EF_ENCHANTPOISON: 125,
-		EF_POISONREACT: 126,
-		EF_POISONREACT2: 127,
-		EF_OVERTHRUST: 128,
-		EF_SPLASHER: 129,
-		EF_TWOHANDQUICKEN: 130,
-		EF_AUTOCOUNTER: 131,
-		EF_GRIMTOOTHATK: 132,
-		EF_FREEZE: 133,
-		EF_FREEZED: 134,
-		EF_ICECRASH: 135,
-		EF_SLOWPOISON: 136,
-		EF_BOTTOM2: 137,
-		EF_FIREPILLARON: 138,
-		EF_SANDMAN: 139,
-		EF_REVIVE: 140,
-		EF_PNEUMA: 141,
-		EF_HEAVENSDRIVE: 142,
-		EF_SONICBLOW2: 143,
-		EF_BRANDISH2: 144,
-		EF_SHOCKWAVE: 145,
-		EF_SHOCKWAVEHIT: 146,
-		EF_EARTHHIT: 147,
-		EF_PIERCESELF: 148,
-		EF_BOWLINGSELF: 149,
-		EF_SPEARSTABSELF: 150,
-		EF_SPEARBMRSELF: 151,
-		EF_HOLYHIT: 152,
-		EF_CONCENTRATION: 153,
-		EF_REFINEOK: 154,
-		EF_REFINEFAIL: 155,
-		EF_JOBCHANGE: 156,
-		EF_LVUP: 157,
-		EF_JOBLVUP: 158,
-		EF_TOPRANK: 159,
-		EF_PARTY: 160,
-		EF_RAIN: 161,
-		EF_SNOW: 162,
-		EF_SAKURA: 163,
-		EF_STATUS_STATE: 164,
-		EF_BANJJAKII: 165,
-		EF_MAKEBLUR: 166,
-		EF_TAMINGSUCCESS: 167,
-		EF_TAMINGFAILED: 168,
-		EF_ENERGYCOAT: 169,
-		EF_CARTREVOLUTION: 170,
-		EF_VENOMDUST2: 171,
-		EF_CHANGEDARK: 172,
-		EF_CHANGEFIRE: 173,
-		EF_CHANGECOLD: 174,
-		EF_CHANGEWIND: 175,
-		EF_CHANGEFLAME: 176,
-		EF_CHANGEEARTH: 177,
-		EF_CHAINGEHOLY: 178,
-		EF_CHANGEPOISON: 179,
-		EF_HITDARK: 180,
-		EF_MENTALBREAK: 181,
-		EF_MAGICALATTHIT: 182,
-		EF_SUI_EXPLOSION: 183,
-		EF_DARKATTACK: 184,
-		EF_SUICIDE: 185,
-		EF_COMBOATTACK1: 186,
-		EF_COMBOATTACK2: 187,
-		EF_COMBOATTACK3: 188,
-		EF_COMBOATTACK4: 189,
-		EF_COMBOATTACK5: 190,
-		EF_GUIDEDATTACK: 191,
-		EF_POISONATTACK: 192,
-		EF_SILENCEATTACK: 193,
-		EF_STUNATTACK: 194,
-		EF_PETRIFYATTACK: 195,
-		EF_CURSEATTACK: 196,
-		EF_SLEEPATTACK: 197,
-		EF_TELEKHIT: 198,
-		EF_PONG: 199,
-		EF_LEVEL99: 200,
-		EF_LEVEL99_2: 201,
-		EF_LEVEL99_3: 202,
-		EF_GUMGANG: 203,
-		EF_POTION1: 204,
-		EF_POTION2: 205,
-		EF_POTION3: 206,
-		EF_POTION4: 207,
-		EF_POTION5: 208,
-		EF_POTION6: 209,
-		EF_POTION7: 210,
-		EF_POTION8: 211,
-		EF_DARKBREATH: 212,
-		EF_DEFFENDER: 213,
-		EF_KEEPING: 214,
-		EF_SUMMONSLAVE: 215,
-		EF_BLOODDRAIN: 216,
-		EF_ENERGYDRAIN: 217,
-		EF_POTION_CON: 218,
-		EF_POTION_: 219,
-		EF_POTION_BERSERK: 220,
-		EF_POTIONPILLAR: 221,
-		EF_DEFENDER: 222,
-		EF_GANBANTEIN: 223,
-		EF_WIND: 224,
-		EF_VOLCANO: 225,
-		EF_GRANDCROSS: 226,
-		EF_INTIMIDATE: 227,
-		EF_CHOOKGI: 228,
-		EF_CLOUD: 229,
-		EF_CLOUD2: 230,
-		EF_MAPPILLAR: 231,
-		EF_LINELINK: 232,
-		EF_CLOUD3: 233,
-		EF_SPELLBREAKER: 234,
-		EF_DISPELL: 235,
-		EF_DELUGE: 236,
-		EF_VIOLENTGALE: 237,
-		EF_LANDPROTECTOR: 238,
-		EF_BOTTOM_VO: 239,
-		EF_BOTTOM_DE: 240,
-		EF_BOTTOM_VI: 241,
-		EF_BOTTOM_LA: 242,
-		EF_FASTMOVE: 243,
-		EF_MAGICROD: 244,
-		EF_HOLYCROSS: 245,
-		EF_SHIELDCHARGE: 246,
-		EF_MAPPILLAR2: 247,
-		EF_PROVIDENCE: 248,
-		EF_SHIELDBOOMERANG: 249,
-		EF_SPEARQUICKEN: 250,
-		EF_DEVOTION: 251,
-		EF_REFLECTSHIELD: 252,
-		EF_ABSORBSPIRITS: 253,
-		EF_STEELBODY: 254,
-		EF_FLAMELAUNCHER: 255,
-		EF_FROSTWEAPON: 256,
-		EF_LIGHTNINGLOADER: 257,
-		EF_SEISMICWEAPON: 258,
-		EF_MAPPILLAR3: 259,
-		EF_MAPPILLAR4: 260,
-		EF_GUMGANG2: 261,
-		EF_TEIHIT1: 262,
-		EF_GUMGANG3: 263,
-		EF_TEIHIT2: 264,
-		EF_TANJI: 265,
-		EF_TEIHIT1X: 266,
-		EF_CHIMTO: 267,
-		EF_STEALCOIN: 268,
-		EF_STRIPWEAPON: 269,
-		EF_STRIPSHIELD: 270,
-		EF_STRIPARMOR: 271,
-		EF_STRIPHELM: 272,
-		EF_CHAINCOMBO: 273,
-		EF_RG_COIN: 274,
-		EF_BACKSTAP: 275,
-		EF_TEIHIT3: 276,
-		EF_BOTTOM_DISSONANCE: 277,
-		EF_BOTTOM_LULLABY: 278,
-		EF_BOTTOM_RICHMANKIM: 279,
-		EF_BOTTOM_ETERNALCHAOS: 280,
-		EF_BOTTOM_DRUMBATTLEFIELD: 281,
-		EF_BOTTOM_RINGNIBELUNGEN: 282,
-		EF_BOTTOM_ROKISWEIL: 283,
-		EF_BOTTOM_INTOABYSS: 284,
-		EF_BOTTOM_SIEGFRIED: 285,
-		EF_BOTTOM_WHISTLE: 286,
-		EF_BOTTOM_ASSASSINCROSS: 287,
-		EF_BOTTOM_POEMBRAGI: 288,
-		EF_BOTTOM_APPLEIDUN: 289,
-		EF_BOTTOM_UGLYDANCE: 290,
-		EF_BOTTOM_HUMMING: 291,
-		EF_BOTTOM_DONTFORGETME: 292,
-		EF_BOTTOM_FORTUNEKISS: 293,
-		EF_BOTTOM_SERVICEFORYOU: 294,
-		EF_TALK_FROSTJOKE: 295,
-		EF_TALK_SCREAM: 296,
-		EF_POKJUK: 297,
-		EF_THROWITEM: 298,
-		EF_THROWITEM2: 299,
-		EF_CHEMICALPROTECTION: 300,
-		EF_POKJUK_SOUND: 301,
-		EF_DEMONSTRATION: 302,
-		EF_CHEMICAL2: 303,
-		EF_TELEPORTATION2: 304,
-		EF_PHARMACY_OK: 305,
-		EF_PHARMACY_FAIL: 306,
-		EF_FORESTLIGHT: 307,
-		EF_THROWITEM3: 308,
-		EF_FIRSTAID: 309,
-		EF_SPRINKLESAND: 310,
-		EF_LOUD: 311,
-		EF_HEAL: 312,
-		EF_HEAL2: 313,
-		EF_EXIT2: 314,
-		EF_GLASSWALL2: 315,
-		EF_READYPORTAL2: 316,
-		EF_PORTAL2: 317,
-		EF_BOTTOM_MAG: 318,
-		EF_BOTTOM_SANC: 319,
-		EF_HEAL3: 320,
-		EF_WARPZONE2: 321,
-		EF_FORESTLIGHT2: 322,
-		EF_FORESTLIGHT3: 323,
-		EF_FORESTLIGHT4: 324,
-		EF_HEAL4: 325,
-		EF_FOOT: 326,
-		EF_FOOT2: 327,
-		EF_BEGINASURA: 328,
-		EF_TRIPLEATTACK: 329,
-		EF_HITLINE: 330,
-		EF_HPTIME: 331,
-		EF_SPTIME: 332,
-		EF_MAPLE: 333,
-		EF_BLIND: 334,
-		EF_POISON: 335,
-		EF_GUARD: 336,
-		EF_JOBLVUP50: 337,
-		EF_ANGEL2: 338,
-		EF_MAGNUM2: 339,
-		EF_CALLZONE: 340,
-		EF_PORTAL3: 341,
-		EF_COUPLECASTING: 342,
-		EF_HEARTCASTING: 343,
-		EF_ENTRY2: 344,
-		EF_SAINTWING: 345,
-		EF_SPHEREWIND: 346,
-		EF_COLORPAPER: 347,
-		EF_LIGHTSPHERE: 348,
-		EF_WATERFALL: 349,
-		EF_WATERFALL_90: 350,
-		EF_WATERFALL_SMALL: 351,
-		EF_WATERFALL_SMALL_90: 352,
-		EF_WATERFALL_T2: 353,
-		EF_WATERFALL_T2_90: 354,
-		EF_WATERFALL_SMALL_T2: 355,
-		EF_WATERFALL_SMALL_T2_90: 356,
-		EF_MINI_TETRIS: 357,
-		EF_GHOST: 358,
-		EF_BAT: 359,
-		EF_BAT2: 360,
-		EF_SOULBREAKER: 361,
-		EF_LEVEL99_4: 362,
-		EF_VALLENTINE: 363,
-		EF_VALLENTINE2: 364,
-		EF_PRESSURE: 365,
-		EF_BASH3D: 366,
-		EF_AURABLADE: 367,
-		EF_REDBODY: 368,
-		EF_LKCONCENTRATION: 369,
-		EF_BOTTOM_GOSPEL: 370,
-		EF_ANGEL: 371,
-		EF_DEVIL: 372,
-		EF_DRAGONSMOKE: 373,
-		EF_BOTTOM_BASILICA: 374,
-		EF_ASSUMPTIO: 375,
-		EF_HITLINE2: 376,
-		EF_BASH3D2: 377,
-		EF_ENERGYDRAIN2: 378,
-		EF_TRANSBLUEBODY: 379,
-		EF_MAGICCRASHER: 380,
-		EF_LIGHTSPHERE2: 381,
-		EF_LIGHTBLADE: 382,
-		EF_ENERGYDRAIN3: 383,
-		EF_LINELINK2: 384,
-		EF_LINKLIGHT: 385,
-		EF_TRUESIGHT: 386,
-		EF_FALCONASSAULT: 387,
-		EF_TRIPLEATTACK2: 388,
-		EF_PORTAL4: 389,
-		EF_MELTDOWN: 390,
-		EF_CARTBOOST: 391,
-		EF_REJECTSWORD: 392,
-		EF_TRIPLEATTACK3: 393,
-		EF_SPHEREWIND2: 394,
-		EF_LINELINK3: 395,
-		EF_PINKBODY: 396,
-		EF_LEVEL99_5: 397,
-		EF_LEVEL99_6: 398,
-		EF_BASH3D3: 399,
-		EF_BASH3D4: 400,
-		EF_NAPALMVALCAN: 401,
-		EF_PORTAL5: 402,
-		EF_MAGICCRASHER2: 403,
-		EF_BOTTOM_SPIDER: 404,
-		EF_BOTTOM_FOGWALL: 405,
-		EF_SOULBURN: 406,
-		EF_SOULCHANGE: 407,
-		EF_BABY: 408,
-		EF_SOULBREAKER2: 409,
-		EF_RAINBOW: 410,
-		EF_PEONG: 411,
-		EF_TANJI2: 412,
-		EF_PRESSEDBODY: 413,
-		EF_SPINEDBODY: 414,
-		EF_KICKEDBODY: 415,
-		EF_AIRTEXTURE: 416,
-		EF_HITBODY: 417,
-		EF_DOUBLEGUMGANG: 418,
-		EF_REFLECTBODY: 419,
-		EF_BABYBODY: 420,
-		EF_BABYBODY2: 421,
-		EF_GIANTBODY: 422,
-		EF_GIANTBODY2: 423,
-		EF_ASURABODY: 424,
-		EF_4WAYBODY: 425,
-		EF_QUAKEBODY: 426,
-		EF_ASURABODY_MONSTER: 427,
-		EF_HITLINE3: 428,
-		EF_HITLINE4: 429,
-		EF_HITLINE5: 430,
-		EF_HITLINE6: 431,
-		EF_ELECTRIC: 432,
-		EF_ELECTRIC2: 433,
-		EF_HITLINE7: 434,
-		EF_STORMKICK: 435,
-		EF_HALFSPHERE: 436,
-		EF_ATTACKENERGY: 437,
-		EF_ATTACKENERGY2: 438,
-		EF_CHEMICAL3: 439,
-		EF_ASSUMPTIO2: 440,
-		EF_BLUECASTING: 441,
-		EF_RUN: 442,
-		EF_STOPRUN: 443,
-		EF_STOPEFFECT: 444,
-		EF_JUMPBODY: 445,
-		EF_LANDBODY: 446,
-		EF_FOOT3: 447,
-		EF_FOOT4: 448,
-		EF_TAE_READY: 449,
-		EF_GRANDCROSS2: 450,
-		EF_SOULSTRIKE2: 451,
-		EF_YUFITEL2: 452,
-		EF_NPC_STOP: 453,
-		EF_DARKCASTING: 454,
-		EF_GUMGANGNPC: 455,
-		EF_AGIUP: 456,
-		EF_JUMPKICK: 457,
-		EF_QUAKEBODY2: 458,
-		EF_STORMKICK1: 459,
-		EF_STORMKICK2: 460,
-		EF_STORMKICK3: 461,
-		EF_STORMKICK4: 462,
-		EF_STORMKICK5: 463,
-		EF_STORMKICK6: 464,
-		EF_STORMKICK7: 465,
-		EF_SPINEDBODY2: 466,
-		EF_BEGINASURA1: 467,
-		EF_BEGINASURA2: 468,
-		EF_BEGINASURA3: 469,
-		EF_BEGINASURA4: 470,
-		EF_BEGINASURA5: 471,
-		EF_BEGINASURA6: 472,
-		EF_BEGINASURA7: 473,
-		EF_AURABLADE2: 474,
-		EF_DEVIL1: 475,
-		EF_DEVIL2: 476,
-		EF_DEVIL3: 477,
-		EF_DEVIL4: 478,
-		EF_DEVIL5: 479,
-		EF_DEVIL6: 480,
-		EF_DEVIL7: 481,
-		EF_DEVIL8: 482,
-		EF_DEVIL9: 483,
-		EF_DEVIL10: 484,
-		EF_DOUBLEGUMGANG2: 485,
-		EF_DOUBLEGUMGANG3: 486,
-		EF_BLACKDEVIL: 487,
-		EF_FLOWERCAST: 488,
-		EF_FLOWERCAST2: 489,
-		EF_FLOWERCAST3: 490,
-		EF_MOCHI: 491,
-		EF_LAMADAN: 492,
-		EF_EDP: 493,
-		EF_SHIELDBOOMERANG2: 494,
-		EF_RG_COIN2: 495,
-		EF_GUARD2: 496,
-		EF_SLIM: 497,
-		EF_SLIM2: 498,
-		EF_SLIM3: 499,
-		EF_CHEMICALBODY: 500,
-		EF_CASTSPIN: 501,
-		EF_PIERCEBODY: 502,
-		EF_SOULLINK: 503,
-		EF_CHOOKGI2: 504,
-		EF_MEMORIZE: 505,
-		EF_SOULLIGHT: 506,
-		EF_MAPAE: 507,
-		EF_ITEMPOKJUK: 508,
-		EF_05VAL: 509,
-		EF_BEGINASURA11: 510,
-		EF_NIGHT: 511,
-		EF_CHEMICAL2DASH: 512,
-		EF_GROUNDSAMPLE: 513,
-		EF_GI_EXPLOSION: 514,
-		EF_CLOUD4: 515,
-		EF_CLOUD5: 516,
-		EF_BOTTOM_HERMODE: 517,
-		EF_CARTTER: 518,
-		EF_ITEMFAST: 519,
-		EF_SHIELDBOOMERANG3: 520,
-		EF_DOUBLECASTBODY: 521,
-		EF_GRAVITATION: 522,
-		EF_TAROTCARD1: 523,
-		EF_TAROTCARD2: 524,
-		EF_TAROTCARD3: 525,
-		EF_TAROTCARD4: 526,
-		EF_TAROTCARD5: 527,
-		EF_TAROTCARD6: 528,
-		EF_TAROTCARD7: 529,
-		EF_TAROTCARD8: 530,
-		EF_TAROTCARD9: 531,
-		EF_TAROTCARD10: 532,
-		EF_TAROTCARD11: 533,
-		EF_TAROTCARD12: 534,
-		EF_TAROTCARD13: 535,
-		EF_TAROTCARD14: 536,
-		EF_ACIDDEMON: 537,
-		EF_GREENBODY: 538,
-		EF_THROWITEM4: 539,
-		EF_BABYBODY_BACK: 540,
-		EF_THROWITEM5: 541,
-		EF_BLUEBODY: 542,
-		EF_HATED: 543,
-		EF_REDLIGHTBODY: 544,
-		EF_RO2YEAR: 545,
-		EF_SMA_READY: 546,
-		EF_STIN: 547,
-		EF_RED_HIT: 548,
-		EF_BLUE_HIT: 549,
-		EF_QUAKEBODY3: 550,
-		EF_SMA: 551,
-		EF_SMA2: 552,
-		EF_STIN2: 553,
-		EF_HITTEXTURE: 554,
-		EF_STIN3: 555,
-		EF_SMA3: 556,
-		EF_BLUEFALL: 557,
-		EF_BLUEFALL_90: 558,
-		EF_FASTBLUEFALL: 559,
-		EF_FASTBLUEFALL_90: 560,
-		EF_BIG_PORTAL: 561,
-		EF_BIG_PORTAL2: 562,
-		EF_SCREEN_QUAKE: 563,
-		EF_HOMUNCASTING: 564,
-		EF_HFLIMOON1: 565,
-		EF_HFLIMOON2: 566,
-		EF_HFLIMOON3: 567,
-		EF_HO_UP: 568,
-		EF_HAMIDEFENCE: 569,
-		EF_HAMICASTLE: 570,
-		EF_HAMIBLOOD: 571,
-		EF_HATED2: 572,
-		EF_TWILIGHT1: 573,
-		EF_TWILIGHT2: 574,
-		EF_TWILIGHT3: 575,
-		EF_ITEM_THUNDER: 576,
-		EF_ITEM_CLOUD: 577,
-		EF_ITEM_CURSE: 578,
-		EF_ITEM_ZZZ: 579,
-		EF_ITEM_RAIN: 580,
-		EF_ITEM_LIGHT: 581,
-		EF_ANGEL3: 582,
-		EF_M01: 583,
-		EF_M02: 584,
-		EF_M03: 585,
-		EF_M04: 586,
-		EF_M05: 587,
-		EF_M06: 588,
-		EF_M07: 589,
-		EF_KAIZEL: 590,
-		EF_KAAHI: 591,
-		EF_CLOUD6: 592,
-		EF_FOOD01: 593,
-		EF_FOOD02: 594,
-		EF_FOOD03: 595,
-		EF_FOOD04: 596,
-		EF_FOOD05: 597,
-		EF_FOOD06: 598,
-		EF_SHRINK: 599,
-		EF_THROWITEM6: 600,
-		EF_SIGHT2: 601,
-		EF_QUAKEBODY4: 602,
-		EF_FIREHIT2: 603,
-		EF_NPC_STOP2: 604,
-		EF_NPC_STOP2_DEL: 605,
-		EF_FVOICE: 606,
-		EF_WINK: 607,
-		EF_COOKING_OK: 608,
-		EF_COOKING_FAIL: 609,
-		EF_TEMP_OK: 610,
-		EF_TEMP_FAIL: 611,
-		EF_HAPGYEOK: 612,
-		EF_THROWITEM7: 613,
-		EF_THROWITEM8: 614,
-		EF_THROWITEM9: 615,
-		EF_THROWITEM10: 616,
-		EF_BUNSINJYUTSU: 617,
-		EF_KOUENKA: 618,
-		EF_HYOUSENSOU: 619,
-		EF_BOTTOM_SUITON: 620,
-		EF_STIN4: 621,
-		EF_THUNDERSTORM2: 622,
-		EF_CHEMICAL4: 623,
-		EF_STIN5: 624,
-		EF_MADNESS_BLUE: 625,
-		EF_MADNESS_RED: 626,
-		EF_RG_COIN3: 627,
-		EF_BASH3D5: 628,
-		EF_CHOOKGI3: 629,
-		EF_KIRIKAGE: 630,
-		EF_TATAMI: 631,
-		EF_KASUMIKIRI: 632,
-		EF_ISSEN: 633,
-		EF_KAEN: 634,
-		EF_BAKU: 635,
-		EF_HYOUSYOURAKU: 636,
-		EF_DESPERADO: 637,
-		EF_LIGHTNING_S: 638,
-		EF_BLIND_S: 639,
-		EF_POISON_S: 640,
-		EF_FREEZING_S: 641,
-		EF_FLARE_S: 642,
-		EF_RAPIDSHOWER: 643,
-		EF_MAGICALBULLET: 644,
-		EF_SPREADATTACK: 645,
-		EF_TRACKCASTING: 646,
-		EF_TRACKING: 647,
-		EF_TRIPLEACTION: 648,
-		EF_BULLSEYE: 649,
-		EF_MAP_MAGICZONE: 650,
-		EF_MAP_MAGICZONE2: 651,
-		EF_DAMAGE1: 652,
-		EF_DAMAGE1_2: 653,
-		EF_DAMAGE1_3: 654,
-		EF_UNDEADBODY: 655,
-		EF_UNDEADBODY_DEL: 656,
-		EF_GREEN_NUMBER: 657,
-		EF_BLUE_NUMBER: 658,
-		EF_RED_NUMBER: 659,
-		EF_PURPLE_NUMBER: 660,
-		EF_BLACK_NUMBER: 661,
-		EF_WHITE_NUMBER: 662,
-		EF_YELLOW_NUMBER: 663,
-		EF_PINK_NUMBER: 664,
-		EF_BUBBLE_DROP: 665,
-		EF_NPC_EARTHQUAKE: 666,
-		EF_DA_SPACE: 667,
-		EF_DRAGONFEAR: 668,
-		EF_BLEEDING: 669,
-		EF_WIDECONFUSE: 670,
-		EF_BOTTOM_RUNNER: 671,
-		EF_BOTTOM_TRANSFER: 672,
-		EF_CRYSTAL_BLUE: 673,
-		EF_BOTTOM_EVILLAND: 674,
-		EF_GUARD3: 675,
-		EF_NPC_SLOWCAST: 676,
-		EF_CRITICALWOUND: 677,
-		EF_GREEN99_3: 678,
-		EF_GREEN99_5: 679,
-		EF_GREEN99_6: 680,
-		EF_MAPSPHERE: 681,
-		EF_POK_LOVE: 682,
-		EF_POK_WHITE: 683,
-		EF_POK_VALEN: 684,
-		EF_POK_BIRTH: 685,
-		EF_POK_CHRISTMAS: 686,
-		EF_MAP_MAGICZONE3: 687,
-		EF_MAP_MAGICZONE4: 688,
-		EF_DUST: 689,
-		EF_TORCH_RED: 690,
-		EF_TORCH_GREEN: 691,
-		EF_MAP_GHOST: 692,
-		EF_GLOW1: 693,
-		EF_GLOW2: 694,
-		EF_GLOW4: 695,
-		EF_TORCH_PURPLE: 696,
-		EF_CLOUD7: 697,
-		EF_CLOUD8: 698,
-		EF_FLOWERLEAF: 699,
-		EF_MAPSPHERE2: 700,
-		EF_GLOW11: 701,
-		EF_GLOW12: 702,
-		EF_CIRCLELIGHT: 703,
-		EF_ITEM315: 704,
-		EF_ITEM316: 705,
-		EF_ITEM317: 706,
-		EF_ITEM318: 707,
-		EF_STORM_MIN: 708,
-		EF_POK_JAP: 709,
-		EF_MAP_GREENLIGHT: 710,
-		EF_MAP_MAGICWALL: 711,
-		EF_MAP_GREENLIGHT2: 712,
-		EF_YELLOWFLY1: 713,
-		EF_YELLOWFLY2: 714,
-		EF_BOTTOM_BLUE: 715,
-		EF_BOTTOM_BLUE2: 716,
-		EF_WEWISH: 717,
-		EF_FIREPILLARON2: 718,
-		EF_FORESTLIGHT5: 719,
-		EF_SOULBREAKER3: 720,
-		EF_ADO_STR: 721,
-		EF_IGN_STR: 722,
-		EF_CHIMTO2: 723,
-		EF_WINDCUTTER: 724,
-		EF_DETECT2: 725,
-		EF_FROSTMYSTY: 726,
-		EF_CRIMSON_STR: 727,
-		EF_HELL_STR: 728,
-		EF_SPR_MASH: 729,
-		EF_SPR_SOULE: 730,
-		EF_DHOWL_STR: 731,
-		EF_EARTHWALL: 732,
-		EF_SOULBREAKER4: 733,
-		EF_CHAINL_STR: 734,
-		EF_CHOOKGI_FIRE: 735,
-		EF_CHOOKGI_WIND: 736,
-		EF_CHOOKGI_WATER: 737,
-		EF_CHOOKGI_GROUND: 738,
-		EF_MAGENTA_TRAP: 739,
-		EF_COBALT_TRAP: 740,
-		EF_MAIZE_TRAP: 741,
-		EF_VERDURE_TRAP: 742,
-		EF_NORMAL_TRAP: 743,
-		EF_CLOAKING2: 744,
-		EF_AIMED_STR: 745,
-		EF_ARROWSTORM_STR: 746,
-		EF_LAULAMUS_STR: 747,
-		EF_LAUAGNUS_STR: 748,
-		EF_MILSHIELD_STR: 749,
-		EF_CONCENTRATION2: 750,
-		EF_FIREBALL2: 751,
-		EF_BUNSINJYUTSU2: 752,
-		EF_CLEARTIME: 753,
-		EF_GLASSWALL3: 754,
-		EF_ORATIO: 755,
-		EF_POTION_BERSERK2: 756,
-		EF_CIRCLEPOWER: 757,
-		EF_ROLLING1: 758,
-		EF_ROLLING2: 759,
-		EF_ROLLING3: 760,
-		EF_ROLLING4: 761,
-		EF_ROLLING5: 762,
-		EF_ROLLING6: 763,
-		EF_ROLLING7: 764,
-		EF_ROLLING8: 765,
-		EF_ROLLING9: 766,
-		EF_ROLLING10: 767,
-		EF_PURPLEBODY: 768,
-		EF_STIN6: 769,
-		EF_RG_COIN4: 770,
-		EF_POISONWAV: 771,
-		EF_POISONSMOKE: 772,
-		EF_GUMGANG4: 773,
-		EF_SHIELDBOOMERANG4: 774,
-		EF_CASTSPIN2: 775,
-		EF_VULCANWAV: 776,
-		EF_AGIUP2: 777,
-		EF_DETECT3: 778,
-		EF_AGIUP3: 779,
-		EF_DETECT4: 780,
-		EF_ELECTRIC3: 781,
-		EF_GUARD4: 782,
-		EF_BOTTOM_BARRIER: 783,
-		EF_BOTTOM_STEALTH: 784,
-		EF_REPAIRTIME: 785,
-		EF_NC_ANAL: 786,
-		EF_FIRETHROW: 787,
-		EF_VENOMIMPRESS: 788,
-		EF_FROSTMISTY: 789,
-		EF_BURNING: 790,
-		EF_COLDTHROW: 791,
-		EF_MAKEHALLU: 792,
-		EF_HALLUTIME: 793,
-		EF_INFRAREDSCAN: 794,
-		EF_CRASHAXE: 795,
-		EF_GTHUNDER: 796,
-		EF_STONERING: 797,
-		EF_INTIMIDATE2: 798,
-		EF_STASIS: 799,
-		EF_REDLINE: 800,
-		EF_FROSTDIVER3: 801,
-		EF_BOTTOM_BASILICA2: 802,
-		EF_RECOGNIZED: 803,
-		EF_TETRA: 804,
-		EF_TETRACASTING: 805,
-		EF_FIREBALL3: 806,
-		EF_INTIMIDATE3: 807,
-		EF_RECOGNIZED2: 808,
-		EF_CLOAKING3: 809,
-		EF_INTIMIDATE4: 810,
-		EF_STRETCH: 811,
-		EF_BLACKBODY: 812,
-		EF_ENERVATION: 813,
-		EF_ENERVATION2: 814,
-		EF_ENERVATION3: 815,
-		EF_ENERVATION4: 816,
-		EF_ENERVATION5: 817,
-		EF_ENERVATION6: 818,
-		EF_LINELINK4: 819,
-		EF_RG_COIN5: 820,
-		EF_WATERFALL_ANI: 821,
-		EF_BOTTOM_MANHOLE: 822,
-		EF_MANHOLE: 823,
-		EF_MAKEFEINT: 824,
-		EF_FORESTLIGHT6: 825,
-		EF_DARKCASTING2: 826,
-		EF_BOTTOM_ANI: 827,
-		EF_BOTTOM_MAELSTROM: 828,
-		EF_BOTTOM_BLOODYLUST: 829,
-		EF_BEGINSPELL_N1: 830,
-		EF_BEGINSPELL_N2: 831,
-		EF_HEAL_N: 832,
-		EF_CHOOKGI_N: 833,
-		EF_JOBLVUP50_2: 834,
-		EF_CHEMICAL2DASH2: 835,
-		EF_CHEMICAL2DASH3: 836,
-		EF_ROLLINGCAST: 837,
-		EF_WATER_BELOW: 838,
-		EF_WATER_FADE: 839,
-		EF_BEGINSPELL_N3: 840,
-		EF_BEGINSPELL_N4: 841,
-		EF_BEGINSPELL_N5: 842,
-		EF_BEGINSPELL_N6: 843,
-		EF_BEGINSPELL_N7: 844,
-		EF_BEGINSPELL_N8: 845,
-		EF_WATER_SMOKE: 846,
-		EF_DANCE1: 847,
-		EF_DANCE2: 848,
-		EF_LINKPARTICLE: 849,
-		EF_SOULLIGHT2: 850,
-		EF_SPR_PARTICLE: 851,
-		EF_SPR_PARTICLE2: 852,
-		EF_SPR_PLANT: 853,
-		EF_CHEMICAL_V: 854,
-		EF_SHOOTPARTICLE: 855,
-		EF_BOT_REVERB: 856,
-		EF_RAIN_PARTICLE: 857,
-		EF_CHEMICAL_V2: 858,
-		EF_SECRA: 859,
-		EF_BOT_REVERB2: 860,
-		EF_CIRCLEPOWER2: 861,
-		EF_SECRA2: 862,
-		EF_CHEMICAL_V3: 863,
-		EF_ENERVATION7: 864,
-		EF_CIRCLEPOWER3: 865,
-		EF_SPR_PLANT2: 866,
-		EF_CIRCLEPOWER4: 867,
-		EF_SPR_PLANT3: 868,
-		EF_RG_COIN6: 869,
-		EF_SPR_PLANT4: 870,
-		EF_CIRCLEPOWER5: 871,
-		EF_SPR_PLANT5: 872,
-		EF_CIRCLEPOWER6: 873,
-		EF_SPR_PLANT6: 874,
-		EF_CIRCLEPOWER7: 875,
-		EF_SPR_PLANT7: 876,
-		EF_CIRCLEPOWER8: 877,
-		EF_SPR_PLANT8: 878,
-		EF_HEARTASURA: 879,
-		EF_BEGINSPELL_150: 880,
-		EF_LEVEL99_150: 881,
-		EF_PRIMECHARGE: 882,
-		EF_GLASSWALL4: 883,
-		EF_GRADIUS_LASER: 884,
-		EF_BASH3D6: 885,
-		EF_GUMGANG5: 886,
-		EF_HITLINE8: 887,
-		EF_ELECTRIC4: 888,
-		EF_TEIHIT1T: 889,
-		EF_SPINMOVE: 890,
-		EF_FIREBALL4: 891,
-		EF_TRIPLEATTACK4: 892,
-		EF_CHEMICAL3S: 893,
-		EF_GROUNDSHAKE: 894,
-		EF_DQ9_CHARGE: 895,
-		EF_DQ9_CHARGE2: 896,
-		EF_DQ9_CHARGE3: 897,
-		EF_DQ9_CHARGE4: 898,
-		EF_BLUELINE: 899,
-		EF_SELFSCROLL: 900,
-		EF_SPR_LIGHTPRINT: 901,
-		EF_PNG_TEST: 902,
-		EF_BEGINSPELL_YB: 903,
-		EF_CHEMICAL2DASH4: 904,
-		EF_GROUNDSHAKE2: 905,
-		EF_PRESSURE2: 906,
-		EF_RG_COIN7: 907,
-		EF_PRIMECHARGE2: 908,
-		EF_PRIMECHARGE3: 909,
-		EF_PRIMECHARGE4: 910,
-		EF_GREENCASTING: 911,
-		EF_WALLOFTHORN: 912,
-		EF_FIREBALL5: 913,
-		EF_THROWITEM11: 914,
-		EF_SPR_PLANT9: 915,
-		EF_DEMONICFIRE: 916,
-		EF_DEMONICFIRE2: 917,
-		EF_DEMONICFIRE3: 918,
-		EF_HELLSPLANT: 919,
-		EF_FIREWALL2: 920,
-		EF_VACUUM: 921,
-		EF_SPR_PLANT10: 922,
-		EF_SPR_LIGHTPRINT2: 923,
-		EF_POISONSMOKE2: 924,
-		EF_MAKEHALLU2: 925,
-		EF_SHOCKWAVE2: 926,
-		EF_SPR_PLANT11: 927,
-		EF_COLDTHROW2: 928,
-		EF_DEMONICFIRE4: 929,
-		EF_PRESSURE3: 930,
-		EF_LINKPARTICLE2: 931,
-		EF_SOULLIGHT3: 932,
-		EF_CHAREFFECT: 933,
-		EF_GUMGANG6: 934,
-		EF_FIREBALL6: 935,
-		EF_GUMGANG7: 936,
-		EF_GUMGANG8: 937,
-		EF_GUMGANG9: 938,
-		EF_BOTTOM_DE2: 939,
-		EF_COLDSTATUS: 940,
-		EF_SPR_LIGHTPRINT3: 941,
-		EF_WATERBALL3: 942,
-		EF_HEAL_N2: 943,
-		EF_RAIN_PARTICLE2: 944,
-		EF_CLOUD9: 945,
-		EF_YELLOWFLY3: 946,
-		EF_EL_GUST: 947,
-		EF_EL_BLAST: 948,
-		EF_EL_AQUAPLAY: 949,
-		EF_EL_UPHEAVAL: 950,
-		EF_EL_WILD_STORM: 951,
-		EF_EL_CHILLY_AIR: 952,
-		EF_EL_CURSED_SOIL: 953,
-		EF_EL_COOLER: 954,
-		EF_EL_TROPIC: 955,
-		EF_EL_PYROTECHNIC: 956,
-		EF_EL_PETROLOGY: 957,
-		EF_EL_HEATER: 958,
-		EF_POISON_MIST: 959,
-		EF_ERASER_CUTTER: 960,
-		EF_SILENT_BREEZE: 961,
-		EF_MAGMA_FLOW: 962,
-		EF_GRAYBODY: 963,
-		EF_LAVA_SLIDE: 964,
-		EF_SONIC_CLAW: 965,
-		EF_TINDER_BREAKER: 966,
-		EF_MIDNIGHT_FRENZY: 967,
-		EF_MACRO: 968,
-		EF_CHEMICAL_ALLRANGE: 969,
-		EF_TETRA_FIRE: 970,
-		EF_TETRA_WATER: 971,
-		EF_TETRA_WIND: 972,
-		EF_TETRA_GROUND: 973,
-		EF_EMITTER: 974,
-		EF_VOLCANIC_ASH: 975,
-		EF_LEVEL99_ORB1: 976,
-		EF_LEVEL99_ORB2: 977,
-		EF_LEVEL150: 978,
-		EF_LEVEL150_SUB: 979,
-		EF_THROWITEM4_1: 980,
-		EF_THROW_HAPPOKUNAI: 981,
-		EF_THROW_MULTIPLE_COIN: 982,
-		EF_THROW_BAKURETSU: 983,
-		EF_ROTATE_HUUMARANKA: 984,
-		EF_ROTATE_BG: 985,
-		EF_ROTATE_LINE_GRAY: 986,
-		EF_2011RWC: 987,
-		EF_2011RWC2: 988,
-		EF_KAIHOU: 989,
-		EF_GROUND_EXPLOSION: 990,
-		EF_KG_KAGEHUMI: 991,
-		EF_KO_ZENKAI_WATER: 992,
-		EF_KO_ZENKAI_LAND: 993,
-		EF_KO_ZENKAI_FIRE: 994,
-		EF_KO_ZENKAI_WIND: 995,
-		EF_KO_JYUMONJIKIRI: 996,
-		EF_KO_SETSUDAN: 997,
-		EF_RED_CROSS: 998,
-		EF_KO_IZAYOI: 999,
-		EF_ROTATE_LINE_BLUE: 1e3,
-		EF_KG_KYOMU: 1001,
-		EF_KO_HUUMARANKA: 1002,
-		EF_BLUELIGHTBODY: 1003,
-		EF_KAGEMUSYA: 1004,
-		EF_OB_GENSOU: 1005,
-		EF_NO100_FIRECRACKER: 1006,
-		EF_KO_MAKIBISHI: 1007,
-		EF_KAIHOU1: 1008,
-		EF_AKAITSUKI: 1009,
-		EF_ZANGETSU: 1010,
-		EF_GENSOU: 1011,
-		EF_HAT_EFFECT: 1012,
-		EF_CHERRYBLOSSOM: 1013,
-		EF_EVENT_CLOUD: 1014,
-		EF_RUN_MAKE_OK: 1015,
-		EF_RUN_MAKE_FAILURE: 1016,
-		EF_MIRESULT_MAKE_OK: 1017,
-		EF_MIRESULT_MAKE_FAIL: 1018,
-		EF_ALL_RAY_OF_PROTECTION: 1019,
-		EF_VENOMFOG: 1020,
-		EF_DUSTSTORM: 1021,
-		EF_LEVEL160: 1022,
-		EF_LEVEL160_SUB: 1023,
-		EF_MAPCHAIN: 1024,
-		EF_MAGIC_FLOOR: 1025,
-		EF_ICEMINE: 1026,
-		EF_FLAMECORSS: 1027,
-		EF_ICEMINE_1: 1028,
-		EF_DANCE_BLADE_ATK: 1029,
-		EF_DARKPIERCING: 1030,
-		EF_INVINCIBLEOFF2: 1031,
-		EF_MAXPAIN: 1032,
-		EF_DEATHSUMMON: 1033,
-		EF_MOONSTAR: 1034,
-		EF_STRANGELIGHTS: 1035,
-		EF_SUPER_STAR: 1036,
-		EF_YELLOBODY: 1037,
-		EF_COLORPAPER2: 1038,
-		EF_EVILS_PAW: 1039,
-		EF_GC_DARKCROW: 1040,
-		EF_RK_DRAGONBREATH_WATER: 1041,
-		EF_ALL_FULL_THROTTLE: 1042,
-		EF_SR_FLASHCOMBO: 1043,
-		EF_RK_LUXANIMA: 1044,
-		EF_CLOUD10: 1045,
-		EF_SO_ELEMENTAL_SHIELD: 1046,
-		EF_AB_OFFERTORIUM: 1047,
-		EF_WL_TELEKINESIS_INTENSE: 1048,
-		EF_GN_ILLUSIONDOPING: 1049,
-		EF_NC_MAGMA_ERUPTION: 1050,
-		EF_LG_KINGS_GRACE: 1051,
-		EF_BLOODDRAIN2: 1052,
-		EF_NPC_WIDEWEB: 1053,
-		EF_NPC_BURNT: 1054,
-		EF_NPC_CHILL: 1055,
-		EF_RA_UNLIMIT: 1056,
-		EF_AB_OFFERTORIUM_RING: 1057,
-		EF_SC_ESCAPE: 1058,
-		EF_WM_FRIGG_SONG: 1059,
-		EF_FLICKER: 1060,
-		EF_C_MAKER: 1061,
-		EF_HAMMER_OF_GOD: 1062,
-		EF_MASS_SPIRAL: 1063,
-		EF_FIRE_RAIN: 1064,
-		EF_WHITEBODY: 1065,
-		EF_BANISHING_BUSTER: 1066,
-		EF_SLUGSHOT: 1067,
-		EF_D_TAIL: 1068,
-		EF_BIND_TRAP1: 1069,
-		EF_BIND_TRAP2: 1070,
-		EF_BIND_TRAP3: 1071,
-		EF_JUMPBODY1: 1072,
-		EF_ANIMATED_EMITTER: 1073,
-		EF_RL_EXPLOSION: 1074,
-		EF_C_MAKER_1: 1075,
-		EF_QD_SHOT: 1076,
-		EF_P_ALTER: 1077,
-		EF_S_STORM: 1078,
-		EF_MUSIC_HAT: 1079,
-		EF_CLOUD_KILL: 1080,
-		EF_ESCAPE: 1081,
-		EF_XENO_SLASHER: 1082,
-		EF_FLOWERSMOKE: 1083,
-		EF_FSTONE: 1084,
-		EF_QSCARABA: 1085,
-		EF_LJOSALFAR: 1086,
-		EF_HAPPINESSSTAR: 1087,
-		EF_POWER_OF_GAIA: 1088,
-		EF_MAPLE_FALLS: 1089,
-		EF_MARKING_USE_CHANGEMONSTER: 1090,
-		EF_MAGICAL_FEATHER: 1091,
-		EF_MERMAID_LONGING: 1092,
-		EF_GIFT_OF_SNOW: 1093,
-		EF_ACH_COMPLETE: 1094,
-		EF_TIME_ACCESSORY: 1095,
-		EF_SPRITEMABLE: 1096,
-		EF_TUNAPARTY: 1097,
-		EF_FRESHSHRIMP: 1098,
-		EF_SU_GROOMING: 1123,
-		EF_SU_CHATTERING: 1124,
-		EF_BAKURETSU_HADOU: 1130,
-		EF_FIREDANCE: 1133,
-		EF_RICHS_COIN_A: 1134,
-		EF_E_CHAIN: 1137,
-		EF_HEAT_BARREL: 1138,
-		EF_H_MINE: 1139,
-		EF_FALLEN_ANGEL: 1140,
-		EF_IMMUNE_PROPERTY: 1149,
-		EF_MOVE_COORDINATE: 1150,
-		DROPEFFECT_PINK: 1186,
-		DROPEFFECT_YELLOW: 1189,
-		DROPEFFECT_PURPLE: 1190,
-		EF_LIGHTSPHERE_SUN: 1197,
-		EF_LIGHTSPHERE_MOON: 1198,
-		EF_LIGHTSPHERE_STAR: 1199,
-		EF_NOVAEXPLOSING: 1202,
-		EF_STAR_EMPEROR: 1203,
-		EF_SMA_BLACK: 1204,
-		EF_ENERGYDRAIN_BLACK: 1208,
-		EF_BLINK_BODY: 1209,
-		EF_SOLARBURST: 1218,
-		EF_SJ_DOCUMENT: 1219,
-		EF_FALLING_STAR: 1220,
-		EF_STORMKICK8: 1223,
-		EF_NEWMOON_KICK: 1229,
-		EF_FULLMOON_KICK: 1230,
-		EF_BOOK_OF_DIMENSION: 1231,
-		EF_CURSE_EXPLOSION: 1233,
-		EF_SOUL_REAPER: 1234,
-		EF_DIGITAL_SPACE: 1240,
-		EF_SOUL_EXPLOSION: 1242,
-		DROPEFFECT_BLUE: 1869,
-		DROPEFFECT_GREEN: 1870,
-		DROPEFFECT_RED: 1871,
-		EF_NEW_SUCCESS: 1872,
-		EF_NEW_FAILURE: 1873,
-		EF_NEW_INTRO: 1874,
-		EF_UI_ENCHANT_INTRO_YELLOW: 1875,
-		EF_UI_ENCHANT_SUCCESS: 1876,
-		EF_UI_ENCHANT_FAIL: 1877,
-		EF_UI_ENCHANT_INTRO_BLUE: 1878,
-		EF_UI_ENCHANT_UP_SUCCESS: 1879,
-		EF_UI_ENCHANT_UP_FAIL: 1880,
-		EF_UI_ENCHANT_INTRO_GREEN: 1881,
-		EF_UI_ENCHANT_RESET_SUCCESS: 1882,
-		EF_UI_ENCHANT_RESET_FAIL: 1883,
-		EF_MAX: 1884
-	};
-}));
-// src/DB/Skills/SkillUnit.js
-var SkillUnit;
-var init_SkillUnit = __esmMin((() => {
-	init_SkillUnitConst();
-	init_EffectConst();
-	SkillUnit = {};
-	SkillUnit[SkillUnitConst_default.UNT_SAFETYWALL] = EffectConst_default.EF_GLASSWALL2;
-	SkillUnit[SkillUnitConst_default.UNT_FIREWALL] = EffectConst_default.EF_FIREWALL;
-	SkillUnit[SkillUnitConst_default.UNT_WARPPORTAL] = EffectConst_default.EF_PORTAL2;
-	SkillUnit[SkillUnitConst_default.UNT_PRE_WARPPORTAL] = EffectConst_default.EF_READYPORTAL2;
-	SkillUnit[SkillUnitConst_default.UNT_SANCTUARY] = EffectConst_default.EF_BOTTOM_SANC;
-	SkillUnit[SkillUnitConst_default.UNT_MAGNUS] = EffectConst_default.EF_BOTTOM_MAG;
-	SkillUnit[SkillUnitConst_default.UNT_PNEUMA] = EffectConst_default.EF_PNEUMA;
-	SkillUnit[SkillUnitConst_default.UNT_FIREPILLAR_WAITING] = EffectConst_default.EF_FIREPILLARON;
-	SkillUnit[SkillUnitConst_default.UNT_ICEWALL] = EffectConst_default.EF_ICEWALL;
-	SkillUnit[SkillUnitConst_default.UNT_QUAGMIRE] = EffectConst_default.EF_QUAGMIRE;
-	SkillUnit[SkillUnitConst_default.UNT_BLASTMINE] = "ef_trap_03_3";
-	SkillUnit[SkillUnitConst_default.UNT_SKIDTRAP] = "ef_trap_02";
-	SkillUnit[SkillUnitConst_default.UNT_ANKLESNARE] = "ef_trap_01";
-	SkillUnit[SkillUnitConst_default.UNT_VENOMDUST] = EffectConst_default.EF_VENOMDUST2;
-	SkillUnit[SkillUnitConst_default.UNT_LANDMINE] = "ef_trap_03";
-	SkillUnit[SkillUnitConst_default.UNT_SHOCKWAVE] = "ef_trap_03_6";
-	SkillUnit[SkillUnitConst_default.UNT_SANDMAN] = "ef_trap_03_4";
-	SkillUnit[SkillUnitConst_default.UNT_FLASHER] = "ef_trap_03_5";
-	SkillUnit[SkillUnitConst_default.UNT_FREEZINGTRAP] = "ef_trap_03_2";
-	SkillUnit[SkillUnitConst_default.UNT_CLAYMORETRAP] = "ef_trap_04";
-	SkillUnit[SkillUnitConst_default.UNT_TALKIEBOX] = "ef_trap_05";
-	SkillUnit[SkillUnitConst_default.UNT_VOLCANO] = EffectConst_default.EF_BOTTOM_VO;
-	SkillUnit[SkillUnitConst_default.UNT_DELUGE] = EffectConst_default.EF_BOTTOM_DE;
-	SkillUnit[SkillUnitConst_default.UNT_VIOLENTGALE] = EffectConst_default.EF_BOTTOM_VI;
-	SkillUnit[SkillUnitConst_default.UNT_LANDPROTECTOR] = EffectConst_default.EF_BOTTOM_LA;
-	SkillUnit[SkillUnitConst_default.UNT_LULLABY] = "278_ground";
-	SkillUnit[SkillUnitConst_default.UNT_RICHMANKIM] = "279_ground";
-	SkillUnit[SkillUnitConst_default.UNT_ETERNALCHAOS] = "280_ground";
-	SkillUnit[SkillUnitConst_default.UNT_DRUMBATTLEFIELD] = "281_ground";
-	SkillUnit[SkillUnitConst_default.UNT_RINGNIBELUNGEN] = "282_ground";
-	SkillUnit[SkillUnitConst_default.UNT_ROKISWEIL] = "283_ground";
-	SkillUnit[SkillUnitConst_default.UNT_INTOABYSS] = "284_ground";
-	SkillUnit[SkillUnitConst_default.UNT_SIEGFRIED] = "285_ground";
-	SkillUnit[SkillUnitConst_default.UNT_DISSONANCE] = "277_ground";
-	SkillUnit[SkillUnitConst_default.UNT_WHISTLE] = "286_ground";
-	SkillUnit[SkillUnitConst_default.UNT_ASSASSINCROSS] = "287_ground";
-	SkillUnit[SkillUnitConst_default.UNT_POEMBRAGI] = "288_ground";
-	SkillUnit[SkillUnitConst_default.UNT_APPLEIDUN] = "289_ground";
-	SkillUnit[SkillUnitConst_default.UNT_UGLYDANCE] = "290_ground";
-	SkillUnit[SkillUnitConst_default.UNT_HUMMING] = "291_ground";
-	SkillUnit[SkillUnitConst_default.UNT_DONTFORGETME] = "292_ground";
-	SkillUnit[SkillUnitConst_default.UNT_FORTUNEKISS] = "293_ground";
-	SkillUnit[SkillUnitConst_default.UNT_SERVICEFORYOU] = "294_ground";
-	SkillUnit[SkillUnitConst_default.UNT_GRAFFITI] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_DEMONSTRATION] = EffectConst_default.EF_DEMONSTRATION;
-	SkillUnit[SkillUnitConst_default.UNT_GOSPEL] = "370_ground";
-	SkillUnit[SkillUnitConst_default.UNT_BASILICA] = EffectConst_default.EF_BOTTOM_BASILICA;
-	SkillUnit[SkillUnitConst_default.UNT_MOONLIT] = "394_ground";
-	SkillUnit[SkillUnitConst_default.UNT_FOGWALL] = "405_ground";
-	SkillUnit[SkillUnitConst_default.UNT_SPIDERWEB] = EffectConst_default.EF_BOTTOM_SPIDER;
-	SkillUnit[SkillUnitConst_default.UNT_GRAVITATION] = "522_ground";
-	SkillUnit[SkillUnitConst_default.UNT_HERMODE] = EffectConst_default.EF_BOTTOM_HERMODE;
-	SkillUnit[SkillUnitConst_default.UNT_SUITON] = EffectConst_default.EF_BOTTOM_SUITON;
-	SkillUnit[SkillUnitConst_default.UNT_TATAMIGAESHI] = EffectConst_default.EF_TATAMI;
-	SkillUnit[SkillUnitConst_default.UNT_KAEN] = EffectConst_default.EF_KAEN;
-	SkillUnit[SkillUnitConst_default.UNT_GROUNDDRIFT_WIND] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_GROUNDDRIFT_WATER] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_GROUNDDRIFT_FIRE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_DEATHWAVE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_WATERATTACK] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_EVILLAND] = EffectConst_default.EF_BOTTOM_EVILLAND;
-	SkillUnit[SkillUnitConst_default.UNT_EPICLESIS] = EffectConst_default.EF_GLASSWALL3;
-	SkillUnit[SkillUnitConst_default.UNT_EARTHSTRAIN] = EffectConst_default.EF_EARTHWALL;
-	SkillUnit[SkillUnitConst_default.UNT_MANHOLE] = EffectConst_default.EF_BOTTOM_MANHOLE;
-	SkillUnit[SkillUnitConst_default.UNT_DIMENSIONDOOR] = EffectConst_default.EF_FORESTLIGHT6;
-	SkillUnit[SkillUnitConst_default.UNT_CHAOSPANIC] = EffectConst_default.EF_BOTTOM_ANI;
-	SkillUnit[SkillUnitConst_default.UNT_MAELSTROM] = EffectConst_default.EF_BOTTOM_MAELSTROM;
-	SkillUnit[SkillUnitConst_default.UNT_BLOODYLUST] = EffectConst_default.EF_BOTTOM_BLOODYLUST;
-	SkillUnit[SkillUnitConst_default.UNT_FEINTBOMB] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_MAGENTATRAP] = "ef_trap_3_magenta";
-	SkillUnit[SkillUnitConst_default.UNT_COBALTTRAP] = "ef_trap_3_cobalt";
-	SkillUnit[SkillUnitConst_default.UNT_MAIZETRAP] = "ef_trap_3_maze";
-	SkillUnit[SkillUnitConst_default.UNT_VERDURETRAP] = "ef_trap_3_verdure";
-	SkillUnit[SkillUnitConst_default.UNT_FIRINGTRAP] = "ef_trap_3_fire";
-	SkillUnit[SkillUnitConst_default.UNT_ICEBOUNDTRAP] = "ef_trap_3_ice";
-	SkillUnit[SkillUnitConst_default.UNT_ELECTRICSHOCKER] = "ef_trap_3_shock";
-	SkillUnit[SkillUnitConst_default.UNT_CLUSTERBOMB] = "ef_trap_3_cluster";
-	SkillUnit[SkillUnitConst_default.UNT_REVERBERATION] = EffectConst_default.EF_BOT_REVERB;
-	SkillUnit[SkillUnitConst_default.UNT_SEVERE_RAINSTORM] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_FIREWALK] = EffectConst_default.EF_FIREWALL2;
-	SkillUnit[SkillUnitConst_default.UNT_ELECTRICWALK] = EffectConst_default.EF_SHOCKWAVE2;
-	SkillUnit[SkillUnitConst_default.UNT_NETHERWORLD] = EffectConst_default.EF_BOT_REVERB2;
-	SkillUnit[SkillUnitConst_default.UNT_PSYCHIC_WAVE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_CLOUD_KILL] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_POISONSMOKE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_NEUTRALBARRIER] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_STEALTHFIELD] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_WARMER] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_THORNS_TRAP] = "ef_trap_3_thorn";
-	SkillUnit[SkillUnitConst_default.UNT_WALLOFTHORN] = EffectConst_default.EF_WALLOFTHORN;
-	SkillUnit[SkillUnitConst_default.UNT_DEMONIC_FIRE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_FIRE_EXPANSION_SMOKE_POWDER] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_FIRE_EXPANSION_TEAR_GAS] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_HELLS_PLANT] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_VACUUM_EXTREME] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_BANDING] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_FIRE_MANTLE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_WATER_BARRIER] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_ZEPHYR] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_POWER_OF_GAIA] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_FIRE_INSIGNIA] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_WATER_INSIGNIA] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_WIND_INSIGNIA] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_EARTH_INSIGNIA] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_POISON_MIST] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_LAVA_SLIDE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_VOLCANIC_ASH] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_ZENKAI_WATER] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_MAKIBISHI] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_VENOMFOG] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_ICEMINE] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_MAGMA_ERUPTION] = EffectConst_default.EF_NONE;
-	SkillUnit[SkillUnitConst_default.UNT_B_TRAP] = EffectConst_default.EF_NONE;
 }));
 // src/DB/Items/ItemEffect.js
 var ItemEffect;
@@ -241910,6 +242230,44 @@ var init_StrEffect$1 = __esmMin((() => {
 	StrEffect_default = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform vec4 uSpriteColor;\r\nuniform sampler2D uDiffuse;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n	fragColor = texture( uDiffuse, vTextureCoord.st ) * uSpriteColor;\r\n	if ( fragColor.a == 0.0 || (fragColor.r == 0.0 && fragColor.g == 0.0 && fragColor.b == 0.0) ) {\r\n		discard;\r\n	}\r\n\r\n	if ( uFogUse ) {\r\n		float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n		float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n		fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n	}\r\n}";
 }));
 // src/Renderer/Effects/StrEffect.js
+/**
+* Turn a frame's four corners as StrEffect.vs would (by the frame's own angle),
+* then mirror them, turn them by the aim and tilt them, in place. The shader
+* then draws them with no turn of its own.
+*
+* Corners are in STR pixels, y down the screen. Angles in degrees: `angle` is
+* the frame's, `aim` the effect's counter-clockwise turn, `tilt` a turn about
+* the screen's x axis (it shortens y by cos(tilt)).
+*
+* @param {number} angle
+* @param {number} aim
+* @param {boolean} flipX
+* @param {boolean} flipY
+* @param {number} tilt
+* @param {Float32Array|Array<number>} cornerX
+* @param {Float32Array|Array<number>} cornerY
+*/
+function transformCorners(angle, aim, flipX, flipY, tilt, cornerX, cornerY) {
+	const r1 = -angle / 180 * Math.PI;
+	const c1 = Math.cos(r1);
+	const s1 = Math.sin(r1);
+	const r2 = aim / 180 * Math.PI;
+	const c2 = Math.cos(r2);
+	const s2 = Math.sin(r2);
+	const squash = tilt ? Math.cos(tilt / 180 * Math.PI) : 1;
+	for (let i = 0; i < 4; i++) {
+		const px = cornerX[i];
+		const py = -cornerY[i];
+		let x = px * c1 - py * s1;
+		let y = px * s1 + py * c1;
+		if (flipX) x = -x;
+		if (flipY) y = -y;
+		const tx = x * c2 - y * s2;
+		const ty = (x * s2 + y * c2) * squash;
+		cornerX[i] = tx;
+		cornerY[i] = -ty;
+	}
+}
 function copyAnim(src) {
 	return {
 		type: src.type,
@@ -242002,18 +242360,21 @@ function calculateAnimation(layer, keyIndex, result) {
 	}
 	return true;
 }
-var D3DBLEND, _program$19, _buffer$15, _spriteOffset, _cornerX, _cornerY, PIXEL_TO_WORLD_Z, anim, StrEffect;
+var D3DBLEND, _program$25, _buffer$15, _spriteOffset, _cornerX, _cornerY, _modelView$2, AIM_PIVOT_X, AIM_PIVOT_Y, PIXEL_TO_WORLD_Z, anim, StrEffect;
 var init_StrEffect = __esmMin((() => {
 	init_StrEffect$2();
 	init_StrEffect$1();
 	init_WebGL();
 	init_Client();
 	D3DBLEND = {};
-	_program$19 = null;
+	_program$25 = null;
 	_buffer$15 = null;
 	_spriteOffset = /* @__PURE__ */ new Float32Array(2);
 	_cornerX = /* @__PURE__ */ new Float32Array(4);
 	_cornerY = /* @__PURE__ */ new Float32Array(4);
+	_modelView$2 = null;
+	AIM_PIVOT_X = 320;
+	AIM_PIVOT_Y = 240;
 	PIXEL_TO_WORLD_Z = 1 / 5;
 	anim = {
 		frame: 0,
@@ -242088,6 +242449,9 @@ var init_StrEffect = __esmMin((() => {
 			}
 			const strFile = Client.loadFile(this.filename, null, null, { texturePath: this.texturePath });
 			if (strFile === null) return;
+			const aim = this.getAimAngle();
+			this.aimed = !!aim || !!this.screenTurn;
+			this.aimAngle = aim - (this.screenTurn || 0);
 			keyIndex = (tick - this.startTick) / 1e3 * strFile.fps;
 			if (this.persistent && strFile && strFile.maxKey) keyIndex = keyIndex % strFile.maxKey;
 			if (!this._lastValidAnim) this._lastValidAnim = {};
@@ -242114,6 +242478,70 @@ var init_StrEffect = __esmMin((() => {
 			if (keyIndex >= strFile.maxKey) this.needCleanUp = true;
 		}
 		/**
+		* How far to turn an effect aimed between two entities, so it lines up
+		* with them on screen.
+		*
+		* `facing` is where the other entity sits in the file, in degrees (0 =
+		* right, 180 = left): the target for an effect on the caster, the caster
+		* for one on the target.
+		*
+		* @return {number} counter-clockwise turn in degrees, 0 when not aimed
+		*/
+		getAimAngle() {
+			const effect = this._Params?.effect;
+			const target = this._Params?.Inst?.otherPosition;
+			if (!effect?.rotateToTarget || !target || !this.position || !_modelView$2) return 0;
+			const x = target[0] - this.position[0];
+			const y = -(target[2] - this.position[2]);
+			const z = target[1] - this.position[1];
+			const m = _modelView$2;
+			const viewX = m[0] * x + m[4] * y + m[8] * z;
+			const viewY = m[1] * x + m[5] * y + m[9] * z;
+			if (!viewX && !viewY) return 0;
+			return Math.atan2(viewY, viewX) * 180 / Math.PI - (effect.facing || 0);
+		}
+		/**
+		* Where a frame's art sits about the effect's position.
+		*
+		* Classic effects put the art's (320,320) on the position, half a cell
+		* lower. An effect from the client's EZ2 table (one with xOffset/yOffset)
+		* puts the art's centre (320,240) on the position moved PosX/PosY client
+		* units along the screen, as CEZ2STREffectEx does: 5 client units to a
+		* cell, 35 STR pixels to a cell.
+		*
+		* @param {object} animat - frame
+		* @param {number} sizeScale - owner's size, for attachments
+		* @param {Float32Array|Array<number>} out - gets the offset in STR pixels
+		* @returns {number} vertical base, in cells
+		*/
+		layout(animat, sizeScale, out) {
+			const ez2 = !this.ownerEntity && this.ez2Offset;
+			const pivotY = ez2 ? AIM_PIVOT_Y : 320;
+			const shiftX = ez2 ? this.ez2Offset[0] * PIXEL_TO_WORLD_Z * 35 : 0;
+			const shiftY = ez2 ? this.ez2Offset[1] * PIXEL_TO_WORLD_Z * 35 : 0;
+			const verticalBase = ez2 ? 0 : .5;
+			const k = this.scale || 1;
+			if (this.ownerEntity) {
+				out[0] = (animat.pos[0] - 320) * k + (this.xOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
+				out[1] = (animat.pos[1] - 320) * k - (this.yOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
+				return 0;
+			}
+			if (this.aimAngle || this.flipX || this.flipY || this.tilt) {
+				const rad = (this.aimAngle || 0) / 180 * Math.PI;
+				const cos = Math.cos(rad);
+				const sin = Math.sin(rad);
+				const x = (animat.pos[0] - AIM_PIVOT_X) * k * (this.flipX ? -1 : 1);
+				const y = (pivotY - animat.pos[1]) * k * (this.flipY ? -1 : 1);
+				const squash = this.tilt ? Math.cos(this.tilt / 180 * Math.PI) : 1;
+				out[0] = x * cos - y * sin + shiftX;
+				out[1] = -(x * sin + y * cos) * squash - shiftY;
+				return verticalBase;
+			}
+			out[0] = (animat.pos[0] - 320) * k + shiftX;
+			out[1] = (animat.pos[1] - pivotY) * k - shiftY;
+			return verticalBase;
+		}
+		/**
 		* Setup geometries, send data to GPU
 		*
 		* @param {object} webgl context
@@ -242121,36 +242549,38 @@ var init_StrEffect = __esmMin((() => {
 		* @param {StrAnimation} animation object
 		*/
 		renderAnimation(gl, material, animat) {
-			const uniform = _program$19.uniform;
+			const uniform = _program$25.uniform;
 			let sizeScale = 1;
 			if (this.ownerEntity) sizeScale = (this.ownerEntity.xSize + this.ownerEntity.ySize) / 2 / 5;
-			_cornerX[0] = animat.xy[0] * sizeScale;
-			_cornerY[0] = animat.xy[4] * sizeScale;
-			_cornerX[1] = animat.xy[1] * sizeScale;
-			_cornerY[1] = animat.xy[5] * sizeScale;
-			_cornerX[2] = animat.xy[3] * sizeScale;
-			_cornerY[2] = animat.xy[7] * sizeScale;
-			_cornerX[3] = animat.xy[2] * sizeScale;
-			_cornerY[3] = animat.xy[6] * sizeScale;
+			const cornerScale = sizeScale * (this.scale || 1);
+			_cornerX[0] = animat.xy[0] * cornerScale;
+			_cornerY[0] = animat.xy[4] * cornerScale;
+			_cornerX[1] = animat.xy[1] * cornerScale;
+			_cornerY[1] = animat.xy[5] * cornerScale;
+			_cornerX[2] = animat.xy[3] * cornerScale;
+			_cornerY[2] = animat.xy[7] * cornerScale;
+			_cornerX[3] = animat.xy[2] * cornerScale;
+			_cornerY[3] = animat.xy[6] * cornerScale;
+			let spriteAngle = animat.angle - (this.aimAngle || 0);
+			if (this.flipX || this.flipY || this.tilt) {
+				transformCorners(animat.angle, this.aimAngle || 0, this.flipX, this.flipY, this.tilt, _cornerX, _cornerY);
+				spriteAngle = 0;
+			}
 			gl.uniform4fv(uniform.uCornerX, _cornerX);
 			gl.uniform4fv(uniform.uCornerY, _cornerY);
-			let verticalBase = .5;
-			if (this.ownerEntity) {
-				_spriteOffset[0] = animat.pos[0] - 320 + (this.xOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
-				_spriteOffset[1] = animat.pos[1] - 320 - (this.yOffset || 0) * PIXEL_TO_WORLD_Z * 35 * sizeScale;
-				verticalBase = 0;
-			} else {
-				_spriteOffset[0] = animat.pos[0] - 320;
-				_spriteOffset[1] = animat.pos[1] - 320;
-			}
+			const verticalBase = this.layout(animat, sizeScale, _spriteOffset);
 			gl.uniform4fv(uniform.uSpriteColor, animat.color);
 			gl.uniform2fv(uniform.uSpriteOffset, _spriteOffset);
 			gl.uniform1f(uniform.uVerticalBase, verticalBase);
 			gl.uniform3fv(uniform.uSpritePosition, this.position);
-			gl.uniform1f(uniform.uSpriteAngle, animat.angle);
+			gl.uniform1f(uniform.uSpriteAngle, spriteAngle);
 			gl.blendFunc(D3DBLEND[animat.srcalpha], D3DBLEND[animat.destalpha]);
 			gl.bindTexture(gl.TEXTURE_2D, material);
-			gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+			if (this.aimed) {
+				gl.disable(gl.DEPTH_TEST);
+				gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+				gl.enable(gl.DEPTH_TEST);
+			} else gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 		}
 		/**
 		* Initialize StrEffect
@@ -242172,7 +242602,7 @@ var init_StrEffect = __esmMin((() => {
 					1
 				]), gl.STATIC_DRAW);
 			}
-			if (!_program$19) _program$19 = WebGL_default.createShaderProgram(gl, StrEffect_default$1, StrEffect_default);
+			if (!_program$25) _program$25 = WebGL_default.createShaderProgram(gl, StrEffect_default$1, StrEffect_default);
 			D3DBLEND[1] = gl.ZERO;
 			D3DBLEND[2] = gl.ONE;
 			D3DBLEND[3] = gl.SRC_COLOR;
@@ -242194,9 +242624,9 @@ var init_StrEffect = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$19) {
-				gl.deleteProgram(_program$19);
-				_program$19 = null;
+			if (_program$25) {
+				gl.deleteProgram(_program$25);
+				_program$25 = null;
 			}
 			if (_buffer$15) {
 				gl.deleteBuffer(_buffer$15);
@@ -242214,10 +242644,11 @@ var init_StrEffect = __esmMin((() => {
 		* @param {number} tick
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$19.uniform;
-			const attribute = _program$19.attribute;
+			const uniform = _program$25.uniform;
+			const attribute = _program$25.attribute;
+			_modelView$2 = modelView;
 			gl.depthMask(false);
-			gl.useProgram(_program$19);
+			gl.useProgram(_program$25);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$15);
 			gl.vertexAttribPointer(attribute.aPosition, 2, gl.FLOAT, false, 0, 0);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
@@ -242236,7 +242667,7 @@ var init_StrEffect = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.depthMask(true);
-			gl.disableVertexAttribArray(_program$19.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$25.attribute.aPosition);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -255438,7 +255869,7 @@ function generateCylinder(totalCircleSides, circleSides, repeatTextureX) {
 	}
 	return new Float32Array(mesh);
 }
-var _program$18, blendMode$3, mat4$18, _matrix$5, Cylinder;
+var _program$24, blendMode$3, mat4$19, _matrix$6, Cylinder;
 var init_Cylinder = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -255448,8 +255879,8 @@ var init_Cylinder = __esmMin((() => {
 	init_Cylinder$2();
 	init_Cylinder$1();
 	blendMode$3 = {};
-	mat4$18 = gl_matrix_default.mat4;
-	_matrix$5 = mat4$18.create();
+	mat4$19 = gl_matrix_default.mat4;
+	_matrix$6 = mat4$19.create();
 	Cylinder = class {
 		constructor(effect, EF_Inst_Par, EF_Init_Par) {
 			const position = EF_Inst_Par.position;
@@ -255542,8 +255973,8 @@ var init_Cylinder = __esmMin((() => {
 		render(gl, tick) {
 			const renderCount = tick - this.startTick;
 			const duration = this.endTick - this.startTick;
-			const uniform = _program$18.uniform;
-			const attribute = _program$18.attribute;
+			const uniform = _program$24.uniform;
+			const attribute = _program$24.attribute;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			if (this.repeatTextureX > 1) gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
 			gl.enableVertexAttribArray(attribute.aPosition);
@@ -255601,11 +256032,11 @@ var init_Cylinder = __esmMin((() => {
 				this.position[2]
 			];
 			if (this.rotate || this.angleX || this.angleY || this.angleZ || this.rotateWithCamera || this.fixedPerspective) {
-				mat4$18.identity(_matrix$5);
-				if (this.rotate) mat4$18.rotateY(_matrix$5, _matrix$5, tick / 4 / 180 * Math.PI);
-				if (this.angleX) mat4$18.rotateX(_matrix$5, _matrix$5, this.angleX / 180 * Math.PI);
-				if (this.angleY) mat4$18.rotateY(_matrix$5, _matrix$5, this.angleY / 180 * Math.PI);
-				if (this.angleZ) mat4$18.rotateZ(_matrix$5, _matrix$5, this.angleZ / 180 * Math.PI);
+				mat4$19.identity(_matrix$6);
+				if (this.rotate) mat4$19.rotateY(_matrix$6, _matrix$6, tick / 4 / 180 * Math.PI);
+				if (this.angleX) mat4$19.rotateX(_matrix$6, _matrix$6, this.angleX / 180 * Math.PI);
+				if (this.angleY) mat4$19.rotateY(_matrix$6, _matrix$6, this.angleY / 180 * Math.PI);
+				if (this.angleZ) mat4$19.rotateZ(_matrix$6, _matrix$6, this.angleZ / 180 * Math.PI);
 				if (this.rotateWithCamera || this.fixedPerspective) {
 					let magic = this.posY;
 					if (this.fixedPerspective) {
@@ -255614,21 +256045,21 @@ var init_Cylinder = __esmMin((() => {
 							currentPosition[2] += this.posZ * Math.cos(vcRad) - this.posY * Math.sin(vcRad);
 							magic = this.posY * Math.sin(vcRad) + this.posZ * Math.sin(vcRad);
 						}
-						mat4$18.rotateX(_matrix$5, _matrix$5, vcRad);
+						mat4$19.rotateX(_matrix$6, _matrix$6, vcRad);
 					}
 					const hcRad = Camera.angle[1] * Math.PI / 180;
 					if (this.posX || this.posY) {
 						currentPosition[0] += this.posX * Math.cos(hcRad) - magic * Math.sin(hcRad);
 						currentPosition[1] += magic * Math.cos(hcRad) + this.posX * Math.sin(hcRad);
 					}
-					mat4$18.rotateY(_matrix$5, _matrix$5, hcRad);
+					mat4$19.rotateY(_matrix$6, _matrix$6, hcRad);
 				} else {
 					currentPosition[0] += this.posX;
 					currentPosition[1] += this.posY;
 					currentPosition[2] += this.posZ;
 				}
 				gl.uniform1i(uniform.uRotate, true);
-				gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$5);
+				gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$6);
 			} else {
 				currentPosition[0] += this.posX;
 				currentPosition[1] += this.posY;
@@ -255663,7 +256094,7 @@ var init_Cylinder = __esmMin((() => {
 			blendMode$3[13] = gl.CONSTANT_ALPHA;
 			blendMode$3[14] = gl.ONE_MINUS_CONSTANT_ALPHA;
 			blendMode$3[15] = gl.SRC_ALPHA_SATURATE;
-			_program$18 = WebGL_default.createShaderProgram(gl, Cylinder_default$1, Cylinder_default);
+			_program$24 = WebGL_default.createShaderProgram(gl, Cylinder_default$1, Cylinder_default);
 			this.ready = true;
 			this.renderBeforeEntities = false;
 		}
@@ -255673,9 +256104,9 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$18) {
-				gl.deleteProgram(_program$18);
-				_program$18 = null;
+			if (_program$24) {
+				gl.deleteProgram(_program$24);
+				_program$24 = null;
 			}
 			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
@@ -255686,8 +256117,8 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$18.uniform;
-			gl.useProgram(_program$18);
+			const uniform = _program$24.uniform;
+			gl.useProgram(_program$24);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -255703,8 +256134,8 @@ var init_Cylinder = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$18.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$18.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$24.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$24.attribute.aTextureCoord);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -255716,6 +256147,690 @@ var init_Cylinder = __esmMin((() => {
 	* @var {number}
 	*/
 	Cylinder.verticeCount = 0;
+}));
+// src/Renderer/Effects/EffectPrimSim.js
+/**
+* Read a numeric option
+*
+* @param {number} value
+* @param {number} fallback
+* @return {number}
+*/
+function num(value, fallback) {
+	return typeof value === "number" && !isNaN(value) ? value : fallback;
+}
+/**
+* Starting state of a primitive
+*
+* @param {object} effect description
+* @return {object} state
+*/
+function createPrimState(effect) {
+	return {
+		frame: 0,
+		frames: num(effect.frames, 100),
+		radius: num(effect.radius, 0),
+		radiusSpeed: num(effect.radiusSpeed, 0),
+		radiusAccel: num(effect.radiusAccel, 0),
+		yaw: num(effect.yaw, 0),
+		spin: num(effect.spin, 0),
+		alpha: num(effect.alpha, 254),
+		alphaSpeed: num(effect.alphaSpeed, 0),
+		alphaMax: num(effect.alphaMax, 254),
+		fadeOutFrame: num(effect.fadeOutFrame, -1),
+		size: num(effect.size, 0),
+		sizeSpeed: num(effect.sizeSpeed, 0),
+		sizeAccel: num(effect.sizeAccel, 0),
+		sizeChangeFrame: num(effect.sizeChangeFrame, -1),
+		sizeChangeSpeed: num(effect.sizeChangeSpeed, 0),
+		sizeChangeAccel: num(effect.sizeChangeAccel, 0)
+	};
+}
+/**
+* Advance a primitive by one tick
+*
+* @param {object} state
+*/
+function stepPrim(state) {
+	if (state.frame === state.fadeOutFrame && state.frames > state.frame) state.alphaSpeed = -state.alpha / (state.frames - state.frame);
+	state.alpha = Math.min(state.alphaMax, Math.max(0, state.alpha + state.alphaSpeed));
+	state.radiusSpeed += state.radiusAccel;
+	state.radius += state.radiusSpeed;
+	state.yaw += state.spin;
+	if (state.frame === state.sizeChangeFrame) {
+		state.sizeSpeed = state.sizeChangeSpeed;
+		state.sizeAccel = state.sizeChangeAccel;
+	}
+	state.sizeSpeed += state.sizeAccel;
+	state.size += state.sizeSpeed;
+	state.frame++;
+}
+/**
+* Advance a primitive up to the given tick (it never goes past its lifetime)
+*
+* @param {object} state
+* @param {number} frame
+* @return {boolean} whether the state changed
+*/
+function advancePrim(state, frame) {
+	const target = Math.min(frame, state.frames);
+	let changed = false;
+	while (state.frame < target) {
+		stepPrim(state);
+		changed = true;
+	}
+	return changed;
+}
+/**
+* Write one vertex in roBrowser's GL space
+* (x, y on the map, z up; GL keeps the map plane in x/z and points y down)
+*/
+function vertex$4(out, i, center, x, y, up, u, v) {
+	out[i + 0] = center[0] + .5 + x / 5;
+	out[i + 1] = -center[2] - up / 5;
+	out[i + 2] = center[1] + .5 + y / 5;
+	out[i + 3] = u;
+	out[i + 4] = v;
+	return i + 5;
+}
+/**
+* Number of vertices a primitive draws (triangles, 5 floats each)
+*
+* @param {object} effect description
+* @return {number}
+*/
+function primVertexCount(effect) {
+	const segments = num(effect.segments, 10);
+	if (effect.prim === "sphere") return segments * num(effect.bands, 5) * 6;
+	if (effect.prim === "quad") return 6;
+	return segments * 6;
+}
+/**
+* Build the ring: a band between radius and radius - width, lying on the ground.
+* U runs uStep per segment and starts again at 0 once it reaches 1;
+* V is 0 on the outer edge and 1 on the inner one.
+*
+* @param {Float32Array} out
+* @param {object} effect description
+* @param {object} state
+* @param {Array} center position, in cells
+*/
+function buildRing$1(out, effect, state, center) {
+	const segments = num(effect.segments, 10);
+	const step = Math.PI * 2 / segments;
+	const uStep = num(effect.uStep, .25);
+	const outer = state.radius;
+	const inner = outer - Math.min(num(effect.width, 0), outer);
+	const yaw = state.yaw / 180 * Math.PI;
+	let u = 0;
+	let o = 0;
+	for (let i = 0; i < segments; ++i) {
+		const a0 = yaw + i * step;
+		const a1 = a0 + step;
+		const c0 = Math.cos(a0), s0 = Math.sin(a0);
+		const c1 = Math.cos(a1), s1 = Math.sin(a1);
+		const u0 = u;
+		const u1 = u + uStep;
+		o = vertex$4(out, o, center, c0 * outer, s0 * outer, 0, u0, 0);
+		o = vertex$4(out, o, center, c1 * outer, s1 * outer, 0, u1, 0);
+		o = vertex$4(out, o, center, c0 * inner, s0 * inner, 0, u0, 1);
+		o = vertex$4(out, o, center, c1 * outer, s1 * outer, 0, u1, 0);
+		o = vertex$4(out, o, center, c1 * inner, s1 * inner, 0, u1, 1);
+		o = vertex$4(out, o, center, c0 * inner, s0 * inner, 0, u0, 1);
+		u = u1 >= 1 ? 0 : u1;
+	}
+}
+/**
+* Build the sphere, centred on the position (its lower half is under the ground).
+* U = longitude / 360, V = (latitude + 90) / 180.
+*
+* @param {Float32Array} out
+* @param {object} effect description
+* @param {object} state
+* @param {Array} center position, in cells
+*/
+function buildSphere(out, effect, state, center) {
+	const segments = num(effect.segments, 10);
+	const bands = num(effect.bands, 5);
+	const r = state.radius;
+	const yaw = state.yaw / 180 * Math.PI;
+	let o = 0;
+	const point = (lon, lat) => {
+		const a = yaw + lon / segments * Math.PI * 2;
+		const b = (lat / bands - .5) * Math.PI;
+		const flat = Math.cos(b) * r;
+		return [
+			Math.cos(a) * flat,
+			Math.sin(a) * flat,
+			Math.sin(b) * r,
+			lon / segments,
+			lat / bands
+		];
+	};
+	for (let j = 0; j < bands; ++j) for (let i = 0; i < segments; ++i) {
+		const p00 = point(i, j);
+		const p10 = point(i + 1, j);
+		const p01 = point(i, j + 1);
+		const p11 = point(i + 1, j + 1);
+		o = vertex$4(out, o, center, ...p00);
+		o = vertex$4(out, o, center, ...p10);
+		o = vertex$4(out, o, center, ...p01);
+		o = vertex$4(out, o, center, ...p10);
+		o = vertex$4(out, o, center, ...p11);
+		o = vertex$4(out, o, center, ...p01);
+	}
+}
+/**
+* Build the quad: a level square spanning -size..+size on both ground axes,
+* height units above the ground, the whole texture corner to corner.
+*
+* @param {Float32Array} out
+* @param {object} effect description
+* @param {object} state
+* @param {Array} center position, in cells
+*/
+function buildQuad(out, effect, state, center) {
+	const s = state.size;
+	const up = num(effect.height, 0);
+	let o = 0;
+	o = vertex$4(out, o, center, s, s, up, 0, 0);
+	o = vertex$4(out, o, center, s, -s, up, 1, 0);
+	o = vertex$4(out, o, center, -s, s, up, 0, 1);
+	o = vertex$4(out, o, center, s, -s, up, 1, 0);
+	o = vertex$4(out, o, center, -s, -s, up, 1, 1);
+	vertex$4(out, o, center, -s, s, up, 0, 1);
+}
+/**
+* Fill a vertex buffer with the primitive's triangles in its current state
+*
+* @param {Float32Array} out, primVertexCount(effect) * 5 floats
+* @param {object} effect description
+* @param {object} state
+* @param {Array} center position, in cells
+*/
+function buildPrimGeometry(out, effect, state, center) {
+	if (effect.prim === "sphere") buildSphere(out, effect, state, center);
+	else if (effect.prim === "quad") buildQuad(out, effect, state, center);
+	else buildRing$1(out, effect, state, center);
+}
+var PRIM_TICK_MS;
+var init_EffectPrimSim = __esmMin((() => {
+	PRIM_TICK_MS = 1e3 / 60;
+}));
+// src/Renderer/Effects/EffectPrim.vs?raw
+var EffectPrim_default$1;
+var init_EffectPrim$2 = __esmMin((() => {
+	EffectPrim_default$1 = "#version 300 es\r\nprecision highp float;\r\n\r\nin vec3 aPosition;\r\nin vec2 aTextureCoord;\r\n\r\nout vec2 vTextureCoord;\r\n\r\nuniform mat4 uModelViewMat;\r\nuniform mat4 uProjectionMat;\r\n\r\nvoid main(void) {\r\n    gl_Position   = uProjectionMat * uModelViewMat * vec4(aPosition, 1.0);\r\n    vTextureCoord = aTextureCoord;\r\n}\r\n";
+}));
+// src/Renderer/Effects/EffectPrim.fs?raw
+var EffectPrim_default;
+var init_EffectPrim$1 = __esmMin((() => {
+	EffectPrim_default = "#version 300 es\r\n\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uDiffuse;\r\nuniform vec4 uColor;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture(uDiffuse, vTextureCoord.st);\r\n\r\n    if (textureSample.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    fragColor = textureSample * uColor;\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep(uFogNear, uFogFar, depth);\r\n        fragColor       = mix(fragColor, vec4(uFogColor, fragColor.w), fogFactor);\r\n    }\r\n}\r\n";
+}));
+// src/Renderer/Effects/EffectPrim.js
+var _program$23, EffectPrim;
+var init_EffectPrim = __esmMin((() => {
+	init_WebGL();
+	init_Client();
+	init_SpriteRenderer();
+	init_EffectPrimSim();
+	init_EffectPrim$2();
+	init_EffectPrim$1();
+	_program$23 = null;
+	EffectPrim = class {
+		/**
+		* @param {object} effect description
+		* @param {object} EF_Inst_Par instance parameters
+		*/
+		constructor(effect, EF_Inst_Par) {
+			this.effect = effect;
+			this.position = EF_Inst_Par.position;
+			this.startTick = EF_Inst_Par.startTick;
+			this.state = createPrimState(effect);
+			this.endTick = this.startTick + this.state.frames * PRIM_TICK_MS;
+			this.vertexCount = primVertexCount(effect);
+			this.vertices = new Float32Array(this.vertexCount * 5);
+			const color = effect.color || [
+				255,
+				255,
+				255
+			];
+			this.color = new Float32Array([
+				color[0] / 255,
+				color[1] / 255,
+				color[2] / 255,
+				0
+			]);
+			this.dirty = true;
+		}
+		/**
+		* Create the buffer and load the texture
+		*
+		* @param {object} gl context
+		*/
+		init(gl) {
+			this.buffer = gl.createBuffer();
+			Client.loadFile(`data/texture/effect/${this.effect.texture}.tga`, (buffer) => {
+				WebGL_default.texture(gl, buffer, (texture) => {
+					if (this.freed) {
+						gl.deleteTexture(texture);
+						return;
+					}
+					this.texture = texture;
+					this.ready = true;
+				});
+			}, () => {
+				this.needCleanUp = true;
+			});
+		}
+		/**
+		* @param {object} gl context
+		*/
+		free(gl) {
+			this.freed = true;
+			this.ready = false;
+			if (this.buffer) {
+				gl.deleteBuffer(this.buffer);
+				this.buffer = null;
+			}
+			if (this.texture) {
+				gl.deleteTexture(this.texture);
+				this.texture = null;
+			}
+		}
+		/**
+		* @param {object} gl context
+		* @param {number} tick
+		*/
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			if (tick > this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const frame = Math.floor((tick - this.startTick) / PRIM_TICK_MS);
+			const attribute = _program$23.attribute;
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+			if (advancePrim(this.state, frame) || this.dirty) {
+				buildPrimGeometry(this.vertices, this.effect, this.state, this.position);
+				gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+				this.dirty = false;
+			}
+			this.color[3] = this.state.alpha / 255;
+			if (this.color[3] <= 0) return;
+			gl.uniform4fv(_program$23.uniform.uColor, this.color);
+			gl.bindTexture(gl.TEXTURE_2D, this.texture);
+			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+			SpriteRenderer.runWithDepth(true, false, true, () => {
+				gl.drawArrays(gl.TRIANGLES, 0, this.vertexCount);
+			});
+		}
+		/**
+		* @param {object} gl context
+		*/
+		static init(gl) {
+			_program$23 = WebGL_default.createShaderProgram(gl, EffectPrim_default$1, EffectPrim_default);
+			this.ready = true;
+			this.renderBeforeEntities = false;
+		}
+		/**
+		* @param {object} gl context
+		*/
+		static free(gl) {
+			if (_program$23) {
+				gl.deleteProgram(_program$23);
+				_program$23 = null;
+			}
+			this.ready = false;
+		}
+		/**
+		* @param {object} gl context
+		* @param {mat4} modelView
+		* @param {mat4} projection
+		* @param {object} fog
+		*/
+		static beforeRender(gl, modelView, projection, fog) {
+			const uniform = _program$23.uniform;
+			const attribute = _program$23.attribute;
+			gl.useProgram(_program$23);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		}
+		/**
+		* @param {object} gl context
+		*/
+		static afterRender(gl) {
+			gl.disableVertexAttribArray(_program$23.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$23.attribute.aTextureCoord);
+		}
+	};
+}));
+// src/Renderer/Effects/AreaSpawner.js
+/**
+* Renderer/Effects/AreaSpawner.js
+*
+* An effect that draws nothing itself: while it lives, it spams another effect
+* at a random point of a square area, on a fixed interval. The official client
+* does this for ground units such as Cross Rain, which drops a spear of rain
+* somewhere in its area every few ticks.
+*
+* EffectTable fields (type 'AREA_SPAWN'):
+*	- spawnEffectId:	effect spammed at each point
+*	- interval:		ms between two spawns (the first one is at the start)
+*	- intervalByLevel:	ms between two spawns, by skill level (index 0 is level 1)
+*	- areaByLevel:		square width in cells, by skill level (index 0 is level 1)
+*	- area:			square width in cells when the level is unknown
+*	- count:		points per spawn, each picked on its own (default 1)
+*	- scaleRange:		[min, max] size of each spawned effect, picked in steps of 0.01
+*
+* This file is part of ROBrowser, (http://www.robrowser.com/).
+*/
+/**
+* Width of the square, in cells.
+* Uses the skill level when the unit packet has one, else the unit range (2 * range + 1),
+* else the level 1 size: a packet with neither is from a client too old for these units.
+*
+* @param {object} effect - EffectTable entry
+* @param {number} [level] - skill level
+* @param {number} [range] - skill unit range
+* @returns {number}
+*/
+function spawnAreaWidth(effect, level, range) {
+	const table = effect.areaByLevel;
+	if (table && table.length && level > 0) return table[Math.min(level, table.length) - 1];
+	if (range > 0) return range * 2 + 1;
+	return effect.area || (table && table.length ? table[0] : 1);
+}
+/**
+* Ms between two spawns. Uses the skill level when there is one.
+*
+* @param {object} effect - EffectTable entry
+* @param {number} [level] - skill level
+* @returns {number}
+*/
+function spawnInterval(effect, level) {
+	const table = effect.intervalByLevel;
+	if (table && table.length && level > 0) return table[Math.min(level, table.length) - 1];
+	return effect.interval > 0 ? effect.interval : 1e3;
+}
+/**
+* Size of one spawned effect, like the official client: a whole number of
+* hundredths, uniform over [min, max].
+*
+* @param {Array<number>} [range] - [min, max]
+* @param {number} random - a number in [0, 1)
+* @returns {number|undefined} undefined when the effect has no range
+*/
+function spawnScale(range, random) {
+	if (!range) return;
+	const steps = Math.round((range[1] - range[0]) * 100);
+	const pick = Math.min(Math.floor(random * (steps + 1)), steps);
+	return Math.round(range[0] * 100 + pick) / 100;
+}
+/**
+* Offset of a point from the centre along one axis, in cells.
+* Like the official client: 50 steps per cell, uniform over [-width / 2, width / 2].
+*
+* @param {number} width - square width in cells
+* @param {number} random - a number in [0, 1)
+* @returns {number}
+*/
+function spawnOffset(width, random) {
+	const steps = Math.round(width * 50);
+	return (Math.min(Math.floor(random * (steps + 1)), steps) - steps / 2) / 50;
+}
+/**
+* How many spawns are due by this tick, counting the one at the start.
+*
+* @param {number} startTick - when the effect started (ms)
+* @param {number} interval - ms between spawns
+* @param {number} tick - now (ms)
+* @returns {number}
+*/
+function spawnsDue(startTick, interval, tick) {
+	if (tick < startTick) return 0;
+	return Math.floor((tick - startTick) / interval) + 1;
+}
+var AreaSpawner;
+var init_AreaSpawner = __esmMin((() => {
+	AreaSpawner = class {
+		/**
+		* @param {object} effect - EffectTable entry
+		* @param {object} EF_Inst_Par - instance params
+		* @param {object} EF_Init_Par - init params (skillLevel, unitRange)
+		* @param {function} spawn - called with (effectId, position, tick) for each point
+		* @param {function} [heightAt] - ground height of a cell
+		*/
+		constructor(effect, EF_Inst_Par, EF_Init_Par, spawn, heightAt) {
+			this.position = EF_Inst_Par.position;
+			this.startTick = EF_Inst_Par.startTick;
+			this.interval = spawnInterval(effect, EF_Init_Par.skillLevel);
+			this.width = spawnAreaWidth(effect, EF_Init_Par.skillLevel, EF_Init_Par.unitRange);
+			this.count = effect.count > 0 ? effect.count : 1;
+			this.scaleRange = effect.scaleRange;
+			this.spawnEffectId = effect.spawnEffectId;
+			this.spawn = spawn;
+			this.heightAt = heightAt;
+			this.spawned = 0;
+			this.ready = true;
+		}
+		render(gl, tick) {
+			const due = spawnsDue(this.startTick, this.interval, tick);
+			if (due - this.spawned > 1) this.spawned = due - 1;
+			while (this.spawned < due) {
+				for (let i = 0; i < this.count; i++) {
+					const x = this.position[0] + spawnOffset(this.width, Math.random());
+					const y = this.position[1] + spawnOffset(this.width, Math.random());
+					const z = this.heightAt ? this.heightAt(x, y) : this.position[2];
+					const scale = spawnScale(this.scaleRange, Math.random());
+					this.spawn(this.spawnEffectId, [
+						x,
+						y,
+						z
+					], this.startTick + this.spawned * this.interval, scale);
+				}
+				this.spawned++;
+			}
+		}
+		static init() {
+			this.ready = true;
+		}
+		static beforeRender() {}
+		static afterRender() {}
+	};
+	AreaSpawner.ready = true;
+}));
+// src/Renderer/Effects/GroundScatter.js
+/**
+* Renderer/Effects/GroundScatter.js
+*
+* Random ground offset the official client gives some world-placed effect copies
+* (Sunset Blast's small blasts). Each horizontal axis gets
+* units - (random integer 0 .. 2 * units - 1) official units, so -(units - 1)..+units.
+* 5 official units are one roBrowser cell.
+*/
+/**
+* @param {number} units  scatter in official units (EffectTable `groundScatter`)
+* @param {function} [random] source of numbers in [0, 1), Math.random by default
+* @return {number[]} [x, y] offset in roBrowser cells
+*/
+function groundScatter(units, random = Math.random) {
+	const axis = () => (units - Math.floor(random() * units * 2)) / 5;
+	return [axis(), axis()];
+}
+var init_GroundScatter = __esmMin((() => {}));
+// src/Renderer/Effects/BezierArcThrowSim.js
+/**
+* How much of the path is left, `elapsed` ms after the throw: 1 at the start,
+* one step less on the first tick. Done at 0 or below.
+*
+* @param {number} elapsed ms
+* @return {number}
+*/
+function pathLeft(elapsed) {
+	return 1 - STEP$1 * (elapsed / TICK_MS + 1);
+}
+/**
+* A world point moved `cells` up the screen.
+*
+* @param {number[]} point GL world
+* @param {number} cells
+* @param {Float32Array|number[]} modelView the camera's, column major
+* @return {number[]}
+*/
+function raiseOnScreen(point, cells, modelView) {
+	const ux = modelView[1];
+	const uy = modelView[5];
+	const uz = modelView[9];
+	const k = cells / (ux * ux + uy * uy + uz * uz || 1);
+	return [
+		point[0] + ux * k,
+		point[1] + uy * k,
+		point[2] + uz * k
+	];
+}
+/**
+* How far a world point is from the camera.
+*
+* @param {number[]} point GL world
+* @param {Float32Array|number[]} modelView
+* @return {number}
+*/
+function depth(point, modelView) {
+	return -(modelView[2] * point[0] + modelView[6] * point[1] + modelView[10] * point[2] + modelView[14]);
+}
+/**
+* The control point: the landing point plus the throw (landing point minus
+* start) turned about the vertical axis.
+*
+* @param {number[]} start GL world
+* @param {number[]} end GL world
+* @param {number} turn radians
+* @return {number[]}
+*/
+function controlPoint(start, end, turn) {
+	const dx = end[0] - start[0];
+	const dy = end[1] - start[1];
+	const dz = end[2] - start[2];
+	const c = Math.cos(turn);
+	const s = Math.sin(turn);
+	return [
+		end[0] + dx * c + dz * s,
+		end[1] + dy,
+		end[2] - dx * s + dz * c
+	];
+}
+/**
+* Where the thrown effect is.
+*
+* @param {number[]} start GL world
+* @param {number[]} control GL world
+* @param {number[]} end GL world
+* @param {number} left how much of the path is left, 1 to 0
+* @return {number[]}
+*/
+function pathPoint(start, control, end, left) {
+	const a = left * left;
+	const b = 2 * left * (1 - left);
+	const e = (1 - left) * (1 - left);
+	return [
+		a * start[0] + b * control[0] + e * end[0],
+		a * start[1] + b * control[1] + e * end[1],
+		a * start[2] + b * control[2] + e * end[2]
+	];
+}
+/**
+* The thrown effect's point for a frame.
+*
+* @param {number[]} from thrower's feet, GL world
+* @param {number[]} to landing point, GL world
+* @param {number} left how much of the path is left
+* @param {Float32Array|number[]} modelView
+* @return {number[]}
+*/
+function throwPoint(from, to, left, modelView) {
+	const start = raiseOnScreen(from, 2, modelView);
+	return pathPoint(start, controlPoint(start, to, depth(from, modelView) <= depth(to, modelView) ? TURN_NEAR : TURN_FAR), to, left);
+}
+/**
+* roBrowser position (x, y, height) to GL world.
+*
+* @param {number[]} position
+* @return {number[]}
+*/
+function toWorld(position) {
+	return [
+		position[0] + .5,
+		-position[2],
+		position[1] + .5
+	];
+}
+/**
+* GL world to roBrowser position (x, y, height).
+*
+* @param {number[]} point
+* @return {number[]}
+*/
+function fromWorld(point) {
+	return [
+		point[0] - .5,
+		point[2] - .5,
+		-point[1]
+	];
+}
+var TICK_MS, STEP$1, TURN_NEAR, TURN_FAR;
+var init_BezierArcThrowSim = __esmMin((() => {
+	TICK_MS = 1e3 / 60;
+	STEP$1 = .07;
+	TURN_NEAR = 4 * Math.PI / 3;
+	TURN_FAR = 2 * Math.PI / 3;
+}));
+// src/Renderer/Effects/BezierArcThrow.js
+var _modelView$1, BezierArcThrowStrEffect;
+var init_BezierArcThrow = __esmMin((() => {
+	init_StrEffect();
+	init_BezierArcThrowSim();
+	_modelView$1 = null;
+	BezierArcThrowStrEffect = class extends StrEffect {
+		/**
+		* @param {string} filename
+		* @param {Array} position landing point
+		* @param {number} startTick
+		* @param {string} texturePath
+		* @param {Array} fallbacks
+		* @param {object} thrower entity it flies from
+		*/
+		constructor(filename, position, startTick, texturePath, fallbacks, thrower) {
+			super(filename, position, startTick, texturePath, fallbacks);
+			this.target = position.slice();
+			this.thrower = thrower;
+		}
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			const left = pathLeft(tick - this.startTick);
+			if (left <= 0 || !this.thrower?.position) {
+				this.needCleanUp = true;
+				return;
+			}
+			if (!_modelView$1) return;
+			this.position = fromWorld(throwPoint(toWorld(this.thrower.position), toWorld(this.target), left, _modelView$1));
+			super.render(gl, tick);
+		}
+		static beforeRender(gl, modelView, projection, fog, tick) {
+			_modelView$1 = modelView;
+			super.beforeRender(gl, modelView, projection, fog, tick);
+		}
+	};
 }));
 // src/Renderer/Effects/RsmEffect.vs?raw
 var RsmEffect_default$1;
@@ -255853,13 +256968,13 @@ function getScaleAtFrame$1(keyframes, frame, animLen) {
 		prev.Scale[2] + (next.Scale[2] - prev.Scale[2]) * t
 	];
 }
-var vec3$4, mat3$3, mat4$17, Box, Node, RSM;
+var vec3$4, mat3$3, mat4$18, Box, Node, RSM;
 var init_Model = __esmMin((() => {
 	init_BinaryReader();
 	init_gl_matrix();
 	vec3$4 = gl_matrix_default.vec3;
 	mat3$3 = gl_matrix_default.mat3;
-	mat4$17 = gl_matrix_default.mat4;
+	mat4$18 = gl_matrix_default.mat4;
 	Box = class {
 		constructor() {
 			this.max = vec3$4.fromValues(-Infinity, -Infinity, -Infinity);
@@ -256056,7 +257171,7 @@ var init_Model = __esmMin((() => {
 				}
 			}
 			this.box = new RSM.Box();
-			this.matrix = mat4$17.create();
+			this.matrix = mat4$18.create();
 			this.textures = textures;
 			this.vertices = vertices;
 			this.tvertices = tvertices;
@@ -256076,19 +257191,19 @@ var init_Model = __esmMin((() => {
 			const v = vec3$4.create();
 			const box = this.box;
 			const nodes = this.main.nodes;
-			const matrix = mat4$17.create();
+			const matrix = mat4$18.create();
 			const vertices = this.vertices;
 			const max = Math.max, min = Math.min;
 			let x, y, z;
-			mat4$17.copy(this.matrix, _matrix);
-			if (this.baseMatrix) mat4$17.multiply(this.matrix, this.matrix, this.baseMatrix);
-			mat4$17.translate(this.matrix, this.matrix, this.pos);
-			if (!this.rotKeyframes.length) mat4$17.rotate(this.matrix, this.matrix, this.rotangle, this.rotaxis);
-			else mat4$17.rotateQuat(this.matrix, this.matrix, this.rotKeyframes[0].q);
-			mat4$17.scale(this.matrix, this.matrix, this.scale);
-			mat4$17.copy(matrix, this.matrix);
-			if (!this.is_only) mat4$17.translate(matrix, matrix, this.offset);
-			mat4$17.multiply(matrix, matrix, mat3$3.toMat4(this.mat3));
+			mat4$18.copy(this.matrix, _matrix);
+			if (this.baseMatrix) mat4$18.multiply(this.matrix, this.matrix, this.baseMatrix);
+			mat4$18.translate(this.matrix, this.matrix, this.pos);
+			if (!this.rotKeyframes.length) mat4$18.rotate(this.matrix, this.matrix, this.rotangle, this.rotaxis);
+			else mat4$18.rotateQuat(this.matrix, this.matrix, this.rotKeyframes[0].q);
+			mat4$18.scale(this.matrix, this.matrix, this.scale);
+			mat4$18.copy(matrix, this.matrix);
+			if (!this.is_only) mat4$18.translate(matrix, matrix, this.offset);
+			mat4$18.multiply(matrix, matrix, mat3$3.toMat4(this.mat3));
 			for (i = 0, count = vertices.length; i < count; ++i) {
 				x = vertices[i][0];
 				y = vertices[i][1];
@@ -256117,8 +257232,8 @@ var init_Model = __esmMin((() => {
 		* @param {mat4} instance_matrix
 		*/
 		compile(instance_matrix) {
-			const modelViewMat = mat4$17.create();
-			const normalMat = mat4$17.create();
+			const modelViewMat = mat4$18.create();
+			const normalMat = mat4$18.create();
 			const textures = this.textures;
 			const faces = this.faces;
 			const vertices = this.vertices;
@@ -256127,18 +257242,18 @@ var init_Model = __esmMin((() => {
 			const shadeGroup = new Array(32);
 			const shadeGroupUsed = new Array(32);
 			let i, x, y, z, count;
-			const matrix = mat4$17.create();
-			mat4$17.identity(matrix);
-			mat4$17.translate(matrix, matrix, [
+			const matrix = mat4$18.create();
+			mat4$18.identity(matrix);
+			mat4$18.translate(matrix, matrix, [
 				-this.main.box.center[0],
 				-this.main.box.max[1],
 				-this.main.box.center[2]
 			]);
-			mat4$17.multiply(matrix, matrix, this.matrix);
-			if (!this.is_only) mat4$17.translate(matrix, matrix, this.offset);
-			mat4$17.multiply(matrix, matrix, mat3$3.toMat4(this.mat3));
-			mat4$17.multiply(modelViewMat, instance_matrix, matrix);
-			mat4$17.extractRotation(normalMat, modelViewMat);
+			mat4$18.multiply(matrix, matrix, this.matrix);
+			if (!this.is_only) mat4$18.translate(matrix, matrix, this.offset);
+			mat4$18.multiply(matrix, matrix, mat3$3.toMat4(this.mat3));
+			mat4$18.multiply(modelViewMat, instance_matrix, matrix);
+			mat4$18.extractRotation(normalMat, modelViewMat);
 			count = vertices.length;
 			const vert = new Float32Array(count * 3);
 			for (i = 0; i < count; ++i) {
@@ -256178,8 +257293,8 @@ var init_Model = __esmMin((() => {
 		* @param {number} animLen - Total animation length
 		*/
 		compileAtFrame(instance_matrix, frame, animLen) {
-			const modelViewMat = mat4$17.create();
-			const normalMat = mat4$17.create();
+			const modelViewMat = mat4$18.create();
+			const normalMat = mat4$18.create();
 			const textures = this.textures;
 			const faces = this.faces;
 			const vertices = this.vertices;
@@ -256188,31 +257303,31 @@ var init_Model = __esmMin((() => {
 			const shadeGroup = new Array(32);
 			const shadeGroupUsed = new Array(32);
 			let i, x, y, z, count;
-			const matrix = mat4$17.create();
-			mat4$17.identity(matrix);
-			mat4$17.translate(matrix, matrix, [
+			const matrix = mat4$18.create();
+			mat4$18.identity(matrix);
+			mat4$18.translate(matrix, matrix, [
 				-this.main.box.center[0],
 				-this.main.box.max[1],
 				-this.main.box.center[2]
 			]);
-			const nodeMatrix = mat4$17.create();
-			mat4$17.identity(nodeMatrix);
-			if (this.baseMatrix) mat4$17.multiply(nodeMatrix, nodeMatrix, this.baseMatrix);
+			const nodeMatrix = mat4$18.create();
+			mat4$18.identity(nodeMatrix);
+			if (this.baseMatrix) mat4$18.multiply(nodeMatrix, nodeMatrix, this.baseMatrix);
 			const animPos = getPositionAtFrame$1(this.posKeyframes, frame, animLen);
-			if (animPos) mat4$17.translate(nodeMatrix, nodeMatrix, animPos);
-			else mat4$17.translate(nodeMatrix, nodeMatrix, this.pos);
+			if (animPos) mat4$18.translate(nodeMatrix, nodeMatrix, animPos);
+			else mat4$18.translate(nodeMatrix, nodeMatrix, this.pos);
 			const animRot = getRotationAtFrame$1(this.rotKeyframes, frame, animLen);
-			if (animRot) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, animRot);
-			else if (this.rotKeyframes && this.rotKeyframes.length > 0) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, this.rotKeyframes[0].q);
-			else mat4$17.rotate(nodeMatrix, nodeMatrix, this.rotangle, this.rotaxis);
+			if (animRot) mat4$18.rotateQuat(nodeMatrix, nodeMatrix, animRot);
+			else if (this.rotKeyframes && this.rotKeyframes.length > 0) mat4$18.rotateQuat(nodeMatrix, nodeMatrix, this.rotKeyframes[0].q);
+			else mat4$18.rotate(nodeMatrix, nodeMatrix, this.rotangle, this.rotaxis);
 			const animScale = getScaleAtFrame$1(this.scaleKeyFrames, frame, animLen);
-			if (animScale) mat4$17.scale(nodeMatrix, nodeMatrix, animScale);
-			else mat4$17.scale(nodeMatrix, nodeMatrix, this.scale);
-			mat4$17.multiply(matrix, matrix, nodeMatrix);
-			if (!this.is_only) mat4$17.translate(matrix, matrix, this.offset);
-			mat4$17.multiply(matrix, matrix, mat3$3.toMat4(this.mat3));
-			mat4$17.multiply(modelViewMat, instance_matrix, matrix);
-			mat4$17.extractRotation(normalMat, modelViewMat);
+			if (animScale) mat4$18.scale(nodeMatrix, nodeMatrix, animScale);
+			else mat4$18.scale(nodeMatrix, nodeMatrix, this.scale);
+			mat4$18.multiply(matrix, matrix, nodeMatrix);
+			if (!this.is_only) mat4$18.translate(matrix, matrix, this.offset);
+			mat4$18.multiply(matrix, matrix, mat3$3.toMat4(this.mat3));
+			mat4$18.multiply(modelViewMat, instance_matrix, matrix);
+			mat4$18.extractRotation(normalMat, modelViewMat);
 			count = vertices.length;
 			const vert = new Float32Array(count * 3);
 			for (i = 0; i < count; ++i) {
@@ -256691,7 +257806,7 @@ var init_Model = __esmMin((() => {
 					1
 				];
 				node.box = new RSM.Box();
-				node.matrix = mat4$17.create();
+				node.matrix = mat4$18.create();
 				node.vertices = vertices;
 				node.tvertices = tvertices;
 				node.faces = faces;
@@ -256700,7 +257815,7 @@ var init_Model = __esmMin((() => {
 				node.scaleKeyFrames = scaleKeyFrames;
 				node.textureKeyFrameGroup = [];
 				node.absoluteTransform = true;
-				node.baseMatrix = mat4$17.create();
+				node.baseMatrix = mat4$18.create();
 				node.baseMatrix[0] = transform[0];
 				node.baseMatrix[1] = transform[1];
 				node.baseMatrix[2] = transform[2];
@@ -256739,26 +257854,26 @@ var init_Model = __esmMin((() => {
 		* @param {number} height
 		*/
 		createInstance(model, width, height) {
-			const matrix = mat4$17.create();
-			mat4$17.identity(matrix);
-			mat4$17.translate(matrix, matrix, [
+			const matrix = mat4$18.create();
+			mat4$18.identity(matrix);
+			mat4$18.translate(matrix, matrix, [
 				model.position[0] + width,
 				model.position[1],
 				model.position[2] + height
 			]);
-			mat4$17.rotateZ(matrix, matrix, model.rotation[2] / 180 * Math.PI);
-			mat4$17.rotateX(matrix, matrix, model.rotation[0] / 180 * Math.PI);
-			mat4$17.rotateY(matrix, matrix, model.rotation[1] / 180 * Math.PI);
-			mat4$17.scale(matrix, matrix, model.scale);
+			mat4$18.rotateZ(matrix, matrix, model.rotation[2] / 180 * Math.PI);
+			mat4$18.rotateX(matrix, matrix, model.rotation[0] / 180 * Math.PI);
+			mat4$18.rotateY(matrix, matrix, model.rotation[1] / 180 * Math.PI);
+			mat4$18.scale(matrix, matrix, model.scale);
 			if (this.main_node.main.version >= 2.2) {
-				mat4$17.scale(matrix, matrix, this.main_node.flip);
-				mat4$17.translate(matrix, matrix, this.main_node.offset);
-				mat4$17.translate(matrix, matrix, [
+				mat4$18.scale(matrix, matrix, this.main_node.flip);
+				mat4$18.translate(matrix, matrix, this.main_node.offset);
+				mat4$18.translate(matrix, matrix, [
 					0,
 					this.box.range[1],
 					0
 				]);
-				mat4$17.translate(matrix, matrix, this.box.offset);
+				mat4$18.translate(matrix, matrix, this.box.offset);
 			}
 			this.instances.push(matrix);
 		}
@@ -256768,11 +257883,11 @@ var init_Model = __esmMin((() => {
 		calcBoundingBox() {
 			let i, j;
 			const box = this.box;
-			const matrix = mat4$17.create();
+			const matrix = mat4$18.create();
 			const nodes = this.nodes;
 			const min = Math.min, max = Math.max;
 			const count = nodes.length;
-			mat4$17.identity(matrix);
+			mat4$18.identity(matrix);
 			this.main_node.calcBoundingBox(matrix);
 			for (i = 0; i < 3; ++i) {
 				for (j = 0; j < count; ++j) {
@@ -256845,14 +257960,14 @@ var init_Model = __esmMin((() => {
 */
 function createScratch() {
 	return {
-		matrix: mat4$16.create(),
-		nodeMatrix: mat4$16.create(),
-		mat4Node: mat4$16.create(),
+		matrix: mat4$17.create(),
+		nodeMatrix: mat4$17.create(),
+		mat4Node: mat4$17.create(),
 		quat: quat.create(),
 		vec3Pos: vec3$3.create(),
 		vec3Scale: vec3$3.create(),
 		vec3BoxCenter: vec3$3.create(),
-		normalMat: mat4$16.create(),
+		normalMat: mat4$17.create(),
 		tempVec: vec3$3.create()
 	};
 }
@@ -257102,30 +258217,30 @@ function generate_mesh_SMOOTH(node, vert, shadeGroup, mesh) {
 */
 function getNodeMatrixAtFrame(ctx, node, instanceMatrix, frame, animLen, outMat, outNormalMat) {
 	const matrix = ctx.matrix;
-	mat4$16.identity(matrix);
+	mat4$17.identity(matrix);
 	ctx.vec3BoxCenter[0] = -node.main.box.center[0];
 	ctx.vec3BoxCenter[1] = -node.main.box.max[1];
 	ctx.vec3BoxCenter[2] = -node.main.box.center[2];
-	mat4$16.translate(matrix, matrix, ctx.vec3BoxCenter);
+	mat4$17.translate(matrix, matrix, ctx.vec3BoxCenter);
 	const nodeMatrix = ctx.nodeMatrix;
-	if (node._parentMatrix) mat4$16.copy(nodeMatrix, node._parentMatrix);
-	else mat4$16.identity(nodeMatrix);
-	if (node.baseMatrix) mat4$16.multiply(nodeMatrix, nodeMatrix, node.baseMatrix);
+	if (node._parentMatrix) mat4$17.copy(nodeMatrix, node._parentMatrix);
+	else mat4$17.identity(nodeMatrix);
+	if (node.baseMatrix) mat4$17.multiply(nodeMatrix, nodeMatrix, node.baseMatrix);
 	const animPos = getPositionAtFrame(ctx, node.posKeyframes, frame, animLen);
-	if (animPos) mat4$16.translate(nodeMatrix, nodeMatrix, animPos);
-	else mat4$16.translate(nodeMatrix, nodeMatrix, node.pos);
+	if (animPos) mat4$17.translate(nodeMatrix, nodeMatrix, animPos);
+	else mat4$17.translate(nodeMatrix, nodeMatrix, node.pos);
 	const animRot = getRotationAtFrame(ctx, node.rotKeyframes, frame, animLen);
-	if (animRot) mat4$16.rotateQuat(nodeMatrix, nodeMatrix, animRot);
-	else if (node.rotKeyframes && node.rotKeyframes.length > 0) mat4$16.rotateQuat(nodeMatrix, nodeMatrix, node.rotKeyframes[0].q);
-	else mat4$16.rotate(nodeMatrix, nodeMatrix, node.rotangle, node.rotaxis);
+	if (animRot) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, animRot);
+	else if (node.rotKeyframes && node.rotKeyframes.length > 0) mat4$17.rotateQuat(nodeMatrix, nodeMatrix, node.rotKeyframes[0].q);
+	else mat4$17.rotate(nodeMatrix, nodeMatrix, node.rotangle, node.rotaxis);
 	const animScale = getScaleAtFrame(ctx, node.scaleKeyFrames, frame, animLen);
-	if (animScale) mat4$16.scale(nodeMatrix, nodeMatrix, animScale);
-	else mat4$16.scale(nodeMatrix, nodeMatrix, node.scale);
-	mat4$16.multiply(matrix, matrix, nodeMatrix);
-	if (!node.is_only) mat4$16.translate(matrix, matrix, node.offset);
-	mat4$16.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, ctx.mat4Node));
-	mat4$16.multiply(outMat, instanceMatrix, matrix);
-	mat4$16.extractRotation(ctx.normalMat, outMat);
+	if (animScale) mat4$17.scale(nodeMatrix, nodeMatrix, animScale);
+	else mat4$17.scale(nodeMatrix, nodeMatrix, node.scale);
+	mat4$17.multiply(matrix, matrix, nodeMatrix);
+	if (!node.is_only) mat4$17.translate(matrix, matrix, node.offset);
+	mat4$17.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, ctx.mat4Node));
+	mat4$17.multiply(outMat, instanceMatrix, matrix);
+	mat4$17.extractRotation(ctx.normalMat, outMat);
 	mat3$2.fromMat4(outNormalMat, ctx.normalMat);
 }
 /**
@@ -257176,16 +258291,16 @@ function compileNodeLocal(ctx, node) {
 */
 function getNodeMatrixStatic(ctx, node, instanceMatrix, outMat, outNormalMat) {
 	const matrix = ctx.matrix;
-	mat4$16.identity(matrix);
+	mat4$17.identity(matrix);
 	ctx.vec3BoxCenter[0] = -node.main.box.center[0];
 	ctx.vec3BoxCenter[1] = -node.main.box.max[1];
 	ctx.vec3BoxCenter[2] = -node.main.box.center[2];
-	mat4$16.translate(matrix, matrix, ctx.vec3BoxCenter);
-	mat4$16.multiply(matrix, matrix, node.matrix);
-	if (!node.is_only) mat4$16.translate(matrix, matrix, node.offset);
-	mat4$16.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, ctx.mat4Node));
-	mat4$16.multiply(outMat, instanceMatrix, matrix);
-	mat4$16.extractRotation(ctx.normalMat, outMat);
+	mat4$17.translate(matrix, matrix, ctx.vec3BoxCenter);
+	mat4$17.multiply(matrix, matrix, node.matrix);
+	if (!node.is_only) mat4$17.translate(matrix, matrix, node.offset);
+	mat4$17.multiply(matrix, matrix, mat3$2.toMat4(node.mat3, ctx.mat4Node));
+	mat4$17.multiply(outMat, instanceMatrix, matrix);
+	mat4$17.extractRotation(ctx.normalMat, outMat);
 	mat3$2.fromMat4(outNormalMat, ctx.normalMat);
 }
 function initModel(gl, data) {
@@ -257247,7 +258362,7 @@ function updateNodeMatrices(self, frame) {
 		getNodeMatrixAtFrame(ctx, node, instanceMatrix, frame, model.animLen, obj.modelMat, obj.normalMat);
 	}
 }
-var _program$17, _normalMat$1, mat4$16, mat3$2, quat, vec3$3, _light$1, RsmEffect;
+var _program$22, _normalMat$1, mat4$17, mat3$2, quat, vec3$3, _light$1, RsmEffect;
 var init_RsmEffect = __esmMin((() => {
 	init_RsmEffect$2();
 	init_RsmEffect$1();
@@ -257255,9 +258370,9 @@ var init_RsmEffect = __esmMin((() => {
 	init_gl_matrix();
 	init_Client();
 	init_Model();
-	_program$17 = null;
+	_program$22 = null;
 	_normalMat$1 = /* @__PURE__ */ new Float32Array(9);
-	mat4$16 = gl_matrix_default.mat4;
+	mat4$17 = gl_matrix_default.mat4;
 	mat3$2 = gl_matrix_default.mat3;
 	quat = gl_matrix_default.quat;
 	vec3$3 = gl_matrix_default.vec3;
@@ -257306,7 +258421,7 @@ var init_RsmEffect = __esmMin((() => {
 			this._scratch = createScratch();
 		}
 		static init(gl) {
-			_program$17 = WebGL_default.createShaderProgram(gl, RsmEffect_default$1, RsmEffect_default);
+			_program$22 = WebGL_default.createShaderProgram(gl, RsmEffect_default$1, RsmEffect_default);
 			this.ready = true;
 		}
 		init(gl, tick) {
@@ -257378,7 +258493,7 @@ var init_RsmEffect = __esmMin((() => {
 						vertCount: obj.vertCount,
 						nodeIndex: obj.nodeIndex,
 						instIndex: ii,
-						modelMat: mat4$16.create(),
+						modelMat: mat4$17.create(),
 						normalMat: mat3$2.create(),
 						shadeType: nodes[obj.nodeIndex].main.shadeType
 					});
@@ -257436,18 +258551,18 @@ var init_RsmEffect = __esmMin((() => {
 			this.ready = false;
 		}
 		static free(gl) {
-			if (_program$17) {
-				gl.deleteProgram(_program$17);
-				_program$17 = null;
+			if (_program$22) {
+				gl.deleteProgram(_program$22);
+				_program$22 = null;
 			}
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			mat4$16.toInverseMat3(modelView, _normalMat$1);
+			mat4$17.toInverseMat3(modelView, _normalMat$1);
 			mat3$2.transpose(_normalMat$1, _normalMat$1);
-			const uniform = _program$17.uniform;
-			const attribute = _program$17.attribute;
-			gl.useProgram(_program$17);
+			const uniform = _program$22.uniform;
+			const attribute = _program$22.attribute;
+			gl.useProgram(_program$22);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix3fv(uniform.uNormalMat, false, _normalMat$1);
@@ -257467,7 +258582,7 @@ var init_RsmEffect = __esmMin((() => {
 			gl.uniform1i(uniform.uDiffuse, 0);
 		}
 		render(gl, tick) {
-			const uniform = _program$17.uniform;
+			const uniform = _program$22.uniform;
 			if (this.isAnimated && this.model && this.animLen > 0) {
 				const elapsed = tick - this.startTick;
 				const frame = Math.floor(elapsed * this.fps / 1e3 % this.animLen);
@@ -257479,7 +258594,7 @@ var init_RsmEffect = __esmMin((() => {
 			gl.uniform3fv(uniform.uPosition, this.position);
 			gl.uniform1f(uniform.uSize, this.size);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-			const attribute = _program$17.attribute;
+			const attribute = _program$22.attribute;
 			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 36, 0);
 			gl.vertexAttribPointer(attribute.aVertexNormal, 3, gl.FLOAT, false, 36, 12);
 			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 36, 24);
@@ -257496,7 +258611,7 @@ var init_RsmEffect = __esmMin((() => {
 			}
 		}
 		static afterRender(gl) {
-			const attribute = _program$17.attribute;
+			const attribute = _program$22.attribute;
 			gl.disableVertexAttribArray(attribute.aPosition);
 			gl.disableVertexAttribArray(attribute.aVertexNormal);
 			gl.disableVertexAttribArray(attribute.aTextureCoord);
@@ -258504,6 +259619,142 @@ var init_ThreeDEffect = __esmMin((() => {
 		}
 	};
 }));
+// src/Renderer/Effects/ScreenDirection.js
+/**
+* Project a cell position to screen pixels, y going down.
+*
+* @param {Array} position entity position [x, y, z]
+* @param {mat4} matrix projection * modelView
+* @param {number} width screen width
+* @param {number} height screen height
+* @return {Array} [x, y]
+*/
+function toScreen(position, matrix, width, height) {
+	_point[0] = position[0] + .5;
+	_point[1] = -position[2];
+	_point[2] = position[1] + .5;
+	_point[3] = 1;
+	vec4$7.transformMat4(_point, _point, matrix);
+	const w = _point[3] === 0 ? 1 : 1 / _point[3];
+	return [_point[0] * w * width / 2, -_point[1] * w * height / 2];
+}
+/**
+* On-screen angle from one position to another, in degrees, clockwise from
+* "right": 0 right, 90 down, 180 left, 270 up. 0 when both land on the same spot.
+*
+* @param {Array} from position [x, y, z]
+* @param {Array} to position [x, y, z]
+* @param {mat4} [matrix] projection * modelView, the current camera by default
+* @param {number} [width] screen width, the renderer's by default
+* @param {number} [height] screen height, the renderer's by default
+* @return {number}
+*/
+function screenAngle(from, to, matrix, width = Renderer.width, height = Renderer.height) {
+	if (!matrix) matrix = mat4$16.multiply(_matrix$5, Camera.projection, Camera.modelView);
+	const [x1, y1] = toScreen(from, matrix, width, height);
+	const [x2, y2] = toScreen(to, matrix, width, height);
+	const dx = x2 - x1;
+	const dy = y2 - y1;
+	const length = Math.hypot(dx, dy);
+	if (length === 0) return 0;
+	const angle = Math.acos(Math.max(-1, Math.min(1, dx / length))) * 180 / Math.PI;
+	return dy < 0 ? 360 - angle : angle;
+}
+/**
+* The official 12-way split of that angle: 30 degree sectors, sector 0
+* centred straight up (255 to 285 degrees), going clockwise.
+*
+* @param {number} angle from screenAngle
+* @return {number} 0 to 11
+*/
+function screenSector(angle) {
+	return Math.floor(Math.trunc(angle + 105) % 360 / 30);
+}
+/**
+* The official two-way split of that angle: 'right' from 270 through 0 to 90
+* degrees, both ends included, 'left' strictly between 90 and 270. Straight
+* up, straight down and the same spot count as right.
+*
+* @param {number} angle from screenAngle
+* @return {string} 'right' or 'left'
+*/
+function screenSide(angle) {
+	return angle <= 90 || angle >= 270 ? "right" : "left";
+}
+var mat4$16, vec4$7, _matrix$5, _point;
+var init_ScreenDirection = __esmMin((() => {
+	init_gl_matrix();
+	init_Camera();
+	init_Renderer();
+	({mat4: mat4$16, vec4: vec4$7} = gl_matrix_default);
+	_matrix$5 = mat4$16.create();
+	_point = vec4$7.create();
+}));
+// src/Renderer/Effects/ShuffledGrid.js
+/**
+* Renderer/Effects/ShuffledGrid.js
+*
+* Spots the official client spreads some world-placed effect copies over
+* (Hell's Drive's blasts): an n x n grid one cell apart, centred on the
+* target, with one spot in each row and each column. The columns and the
+* rows are shuffled separately and paired in order.
+*/
+/**
+* The numbers 0 .. n - 1 in random order (uniform shuffle).
+*
+* @param {number} n
+* @param {function} random source of numbers in [0, 1)
+* @return {number[]}
+*/
+function shuffled(n, random) {
+	const list = Array.from({ length: n }, (_, i) => i);
+	for (let i = n - 1; i > 0; i--) {
+		const j = Math.floor(random() * (i + 1));
+		[list[i], list[j]] = [list[j], list[i]];
+	}
+	return list;
+}
+/**
+* @param {number} n grid size (spots per side, and number of spots)
+* @param {function} [random] source of numbers in [0, 1), Math.random by default
+* @return {number[][]} n [x, y] offsets in roBrowser cells, -floor(n / 2) .. +floor(n / 2)
+*/
+function shuffledGrid(n, random = Math.random) {
+	const half = Math.floor(n / 2);
+	const columns = shuffled(n, random);
+	const rows = shuffled(n, random);
+	return columns.map((column, k) => [column - half, rows[k] - half]);
+}
+var init_ShuffledGrid = __esmMin((() => {}));
+// src/Renderer/Effects/SpinSets.js
+/**
+* @param {number} sets how many sets (one per row)
+* @param {function} [random] source of numbers in [0, 1), Math.random by default
+* @return {{set: number, turn: number, slot: number}[]} one entry per copy: its set,
+*   its clockwise turn on screen in degrees, and its start slot (x SPIN_SLOT ms)
+*/
+function spinSets(sets, random = Math.random) {
+	const copies = [];
+	for (let set = 0; set < sets; set++) {
+		const n = SET_MIN + Math.floor(random() * SET_SPREAD);
+		const step = 360 / n;
+		const jitter = Math.floor(step);
+		const order = shuffled(n, random);
+		for (let i = 0; i < n; i++) copies.push({
+			set,
+			turn: i * step + Math.floor(random() * jitter),
+			slot: order[i] + SET_GAP * set
+		});
+	}
+	return copies;
+}
+var SET_GAP, SET_MIN, SET_SPREAD;
+var init_SpinSets = __esmMin((() => {
+	init_ShuffledGrid();
+	SET_GAP = 10;
+	SET_MIN = 15;
+	SET_SPREAD = 5;
+}));
 // src/Renderer/Effects/QuadHorn.vs?raw
 var QuadHorn_default$1;
 var init_QuadHorn$2 = __esmMin((() => {
@@ -258515,7 +259766,7 @@ var init_QuadHorn$1 = __esmMin((() => {
 	QuadHorn_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nuniform vec4 uColor;\r\nuniform sampler2D uDiffuse;\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\nout vec4 fragColor;\r\n\r\nvoid main(void) {\r\n    \r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n    \r\n    if (textureSample.a == 0.0 ) { discard; }\r\n    if (textureSample.r < 0.01 && textureSample.g < 0.01 && textureSample.b < 0.01) {\r\n        discard;\r\n        }\r\n    \r\n    fragColor = textureSample * uColor;\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
 }));
 // src/Renderer/Effects/QuadHorn.js
-var _program$16, mat4$15, blendMode, vertices, texCoords, rand$1, QuadHorn;
+var _program$21, mat4$15, blendMode, vertices, texCoords, rand$1, QuadHorn;
 var init_QuadHorn = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -258651,8 +259902,8 @@ var init_QuadHorn = __esmMin((() => {
 			this.ready = false;
 		}
 		render(gl, tick) {
-			const uniform = _program$16.uniform;
-			const attribute = _program$16.attribute;
+			const uniform = _program$21.uniform;
+			const attribute = _program$21.attribute;
 			const deltaStart = (tick - this.startTick) / 1e3;
 			const deltaEnd = (tick - this.endTick) / 1e3;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -258739,7 +259990,7 @@ var init_QuadHorn = __esmMin((() => {
 			gl.flush();
 		}
 		static init(gl) {
-			_program$16 = WebGL_default.createShaderProgram(gl, QuadHorn_default$1, QuadHorn_default);
+			_program$21 = WebGL_default.createShaderProgram(gl, QuadHorn_default$1, QuadHorn_default);
 			blendMode[1] = gl.ZERO;
 			blendMode[2] = gl.ONE;
 			blendMode[3] = gl.SRC_COLOR;
@@ -258759,16 +260010,16 @@ var init_QuadHorn = __esmMin((() => {
 			this.renderBeforeEntities = true;
 		}
 		static free(gl) {
-			if (_program$16) {
-				gl.deleteProgram(_program$16);
-				_program$16 = null;
+			if (_program$21) {
+				gl.deleteProgram(_program$21);
+				_program$21 = null;
 			}
 			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$16.uniform;
-			gl.useProgram(_program$16);
+			const uniform = _program$21.uniform;
+			gl.useProgram(_program$21);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -258779,9 +260030,9 @@ var init_QuadHorn = __esmMin((() => {
 			gl.uniform1i(uniform.uDiffuse, 0);
 		}
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$16.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$16.attribute.aTextureCoord);
-			gl.disableVertexAttribArray(_program$16.attribute.aColor);
+			gl.disableVertexAttribArray(_program$21.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$21.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$21.attribute.aColor);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		}
 	};
@@ -258990,7 +260241,7 @@ function setVertex(index, x, y, z, u, v) {
 	_vertices[offset + 3] = u;
 	_vertices[offset + 4] = v;
 }
-var mat4$14, _matrix$4, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$15, _particleProgram, _textureCache, _vertices, WaterfallEffect;
+var mat4$14, _matrix$4, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$20, _particleProgram, _textureCache, _vertices, WaterfallEffect;
 var init_WaterfallEffect = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -259063,8 +260314,8 @@ var init_WaterfallEffect = __esmMin((() => {
 			this.textureCache = loadTextures(gl, this.textureSet, this);
 		}
 		render(gl, tick) {
-			const uniform = _program$15.uniform;
-			const attribute = _program$15.attribute;
+			const uniform = _program$20.uniform;
+			const attribute = _program$20.attribute;
 			mat4$14.identity(_matrix$4);
 			mat4$14.translate(_matrix$4, _matrix$4, [
 				this.position[0] + .5,
@@ -259135,9 +260386,9 @@ var init_WaterfallEffect = __esmMin((() => {
 			gl.disableVertexAttribArray(attribute.aCorner);
 			gl.disableVertexAttribArray(attribute.aSeed);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.useProgram(_program$15);
-			gl.enableVertexAttribArray(_program$15.attribute.aPosition);
-			gl.enableVertexAttribArray(_program$15.attribute.aTextureCoord);
+			gl.useProgram(_program$20);
+			gl.enableVertexAttribArray(_program$20.attribute.aPosition);
+			gl.enableVertexAttribArray(_program$20.attribute.aTextureCoord);
 		}
 		/**
 		* Free WebGL resources
@@ -259182,9 +260433,9 @@ var init_WaterfallEffect = __esmMin((() => {
 			gl.uniform1f(_particleProgram.uniform.uFogFar, fog.far);
 			gl.uniform1i(_particleProgram.uniform.uTexture, 0);
 			gl.uniform3fv(_particleProgram.uniform.uColor, PARTICLE_COLOR);
-			const uniform = _program$15.uniform;
-			const attribute = _program$15.attribute;
-			gl.useProgram(_program$15);
+			const uniform = _program$20.uniform;
+			const attribute = _program$20.attribute;
+			gl.useProgram(_program$20);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fogUse);
@@ -259207,8 +260458,8 @@ var init_WaterfallEffect = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.depthMask(true);
-			gl.disableVertexAttribArray(_program$15.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$15.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$20.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$20.attribute.aTextureCoord);
 		}
 		/**
 		* Initialize the effect type
@@ -259216,7 +260467,7 @@ var init_WaterfallEffect = __esmMin((() => {
 		* @param {WebGLRenderingContext} gl
 		*/
 		static init(gl) {
-			_program$15 = WebGL_default.createShaderProgram(gl, WaterfallEffect_default$1, WaterfallEffect_default);
+			_program$20 = WebGL_default.createShaderProgram(gl, WaterfallEffect_default$1, WaterfallEffect_default);
 			_particleProgram = WebGL_default.createShaderProgram(gl, WaterfallParticle_default$1, WaterfallParticle_default);
 			this.ready = true;
 		}
@@ -259234,9 +260485,9 @@ var init_WaterfallEffect = __esmMin((() => {
 				cache.waiters.clear();
 			});
 			_textureCache.clear();
-			if (_program$15) gl.deleteProgram(_program$15);
+			if (_program$20) gl.deleteProgram(_program$20);
 			if (_particleProgram) gl.deleteProgram(_particleProgram);
-			_program$15 = null;
+			_program$20 = null;
 			_particleProgram = null;
 			this.ready = false;
 			this.needInit = true;
@@ -259294,7 +260545,18 @@ function spamSTR(Params) {
 		filename: "data/texture/effect/" + pick(Params.effect.file) + ".str",
 		texturePath
 	});
-	EffectManager.add(new StrEffect("data/texture/effect/" + filename + ".str", Params.Inst.position, Params.Inst.startTick, texturePath, fallbacks), Params);
+	const str = Params.effect.arcThrow ? new BezierArcThrowStrEffect("data/texture/effect/" + filename + ".str", Params.Inst.position, Params.Inst.startTick, texturePath, fallbacks, Params.Init.ownerEntity) : new StrEffect("data/texture/effect/" + filename + ".str", Params.Inst.position, Params.Inst.startTick, texturePath, fallbacks);
+	if (Params.effect.xOffset !== void 0 || Params.effect.yOffset !== void 0) str.ez2Offset = [Params.effect.xOffset || 0, Params.effect.yOffset || 0];
+	if (Params.Init.screenTurn !== void 0 || Params.effect.turnOffset) {
+		const turn = (Params.Init.screenTurn || 0) + (Params.effect.turnOffset || 0);
+		if (turn % 360) str.screenTurn = turn;
+	}
+	if (Params.Init.flipX) str.flipX = true;
+	if (Params.Init.flipY) str.flipY = true;
+	if (Params.effect.tilt) str.tilt = Params.effect.tilt;
+	const scale = Params.Init.scale || Params.effect.scale;
+	if (scale > 0 && scale !== 1) str.scale = scale;
+	EffectManager.add(str, Params);
 }
 /**
 * Spam an effect to the scene
@@ -259335,6 +260597,16 @@ function spamSprite(Params) {
 		renderBefore: !!Params.effect.renderBeforeEntities
 	});
 	if (isNewEntity) EntityManager.add(entity);
+}
+/**
+* A cast loop stops when its cast ends, wherever its own animation is.
+*
+* @param {object} effect
+* @param {number} tick
+*/
+function stopEndedCastLoop(effect, tick) {
+	const Params = effect._Params;
+	if (Params && Params.effect && Params.effect.castLoop && Params.Inst.endTick > 0 && tick >= Params.Inst.endTick) effect.needCleanUp = true;
 }
 /**
 * Repeat an existing effect if needed
@@ -259403,12 +260675,19 @@ var init_EffectManager = __esmMin((() => {
 	init_Events();
 	init_Configs();
 	init_Cylinder();
+	init_EffectPrim();
+	init_AreaSpawner();
+	init_GroundScatter();
 	init_StrEffect();
+	init_BezierArcThrow();
 	init_RsmEffect();
 	init_TwoDEffect();
 	init_ThreeDEffect();
 	init_Entity$1();
 	init_EntityManager();
+	init_ScreenDirection();
+	init_ShuffledGrid();
+	init_SpinSets();
 	init_Renderer();
 	init_Altitude();
 	init_SoundManager();
@@ -259538,10 +260817,11 @@ var init_EffectManager = __esmMin((() => {
 						if (!!list[j].renderBeforeEntities !== renderBeforeEntities) continue;
 						const effect = list[j];
 						const pos = effect._Params && effect._Params.Inst ? effect._Params.Inst.position : null;
+						stopEndedCastLoop(effect, tick);
 						let culled = false;
 						if (pos) {
 							if ((pos[0] - center[0]) * (pos[0] - center[0]) + (pos[1] - center[1]) * (pos[1] - center[1]) > cullDistanceSq) {
-								let shouldRemove = false;
+								let shouldRemove = effect.needCleanUp;
 								if (effect._Params.Inst.duration > 0 && effect._Params.Inst.endTick > 0 && tick > effect._Params.Inst.endTick) shouldRemove = true;
 								if (shouldRemove) {
 									effect.needCleanUp = true;
@@ -259552,12 +260832,13 @@ var init_EffectManager = __esmMin((() => {
 								}
 							}
 						}
-						if (!culled) {
+						if (!culled && !effect.needCleanUp) {
 							if (!effect.ready && effect.needInit) {
 								effect.init(gl);
 								effect.needInit = false;
 							}
 							if (effect.ready) effect.render(gl, tick);
+							else if (effect.endTick > 0 && tick > effect.endTick) effect.needCleanUp = true;
 						}
 						size += repeatEffect(effect);
 						if (effect.needCleanUp) {
@@ -259644,11 +260925,16 @@ var init_EffectManager = __esmMin((() => {
 				Params.Inst.position[1],
 				Params.Inst.position[2]
 			];
+			if (Params.effect.groundScatter && !Params.effect.attachedEntity) {
+				const [dx, dy] = groundScatter(Params.effect.groundScatter);
+				Params.Inst.position[0] += dx;
+				Params.Inst.position[1] += dy;
+			}
 			Params.Inst.persistent = Params.Init.persistent || false;
 			if (typeof Params.effect.repeat !== "undefined" && Params.effect.repeat !== null) Params.Inst.persistent = Params.effect.repeat;
 			Params.Inst.repeatEnd = Params.Init.repeatEnd ? Params.Init.repeatEnd : Params.effect.repeatEnd || 0;
 			Params.Inst.repeatDelay = Params.effect.repeatDelay ? Params.effect.repeatDelay : Params.Init.repeatDelay;
-			if (Params.effect.wav) {
+			if (Params.effect.wav && !(Params.Inst.noDelay && Params.effect.castLoop)) {
 				filename = Params.effect.wav;
 				if (Params.effect.rand) filename = filename.replace("%d", Math.round(Params.effect.rand[0] + (Params.effect.rand[1] - Params.effect.rand[0]) * Math.random()));
 				Events.setTimeout(function() {
@@ -259661,8 +260947,13 @@ var init_EffectManager = __esmMin((() => {
 			Params.Inst.delayLateDelta = !isNaN(Params.effect.delayLateDelta) ? Params.effect.delayLateDelta * Params.Inst.duplicateID : 0;
 			Params.Inst.delayOffset = !isNaN(Params.effect.delayOffset) ? Params.effect.delayOffset + Params.Inst.delayOffsetDelta : 0;
 			Params.Inst.delayLate = !isNaN(Params.effect.delayLate) ? Params.effect.delayLate + Params.Inst.delayLateDelta : 0;
-			Params.Inst.startTick = Params.Inst.startTick + (Params.Inst.noDelay ? Params.Inst.delayOffset + Params.Inst.delayLate : Params.effect.delayStart || 0);
+			const delayStart = typeof Params.effect.delayStart === "function" ? Params.effect.delayStart(Params) : Params.effect.delayStart;
+			Params.Inst.startTick = Params.Inst.startTick + (Params.Inst.noDelay ? Params.Inst.delayOffset + Params.Inst.delayLate : delayStart || 0);
 			Params.Inst.endTick = Params.Inst.duration > 0 ? Params.Inst.startTick + (Params.Inst.noDelay ? Params.Inst.delayOffset : 0) + Params.Inst.duration : -1;
+			if (Params.effect.castLoop && Params.Init.castEndTick > 0) {
+				Params.Inst.repeatEnd = Params.Init.castEndTick;
+				Params.Inst.endTick = Params.Init.castEndTick;
+			}
 			switch (Params.effect.type) {
 				case "SPR":
 					spamSprite(Params);
@@ -259672,6 +260963,17 @@ var init_EffectManager = __esmMin((() => {
 					break;
 				case "CYLINDER":
 					EffectManager.add(new Cylinder(Params.effect, Params.Inst, Params.Init), Params);
+					break;
+				case "PRIM":
+					EffectManager.add(new EffectPrim(Params.effect, Params.Inst, Params.Init), Params);
+					break;
+				case "AREA_SPAWN":
+					EffectManager.add(new AreaSpawner(Params.effect, Params.Inst, Params.Init, (effectId, position, startTick, scale) => EffectManager.spam(Object.assign({
+						effectId,
+						position,
+						startTick,
+						otherAID: Params.Init.otherAID
+					}, scale && { scale })), (x, y) => Altitude.getCellHeight(x, y)), Params);
 					break;
 				case "2D":
 					EffectManager.add(new TwoDEffect(Params.effect, Params.Inst, Params.Init), Params);
@@ -259706,12 +261008,20 @@ var init_EffectManager = __esmMin((() => {
 		* @param {number} position x
 		* @param {number} position y
 		* @param {number} skill unique id
+		* @param {number} creator id
+		* @param {number} [level] skill level, when the packet has it
+		* @param {number} [range] skill unit range, when the packet has it
 		*/
-		static spamSkillZone(unit_id, xPos, yPos, uid, creatorUid) {
+		static spamSkillZone(unit_id, xPos, yPos, uid, creatorUid, level, range) {
 			if (!Map_default.effect) return;
 			if (!(unit_id in SkillUnit)) return;
-			const effectId = SkillUnit[unit_id];
-			if (!(effectId in EffectTable_default)) return;
+			let effectIds = [SkillUnit[unit_id]].flat().filter((effectId) => effectId in EffectTable_default);
+			let persistent = true;
+			if (!effectIds.length && unit_id in SkillUnitFallback) {
+				effectIds = SkillUnitFallback[unit_id].filter((effectId) => effectId in EffectTable_default);
+				persistent = false;
+			}
+			if (!effectIds.length) return;
 			EffectManager.remove(null, uid);
 			const entity = new Entity();
 			entity.GID = uid;
@@ -259723,21 +261033,45 @@ var init_EffectManager = __esmMin((() => {
 			entity.hideShadow = true;
 			entity.objecttype = traps.includes(unit_id) ? entity.constructor.TYPE_TRAP : targetableUnits.includes(unit_id) ? entity.constructor.TYPE_UNIT : entity.constructor.TYPE_EFFECT;
 			entity.creatorGID = creatorUid;
+			entity.skillUnitId = unit_id;
 			EntityManager.add(entity);
-			const EF_Init_Par = {
+			effectIds.forEach((effectId) => {
+				const EF_Init_Par = {
+					effectId,
+					ownerAID: uid,
+					position: [
+						xPos,
+						yPos,
+						Altitude.getCellHeight(xPos, yPos)
+					],
+					startTick: Renderer.tick,
+					persistent,
+					duration: -1,
+					otherAID: creatorUid,
+					skillLevel: level,
+					unitRange: range
+				};
+				EffectManager.spam(EF_Init_Par);
+			});
+		}
+		/**
+		* Play a skill unit's end effects where it stood, when it goes
+		*
+		* @param {number} uid skill unique id
+		*/
+		static spamSkillZoneEnd(uid) {
+			if (!Map_default.effect) return;
+			const entity = EntityManager.get(uid);
+			if (!entity || !(entity.skillUnitId in SkillUnitEnd)) return;
+			const position = [
+				entity.position[0],
+				entity.position[1],
+				entity.position[2]
+			];
+			SkillUnitEnd[entity.skillUnitId].forEach((effectId) => EffectManager.spam({
 				effectId,
-				ownerAID: uid,
-				position: [
-					xPos,
-					yPos,
-					Altitude.getCellHeight(xPos, yPos)
-				],
-				startTick: Renderer.tick,
-				persistent: true,
-				duration: -1,
-				otherAID: creatorUid
-			};
-			EffectManager.spam(EF_Init_Par);
+				position
+			}));
 		}
 		/**
 		* Spam a skill on a target
@@ -259746,8 +261080,10 @@ var init_EffectManager = __esmMin((() => {
 		* @param {number} target aid
 		* @param {Array} position
 		* @param {number} tick
+		* @param {number} srcAID caster aid
+		* @param {number} [level] skill level from the ground packet
 		*/
-		static spamSkill(skillId, destAID, position, tick, srcAID) {
+		static spamSkill(skillId, destAID, position, tick, srcAID, level) {
 			let effects, EF_Init_Par;
 			if (!(skillId in SkillEffect)) return;
 			if (SkillEffect[skillId].effectId) {
@@ -259763,6 +261099,18 @@ var init_EffectManager = __esmMin((() => {
 						otherAID: srcAID
 					};
 					EffectManager.spam(EF_Init_Par);
+				});
+			}
+			const groundByLevel = SkillEffect[skillId].groundEffectIdByLevel;
+			if (groundByLevel && groundByLevel.length && position && level > 0) {
+				const effectId = groundByLevel[Math.min(level, groundByLevel.length) - 1];
+				if (effectId) EffectManager.spam({
+					effectId,
+					ownerAID: destAID,
+					position,
+					startTick: tick,
+					otherAID: srcAID,
+					skillLevel: level
 				});
 			}
 			if (SkillEffect[skillId].effectIdOnCaster && srcAID) {
@@ -259785,8 +261133,10 @@ var init_EffectManager = __esmMin((() => {
 		* @param {number} skill id
 		* @param {number} target aid
 		* @param {number} tick
+		* @param {number} srcAID caster aid
+		* @param {number} [level] skill level from the packet
 		*/
-		static spamSkillSuccess(skillId, destAID, tick, srcAID) {
+		static spamSkillSuccess(skillId, destAID, tick, srcAID, level) {
 			let effects, EF_Init_Par;
 			if (!(skillId in SkillEffect)) return;
 			if (SkillEffect[skillId].successEffectId) {
@@ -259801,6 +261151,28 @@ var init_EffectManager = __esmMin((() => {
 					EffectManager.spam(EF_Init_Par);
 				});
 			}
+			const byLevel = SkillEffect[skillId].successEffectIdOnCasterByLevel;
+			if (byLevel && byLevel.length && level > 0) {
+				const effectId = byLevel[Math.min(level, byLevel.length) - 1];
+				if (effectId) EffectManager.spam({
+					effectId,
+					ownerAID: srcAID,
+					startTick: tick,
+					otherAID: destAID,
+					skillLevel: level
+				});
+			}
+			const byLevelOnTarget = SkillEffect[skillId].successEffectIdOnTargetByLevel;
+			if (byLevelOnTarget && byLevelOnTarget.length && level > 0 && destAID) {
+				const effectId = byLevelOnTarget[Math.min(level, byLevelOnTarget.length) - 1];
+				if (effectId) EffectManager.spam({
+					effectId,
+					ownerAID: destAID,
+					startTick: tick,
+					otherAID: srcAID,
+					skillLevel: level
+				});
+			}
 			if (SkillEffect[skillId].successEffectIdOnCaster) {
 				effects = Array.isArray(SkillEffect[skillId].successEffectIdOnCaster) ? SkillEffect[skillId].successEffectIdOnCaster : [SkillEffect[skillId].successEffectIdOnCaster];
 				effects.forEach((effectId) => {
@@ -259813,6 +261185,132 @@ var init_EffectManager = __esmMin((() => {
 					EffectManager.spam(EF_Init_Par);
 				});
 			}
+			const byDirection = SkillEffect[skillId].successEffectIdOnCasterByScreenDirection;
+			if (byDirection && srcAID && destAID) {
+				const srcEntity = EntityManager.get(srcAID);
+				const destEntity = EntityManager.get(destAID);
+				if (srcEntity && destEntity) {
+					const effectId = byDirection[screenSector(screenAngle(srcEntity.position, destEntity.position))];
+					if (effectId) EffectManager.spam({
+						effectId,
+						ownerAID: srcAID,
+						startTick: tick,
+						otherAID: destAID
+					});
+				}
+			}
+			const aimed = SkillEffect[skillId].successEffectIdOnCasterAimed;
+			if (aimed && srcAID && destAID) {
+				const srcEntity = EntityManager.get(srcAID);
+				const destEntity = EntityManager.get(destAID);
+				if (srcEntity && destEntity) EffectManager.spam({
+					effectId: aimed,
+					ownerAID: srcAID,
+					startTick: tick,
+					otherAID: destAID,
+					screenTurn: screenAngle(srcEntity.position, destEntity.position)
+				});
+			}
+			const thrown = SkillEffect[skillId].successEffectThrowAtTarget;
+			if (thrown && srcAID && destAID) {
+				const destEntity = EntityManager.get(destAID);
+				if (destEntity && EntityManager.get(srcAID)) EffectManager.spam({
+					effectId: thrown,
+					ownerAID: srcAID,
+					position: destEntity.position.slice(),
+					startTick: tick,
+					otherAID: destAID
+				});
+			}
+			const bySide = SkillEffect[skillId].successEffectIdOnTargetByScreenSide;
+			if (bySide && srcAID && destAID) {
+				const srcEntity = EntityManager.get(srcAID);
+				const destEntity = EntityManager.get(destAID);
+				if (srcEntity && destEntity) {
+					const effectId = bySide[screenSide(screenAngle(srcEntity.position, destEntity.position))];
+					if (effectId) EffectManager.spam({
+						effectId,
+						ownerAID: destAID,
+						startTick: tick,
+						otherAID: srcAID
+					});
+				}
+			}
+			const gridIds = SkillEffect[skillId].successEffectGridIds;
+			const gridSizes = SkillEffect[skillId].successEffectGridSizeByLevel;
+			const center = gridIds && level > 0 ? EntityManager.get(destAID) || EntityManager.get(srcAID) : null;
+			if (center && gridSizes && gridSizes.length) {
+				const size = gridSizes[Math.min(level, gridSizes.length) - 1];
+				const step = SkillEffect[skillId].successEffectGridStep || 0;
+				const start = tick || Renderer.tick;
+				const [x, y, z] = center.position;
+				shuffledGrid(size).forEach(([dx, dy], k) => {
+					gridIds.forEach((entry) => {
+						const effectId = Array.isArray(entry) ? entry.at(Math.floor(Math.random() * entry.length)) : entry;
+						EffectManager.spam({
+							effectId,
+							ownerAID: destAID,
+							position: [
+								x + dx,
+								y + dy,
+								z
+							],
+							startTick: start + step * k,
+							otherAID: srcAID,
+							skillLevel: level
+						});
+					});
+				});
+			}
+			const spinIds = SkillEffect[skillId].successEffectSpinSets;
+			const spinAt = spinIds ? EntityManager.get(destAID) || EntityManager.get(srcAID) : null;
+			if (spinAt) {
+				const start = tick || Renderer.tick;
+				const [x, y, z] = spinAt.position;
+				spinSets(spinIds.length).forEach(({ set, turn, slot }) => {
+					EffectManager.spam({
+						effectId: spinIds[set],
+						ownerAID: destAID,
+						position: [
+							x,
+							y,
+							z
+						],
+						startTick: start + 32 * slot,
+						otherAID: srcAID,
+						screenTurn: turn
+					});
+				});
+			}
+		}
+		/**
+		* Spam skill effects as a damage packet arrives, before the hit lands
+		* (damageEffectIdOnCaster, damageEffectIdOnTarget). Every damage packet
+		* counts, splash and misses included.
+		*
+		* @param {number} skillId skill id
+		* @param {number} destAID target aid
+		* @param {number} tick
+		* @param {number} srcAID caster aid
+		* @param {function} [random] returns a number in [0, 1)
+		*/
+		static spamSkillDamage(skillId, destAID, tick, srcAID, random = Math.random) {
+			const skill = SkillEffect[skillId];
+			if (!skill) return;
+			const play = (field, ownerAID, otherAID) => {
+				if (!skill[field] || !ownerAID) return;
+				(Array.isArray(skill[field]) ? skill[field] : [skill[field]]).forEach((entry) => {
+					const effectId = Array.isArray(entry) ? entry.at(Math.floor(random() * entry.length)) : entry;
+					EffectManager.spam({
+						effectId,
+						ownerAID,
+						startTick: tick,
+						otherAID
+					});
+				});
+			};
+			play("damageEffectIdOnCaster", srcAID, destAID);
+			play("damageEffectIdOnTarget", destAID, srcAID);
 		}
 		/**
 		* Spam skill effect on hit with damage
@@ -259909,10 +261407,14 @@ var init_EffectManager = __esmMin((() => {
 		* @param {number} skill id
 		* @param {number} target aid
 		* @param {number} tick
+		* @param {number} source aid
+		* @param {number} cast time in ms, used by effect rows marked castLoop
 		*/
-		static spamSkillCast(skillId, destAID, tick, srcAID) {
+		static spamSkillCast(skillId, destAID, tick, srcAID, castTime) {
 			let effects, EF_Init_Par;
 			if (!(skillId in SkillEffect)) return;
+			const startTick = tick || Renderer.tick;
+			const castEndTick = castTime > 0 ? startTick + castTime : 0;
 			if (SkillEffect[skillId].beginCastEffectId) {
 				effects = Array.isArray(SkillEffect[skillId].beginCastEffectId) ? SkillEffect[skillId].beginCastEffectId : [SkillEffect[skillId].beginCastEffectId];
 				effects.forEach((effectId) => {
@@ -259920,11 +261422,31 @@ var init_EffectManager = __esmMin((() => {
 						effectId,
 						ownerAID: destAID,
 						startTick: tick,
-						otherAID: srcAID
+						otherAID: srcAID,
+						castEndTick
 					};
 					EffectManager.spam(EF_Init_Par);
 				});
 			}
+		}
+		/**
+		* Remove the cast effects (rows marked castLoop) still playing on an entity,
+		* when its cast is cancelled.
+		*
+		* @param {number} aid
+		*/
+		static removeCastLoops(AID) {
+			Object.keys(_list$3).forEach((name) => {
+				const list = _list$3[name];
+				for (let i = list.length - 1; i >= 0; --i) {
+					const Params = list[i]._Params;
+					if (Params && Params.effect && Params.effect.castLoop && Params.Init.ownerAID === AID) {
+						if (list[i].free) list[i].free(_gl);
+						list.splice(i, 1);
+					}
+				}
+				if (!list.length) delete _list$3[name];
+			});
 		}
 		/**
 		* Spam a item on a target
@@ -260044,6 +261566,16 @@ var init_EffectManager = __esmMin((() => {
 		}
 		static debug() {
 			console.log("%c[DEBUG] EffectManager _list: ", "color:#F5B342", _list$3);
+		}
+		/**
+		* Whether an actor already has an effect running (or waiting to start)
+		*
+		* @param {number} AID effect owner ID
+		* @param {mixed} effectID effect ID
+		* @return {boolean}
+		*/
+		static has(AID, effectID) {
+			return Object.keys(_list$3).some((name) => _list$3[name].some((effect) => effect._Params && effect._Params.Init.ownerAID === AID && effect._Params.Inst.effectID === effectID));
 		}
 		/**
 		* Remove an effect
@@ -260570,7 +262102,7 @@ var init_Blind$1 = __esmMin((() => {
 	Blind_default = "#version 300 es\r\nprecision mediump float;\r\n\r\nuniform sampler2D uTexture;\r\nuniform float uFocusRadius;\r\nuniform float uFocusFalloff;\r\nuniform vec2 uAspectRatio;\r\n\r\nin vec2 vUv;\r\nout vec4 fragColor;\r\n\r\nvoid main() {\r\n	vec2 uv = (vUv - 0.5) * uAspectRatio;  \r\n	float dist = length(uv); \r\n	vec3 original = texture(uTexture, vUv).rgb;\r\n	float effectMask = smoothstep(uFocusRadius, uFocusRadius + uFocusFalloff, dist);\r\n\r\n	if (effectMask <= 0.01) {\r\n		fragColor = texture(uTexture, vUv);\r\n		return;\r\n	}\r\n	vec3 finalColor = mix(original, vec3(0.0), effectMask);  \r\n	fragColor = vec4(finalColor, 1.0);\r\n}";
 }));
 // src/Renderer/Effects/Shaders/Blind.js
-var _program$14, _buffer$14, _active, Blind;
+var _program$19, _buffer$14, _active, Blind;
 var init_Blind = __esmMin((() => {
 	init_WebGL();
 	init_Camera();
@@ -260586,31 +262118,31 @@ var init_Blind = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target buffer
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$14 || !_program$14 || !Blind.isActive()) return;
+			if (!_buffer$14 || !_program$19 || !Blind.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$14);
+			gl.useProgram(_program$19);
 			const baseRadius = .2;
 			const baseFalloff = .5;
 			const zoom = Camera.zoomFinal;
 			const focusRadius = baseRadius + (63 - zoom) / 1e3;
 			const focusFalloff = baseFalloff + (63 - zoom) / 1e3;
-			gl.uniform1f(_program$14.uniform.uFocusRadius, focusRadius);
-			gl.uniform1f(_program$14.uniform.uFocusFalloff, focusFalloff);
-			gl.uniform2f(_program$14.uniform.uAspectRatio, gl.canvas.width / gl.canvas.height, 1);
+			gl.uniform1f(_program$19.uniform.uFocusRadius, focusRadius);
+			gl.uniform1f(_program$19.uniform.uFocusFalloff, focusFalloff);
+			gl.uniform2f(_program$19.uniform.uAspectRatio, gl.canvas.width / gl.canvas.height, 1);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$14);
-			const posLoc = _program$14.attribute.aPosition;
+			const posLoc = _program$19.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$14.uniform.uTexture, 0);
+			gl.uniform1i(_program$19.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$14 = WebGL_default.createShaderProgram(gl, Common_default, Blind_default);
+				_program$19 = WebGL_default.createShaderProgram(gl, Common_default, Blind_default);
 			} catch (e) {
 				console.error("Error compiling Blind shader.", e);
 				return;
@@ -260640,11 +262172,11 @@ var init_Blind = __esmMin((() => {
 			_active = bool;
 		}
 		static program() {
-			return _program$14;
+			return _program$19;
 		}
 		static clean(gl) {
 			if (_buffer$14) gl.deleteBuffer(_buffer$14);
-			_program$14 = _buffer$14 = null;
+			_program$19 = _buffer$14 = null;
 		}
 	};
 }));
@@ -260846,13 +262378,13 @@ function init$7(gl, mapname) {
 		_display = false;
 		return;
 	}
-	_color = Weather.sky[mapname].cloudColor;
+	_color$1 = Weather.sky[mapname].cloudColor;
 	const color = Weather.sky[mapname].skyColor;
-	if (_color) _display = true;
+	if (_color$1) _display = true;
 	else _display = false;
 	gl.clearColor(color[0], color[1], color[2], color[3]);
-	if (!_textures.length && _display) {
-		_textures.length = 8;
+	if (!_textures$4.length && _display) {
+		_textures$4.length = 8;
 		for (i = 0; i < 7; i++) loadCloudTexture(gl, i);
 	}
 }
@@ -260865,7 +262397,7 @@ function init$7(gl, mapname) {
 function loadCloudTexture(gl, i) {
 	Client.loadFile("data/texture/effect/cloud" + (i + 1) + ".tga", function(buffer) {
 		WebGL_default.texture(gl, buffer, function(texture) {
-			_textures[i] = texture;
+			_textures$4[i] = texture;
 		});
 	});
 }
@@ -260882,7 +262414,7 @@ function setUpCloudData() {
 			death_tick: 0
 		};
 		cloudInit(_clouds[i]);
-		_clouds[i].sprite = Math.random() * (_textures.length - 1) | 0;
+		_clouds[i].sprite = Math.random() * (_textures$4.length - 1) | 0;
 		_clouds[i].death_tick = _clouds[i].born_tick + Math.random() * 8e3;
 		_clouds[i].born_tick -= 2e3;
 	}
@@ -260918,7 +262450,7 @@ function render$7(gl, modelView, projection, fog, tick) {
 	if (!_display) return;
 	let i, cloud, opacity;
 	SpriteRenderer.bind3DContext(gl, modelView, projection, fog);
-	SpriteRenderer.color.set(_color);
+	SpriteRenderer.color.set(_color$1);
 	SpriteRenderer.shadow = 1;
 	SpriteRenderer.angle = 0;
 	SpriteRenderer.size[0] = 500;
@@ -260937,7 +262469,7 @@ function render$7(gl, modelView, projection, fog, tick) {
 		else opacity = 1;
 		SpriteRenderer.zIndex = 0;
 		SpriteRenderer.color[3] = opacity;
-		SpriteRenderer.image.texture = _textures[cloud.sprite];
+		SpriteRenderer.image.texture = _textures$4[cloud.sprite];
 		const dt = Math.min(tick - (cloud._lastTick || cloud.born_tick), 250);
 		cloud._lastTick = tick;
 		vec3$8.scaleAndAdd(cloud.position, cloud.position, cloud.direction, dt / 25);
@@ -260948,7 +262480,7 @@ function render$7(gl, modelView, projection, fog, tick) {
 	}
 	SpriteRenderer.unbind(gl);
 }
-var MAX_CLOUDS, _clouds, _textures, _color, _display, Sky_default;
+var MAX_CLOUDS, _clouds, _textures$4, _color$1, _display, Sky_default;
 var init_Sky = __esmMin((() => {
 	init_WebGL();
 	init_WeatherEffect();
@@ -260958,8 +262490,8 @@ var init_Sky = __esmMin((() => {
 	init_gl_matrix();
 	MAX_CLOUDS = 150;
 	_clouds = new Array(MAX_CLOUDS);
-	_textures = [];
-	_color = null;
+	_textures$4 = [];
+	_color$1 = null;
 	_display = true;
 	Sky_default = {
 		init: init$7,
@@ -262905,7 +264437,7 @@ var init_GaussianBlur$1 = __esmMin((() => {
 	GaussianBlur_default = "#version 300 es\r\nprecision mediump float;\r\n\r\nuniform sampler2D uTexture;\r\nuniform float uFocusRadius;\r\nuniform float uFocusFalloff;\r\nuniform vec2 uTexelSize;\r\n\r\nin vec2 vUv;\r\nout vec4 fragColor;\r\n\r\nvec3 spdReduce4(vec3 c0, vec3 c1, vec3 c2, vec3 c3) {\r\n	return (c0 + c1 + c2 + c3) * 0.25;\r\n}\r\n\r\nvec3 load_and_reduce(sampler2D tex, vec2 uv, vec2 texelSize, float intensity) {  \r\n	vec2 offset = texelSize * (intensity * 0.5); \r\n	  \r\n	vec3 c0 = texture(tex, uv + vec2(-offset.x, -offset.y)).rgb;  \r\n	vec3 c1 = texture(tex, uv + vec2(offset.x, -offset.y)).rgb;  \r\n	vec3 c2 = texture(tex, uv + vec2(-offset.x, offset.y)).rgb;  \r\n	vec3 c3 = texture(tex, uv + vec2(offset.x, offset.y)).rgb;  \r\n	  \r\n	return spdReduce4(c0, c1, c2, c3);\r\n}  \r\n\r\nvoid main() {\r\n	float dist = distance(vUv, vec2(0.5));\r\n	vec3 original = texture(uTexture, vUv).rgb;\r\n	float effectMask = smoothstep(uFocusRadius, uFocusRadius + uFocusFalloff, dist);\r\n\r\n	if (effectMask <= 0.01) {\r\n		fragColor = texture(uTexture, vUv);\r\n		return;\r\n	}\r\n\r\n	vec3 blurred = load_and_reduce(uTexture, vUv, uTexelSize, effectMask);\r\n	fragColor = vec4(mix(original, blurred, effectMask), 1.0);\r\n}";
 }));
 // src/Renderer/Effects/Shaders/GaussianBlur.js
-var _program$13, _buffer$12, GaussianBlur;
+var _program$18, _buffer$12, GaussianBlur;
 var init_GaussianBlur = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -262920,29 +264452,29 @@ var init_GaussianBlur = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFbo - Target buffer
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$12 || !_program$13 || !GaussianBlur.isActive()) return;
+			if (!_buffer$12 || !_program$18 || !GaussianBlur.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$13);
+			gl.useProgram(_program$18);
 			const focusRadius = GraphicsSettings.blurArea / 100;
 			const focusFalloff = .5;
-			gl.uniform1f(_program$13.uniform.uFocusRadius, focusRadius);
-			gl.uniform1f(_program$13.uniform.uFocusFalloff, focusFalloff);
+			gl.uniform1f(_program$18.uniform.uFocusRadius, focusRadius);
+			gl.uniform1f(_program$18.uniform.uFocusFalloff, focusFalloff);
 			const boxsampleFactor = GraphicsSettings.blurIntensity;
-			gl.uniform2f(_program$13.uniform.uTexelSize, 1 / gl.canvas.width * boxsampleFactor, 1 / gl.canvas.height * boxsampleFactor);
+			gl.uniform2f(_program$18.uniform.uTexelSize, 1 / gl.canvas.width * boxsampleFactor, 1 / gl.canvas.height * boxsampleFactor);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$12);
-			const posLoc = _program$13.attribute.aPosition;
+			const posLoc = _program$18.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$13.uniform.uTexture, 0);
+			gl.uniform1i(_program$18.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$13 = WebGL_default.createShaderProgram(gl, Common_default, GaussianBlur_default);
+				_program$18 = WebGL_default.createShaderProgram(gl, Common_default, GaussianBlur_default);
 			} catch (e) {
 				console.error("Error compiling Lens Blur shader.", e);
 				return;
@@ -262969,11 +264501,11 @@ var init_GaussianBlur = __esmMin((() => {
 			return GraphicsSettings.blur;
 		}
 		static program() {
-			return _program$13;
+			return _program$18;
 		}
 		static clean(gl) {
 			if (_buffer$12) gl.deleteBuffer(_buffer$12);
-			_program$13 = _buffer$12 = null;
+			_program$18 = _buffer$12 = null;
 		}
 	};
 }));
@@ -262983,7 +264515,7 @@ var init_CAS$1 = __esmMin((() => {
 	CAS_default = "#version 300 es \r\nprecision mediump float;  \r\n\r\nuniform sampler2D uTexture;  \r\nuniform float uContrast;  \r\nuniform float uSharpening;  \r\nuniform vec2 uTexelSize;  \r\n\r\nin vec2 vUv;  \r\nout vec4 fragColor;  \r\n\r\nvoid main() {  \r\n    // Sampling 3x3  \r\n    //  a b c  \r\n    //  d(e)f  \r\n    //  g h i  \r\n      \r\n    vec3 a = texture(uTexture, vUv + vec2(-uTexelSize.x, -uTexelSize.y)).rgb;  \r\n    vec3 b = texture(uTexture, vUv + vec2(0.0, -uTexelSize.y)).rgb;  \r\n    vec3 c = texture(uTexture, vUv + vec2(uTexelSize.x, -uTexelSize.y)).rgb;  \r\n    vec3 d = texture(uTexture, vUv + vec2(-uTexelSize.x, 0.0)).rgb;  \r\n    vec3 e = texture(uTexture, vUv).rgb;  \r\n    vec3 f = texture(uTexture, vUv + vec2(uTexelSize.x, 0.0)).rgb;  \r\n    vec3 g = texture(uTexture, vUv + vec2(-uTexelSize.x, uTexelSize.y)).rgb;  \r\n    vec3 h = texture(uTexture, vUv + vec2(0.0, uTexelSize.y)).rgb;  \r\n    vec3 i = texture(uTexture, vUv + vec2(uTexelSize.x, uTexelSize.y)).rgb;  \r\n\r\n    // Soft min e max \r\n    vec3 mnRGB = min(min(min(d, e), min(f, b)), h);  \r\n    vec3 mnRGB2 = min(mnRGB, min(min(a, c), min(g, i)));  \r\n    mnRGB += mnRGB2;  \r\n\r\n    vec3 mxRGB = max(max(max(d, e), max(f, b)), h);  \r\n    vec3 mxRGB2 = max(mxRGB, max(max(a, c), max(g, i)));  \r\n    mxRGB += mxRGB2;  \r\n\r\n    vec3 rcpMRGB = 1.0 / mxRGB;  \r\n    vec3 ampRGB = clamp(min(mnRGB, 2.0 - mxRGB) * rcpMRGB, 0.0, 1.0);  \r\n\r\n    ampRGB = inversesqrt(ampRGB);  \r\n\r\n    float peak = -3.0 * uContrast + 8.0;  \r\n    vec3 wRGB = -1.0 / (ampRGB * peak);  \r\n    vec3 rcpWeightRGB = 1.0 / (4.0 * wRGB + 1.0);  \r\n\r\n    // Cross Filter \r\n    //  0 w 0  \r\n    //  w 1 w  \r\n    //  0 w 0  \r\n    vec3 window = (b + d) + (f + h);  \r\n    vec3 outColor = clamp((window * wRGB + e) * rcpWeightRGB, 0.0, 1.0);  \r\n\r\n    // Blend \r\n    fragColor = vec4(mix(e, outColor, uSharpening), 1.0);  \r\n}";
 }));
 // src/Renderer/Effects/Shaders/CAS.js
-var _program$12, _buffer$11, CAS;
+var _program$17, _buffer$11, CAS;
 var init_CAS = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -262992,26 +264524,26 @@ var init_CAS = __esmMin((() => {
 	init_CAS$1();
 	CAS = class CAS {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$11 || !_program$12 || !CAS.isActive()) return;
+			if (!_buffer$11 || !_program$17 || !CAS.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$12);
-			gl.uniform1f(_program$12.uniform.uContrast, GraphicsSettings.casContrast || 0);
-			gl.uniform1f(_program$12.uniform.uSharpening, GraphicsSettings.casSharpening || 1);
-			gl.uniform2f(_program$12.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
+			gl.useProgram(_program$17);
+			gl.uniform1f(_program$17.uniform.uContrast, GraphicsSettings.casContrast || 0);
+			gl.uniform1f(_program$17.uniform.uSharpening, GraphicsSettings.casSharpening || 1);
+			gl.uniform2f(_program$17.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$11);
-			const posLoc = _program$12.attribute.aPosition;
+			const posLoc = _program$17.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$12.uniform.uTexture, 0);
+			gl.uniform1i(_program$17.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$12 = WebGL_default.createShaderProgram(gl, Common_default, CAS_default);
+				_program$17 = WebGL_default.createShaderProgram(gl, Common_default, CAS_default);
 			} catch (e) {
 				console.error("Error compiling CAS shader.", e);
 				return;
@@ -263038,11 +264570,11 @@ var init_CAS = __esmMin((() => {
 			return GraphicsSettings.casEnabled;
 		}
 		static program() {
-			return _program$12;
+			return _program$17;
 		}
 		static clean(gl) {
 			if (_buffer$11) gl.deleteBuffer(_buffer$11);
-			_program$12 = _buffer$11 = null;
+			_program$17 = _buffer$11 = null;
 		}
 	};
 }));
@@ -263052,7 +264584,7 @@ var init_FXAA$1 = __esmMin((() => {
 	FXAA_default = "#version 300 es\r\nprecision mediump float;  \r\n\r\nuniform sampler2D uTexture;  \r\nuniform float uSubpix;  \r\nuniform float uEdgeThreshold;  \r\nuniform float uEdgeThresholdMin;  \r\nuniform vec2 uTexelSize;  \r\n\r\nin vec2 vUv;  \r\nout vec4 fragColor;  \r\n\r\nfloat luminance(vec3 rgb) {  \r\n    return dot(rgb, vec3(0.299, 0.587, 0.114));  \r\n}  \r\n\r\nvoid main() {  \r\n    vec3 rgbM = texture(uTexture, vUv).rgb;  \r\n      \r\n    vec3 rgbNW = texture(uTexture, vUv + vec2(-uTexelSize.x, -uTexelSize.y)).rgb;  \r\n    vec3 rgbNE = texture(uTexture, vUv + vec2(uTexelSize.x, -uTexelSize.y)).rgb;  \r\n    vec3 rgbSW = texture(uTexture, vUv + vec2(-uTexelSize.x, uTexelSize.y)).rgb;  \r\n    vec3 rgbSE = texture(uTexture, vUv + vec2(uTexelSize.x, uTexelSize.y)).rgb;  \r\n\r\n    float lumaM = luminance(rgbM);  \r\n    float lumaNW = luminance(rgbNW);  \r\n    float lumaNE = luminance(rgbNE);  \r\n    float lumaSW = luminance(rgbSW);  \r\n    float lumaSE = luminance(rgbSE);  \r\n\r\n    float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));  \r\n    float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));  \r\n\r\n    float lumaRange = lumaMax - lumaMin;  \r\n    if(lumaRange < max(uEdgeThresholdMin, lumaMax * uEdgeThreshold)) {  \r\n        fragColor = vec4(rgbM, 1.0);  \r\n        return;  \r\n    }  \r\n\r\n    vec2 dir;  \r\n    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));  \r\n    dir.y = ((lumaNW + lumaSW) - (lumaNE + lumaSE));  \r\n\r\n    float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * 0.03125, 0.0078125);  \r\n    float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);  \r\n    dir = min(vec2(8.0), max(vec2(-8.0), dir * rcpDirMin)) * uTexelSize;  \r\n\r\n    vec3 rgbA = 0.5 * (  \r\n        texture(uTexture, vUv + dir * (1.0/3.0 - 0.5)).rgb +  \r\n        texture(uTexture, vUv + dir * (2.0/3.0 - 0.5)).rgb);  \r\n    vec3 rgbB = rgbA * 0.5 + 0.25 * (  \r\n        texture(uTexture, vUv + dir * -0.5).rgb +  \r\n        texture(uTexture, vUv + dir * 0.5).rgb);  \r\n\r\n    float lumaB = luminance(rgbB);  \r\n    if((lumaB < lumaMin) || (lumaB > lumaMax)) {  \r\n        fragColor = vec4(rgbA, 1.0);  \r\n    } else {  \r\n        fragColor = vec4(rgbB, 1.0);  \r\n    }  \r\n}";
 }));
 // src/Renderer/Effects/Shaders/FXAA.js
-var _program$11, _buffer$10, FXAA;
+var _program$16, _buffer$10, FXAA;
 var init_FXAA = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -263061,27 +264593,27 @@ var init_FXAA = __esmMin((() => {
 	init_FXAA$1();
 	FXAA = class FXAA {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$10 || !_program$11 || !FXAA.isActive()) return;
+			if (!_buffer$10 || !_program$16 || !FXAA.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$11);
-			gl.uniform1f(_program$11.uniform.uSubpix, GraphicsSettings.fxaaSubpix || .25);
-			gl.uniform1f(_program$11.uniform.uEdgeThreshold, GraphicsSettings.fxaaEdgeThreshold || .125);
-			gl.uniform1f(_program$11.uniform.uEdgeThresholdMin, 0);
-			gl.uniform2f(_program$11.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
+			gl.useProgram(_program$16);
+			gl.uniform1f(_program$16.uniform.uSubpix, GraphicsSettings.fxaaSubpix || .25);
+			gl.uniform1f(_program$16.uniform.uEdgeThreshold, GraphicsSettings.fxaaEdgeThreshold || .125);
+			gl.uniform1f(_program$16.uniform.uEdgeThresholdMin, 0);
+			gl.uniform2f(_program$16.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$10);
-			const posLoc = _program$11.attribute.aPosition;
+			const posLoc = _program$16.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$11.uniform.uTexture, 0);
+			gl.uniform1i(_program$16.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$11 = WebGL_default.createShaderProgram(gl, Common_default, FXAA_default);
+				_program$16 = WebGL_default.createShaderProgram(gl, Common_default, FXAA_default);
 			} catch (e) {
 				console.error("Error compiling FXAA shader.", e);
 				return;
@@ -263108,11 +264640,11 @@ var init_FXAA = __esmMin((() => {
 			return GraphicsSettings.fxaaEnabled;
 		}
 		static program() {
-			return _program$11;
+			return _program$16;
 		}
 		static clean(gl) {
 			if (_buffer$10) gl.deleteBuffer(_buffer$10);
-			_program$11 = _buffer$10 = null;
+			_program$16 = _buffer$10 = null;
 		}
 	};
 }));
@@ -263122,7 +264654,7 @@ var init_Vibrance$1 = __esmMin((() => {
 	Vibrance_default = "#version 300 es\r\nprecision mediump float;  \r\n\r\nuniform sampler2D uTexture;  \r\nuniform float uVibrance;  \r\nuniform vec3 uVibranceRGBBalance;  \r\n\r\nin vec2 vUv;  \r\nout vec4 fragColor;  \r\n\r\nvoid main() {  \r\n    vec3 color = texture(uTexture, vUv).rgb;  \r\n      \r\n    // (Rec. 709)  \r\n    vec3 coefLuma = vec3(0.212656, 0.715158, 0.072186);  \r\n    float luma = dot(coefLuma, color);  \r\n\r\n    float max_color = max(color.r, max(color.g, color.b));  \r\n    float min_color = min(color.r, min(color.g, color.b));  \r\n    float color_saturation = max_color - min_color;  \r\n\r\n    vec3 coeffVibrance = uVibranceRGBBalance * uVibrance;  \r\n\r\n    float strength = 1.0 + (coeffVibrance.r * (1.0 - (sign(coeffVibrance.r) * color_saturation)));  \r\n    color.r = mix(luma, color.r, strength);  \r\n      \r\n    strength = 1.0 + (coeffVibrance.g * (1.0 - (sign(coeffVibrance.g) * color_saturation)));  \r\n    color.g = mix(luma, color.g, strength);  \r\n      \r\n    strength = 1.0 + (coeffVibrance.b * (1.0 - (sign(coeffVibrance.b) * color_saturation)));  \r\n    color.b = mix(luma, color.b, strength);  \r\n\r\n    fragColor = vec4(color, 1.0);  \r\n} ";
 }));
 // src/Renderer/Effects/Shaders/Vibrance.js
-var _program$10, _buffer$9, Vibrance;
+var _program$15, _buffer$9, Vibrance;
 var init_Vibrance = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -263131,25 +264663,25 @@ var init_Vibrance = __esmMin((() => {
 	init_Vibrance$1();
 	Vibrance = class Vibrance {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$9 || !_program$10 || !Vibrance.isActive()) return;
+			if (!_buffer$9 || !_program$15 || !Vibrance.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$10);
-			gl.uniform1f(_program$10.uniform.uVibrance, GraphicsSettings.vibrance || .15);
-			gl.uniform3f(_program$10.uniform.uVibranceRGBBalance, 1, 1, 1);
+			gl.useProgram(_program$15);
+			gl.uniform1f(_program$15.uniform.uVibrance, GraphicsSettings.vibrance || .15);
+			gl.uniform3f(_program$15.uniform.uVibranceRGBBalance, 1, 1, 1);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$9);
-			const posLoc = _program$10.attribute.aPosition;
+			const posLoc = _program$15.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$10.uniform.uTexture, 0);
+			gl.uniform1i(_program$15.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$10 = WebGL_default.createShaderProgram(gl, Common_default, Vibrance_default);
+				_program$15 = WebGL_default.createShaderProgram(gl, Common_default, Vibrance_default);
 			} catch (e) {
 				console.error("Error compiling Vibrance shader.", e);
 				return;
@@ -263176,11 +264708,11 @@ var init_Vibrance = __esmMin((() => {
 			return GraphicsSettings.vibranceEnabled;
 		}
 		static program() {
-			return _program$10;
+			return _program$15;
 		}
 		static clean(gl) {
 			if (_buffer$9) gl.deleteBuffer(_buffer$9);
-			_program$10 = _buffer$9 = null;
+			_program$15 = _buffer$9 = null;
 		}
 	};
 }));
@@ -263190,7 +264722,7 @@ var init_Cartoon$1 = __esmMin((() => {
 	Cartoon_default = "#version 300 es\r\nprecision mediump float;  \r\n\r\nuniform sampler2D uTexture;  \r\nuniform float uPower;  \r\nuniform float uEdgeSlope;  \r\nuniform vec2 uTexelSize;  \r\n\r\nin vec2 vUv;  \r\nout vec4 fragColor;  \r\n\r\nvoid main() {  \r\n    vec3 color = texture(uTexture, vUv).rgb;  \r\n\r\n    const vec3 coefLuma = vec3(0.2126, 0.7152, 0.0722);  \r\n\r\n    float diff1 = dot(coefLuma, texture(uTexture, vUv + uTexelSize).rgb);  \r\n    diff1 = dot(vec4(coefLuma, -1.0), vec4(texture(uTexture, vUv - uTexelSize).rgb, diff1));  \r\n      \r\n    float diff2 = dot(coefLuma, texture(uTexture, vUv + uTexelSize * vec2(1, -1)).rgb);  \r\n    diff2 = dot(vec4(coefLuma, -1.0), vec4(texture(uTexture, vUv + uTexelSize * vec2(-1, 1)).rgb, diff2));  \r\n\r\n    float edge = dot(vec2(diff1, diff2), vec2(diff1, diff2));  \r\n\r\n    vec3 result = clamp(pow(abs(edge), uEdgeSlope) * -uPower + color, 0.0, 1.0);  \r\n    fragColor = vec4(result, 1.0);  \r\n}";
 }));
 // src/Renderer/Effects/Shaders/Cartoon.js
-var _program$9, _buffer$8, Cartoon;
+var _program$14, _buffer$8, Cartoon;
 var init_Cartoon = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -263199,26 +264731,26 @@ var init_Cartoon = __esmMin((() => {
 	init_Cartoon$1();
 	Cartoon = class Cartoon {
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$8 || !_program$9 || !Cartoon.isActive()) return;
+			if (!_buffer$8 || !_program$14 || !Cartoon.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$9);
-			gl.uniform1f(_program$9.uniform.uPower, GraphicsSettings.cartoonPower || 1.5);
-			gl.uniform1f(_program$9.uniform.uEdgeSlope, GraphicsSettings.cartoonEdgeSlope || 1.5);
-			gl.uniform2f(_program$9.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
+			gl.useProgram(_program$14);
+			gl.uniform1f(_program$14.uniform.uPower, GraphicsSettings.cartoonPower || 1.5);
+			gl.uniform1f(_program$14.uniform.uEdgeSlope, GraphicsSettings.cartoonEdgeSlope || 1.5);
+			gl.uniform2f(_program$14.uniform.uTexelSize, 1 / gl.canvas.width, 1 / gl.canvas.height);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$8);
-			const posLoc = _program$9.attribute.aPosition;
+			const posLoc = _program$14.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
-			gl.uniform1i(_program$9.uniform.uTexture, 0);
+			gl.uniform1i(_program$14.uniform.uTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$9 = WebGL_default.createShaderProgram(gl, Common_default, Cartoon_default);
+				_program$14 = WebGL_default.createShaderProgram(gl, Common_default, Cartoon_default);
 			} catch (e) {
 				console.error("Error compiling Cartoon shader.", e);
 				return;
@@ -263245,11 +264777,11 @@ var init_Cartoon = __esmMin((() => {
 			return GraphicsSettings.cartoonEnabled;
 		}
 		static program() {
-			return _program$9;
+			return _program$14;
 		}
 		static clean(gl) {
 			if (_buffer$8) gl.deleteBuffer(_buffer$8);
-			_program$9 = _buffer$8 = null;
+			_program$14 = _buffer$8 = null;
 		}
 	};
 }));
@@ -263259,7 +264791,7 @@ var init_CommonUpsampling = __esmMin((() => {
 	CommonUpsampling_default = "#version 300 es\r\nprecision mediump float;\r\nuniform sampler2D uSceneTexture;\r\n\r\nin vec2 vUv;\r\nout vec4 fragColor;\r\n\r\nvoid main() {\r\n	vec3 original = texture(uSceneTexture, vUv).rgb; \r\n	fragColor = vec4(original, 1.0);\r\n}";
 }));
 // src/Renderer/Effects/Shaders/Upsampling.js
-var _program$8, _buffer$7, Upsampling;
+var _program$13, _buffer$7, Upsampling;
 var init_Upsampling = __esmMin((() => {
 	init_Graphics();
 	init_WebGL();
@@ -263274,18 +264806,18 @@ var init_Upsampling = __esmMin((() => {
 		* @param {WebGLFramebuffer} outputFramebuffer - Destination (Screen or next effect)
 		*/
 		static render(gl, inputTexture, outputFbo) {
-			if (!_buffer$7 || !_program$8 || !Upsampling.isActive()) return;
+			if (!_buffer$7 || !_program$13 || !Upsampling.isActive()) return;
 			PostProcess.beforeRenderPass(gl, outputFbo);
-			gl.useProgram(_program$8);
+			gl.useProgram(_program$13);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$7);
-			const posLoc = _program$8.attribute.aPosition;
+			const posLoc = _program$13.attribute.aPosition;
 			gl.enableVertexAttribArray(posLoc);
 			gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, inputTexture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-			gl.uniform1i(_program$8.uniform.uSceneTexture, 0);
+			gl.uniform1i(_program$13.uniform.uSceneTexture, 0);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			PostProcess.afterRenderPass(gl);
 		}
@@ -263295,7 +264827,7 @@ var init_Upsampling = __esmMin((() => {
 		static init(gl) {
 			if (!gl) return;
 			try {
-				_program$8 = WebGL_default.createShaderProgram(gl, Common_default, CommonUpsampling_default);
+				_program$13 = WebGL_default.createShaderProgram(gl, Common_default, CommonUpsampling_default);
 			} catch (e) {
 				console.error("Error compiling Upsampling shader.", e);
 				return;
@@ -263324,11 +264856,11 @@ var init_Upsampling = __esmMin((() => {
 		}
 		/** @returns {WebGLProgram} The loaded shader program (returning one for validation check) */
 		static program() {
-			return _program$8;
+			return _program$13;
 		}
 		/** Clears memory references */
 		static clean(gl) {
-			_program$8 = null;
+			_program$13 = null;
 			if (_buffer$7) gl.deleteBuffer(_buffer$7);
 			_buffer$7 = null;
 		}
@@ -265837,7 +267369,7 @@ function calculateSize(self, aura, auraAngle, i) {
 	const endY = sin * (aura[i].distance * .8 + riseFactor);
 	return [Math.abs(endX - startX), Math.abs(endY - startY)];
 }
-var _program$7, _buffer$6, GroundAura;
+var _program$12, _buffer$6, GroundAura;
 var init_GroundAura = __esmMin((() => {
 	init_GroundAura$2();
 	init_GroundAura$1();
@@ -265892,7 +267424,7 @@ var init_GroundAura = __esmMin((() => {
 			this.ready = false;
 		}
 		render(gl, tick) {
-			const uniform = _program$7.uniform;
+			const uniform = _program$12.uniform;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			const RAG_TICK_MS = 25;
 			const dt = Math.min(tick - (this._lastTick || tick), 250);
@@ -265942,7 +267474,7 @@ var init_GroundAura = __esmMin((() => {
 		* Initialize static resources
 		*/
 		static init(gl) {
-			_program$7 = WebGL_default.createShaderProgram(gl, GroundAura_default$1, GroundAura_default);
+			_program$12 = WebGL_default.createShaderProgram(gl, GroundAura_default$1, GroundAura_default);
 			const vertices = generateGroundQuad();
 			_buffer$6 = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$6);
@@ -265954,9 +267486,9 @@ var init_GroundAura = __esmMin((() => {
 		* Free static resources
 		*/
 		static free(gl) {
-			if (_program$7) {
-				gl.deleteProgram(_program$7);
-				_program$7 = null;
+			if (_program$12) {
+				gl.deleteProgram(_program$12);
+				_program$12 = null;
 			}
 			if (_buffer$6) {
 				gl.deleteBuffer(_buffer$6);
@@ -265968,10 +267500,10 @@ var init_GroundAura = __esmMin((() => {
 		* Before render setup
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$7.uniform;
-			const attribute = _program$7.attribute;
+			const uniform = _program$12.uniform;
+			const attribute = _program$12.attribute;
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-			gl.useProgram(_program$7);
+			gl.useProgram(_program$12);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -265991,8 +267523,8 @@ var init_GroundAura = __esmMin((() => {
 		*/
 		static afterRender(gl) {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.disableVertexAttribArray(_program$7.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$7.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$12.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$12.attribute.aTextureCoord);
 		}
 	};
 }));
@@ -266059,7 +267591,7 @@ function createAnchor(isGhost, seedMaxUnits) {
 		z: 0
 	};
 }
-var DEG_TO_RAD, GAME_TO_WORLD, NUM_COLUMNS, ANCHORS_PER_COL, BASE_LIFT, REF_RADIUS, REF_SPEED, REF_DRIFT_K, REF_SEED_MAX, REF_RESET_Y, REF_ALPHA_OFFSET, REF_ALPHA_GAIN, ANCHOR_SIGNS, ANCHOR_PHASE_OFFSETS, debugConfig, _program$6, _buffer$5, BILLBOARD_CORNERS, Level99Bubble;
+var DEG_TO_RAD, GAME_TO_WORLD, NUM_COLUMNS, ANCHORS_PER_COL, BASE_LIFT, REF_RADIUS, REF_SPEED, REF_DRIFT_K, REF_SEED_MAX, REF_RESET_Y, REF_ALPHA_OFFSET, REF_ALPHA_GAIN, ANCHOR_SIGNS, ANCHOR_PHASE_OFFSETS, debugConfig, _program$11, _buffer$5, BILLBOARD_CORNERS, Level99Bubble;
 var init_Level99Bubble = __esmMin((() => {
 	init_Level99Bubble$2();
 	init_Level99Bubble$1();
@@ -266301,7 +267833,7 @@ var init_Level99Bubble = __esmMin((() => {
 		}
 		render(gl, tick) {
 			if (!this.ready || !this.texture) return;
-			const uniform = _program$6.uniform;
+			const uniform = _program$11.uniform;
 			const groundZ = Altitude.getCellHeight(this.position[0], this.position[1]);
 			const basePos = [
 				this.position[0] + .5,
@@ -266365,7 +267897,7 @@ var init_Level99Bubble = __esmMin((() => {
 			}
 		}
 		renderBackground(gl, basePos) {
-			const uniform = _program$6.uniform;
+			const uniform = _program$11.uniform;
 			const radius = this.baseRadius * GAME_TO_WORLD * debugConfig.bgRadiusFactor;
 			const height = this.seedMax * GAME_TO_WORLD;
 			function drawQuad(v0, v1, v2, v3) {
@@ -266495,7 +268027,7 @@ var init_Level99Bubble = __esmMin((() => {
 			gl.uniform1i(uniform.uSolidBg, 0);
 		}
 		static init(gl) {
-			_program$6 = WebGL_default.createShaderProgram(gl, Level99Bubble_default$1, Level99Bubble_default);
+			_program$11 = WebGL_default.createShaderProgram(gl, Level99Bubble_default$1, Level99Bubble_default);
 			_buffer$5 = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$5);
 			gl.bufferData(gl.ARRAY_BUFFER, 120, gl.DYNAMIC_DRAW);
@@ -266503,9 +268035,9 @@ var init_Level99Bubble = __esmMin((() => {
 			this.renderBeforeEntities = true;
 		}
 		static free(gl) {
-			if (_program$6) {
-				gl.deleteProgram(_program$6);
-				_program$6 = null;
+			if (_program$11) {
+				gl.deleteProgram(_program$11);
+				_program$11 = null;
 			}
 			if (_buffer$5) {
 				gl.deleteBuffer(_buffer$5);
@@ -266514,10 +268046,10 @@ var init_Level99Bubble = __esmMin((() => {
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog) {
-			const uniform = _program$6.uniform;
-			const attribute = _program$6.attribute;
+			const uniform = _program$11.uniform;
+			const attribute = _program$11.attribute;
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-			gl.useProgram(_program$6);
+			gl.useProgram(_program$11);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -266535,8 +268067,8 @@ var init_Level99Bubble = __esmMin((() => {
 		}
 		static afterRender(gl) {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-			gl.disableVertexAttribArray(_program$6.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$6.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$11.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$11.attribute.aTextureCoord);
 		}
 	};
 }));
@@ -266551,7 +268083,7 @@ var init_Tiles$1 = __esmMin((() => {
 	Tiles_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\nuniform sampler2D uDiffuse;\r\nuniform float alpha;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\n    void main(void) {\r\n        vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n        if (textureSample.r < 0.1 || textureSample.g < 0.1 || textureSample.b < 0.1) {\r\n            discard;\r\n        }\r\n        textureSample.a = alpha;\r\n        fragColor = textureSample;\r\n    \r\n    if (uFogUse) {\r\n    float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n    float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n    fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
 }));
 // src/Renderer/Effects/Tiles.js
-function loadTexture(gl, texture, cb) {
+function loadTexture$5(gl, texture, cb) {
 	const _texture = gl.createTexture();
 	Client.loadFile(texture.filename, function(buffer) {
 		Texture.load(buffer, function(canvas) {
@@ -266622,7 +268154,7 @@ var init_Tiles = __esmMin((() => {
 				0,
 				0
 			]), gl.STATIC_DRAW);
-			loadTexture(gl, {
+			loadTexture$5(gl, {
 				filename: textureFilename,
 				size
 			}, (texture) => {
@@ -266900,7 +268432,7 @@ var init_LockOnTarget$1 = __esmMin((() => {
 	LockOnTarget_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\n\r\nuniform sampler2D uDiffuse;\r\nuniform float uColor;\r\nout vec4 fragColor;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n    if (textureSample.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    fragColor     = textureSample;\r\n    fragColor.gb *= uColor;\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
 }));
 // src/Renderer/Effects/LockOnTarget.js
-var _texture$3, _program$5, _buffer$4, mat4$8, _matrix$3, LockOnTarget;
+var _texture$4, _program$10, _buffer$4, mat4$8, _matrix$3, LockOnTarget;
 var init_LockOnTarget = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -266945,9 +268477,9 @@ var init_LockOnTarget = __esmMin((() => {
 			time /= 50;
 			time = Math.max(time, 1);
 			time = Math.min(time, 5);
-			gl.uniform3fv(_program$5.uniform.uPosition, this.target.position);
-			gl.uniform1f(_program$5.uniform.uSize, (6 - time) * 3);
-			gl.uniform1f(_program$5.uniform.uColor, color);
+			gl.uniform3fv(_program$10.uniform.uPosition, this.target.position);
+			gl.uniform1f(_program$10.uniform.uSize, (6 - time) * 3);
+			gl.uniform1f(_program$10.uniform.uColor, color);
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 			this.needCleanUp = this.endTick < tick;
 		}
@@ -266957,7 +268489,7 @@ var init_LockOnTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static init(gl) {
-			_program$5 = WebGL_default.createShaderProgram(gl, LockOnTarget_default$1, LockOnTarget_default);
+			_program$10 = WebGL_default.createShaderProgram(gl, LockOnTarget_default$1, LockOnTarget_default);
 			_buffer$4 = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$4);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -266996,8 +268528,8 @@ var init_LockOnTarget = __esmMin((() => {
 					ctx.translate(-this.width / 2, -this.height / 2);
 					ctx.drawImage(this, 0, 0);
 					ctx.restore();
-					_texture$3 = gl.createTexture();
-					gl.bindTexture(gl.TEXTURE_2D, _texture$3);
+					_texture$4 = gl.createTexture();
+					gl.bindTexture(gl.TEXTURE_2D, _texture$4);
 					gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this);
 					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -267012,13 +268544,13 @@ var init_LockOnTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_texture$3) {
-				gl.deleteTexture(_texture$3);
-				_texture$3 = null;
+			if (_texture$4) {
+				gl.deleteTexture(_texture$4);
+				_texture$4 = null;
 			}
-			if (_program$5) {
-				gl.deleteProgram(_program$5);
-				_program$5 = null;
+			if (_program$10) {
+				gl.deleteProgram(_program$10);
+				_program$10 = null;
 			}
 			if (_buffer$4) gl.deleteBuffer(_buffer$4);
 			this.ready = false;
@@ -267029,11 +268561,11 @@ var init_LockOnTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$5.uniform;
-			const attribute = _program$5.attribute;
+			const uniform = _program$10.uniform;
+			const attribute = _program$10.attribute;
 			mat4$8.identity(_matrix$3);
 			mat4$8.rotateY(_matrix$3, _matrix$3, tick / 4 / 180 * Math.PI);
-			gl.useProgram(_program$5);
+			gl.useProgram(_program$10);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$3);
@@ -267042,7 +268574,7 @@ var init_LockOnTarget = __esmMin((() => {
 			gl.uniform1f(uniform.uFogFar, fog.far);
 			gl.uniform3fv(uniform.uFogColor, fog.color);
 			gl.activeTexture(gl.TEXTURE0);
-			gl.bindTexture(gl.TEXTURE_2D, _texture$3);
+			gl.bindTexture(gl.TEXTURE_2D, _texture$4);
 			gl.uniform1i(uniform.uDiffuse, 0);
 			gl.enableVertexAttribArray(attribute.aPosition);
 			gl.enableVertexAttribArray(attribute.aTextureCoord);
@@ -267056,8 +268588,8 @@ var init_LockOnTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$5.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$5.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$10.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$10.attribute.aTextureCoord);
 		}
 	};
 	/**
@@ -267151,7 +268683,7 @@ function generateMagicRing() {
 	}
 	return new Float32Array(mesh);
 }
-var _program$4, _buffer$3, mat4$7, _matrix$2, _verticeCount$1, MagicRing;
+var _program$9, _buffer$3, mat4$7, _matrix$2, _verticeCount$1, MagicRing;
 var init_MagicRing = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -267197,8 +268729,8 @@ var init_MagicRing = __esmMin((() => {
 		* @param {object} wegl context
 		*/
 		render(gl, tick) {
-			const uniform = _program$4.uniform;
-			const attribute = _program$4.attribute;
+			const uniform = _program$9.uniform;
+			const attribute = _program$9.attribute;
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			gl.enableVertexAttribArray(attribute.aPosition);
 			gl.enableVertexAttribArray(attribute.aTextureCoord);
@@ -267221,7 +268753,7 @@ var init_MagicRing = __esmMin((() => {
 		static init(gl) {
 			const vertices = generateMagicRing();
 			_verticeCount$1 = vertices.length / 5;
-			_program$4 = WebGL_default.createShaderProgram(gl, MagicRing_default$1, MagicRing_default);
+			_program$9 = WebGL_default.createShaderProgram(gl, MagicRing_default$1, MagicRing_default);
 			_buffer$3 = gl.createBuffer();
 			this.ready = true;
 			this.renderBeforeEntities = false;
@@ -267234,9 +268766,9 @@ var init_MagicRing = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$4) {
-				gl.deleteProgram(_program$4);
-				_program$4 = null;
+			if (_program$9) {
+				gl.deleteProgram(_program$9);
+				_program$9 = null;
 			}
 			if (_buffer$3) gl.deleteBuffer(_buffer$3);
 			this.ready = false;
@@ -267247,10 +268779,10 @@ var init_MagicRing = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$4.uniform;
+			const uniform = _program$9.uniform;
 			mat4$7.identity(_matrix$2);
 			mat4$7.rotateY(_matrix$2, _matrix$2, tick / 4 / 180 * Math.PI);
-			gl.useProgram(_program$4);
+			gl.useProgram(_program$9);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$2);
@@ -267267,8 +268799,8 @@ var init_MagicRing = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$4.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$4.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$9.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$9.attribute.aTextureCoord);
 		}
 	};
 }));
@@ -267283,7 +268815,7 @@ var init_MagicTarget$1 = __esmMin((() => {
 	MagicTarget_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uDiffuse;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n    if (textureSample.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    if (textureSample.r < 0.1 || textureSample.g < 0.1 || textureSample.b < 0.1) {\r\n        discard;\r\n    }\r\n\r\n    fragColor = textureSample;\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
 }));
 // src/Renderer/Effects/MagicTarget.js
-var _texture$2, _program$3, mat4$6, _matrix$1, CastSize, MagicTarget;
+var _texture$3, _program$8, mat4$6, _matrix$1, CastSize, MagicTarget;
 var init_MagicTarget = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -267547,9 +269079,9 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} wegl context
 		*/
 		render(gl, tick) {
-			const attribute = _program$3.attribute;
+			const attribute = _program$8.attribute;
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-			gl.uniform1f(_program$3.uniform.uCameraLatitude, Camera.getLatitude());
+			gl.uniform1f(_program$8.uniform.uCameraLatitude, Camera.getLatitude());
 			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
 			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
 			gl.drawArrays(gl.TRIANGLES, 0, this.vertCount);
@@ -267561,10 +269093,10 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static init(gl) {
-			_program$3 = WebGL_default.createShaderProgram(gl, MagicTarget_default$1, MagicTarget_default);
+			_program$8 = WebGL_default.createShaderProgram(gl, MagicTarget_default$1, MagicTarget_default);
 			Client.loadFile("data/texture/effect/magic_target.tga", (buffer) => {
 				WebGL_default.texture(gl, buffer, (texture) => {
-					_texture$2 = texture;
+					_texture$3 = texture;
 					this.ready = true;
 				});
 			});
@@ -267575,13 +269107,13 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_texture$2) {
-				gl.deleteTexture(_texture$2);
-				_texture$2 = null;
+			if (_texture$3) {
+				gl.deleteTexture(_texture$3);
+				_texture$3 = null;
 			}
-			if (_program$3) {
-				gl.deleteProgram(_program$3);
-				_program$3 = null;
+			if (_program$8) {
+				gl.deleteProgram(_program$8);
+				_program$8 = null;
 			}
 			this.ready = false;
 		}
@@ -267591,11 +269123,11 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$3.uniform;
-			const attribute = _program$3.attribute;
+			const uniform = _program$8.uniform;
+			const attribute = _program$8.attribute;
 			mat4$6.identity(_matrix$1);
 			mat4$6.rotateZ(_matrix$1, _matrix$1, tick / 1e3 * 40 / 180 * Math.PI);
-			gl.useProgram(_program$3);
+			gl.useProgram(_program$8);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$1);
@@ -267604,7 +269136,7 @@ var init_MagicTarget = __esmMin((() => {
 			gl.uniform1f(uniform.uFogFar, fog.far);
 			gl.uniform3fv(uniform.uFogColor, fog.color);
 			gl.activeTexture(gl.TEXTURE0);
-			gl.bindTexture(gl.TEXTURE_2D, _texture$2);
+			gl.bindTexture(gl.TEXTURE_2D, _texture$3);
 			gl.uniform1i(uniform.uDiffuse, 0);
 			gl.enableVertexAttribArray(attribute.aPosition);
 			gl.enableVertexAttribArray(attribute.aTextureCoord);
@@ -267615,8 +269147,8 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$3.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$3.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$8.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$8.attribute.aTextureCoord);
 		}
 	};
 	/**
@@ -267674,7 +269206,7 @@ function generatePropertyGround() {
 	}
 	return new Float32Array(mesh);
 }
-var _program$2, _buffer$2, mat4$5, _rotationMatrices$2, _verticeCount, _num, PropertyGround;
+var _program$7, _buffer$2, mat4$5, _rotationMatrices$2, _verticeCount, _num, PropertyGround;
 var init_PropertyGround = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -267727,8 +269259,8 @@ var init_PropertyGround = __esmMin((() => {
 		* @param {object} wegl context
 		*/
 		render(gl, tick) {
-			const uniform = _program$2.uniform;
-			const attribute = _program$2.attribute;
+			const uniform = _program$7.uniform;
+			const attribute = _program$7.attribute;
 			let sizeMult = Math.sin(tick / (360 * Math.PI) + this.sizeRandomize);
 			if (sizeMult < .5) sizeMult = .5;
 			gl.uniformMatrix4fv(uniform.uRotationMat, false, _rotationMatrices$2[this.ix]);
@@ -267752,7 +269284,7 @@ var init_PropertyGround = __esmMin((() => {
 		static init(gl) {
 			const vertices = generatePropertyGround();
 			_verticeCount = vertices.length / 5;
-			_program$2 = WebGL_default.createShaderProgram(gl, PropertyGround_default$1, PropertyGround_default);
+			_program$7 = WebGL_default.createShaderProgram(gl, PropertyGround_default$1, PropertyGround_default);
 			_buffer$2 = gl.createBuffer();
 			this.ready = true;
 			this.renderBeforeEntities = false;
@@ -267765,9 +269297,9 @@ var init_PropertyGround = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static free(gl) {
-			if (_program$2) {
-				gl.deleteProgram(_program$2);
-				_program$2 = null;
+			if (_program$7) {
+				gl.deleteProgram(_program$7);
+				_program$7 = null;
 			}
 			if (_buffer$2) gl.deleteBuffer(_buffer$2);
 			this.ready = false;
@@ -267778,7 +269310,7 @@ var init_PropertyGround = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$2.uniform;
+			const uniform = _program$7.uniform;
 			let _matrix, offset;
 			for (let i = 0, _len = _rotationMatrices$2.length; i < _len; i++) {
 				_matrix = _rotationMatrices$2[i];
@@ -267786,7 +269318,7 @@ var init_PropertyGround = __esmMin((() => {
 				offset = i * 2 * Math.PI / _rotationMatrices$2.length;
 				mat4$5.rotateY(_matrix, _matrix, offset + tick / 8 / 180 * Math.PI);
 			}
-			gl.useProgram(_program$2);
+			gl.useProgram(_program$7);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
@@ -267802,8 +269334,8 @@ var init_PropertyGround = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		static afterRender(gl) {
-			gl.disableVertexAttribArray(_program$2.attribute.aPosition);
-			gl.disableVertexAttribArray(_program$2.attribute.aTextureCoord);
+			gl.disableVertexAttribArray(_program$7.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$7.attribute.aTextureCoord);
 		}
 	};
 }));
@@ -267854,7 +269386,7 @@ var init_SpiritSphere$1 = __esmMin((() => {
 	SpiritSphere_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;    \r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform vec4 uColor;\r\nuniform sampler2D uDiffuse;\r\nfloat tmp;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n    \r\n    textureSample *= uColor;\r\n    \r\n    /*if (texture.r < 0.1 && texture.g < 0.1 && texture.b < 0.1) {\r\n        discard;\r\n    }*/\r\n    \r\n    fragColor = textureSample;\r\n\r\n}";
 }));
 // src/Renderer/Effects/SpiritSphere.js
-var _texture$1, _program$1, _buffer$1, mat4$4, _rotationMatrices$1, SpiritSphere;
+var _texture$2, _program$6, _buffer$1, mat4$4, _rotationMatrices$1, SpiritSphere;
 var init_SpiritSphere = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -267889,7 +269421,7 @@ var init_SpiritSphere = __esmMin((() => {
 			this.ready = false;
 		}
 		static init(gl) {
-			_program$1 = WebGL_default.createShaderProgram(gl, SpiritSphere_default$1, SpiritSphere_default);
+			_program$6 = WebGL_default.createShaderProgram(gl, SpiritSphere_default$1, SpiritSphere_default);
 			_buffer$1 = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$1);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -267927,8 +269459,8 @@ var init_SpiritSphere = __esmMin((() => {
 					ctx.translate(-this.width / 2, -this.height / 2);
 					ctx.drawImage(this, 0, 0);
 					ctx.restore();
-					_texture$1 = gl.createTexture();
-					gl.bindTexture(gl.TEXTURE_2D, _texture$1);
+					_texture$2 = gl.createTexture();
+					gl.bindTexture(gl.TEXTURE_2D, _texture$2);
 					gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this);
 					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 					gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -267938,21 +269470,21 @@ var init_SpiritSphere = __esmMin((() => {
 			});
 		}
 		static free(gl) {
-			if (_texture$1) {
-				gl.deleteTexture(_texture$1);
-				_texture$1 = null;
+			if (_texture$2) {
+				gl.deleteTexture(_texture$2);
+				_texture$2 = null;
 			}
-			if (_program$1) {
-				gl.deleteProgram(_program$1);
-				_program$1 = null;
+			if (_program$6) {
+				gl.deleteProgram(_program$6);
+				_program$6 = null;
 			}
 			if (_buffer$1) gl.deleteBuffer(_buffer$1);
 			this.ready = false;
 		}
 		static beforeRender(gl, modelView, projection, fog, tick) {
-			const uniform = _program$1.uniform;
-			const attribute = _program$1.attribute;
-			gl.useProgram(_program$1);
+			const uniform = _program$6.uniform;
+			const attribute = _program$6.attribute;
+			gl.useProgram(_program$6);
 			let _matrix, offset;
 			for (let i = 0, _len = _rotationMatrices$1.length; i < _len; i++) {
 				const vcRad = (Camera.angle[0] - 90) * Math.PI / 180;
@@ -267969,7 +269501,7 @@ var init_SpiritSphere = __esmMin((() => {
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.activeTexture(gl.TEXTURE0);
-			gl.bindTexture(gl.TEXTURE_2D, _texture$1);
+			gl.bindTexture(gl.TEXTURE_2D, _texture$2);
 			gl.uniform1i(uniform.uDiffuse, 0);
 			gl.enableVertexAttribArray(attribute.aPosition);
 			gl.enableVertexAttribArray(attribute.aTextureCoord);
@@ -267978,7 +269510,7 @@ var init_SpiritSphere = __esmMin((() => {
 			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 16, 8);
 		}
 		render(gl, tick) {
-			const uniform = _program$1.uniform;
+			const uniform = _program$6.uniform;
 			gl.uniform3fv(uniform.uPosition, this.position);
 			gl.bindBuffer(gl.ARRAY_BUFFER, _buffer$1);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -268075,11 +269607,2224 @@ var init_SpiritSphere = __esmMin((() => {
 		}
 		static afterRender(gl) {
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			gl.disableVertexAttribArray(_program$6.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$6.attribute.aTextureCoord);
+		}
+	};
+	SpiritSphere.renderBeforeEntities = false;
+}));
+// src/Renderer/Effects/CasterStrobe.js
+/**
+* Colour multiplier of the caster on a tick of the effect
+*
+* @param {number} frame tick since the effect started
+* @return {number} 0 (black) .. 1 (normal)
+*/
+function casterStrobeShade(frame) {
+	if (frame < STROBE.first) return 1;
+	if (frame <= STROBE.last) return frame % 2 ? 1 : 0;
+	return Math.min(1, (frame - STROBE.last) * STROBE.recoverStep / 255);
+}
+/**
+* Run the strobe on an entity, through its flash colour
+*
+* @param {Entity} entity
+*/
+function startCasterStrobe(entity) {
+	if (!entity || !entity.animations || !entity._flashColor) return;
+	const setShade = (shade) => {
+		entity._flashColor[0] = shade;
+		entity._flashColor[1] = shade;
+		entity._flashColor[2] = shade;
+		entity._flashColor[3] = 1;
+		entity.recalculateBlendingColor();
+	};
+	entity.animations.add((tick) => {
+		const frame = Math.floor(tick / PRIM_TICK_MS);
+		const poisoned = (entity._healthState & StatusState_default.HealthState.POISON) !== 0;
+		const done = frame > STROBE.last && (poisoned || casterStrobeShade(frame) >= 1);
+		setShade(done ? 1 : casterStrobeShade(frame));
+		return done;
+	});
+}
+var STROBE;
+var init_CasterStrobe = __esmMin((() => {
+	init_StatusState();
+	init_EffectPrimSim();
+	STROBE = {
+		first: 6,
+		last: 60,
+		recoverStep: 8
+	};
+}));
+// src/Renderer/Effects/CastConeSim.js
+/**
+* How long a cone plays, in ticks, for a cast of `castTime` ms.
+*
+* @param {number} castTime
+* @return {number}
+*/
+function coneFrames(castTime, min = 120) {
+	const ticks = Math.floor((castTime > 0 ? castTime : 0) / 16);
+	return Math.max(min, ticks);
+}
+/**
+* The state of one crown's bands on tick `t` (1 on the first): alpha (0-255),
+* lean (degrees) and foot radius (world units) of each.
+* The client keeps the foot radius in single precision, so this does too.
+*
+* @param {number} t
+* @param {number} frames
+* @param {Array<number>} alphas each band's starting alpha
+* @return {Array<{alpha: number, tilt: number, foot: number}>}
+*/
+function pulseBands(t, frames, alphas) {
+	const f = Math.fround;
+	return alphas.map((start) => {
+		let alpha = start;
+		let tilt = PULSE.tilt;
+		let foot = f(PULSE.foot);
+		for (let age = 1; age <= t; age++) {
+			tilt -= 1;
+			foot = f(foot + f(PULSE.grow));
+			let base = alpha;
+			if (tilt < PULSE.minTilt) {
+				tilt = PULSE.minTilt;
+				base = 0;
+			}
+			if (foot < PULSE.flashBelow) alpha = base + PULSE.flashUp;
+			else {
+				alpha = base - PULSE.fadeDown;
+				if (alpha < 1) {
+					alpha = 0;
+					if (age < frames - PULSE.lastRestart) {
+						foot = f(PULSE.restartFoot);
+						tilt = PULSE.restartTilt;
+					}
+				}
+			}
+		}
+		return {
+			alpha: Math.min(255, alpha),
+			tilt,
+			foot
+		};
+	});
+}
+/**
+* A band's alpha (0-255 scale, before the passes' gain) on tick `t` (1 on the first).
+*
+* @param {number} t
+* @param {number} frames
+* @return {number}
+*/
+function bandAlpha$1(t, frames) {
+	const up = Math.min(100, 3 * Math.min(t, 29));
+	const down = 2 * Math.max(0, t - (frames - 46));
+	return Math.max(0, up - down);
+}
+/**
+* The ground squares' alpha on tick `t`.
+*
+* @param {number} t
+* @param {number} frames
+* @return {number}
+*/
+function groundAlpha(t, frames) {
+	return Math.max(0, GROUND.alpha - 8 * Math.max(0, t - (frames - 25)));
+}
+/**
+* Which W_bubble frame (0-26) shows on tick `t`.
+*
+* @param {number} t
+* @return {number}
+*/
+function bubbleFrame(t) {
+	return t % 27;
+}
+/**
+* Write one vertex in roBrowser's GL space, from client units about `center`.
+*/
+function vertex$3(out, i, center, x, y, up, u, v) {
+	out[i + 0] = center[0] + .5 + x / 5;
+	out[i + 1] = -center[2] - up / 5;
+	out[i + 2] = center[1] + .5 + y / 5;
+	out[i + 3] = u;
+	out[i + 4] = v;
+	return i + 5;
+}
+/**
+* How far around its swell a band is on tick `t`, in degrees.
+*/
+function swellPhase(band, t) {
+	return band < 2 ? t + band * 90 : (t + band * 45) * 2;
+}
+/**
+* Fill `out` with the cone's triangles on tick `t`.
+* V is 1 at a strip's foot and 0 at its tip; U runs 1/21 a strip.
+*
+* @param {Float32Array} out CONE_VERTICES * 5 floats
+* @param {number} t tick, 1 on the first
+* @param {Array} center position, in cells
+*/
+function buildCone(out, t, center) {
+	buildBands(out, t, center, BANDS$2.map((band) => {
+		const turn = (band.turn + 3 * t) % 360;
+		return {
+			turn,
+			foot: FOOT + Math.sin(turn * DEG$4),
+			tilt: band.tilt,
+			length: LENGTH
+		};
+	}));
+}
+/**
+* Fill `out` with one of 830's crowns on tick `t`, for the band states from pulseBands().
+* Same layout as buildCone(), but the bands do not turn.
+*
+* @param {Float32Array} out CONE_VERTICES * 5 floats
+* @param {number} t tick, 1 on the first
+* @param {Array} center position, in cells
+* @param {Array<{tilt: number, foot: number}>} states
+*/
+function buildPulse(out, t, center, states) {
+	buildBands(out, t, center, BANDS$2.map((band, b) => ({
+		turn: band.turn,
+		foot: states[b].foot,
+		tilt: states[b].tilt,
+		length: PULSE_LENGTHS[b]
+	})));
+}
+/**
+* The four bands' strips: each band rises from a circle of radius `foot`,
+* starting at angle `turn`, its strips `length` long (swelling along the ring)
+* and leaning `tilt` degrees from the ground.
+*/
+function buildBands(out, t, center, bands) {
+	let o = 0;
+	for (let b = 0; b < bands.length; b++) {
+		const { turn, foot, tilt, length: base } = bands[b];
+		const lean = Math.cos(tilt * DEG$4);
+		const rise = Math.sin(tilt * DEG$4);
+		const swell = Math.sin(swellPhase(b, t) * DEG$4);
+		let prev = null;
+		for (let j = 0; j <= 20; j++) {
+			const angle = (turn + 18 * j) * DEG$4;
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			const length = base * (1 + .3 * Math.sin(9 * j * DEG$4) * swell);
+			const point = {
+				fx: foot * cos,
+				fy: foot * sin,
+				tx: (foot + length * lean) * cos,
+				ty: (foot + length * lean) * sin,
+				up: length * rise,
+				u: j / 21
+			};
+			if (prev) {
+				o = vertex$3(out, o, center, prev.fx, prev.fy, 0, prev.u, 1);
+				o = vertex$3(out, o, center, point.fx, point.fy, 0, point.u, 1);
+				o = vertex$3(out, o, center, point.tx, point.ty, point.up, point.u, 0);
+				o = vertex$3(out, o, center, point.tx, point.ty, point.up, point.u, 0);
+				o = vertex$3(out, o, center, prev.tx, prev.ty, prev.up, prev.u, 0);
+				o = vertex$3(out, o, center, prev.fx, prev.fy, 0, prev.u, 1);
+			}
+			prev = point;
+		}
+	}
+}
+/**
+* Fill `out` with the ground squares on tick `t`, 1 world unit above the ground.
+*
+* @param {Float32Array} out GROUND_VERTICES * 5 floats
+* @param {number} t tick, 1 on the first
+* @param {Array} center position, in cells
+*/
+function buildGround(out, t, center) {
+	const uv = [
+		[0, 0],
+		[1, 0],
+		[1, 1],
+		[0, 1]
+	];
+	let o = 0;
+	for (const layer of GROUND.layers) {
+		const pulse = (layer.pulse + 3 * t) % 360;
+		const reach = GROUND.size * (.8 + .1 * (1 + Math.sin(pulse * DEG$4)));
+		const corners = [
+			0,
+			1,
+			2,
+			3
+		].map((k) => {
+			const a = (layer.angle + 90 * k) * DEG$4;
+			return [Math.cos(a) * reach, Math.sin(a) * reach];
+		});
+		for (const k of [
+			0,
+			1,
+			2,
+			2,
+			3,
+			0
+		]) o = vertex$3(out, o, center, corners[k][0], corners[k][1], 1, uv[k][0], uv[k][1]);
+	}
+}
+var DEG$4, BANDS$2, LENGTH, FOOT, VARIANTS, PULSE_CROWNS, PULSE_LENGTHS, PULSE, GROUND, CONE_VERTICES, GROUND_VERTICES;
+var init_CastConeSim = __esmMin((() => {
+	init_EffectPrimSim();
+	DEG$4 = Math.PI / 180;
+	BANDS$2 = [
+		{
+			tilt: 75,
+			turn: 180
+		},
+		{
+			tilt: 63,
+			turn: 270
+		},
+		{
+			tilt: 52,
+			turn: 0
+		},
+		{
+			tilt: 40,
+			turn: 90
+		}
+	];
+	LENGTH = 23;
+	FOOT = 4.3;
+	VARIANTS = {
+		0: {
+			rgb: [
+				0,
+				0,
+				255
+			],
+			gain: 3,
+			additive: true
+		},
+		3: {
+			rgb: [
+				255,
+				0,
+				0
+			],
+			gain: 3,
+			additive: true
+		},
+		4: {
+			rgb: [
+				0,
+				255,
+				0
+			],
+			gain: 2,
+			additive: true
+		},
+		5: {
+			rgb: [
+				255,
+				255,
+				0
+			],
+			gain: 2,
+			additive: true
+		},
+		6: {
+			rgb: [
+				255,
+				255,
+				255
+			],
+			gain: 2,
+			additive: true
+		},
+		7: {
+			rgb: [
+				255,
+				0,
+				255
+			],
+			gain: 2,
+			additive: true
+		},
+		8: {
+			rgb: [
+				0,
+				255,
+				255
+			],
+			gain: 2,
+			additive: true
+		},
+		11: {
+			rgb: [
+				0,
+				0,
+				0
+			],
+			gain: 2,
+			additive: false
+		}
+	};
+	PULSE_CROWNS = [{
+		alpha: [
+			180,
+			135,
+			90,
+			45
+		],
+		rgb: [
+			100,
+			100,
+			255
+		],
+		additive: true
+	}, {
+		alpha: [
+			160,
+			115,
+			70,
+			25
+		],
+		rgb: [
+			255,
+			255,
+			255
+		],
+		additive: false
+	}];
+	PULSE_LENGTHS = [
+		30,
+		29,
+		28,
+		27
+	];
+	PULSE = {
+		tilt: 80,
+		foot: 4.1,
+		restartTilt: 74,
+		restartFoot: 3.37,
+		minTilt: 10,
+		grow: .07,
+		flashBelow: 4,
+		flashUp: 10,
+		fadeDown: 3,
+		lastRestart: 30
+	};
+	GROUND = {
+		texture: "cir0002.bmp",
+		rgb: [
+			35,
+			35,
+			255
+		],
+		alpha: 200,
+		size: 24,
+		layers: [{
+			angle: 0,
+			pulse: 0
+		}, {
+			angle: 23,
+			pulse: 180
+		}]
+	};
+	CONE_VERTICES = BANDS$2.length * 20 * 6;
+	GROUND_VERTICES = GROUND.layers.length * 6;
+}));
+// src/Renderer/Effects/CastCone.js
+function loadTexture$4(gl, name) {
+	if (_textures$3.has(name)) return;
+	_textures$3.set(name, null);
+	Client.loadFile(`data/texture/effect/${name}`, (buffer) => {
+		WebGL_default.texture(gl, buffer, (texture) => {
+			if (!_textures$3.has(name)) {
+				gl.deleteTexture(texture);
+				return;
+			}
+			_textures$3.set(name, texture);
+		});
+	});
+}
+function bubbleName(frame) {
+	return `w_bubble${String(frame + 1).padStart(2, "0")}.tga`;
+}
+var BAND_VERTICES, _program$5, _textures$3, CastCone;
+var init_CastCone = __esmMin((() => {
+	init_WebGL();
+	init_Client();
+	init_SpriteRenderer();
+	init_CastConeSim();
+	init_EffectPrim$2();
+	init_EffectPrim$1();
+	BAND_VERTICES = 120;
+	_program$5 = null;
+	_textures$3 = /* @__PURE__ */ new Map();
+	CastCone = class {
+		/**
+		* @param {vec3} position caster position (kept by reference, so it follows)
+		* @param {number} startTick
+		* @param {number} castTime cast time, ms
+		* @param {{variant: number, ground: boolean, pulse: boolean}} options
+		*/
+		constructor(position, startTick, castTime, options = {}) {
+			this.position = position;
+			this.startTick = startTick || 0;
+			this.pulse = !!options.pulse;
+			this.frames = coneFrames(castTime, this.pulse ? 100 : 120);
+			this.endTick = this.startTick + this.frames * PRIM_TICK_MS;
+			this.variant = VARIANTS[options.variant] || VARIANTS[0];
+			this.ground = !!options.ground;
+			this.cone = new Float32Array(CONE_VERTICES * 5);
+			this.squares = new Float32Array(GROUND_VERTICES * 5);
+			this.color = /* @__PURE__ */ new Float32Array(4);
+		}
+		init(gl) {
+			this.buffer = gl.createBuffer();
+			for (let i = 0; i < 27; i++) loadTexture$4(gl, bubbleName(i));
+			if (this.ground && !this.pulse) loadTexture$4(gl, GROUND.texture);
+			this.ready = true;
+		}
+		free(gl) {
+			this.ready = false;
+			if (this.buffer) {
+				gl.deleteBuffer(this.buffer);
+				this.buffer = null;
+			}
+		}
+		upload(gl, data) {
+			const attribute = _program$5.attribute;
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+			gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+		}
+		/**
+		* Draw `count` uploaded vertices from `first`, additive or with normal alpha blending.
+		*/
+		draw(gl, first, count, texture, rgb, alpha, additive) {
+			if (!texture || alpha <= 0) return;
+			this.color[0] = rgb[0] / 255;
+			this.color[1] = rgb[1] / 255;
+			this.color[2] = rgb[2] / 255;
+			this.color[3] = Math.min(255, alpha) / 255;
+			gl.uniform4fv(_program$5.uniform.uColor, this.color);
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			if (!additive) gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			gl.drawArrays(gl.TRIANGLES, first, count);
+			if (!additive) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+		}
+		pass(gl, data, count, texture, rgb, alpha, additive) {
+			if (!texture || alpha <= 0) return;
+			this.upload(gl, data);
+			this.draw(gl, 0, count, texture, rgb, alpha, additive);
+		}
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			if (tick > this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const t = Math.min(this.frames, Math.floor((tick - this.startTick) / PRIM_TICK_MS) + 1);
+			const self = this;
+			SpriteRenderer.runWithDepth(true, false, false, function() {
+				const texture = _textures$3.get(bubbleName(bubbleFrame(t)));
+				if (self.pulse) {
+					for (const crown of PULSE_CROWNS) {
+						const states = pulseBands(t, self.frames, crown.alpha);
+						buildPulse(self.cone, t, self.position, states);
+						self.upload(gl, self.cone);
+						for (let b = 0; b < states.length; b++) self.draw(gl, b * BAND_VERTICES, BAND_VERTICES, texture, crown.rgb, states[b].alpha, crown.additive);
+					}
+					return;
+				}
+				if (self.ground) {
+					buildGround(self.squares, t, self.position);
+					self.pass(gl, self.squares, GROUND_VERTICES, _textures$3.get(GROUND.texture), GROUND.rgb, groundAlpha(t, self.frames), true);
+				}
+				const alpha = bandAlpha$1(t, self.frames);
+				buildCone(self.cone, t, self.position);
+				self.pass(gl, self.cone, CONE_VERTICES, texture, [
+					255,
+					255,
+					255
+				], alpha, false);
+				self.pass(gl, self.cone, CONE_VERTICES, texture, self.variant.rgb, alpha * self.variant.gain, self.variant.additive);
+			});
+		}
+		static init(gl) {
+			_program$5 = WebGL_default.createShaderProgram(gl, EffectPrim_default$1, EffectPrim_default);
+			this.ready = true;
+			this.renderBeforeEntities = false;
+		}
+		static free(gl) {
+			if (_program$5) {
+				gl.deleteProgram(_program$5);
+				_program$5 = null;
+			}
+			for (const texture of _textures$3.values()) if (texture) gl.deleteTexture(texture);
+			_textures$3.clear();
+			this.ready = false;
+		}
+		static beforeRender(gl, modelView, projection, fog) {
+			const uniform = _program$5.uniform;
+			const attribute = _program$5.attribute;
+			gl.useProgram(_program$5);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+		}
+		static afterRender(gl) {
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			gl.disableVertexAttribArray(_program$5.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$5.attribute.aTextureCoord);
+		}
+	};
+}));
+// src/Renderer/Effects/CastCircleSim.js
+/** Strips drawn per band: one between each step of the arc, plus the 315 degree bands' extra step. */
+function stripsOf(band) {
+	return Math.floor(band.arc / Math.floor(band.arc / 20));
+}
+/**
+* How long a circle plays, in ticks, for a cast of `castTime` ms.
+*
+* @param {number} castTime
+* @return {number}
+*/
+function circleFrames(castTime) {
+	const ticks = Math.floor((castTime > 0 ? castTime : 0) / 16);
+	return Math.max(70, ticks);
+}
+/**
+* A band's alpha (out of 255) on tick `t` (1 on the first).
+*
+* @param {number} b band index
+* @param {number} t
+* @param {number} frames
+* @param {boolean} [tinted] the tinted circle (effects 54, 55, 57)
+* @return {number}
+*/
+function bandAlpha(b, t, frames, tinted = false) {
+	const band = BANDS$1[b];
+	const fadeFrom = frames - FADE;
+	if (!band.pulse) return Math.max(0, band.alpha - 5 * Math.max(0, t - fadeFrom + 1));
+	const up = Math.min(tinted ? 60 : 100, band.alpha + 8 * Math.min(t, fadeFrom - 1, 19));
+	return Math.max(0, up - (tinted ? 2 : 3) * Math.max(0, t - fadeFrom + 1));
+}
+/**
+* Height of point `j` of band `b` on tick `t`, in world units.
+*
+* @param {number} b
+* @param {number} j 0 to 20
+* @param {number} t
+* @param {boolean} [tinted] the tinted circle: no band pulses
+* @return {number}
+*/
+function pointHeight$1(b, j, t, tinted = false) {
+	const band = BANDS$1[b];
+	const full = band.height * Math.sin(9 * j * DEG$3);
+	if (t < 91) return Math.max(0, full * Math.sin(t * DEG$3));
+	if (!band.pulse || tinted || t === 91) return Math.max(0, full);
+	return full * .55 + full * .45 * Math.sin(t % 360 * DEG$3);
+}
+/**
+* Write one vertex in roBrowser's GL space, from client units about `center`.
+*/
+function vertex$2(out, i, center, x, y, up, u, v) {
+	out[i + 0] = center[0] + .5 + x / 5;
+	out[i + 1] = -center[2] - up / 5;
+	out[i + 2] = center[1] + .5 + y / 5;
+	out[i + 3] = u;
+	out[i + 4] = v;
+	return i + 5;
+}
+/**
+* Fill `out` with band `b`'s triangles on tick `t`.
+* V is 1 at a strip's foot and 0 at its tip; strip k runs U from k/21 to (k+1)/21.
+*
+* @param {Float32Array} out
+* @param {number} o first float to write
+* @param {number} b band index
+* @param {number} t tick, 1 on the first
+* @param {Array} center position, in cells
+* @param {boolean} tinted
+* @return {number} next float
+*/
+function buildBand(out, o, b, t, center, tinted) {
+	const band = BANDS$1[b];
+	const step = Math.floor(band.arc / 20);
+	const turn = (band.turn + band.spin * t) % 360;
+	const lean = Math.cos(band.tilt * DEG$3);
+	const rise = Math.sin(band.tilt * DEG$3);
+	let prev = null;
+	for (let i = 0, a = 0; a <= band.arc; i++, a += step) {
+		const j = Math.min(i, 20);
+		const angle = (band.arc === 360 && j === 20 ? turn : turn + a) * DEG$3;
+		const cos = Math.cos(angle);
+		const sin = Math.sin(angle);
+		const h = pointHeight$1(b, j, t, tinted);
+		const point = {
+			fx: band.foot * cos,
+			fy: band.foot * sin,
+			tx: (band.foot + h * lean) * cos,
+			ty: (band.foot + h * lean) * sin,
+			up: h * rise
+		};
+		if (prev) {
+			const u0 = (j - 1) / 21;
+			const u1 = j / 21;
+			o = vertex$2(out, o, center, prev.fx, prev.fy, 0, u0, 1);
+			o = vertex$2(out, o, center, point.fx, point.fy, 0, u1, 1);
+			o = vertex$2(out, o, center, point.tx, point.ty, point.up, u1, 0);
+			o = vertex$2(out, o, center, prev.tx, prev.ty, prev.up, u0, 0);
+			o = vertex$2(out, o, center, point.tx, point.ty, point.up, u1, 0);
+			o = vertex$2(out, o, center, prev.fx, prev.fy, 0, u0, 1);
+		}
+		prev = point;
+	}
+	return o;
+}
+/**
+* Fill `out` with every band's triangles on tick `t`, and say where each band starts.
+*
+* @param {Float32Array} out CIRCLE_VERTICES * 5 floats
+* @param {number} t tick, 1 on the first
+* @param {Array} center position, in cells
+* @param {boolean} [tinted] the tinted circle (effects 54, 55, 57)
+* @return {number[]} first vertex of each band, then the total
+*/
+function buildCircle(out, t, center, tinted = false) {
+	const starts = [];
+	let o = 0;
+	for (let b = 0; b < BANDS$1.length; b++) {
+		starts.push(o / 5);
+		o = buildBand(out, o, b, t, center, tinted);
+	}
+	starts.push(o / 5);
+	return starts;
+}
+var DEG$3, FADE, BANDS$1, TINT_MODES, CIRCLE_VERTICES;
+var init_CastCircleSim = __esmMin((() => {
+	init_EffectPrimSim();
+	DEG$3 = Math.PI / 180;
+	FADE = 40;
+	BANDS$1 = [
+		{
+			foot: 4.5,
+			tilt: 70,
+			arc: 315,
+			spin: 3,
+			height: 25,
+			turn: 0,
+			alpha: 180
+		},
+		{
+			foot: 5,
+			tilt: 57,
+			arc: 315,
+			spin: 4,
+			height: 22,
+			turn: 90,
+			alpha: 180
+		},
+		{
+			foot: 5.5,
+			tilt: 45,
+			arc: 315,
+			spin: 5,
+			height: 19,
+			turn: 180,
+			alpha: 180
+		},
+		{
+			foot: 4,
+			tilt: 89,
+			arc: 360,
+			spin: 0,
+			height: 250,
+			turn: 0,
+			alpha: 70,
+			pulse: true
+		}
+	];
+	TINT_MODES = {
+		0: {
+			color: [
+				255,
+				255,
+				255
+			],
+			additive: false
+		},
+		1: {
+			color: [
+				255,
+				175,
+				175
+			],
+			additive: true
+		},
+		2: {
+			color: [
+				195,
+				195,
+				255
+			],
+			additive: false
+		}
+	};
+	CIRCLE_VERTICES = BANDS$1.reduce((sum, band) => sum + stripsOf(band) * 6, 0);
+}));
+// src/Renderer/Effects/CastCircle.js
+function loadTexture$3(gl, name) {
+	if (_textures$2.has(name)) return;
+	_textures$2.set(name, null);
+	Client.loadFile(`data/texture/effect/${name}`, (buffer) => {
+		WebGL_default.texture(gl, buffer, (texture) => {
+			if (!_textures$2.has(name)) {
+				gl.deleteTexture(texture);
+				return;
+			}
+			_textures$2.set(name, texture);
+		});
+	});
+}
+var _program$4, _textures$2, CastCircle;
+var init_CastCircle = __esmMin((() => {
+	init_WebGL();
+	init_Client();
+	init_SpriteRenderer();
+	init_CastCircleSim();
+	init_EffectPrim$2();
+	init_EffectPrim$1();
+	_program$4 = null;
+	_textures$2 = /* @__PURE__ */ new Map();
+	CastCircle = class {
+		/**
+		* @param {vec3} position caster position (kept by reference, so it follows)
+		* @param {number} startTick
+		* @param {number} castTime cast time, ms
+		* @param {string} texture file under data/texture/effect/
+		* @param {number} [mode] the tinted circle's mode (TINT_MODES); leave out for the untinted circle
+		*/
+		constructor(position, startTick, castTime, texture, mode) {
+			this.position = position;
+			this.startTick = startTick || 0;
+			this.frames = circleFrames(castTime);
+			this.endTick = this.startTick + this.frames * PRIM_TICK_MS;
+			this.texture = texture;
+			this.vertices = new Float32Array(CIRCLE_VERTICES * 5);
+			this.tinted = mode in TINT_MODES;
+			const tint = this.tinted ? TINT_MODES[mode] : TINT_MODES[0];
+			this.color = new Float32Array([
+				tint.color[0] / 255,
+				tint.color[1] / 255,
+				tint.color[2] / 255,
+				1
+			]);
+			this.additive = tint.additive;
+		}
+		init(gl) {
+			this.buffer = gl.createBuffer();
+			loadTexture$3(gl, this.texture);
+			this.ready = true;
+		}
+		free(gl) {
+			this.ready = false;
+			if (this.buffer) {
+				gl.deleteBuffer(this.buffer);
+				this.buffer = null;
+			}
+		}
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			if (tick > this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const texture = _textures$2.get(this.texture);
+			if (!texture) return;
+			const t = Math.min(this.frames, Math.floor((tick - this.startTick) / PRIM_TICK_MS) + 1);
+			const starts = buildCircle(this.vertices, t, this.position, this.tinted);
+			const attribute = _program$4.attribute;
+			const self = this;
+			SpriteRenderer.runWithDepth(true, false, false, function() {
+				gl.bindBuffer(gl.ARRAY_BUFFER, self.buffer);
+				gl.bufferData(gl.ARRAY_BUFFER, self.vertices, gl.DYNAMIC_DRAW);
+				gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+				gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				if (self.additive) gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+				for (let b = 0; b < BANDS$1.length; b++) {
+					const alpha = bandAlpha(b, t, self.frames, self.tinted);
+					if (alpha <= 0) continue;
+					self.color[3] = alpha / 255;
+					gl.uniform4fv(_program$4.uniform.uColor, self.color);
+					gl.drawArrays(gl.TRIANGLES, starts[b], starts[b + 1] - starts[b]);
+				}
+				if (self.additive) gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			});
+		}
+		static init(gl) {
+			_program$4 = WebGL_default.createShaderProgram(gl, EffectPrim_default$1, EffectPrim_default);
+			this.ready = true;
+			this.renderBeforeEntities = false;
+		}
+		static free(gl) {
+			if (_program$4) {
+				gl.deleteProgram(_program$4);
+				_program$4 = null;
+			}
+			for (const texture of _textures$2.values()) if (texture) gl.deleteTexture(texture);
+			_textures$2.clear();
+			this.ready = false;
+		}
+		static beforeRender(gl, modelView, projection, fog) {
+			const uniform = _program$4.uniform;
+			const attribute = _program$4.attribute;
+			gl.useProgram(_program$4);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		}
+		static afterRender(gl) {
+			gl.disableVertexAttribArray(_program$4.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$4.attribute.aTextureCoord);
+		}
+	};
+}));
+// src/Renderer/Effects/CastRingSim.js
+/**
+* @param {number} arg the ring's argument
+* @return {number} its mode
+*/
+function ringMode(arg) {
+	return arg in ARG_MODE ? ARG_MODE[arg] : 5;
+}
+/**
+* @param {number} mode
+* @return {{color: number[], additive: boolean}}
+*/
+function modeTint(mode) {
+	return RING_MODES[mode] || RING_MODES[5];
+}
+/**
+* Band lengths (foot to tip, before the wobble) by argument.
+*
+* @param {number} arg
+* @return {number[]}
+*/
+function bandLengths(arg) {
+	if (arg === 2) return [
+		25,
+		24,
+		23,
+		22
+	];
+	if (arg === 22) return [
+		15,
+		14,
+		13,
+		12
+	];
+	return [
+		20,
+		19,
+		18,
+		17
+	];
+}
+/**
+* How long a ring effect plays, in ticks, for a cast of `castTime` ms.
+*
+* @param {number} castTime
+* @return {number}
+*/
+function ringFrames(castTime) {
+	const ticks = Math.floor((castTime > 0 ? castTime : 0) / 16);
+	return Math.max(56, ticks);
+}
+/**
+* A new ring, as the client builds it on the effect's first tick.
+*
+* @param {number} size 45 or 25
+* @param {number} arg the ring's argument
+* @param {number} frames the effect's lifetime, ticks
+* @param {boolean} [cycle] the colour-cycling twin (primitive 139)
+* @return {object}
+*/
+function createRing(size, arg, frames, cycle = false) {
+	const short = frames < 61;
+	const lengths = bandLengths(arg);
+	return {
+		arg,
+		frames,
+		cycle,
+		mode: cycle ? CYCLE_MODES[0] : ringMode(arg),
+		bands: BAND_START.map((start, b) => ({
+			start,
+			length: lengths[b],
+			alpha: short ? 0 : size + BAND_ALPHA[b],
+			counter: short ? 0 - 5 * b : 0,
+			foot: FOOT_START,
+			lean: LEAN_START,
+			points: new Array(21).fill(0)
+		}))
+	};
+}
+function phaseOf(b, c) {
+	switch (b) {
+		case 0: return c;
+		case 1: return c + 90;
+		case 2: return (c + 90) * 2;
+		default: return (c + 135) * 2;
+	}
+}
+/**
+* Run a ring one tick.
+*
+* @param {object} ring from createRing
+*/
+function stepRing(ring) {
+	const slow = ring.arg === 22;
+	for (let b = 0; b < ring.bands.length; b++) {
+		const band = ring.bands[b];
+		band.counter++;
+		if (ring.cycle && band.counter >= 0 && band.counter % 25 === 0) ring.mode = CYCLE_MODES[band.counter / 25 % CYCLE_MODES.length];
+		if (band.counter <= 0) continue;
+		band.foot = f32(band.foot + FOOT_STEP);
+		band.lean--;
+		if (band.lean < LEAN_MIN) {
+			band.lean = LEAN_MIN;
+			band.alpha = 0;
+		}
+		if (band.foot < FOOT_FULL) band.alpha += slow ? 5 : 10;
+		else {
+			band.alpha -= 3;
+			if (band.alpha < 1) {
+				band.alpha = 0;
+				if (band.counter < ring.frames - 30) {
+					band.foot = FOOT_RESTART;
+					band.lean = slow ? 64 : 74;
+				}
+			}
+		}
+		const wave = Math.sin(phaseOf(b, band.counter) % 360 * DEG$2);
+		for (let j = 0; j < 21; j++) band.points[j] = band.length + band.length * WOBBLE * Math.sin(9 * j * DEG$2) * wave;
+	}
+}
+/**
+* Write one vertex in roBrowser's GL space, from client units about `center`.
+*/
+function vertex$1(out, i, center, x, y, up, u, v) {
+	out[i + 0] = center[0] + .5 + x / 5;
+	out[i + 1] = -center[2] - up / 5;
+	out[i + 2] = center[1] + .5 + y / 5;
+	out[i + 3] = u;
+	out[i + 4] = v;
+	return i + 5;
+}
+/**
+* Fill `out` with the ring's triangles, band after band (STRIPS * 6 vertices each).
+* V is 1 at a strip's foot and 0 at its tip; strip k runs U from k/21 to (k+1)/21.
+*
+* @param {Float32Array} out RING_VERTICES * 5 floats
+* @param {object} ring
+* @param {Array} center position, in cells
+*/
+function buildRing(out, ring, center) {
+	let o = 0;
+	for (const band of ring.bands) {
+		const reach = Math.cos(band.lean * DEG$2);
+		const up_ = Math.sin(band.lean * DEG$2);
+		let prev = null;
+		for (let j = 0; j < 21; j++) {
+			const angle = (band.start + 18 * j) % 360 * DEG$2;
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			const p = band.points[j];
+			const point = {
+				fx: band.foot * cos,
+				fy: band.foot * sin,
+				tx: (band.foot + p * reach) * cos,
+				ty: (band.foot + p * reach) * sin,
+				up: p * up_
+			};
+			if (prev) {
+				const u0 = (j - 1) / 21;
+				const u1 = j / 21;
+				o = vertex$1(out, o, center, prev.fx, prev.fy, 0, u0, 1);
+				o = vertex$1(out, o, center, point.fx, point.fy, 0, u1, 1);
+				o = vertex$1(out, o, center, point.tx, point.ty, point.up, u1, 0);
+				o = vertex$1(out, o, center, prev.tx, prev.ty, prev.up, u0, 0);
+				o = vertex$1(out, o, center, point.tx, point.ty, point.up, u1, 0);
+				o = vertex$1(out, o, center, prev.fx, prev.fy, 0, u0, 1);
+			}
+			prev = point;
+		}
+	}
+}
+var DEG$2, f32, BAND_START, BAND_ALPHA, FOOT_START, FOOT_RESTART, FOOT_STEP, FOOT_FULL, LEAN_START, LEAN_MIN, WOBBLE, RING_VERTICES, ARG_MODE, RING_MODES, CYCLE_MODES;
+var init_CastRingSim = __esmMin((() => {
+	init_EffectPrimSim();
+	DEG$2 = Math.PI / 180;
+	f32 = Math.fround;
+	BAND_START = [
+		180,
+		270,
+		0,
+		90
+	];
+	BAND_ALPHA = [
+		135,
+		90,
+		45,
+		0
+	];
+	FOOT_START = f32(4.1);
+	FOOT_RESTART = f32(3.37);
+	FOOT_STEP = f32(.07);
+	FOOT_FULL = 4;
+	LEAN_START = 80;
+	LEAN_MIN = 10;
+	WOBBLE = .3;
+	RING_VERTICES = BAND_START.length * 20 * 6;
+	ARG_MODE = {
+		1: 8,
+		2: 5,
+		3: 10,
+		4: 11,
+		5: 4,
+		6: 12,
+		15: 7,
+		20: 24,
+		21: 25,
+		22: 26,
+		23: 27,
+		31: 31,
+		42: 42,
+		43: 43,
+		44: 44,
+		45: 45,
+		46: 46,
+		47: 47,
+		48: 48,
+		49: 49,
+		50: 50
+	};
+	RING_MODES = {
+		4: {
+			color: [
+				100,
+				100,
+				255
+			],
+			additive: true
+		},
+		5: {
+			color: [
+				255,
+				255,
+				255
+			],
+			additive: true
+		},
+		6: {
+			color: [
+				255,
+				100,
+				100
+			],
+			additive: true
+		},
+		7: {
+			color: [
+				100,
+				255,
+				100
+			],
+			additive: true
+		},
+		8: {
+			color: [
+				255,
+				255,
+				170
+			],
+			additive: true
+		},
+		10: {
+			color: [
+				255,
+				89,
+				182
+			],
+			additive: true
+		},
+		11: {
+			color: [
+				170,
+				170,
+				255
+			],
+			additive: true
+		},
+		12: {
+			color: [
+				50,
+				50,
+				50
+			],
+			additive: false
+		},
+		24: {
+			color: [
+				10,
+				66,
+				114
+			],
+			additive: true
+		},
+		25: {
+			color: [
+				35,
+				146,
+				185
+			],
+			additive: true
+		},
+		26: {
+			color: [
+				164,
+				205,
+				254
+			],
+			additive: true
+		},
+		27: {
+			color: [
+				84,
+				169,
+				205
+			],
+			additive: true
+		},
+		31: {
+			color: [
+				244,
+				187,
+				124
+			],
+			additive: true
+		},
+		42: {
+			color: [
+				43,
+				40,
+				46
+			],
+			additive: false
+		},
+		43: {
+			color: [
+				125,
+				182,
+				160
+			],
+			additive: false
+		},
+		44: {
+			color: [
+				180,
+				55,
+				30
+			],
+			additive: false
+		},
+		45: {
+			color: [
+				65,
+				141,
+				231
+			],
+			additive: true
+		},
+		46: {
+			color: [
+				164,
+				47,
+				29
+			],
+			additive: true
+		},
+		47: {
+			color: [
+				172,
+				154,
+				56
+			],
+			additive: true
+		},
+		48: {
+			color: [
+				80,
+				20,
+				20
+			],
+			additive: true
+		},
+		49: {
+			color: [
+				200,
+				130,
+				84
+			],
+			additive: true
+		},
+		50: {
+			color: [
+				255,
+				198,
+				91
+			],
+			additive: true
+		}
+	};
+	CYCLE_MODES = [
+		4,
+		6,
+		7,
+		8
+	];
+}));
+// src/Renderer/Effects/CastRing.js
+function loadTexture$2(gl, name) {
+	if (_textures$1.has(name)) return;
+	_textures$1.set(name, null);
+	Client.loadFile(`data/texture/effect/${name}`, (buffer) => {
+		WebGL_default.texture(gl, buffer, (texture) => {
+			if (!_textures$1.has(name)) {
+				gl.deleteTexture(texture);
+				return;
+			}
+			_textures$1.set(name, texture);
+		});
+	});
+}
+var _program$3, _textures$1, SIZES, CastRing;
+var init_CastRing = __esmMin((() => {
+	init_WebGL();
+	init_Client();
+	init_SpriteRenderer();
+	init_CastRingSim();
+	init_EffectPrim$2();
+	init_EffectPrim$1();
+	_program$3 = null;
+	_textures$1 = /* @__PURE__ */ new Map();
+	SIZES = [45, 25];
+	CastRing = class {
+		/**
+		* @param {vec3} position caster position (kept by reference, so it follows)
+		* @param {number} startTick
+		* @param {number} castTime cast time, ms
+		* @param {string} texture file under data/texture/effect/
+		* @param {number[]} args the size-45 ring's argument, then the size-25 ring's
+		* @param {boolean} [cycle] build the colour-cycling twin (client primitive 139)
+		*/
+		constructor(position, startTick, castTime, texture, args, cycle = false) {
+			this.position = position;
+			this.startTick = startTick || 0;
+			this.frames = ringFrames(castTime);
+			this.endTick = this.startTick + this.frames * PRIM_TICK_MS;
+			this.texture = texture;
+			this.ticks = 0;
+			this.rings = SIZES.map((size, i) => ({
+				sim: createRing(size, args[i], this.frames, cycle),
+				vertices: new Float32Array(RING_VERTICES * 5),
+				color: /* @__PURE__ */ new Float32Array(4),
+				buffer: null
+			}));
+		}
+		init(gl) {
+			for (const ring of this.rings) ring.buffer = gl.createBuffer();
+			loadTexture$2(gl, this.texture);
+			this.ready = true;
+		}
+		free(gl) {
+			this.ready = false;
+			for (const ring of this.rings) if (ring.buffer) {
+				gl.deleteBuffer(ring.buffer);
+				ring.buffer = null;
+			}
+		}
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			if (tick > this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const t = Math.min(this.frames, Math.floor((tick - this.startTick) / PRIM_TICK_MS) + 1);
+			while (this.ticks < t) {
+				for (const ring of this.rings) stepRing(ring.sim);
+				this.ticks++;
+			}
+			const texture = _textures$1.get(this.texture);
+			if (!texture) return;
+			const attribute = _program$3.attribute;
+			const self = this;
+			SpriteRenderer.runWithDepth(true, false, false, function() {
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				for (const ring of self.rings) {
+					buildRing(ring.vertices, ring.sim, self.position);
+					gl.bindBuffer(gl.ARRAY_BUFFER, ring.buffer);
+					gl.bufferData(gl.ARRAY_BUFFER, ring.vertices, gl.DYNAMIC_DRAW);
+					gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+					gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+					const tint = modeTint(ring.sim.mode);
+					ring.color[0] = tint.color[0] / 255;
+					ring.color[1] = tint.color[1] / 255;
+					ring.color[2] = tint.color[2] / 255;
+					gl.blendFunc(gl.SRC_ALPHA, tint.additive ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA);
+					ring.sim.bands.forEach((band, b) => {
+						const alpha = Math.min(255, band.alpha);
+						if (alpha <= 0) return;
+						ring.color[3] = alpha / 255;
+						gl.uniform4fv(_program$3.uniform.uColor, ring.color);
+						gl.drawArrays(gl.TRIANGLES, b * 20 * 6, 120);
+					});
+				}
+				gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+			});
+		}
+		static init(gl) {
+			_program$3 = WebGL_default.createShaderProgram(gl, EffectPrim_default$1, EffectPrim_default);
+			this.ready = true;
+			this.renderBeforeEntities = false;
+		}
+		static free(gl) {
+			if (_program$3) {
+				gl.deleteProgram(_program$3);
+				_program$3 = null;
+			}
+			for (const texture of _textures$1.values()) if (texture) gl.deleteTexture(texture);
+			_textures$1.clear();
+			this.ready = false;
+		}
+		static beforeRender(gl, modelView, projection, fog) {
+			const uniform = _program$3.uniform;
+			const attribute = _program$3.attribute;
+			gl.useProgram(_program$3);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		}
+		static afterRender(gl) {
+			gl.disableVertexAttribArray(_program$3.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$3.attribute.aTextureCoord);
+		}
+	};
+}));
+// src/Renderer/Effects/CastFunnelSim.js
+/**
+* A band's alpha (out of 255) on tick `t` (1 on the first). Every band is the same.
+*
+* @param {number} t
+* @return {number}
+*/
+function funnelAlpha(t) {
+	if (t <= FUNNEL.riseTicks) return FUNNEL.alphaUp * Math.max(0, t);
+	return Math.max(0, FUNNEL.alphaUp * FUNNEL.riseTicks - FUNNEL.alphaDown * (t - FUNNEL.riseTicks));
+}
+/**
+* Band `b`'s state on tick `t`: start angle, lean and foot radius.
+*
+* @param {number} b band index
+* @param {number} t tick, 1 on the first
+* @return {{angle: number, lean: number, foot: number}}
+*/
+function bandState(b, t) {
+	return {
+		angle: (FUNNEL.turn * b + FUNNEL.spin * t) % 360,
+		lean: Math.max(FUNNEL.leanMin, FUNNEL.lean - FUNNEL.leanStep * t),
+		foot: FUNNEL.foot + b + FUNNEL.spread * t
+	};
+}
+/**
+* Height of point `j` of band `b` on tick `t`, in world units.
+*
+* @param {number} b
+* @param {number} j 0 to 20
+* @param {number} t
+* @return {number}
+*/
+function pointHeight(b, j, t) {
+	return FUNNEL.height * Math.sin(9 * j * DEG$1) * (1 + FUNNEL.breathe * Math.sin((t + FUNNEL.turn * b) % 360 * DEG$1));
+}
+/**
+* Write one vertex in roBrowser's GL space, from client units about `center`.
+*/
+function vertex(out, i, center, x, y, up, u, v) {
+	out[i + 0] = center[0] + .5 + x / 5;
+	out[i + 1] = -center[2] - up / 5;
+	out[i + 2] = center[1] + .5 + y / 5;
+	out[i + 3] = u;
+	out[i + 4] = v;
+	return i + 5;
+}
+/**
+* Fill `out` with every band's triangles on tick `t`.
+* V is 1 at a strip's foot and 0 at its tip; strip k runs U from k/21 to (k+1)/21.
+*
+* @param {Float32Array} out FUNNEL_VERTICES * 5 floats
+* @param {number} t tick, 1 on the first
+* @param {Array} center position, in cells
+* @return {number} vertices written
+*/
+function buildFunnel(out, t, center) {
+	const step = 18;
+	let o = 0;
+	for (let b = 0; b < 4; b++) {
+		const band = bandState(b, t);
+		const lean = Math.cos(band.lean * DEG$1);
+		const rise = Math.sin(band.lean * DEG$1);
+		let prev = null;
+		for (let j = 0; j < 21; j++) {
+			const angle = (j === 20 ? band.angle : band.angle + j * step) * DEG$1;
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			const h = pointHeight(b, j, t);
+			const point = {
+				fx: band.foot * cos,
+				fy: band.foot * sin,
+				tx: (band.foot + h * lean) * cos,
+				ty: (band.foot + h * lean) * sin,
+				up: h * rise
+			};
+			if (prev) {
+				const u0 = (j - 1) / 21;
+				const u1 = j / 21;
+				o = vertex(out, o, center, prev.fx, prev.fy, 0, u0, 1);
+				o = vertex(out, o, center, point.fx, point.fy, 0, u1, 1);
+				o = vertex(out, o, center, point.tx, point.ty, point.up, u1, 0);
+				o = vertex(out, o, center, prev.tx, prev.ty, prev.up, u0, 0);
+				o = vertex(out, o, center, point.tx, point.ty, point.up, u1, 0);
+				o = vertex(out, o, center, prev.fx, prev.fy, 0, u0, 1);
+			}
+			prev = point;
+		}
+	}
+	return o / 5;
+}
+var DEG$1, FUNNEL;
+var init_CastFunnelSim = __esmMin((() => {
+	init_EffectPrimSim();
+	DEG$1 = Math.PI / 180;
+	FUNNEL = {
+		height: 25,
+		breathe: .15,
+		turn: 90,
+		spin: 5,
+		lean: 80,
+		leanStep: 1,
+		leanMin: 40,
+		foot: 1,
+		spread: .3,
+		alphaUp: 20,
+		riseTicks: 10,
+		alphaDown: 5
+	};
+	FUNNEL.riseTicks + FUNNEL.alphaUp * FUNNEL.riseTicks / FUNNEL.alphaDown;
+}));
+// src/Renderer/Effects/CastFunnel.js
+function loadTexture$1(gl, name) {
+	if (_textures.has(name)) return;
+	_textures.set(name, null);
+	Client.loadFile(`data/texture/effect/${name}`, (buffer) => {
+		WebGL_default.texture(gl, buffer, (texture) => {
+			if (!_textures.has(name)) {
+				gl.deleteTexture(texture);
+				return;
+			}
+			_textures.set(name, texture);
+		});
+	});
+}
+var _program$2, _textures, CastFunnel;
+var init_CastFunnel = __esmMin((() => {
+	init_WebGL();
+	init_Client();
+	init_SpriteRenderer();
+	init_CastFunnelSim();
+	init_EffectPrim$2();
+	init_EffectPrim$1();
+	_program$2 = null;
+	_textures = /* @__PURE__ */ new Map();
+	CastFunnel = class {
+		/**
+		* @param {vec3} position caster position (kept by reference, so it follows)
+		* @param {number} startTick
+		* @param {number} frames lifetime in ticks (1/60 s)
+		* @param {string} texture file under data/texture/effect/
+		*/
+		constructor(position, startTick, frames, texture) {
+			this.position = position;
+			this.startTick = startTick || 0;
+			this.frames = Math.max(1, Math.floor(frames));
+			this.endTick = this.startTick + this.frames * PRIM_TICK_MS;
+			this.texture = texture;
+			this.vertices = /* @__PURE__ */ new Float32Array(2400);
+			this.color = new Float32Array([
+				1,
+				1,
+				1,
+				1
+			]);
+		}
+		init(gl) {
+			this.buffer = gl.createBuffer();
+			loadTexture$1(gl, this.texture);
+			this.ready = true;
+		}
+		free(gl) {
+			this.ready = false;
+			if (this.buffer) {
+				gl.deleteBuffer(this.buffer);
+				this.buffer = null;
+			}
+		}
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			if (tick > this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const texture = _textures.get(this.texture);
+			if (!texture) return;
+			const t = Math.min(this.frames, Math.floor((tick - this.startTick) / PRIM_TICK_MS) + 1);
+			const alpha = funnelAlpha(t);
+			if (alpha <= 0) return;
+			const count = buildFunnel(this.vertices, t, this.position);
+			const attribute = _program$2.attribute;
+			const self = this;
+			SpriteRenderer.runWithDepth(true, false, false, function() {
+				gl.bindBuffer(gl.ARRAY_BUFFER, self.buffer);
+				gl.bufferData(gl.ARRAY_BUFFER, self.vertices, gl.DYNAMIC_DRAW);
+				gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+				gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				self.color[3] = alpha / 255;
+				gl.uniform4fv(_program$2.uniform.uColor, self.color);
+				gl.drawArrays(gl.TRIANGLES, 0, count);
+			});
+		}
+		static init(gl) {
+			_program$2 = WebGL_default.createShaderProgram(gl, EffectPrim_default$1, EffectPrim_default);
+			this.ready = true;
+			this.renderBeforeEntities = false;
+		}
+		static free(gl) {
+			if (_program$2) {
+				gl.deleteProgram(_program$2);
+				_program$2 = null;
+			}
+			for (const texture of _textures.values()) if (texture) gl.deleteTexture(texture);
+			_textures.clear();
+			this.ready = false;
+		}
+		static beforeRender(gl, modelView, projection, fog) {
+			const uniform = _program$2.uniform;
+			const attribute = _program$2.attribute;
+			gl.useProgram(_program$2);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		}
+		static afterRender(gl) {
+			gl.disableVertexAttribArray(_program$2.attribute.aPosition);
+			gl.disableVertexAttribArray(_program$2.attribute.aTextureCoord);
+		}
+	};
+}));
+// src/Renderer/Effects/CasterMarks.js
+/**
+* The caster's colour on tick `age`: the last colour the effect set, brought
+* back by 8 a tick since.
+*
+* @param {function} schedule
+* @param {number} age
+* @return {number[]|null} 0-255 per channel, or null when never set
+*/
+function colorAt(schedule, age) {
+	for (let a = age; a >= 0 && age - a <= Math.ceil(255 / 8); a--) {
+		const set = schedule(a).color;
+		if (set) return set.map((c) => Math.min(255, c + 8 * (age - a)));
+	}
+	return null;
+}
+/**
+* Recover a colour on an entity by 8 a tick until it is back to normal
+*
+* @param {Entity} entity
+* @param {number[]} color 0-255 per channel
+*/
+function recoverColor(entity, color) {
+	if (!entity.animations || !entity._flashColor) return;
+	entity.animations.add((tick) => {
+		const steps = Math.floor(tick / PRIM_TICK_MS);
+		let done = true;
+		for (let i = 0; i < 3; i++) {
+			const c = Math.min(255, color[i] + 8 * steps);
+			entity._flashColor[i] = c / 255;
+			done = done && c >= 255;
+		}
+		entity.recalculateBlendingColor();
+		return done;
+	});
+}
+var RED, YELLOW, WHITE, SCHEDULES, CasterMarks;
+var init_CasterMarks = __esmMin((() => {
+	init_EntityManager();
+	init_EffectPrimSim();
+	RED = [
+		255,
+		0,
+		0
+	];
+	YELLOW = [
+		250,
+		250,
+		100
+	];
+	WHITE = [
+		255,
+		255,
+		255
+	];
+	SCHEDULES = {
+		934: (age) => {
+			const on = age >= 10 && age <= 34 && age % 4 < 2;
+			return {
+				add: on,
+				glow: on,
+				split: false,
+				color: null
+			};
+		},
+		2373: (age) => {
+			const on = age <= 30;
+			return {
+				add: on,
+				glow: on,
+				split: true,
+				color: on ? RED : null
+			};
+		},
+		502: (age) => {
+			const on = age <= 140;
+			const even = age % 2 === 0;
+			return {
+				add: on && even,
+				glow: on,
+				split: false,
+				color: on ? even ? YELLOW : WHITE : null
+			};
+		}
+	};
+	CasterMarks = class {
+		static ready = true;
+		static renderBeforeEntities = true;
+		static beforeRender() {}
+		static afterRender() {}
+		/**
+		* @param {Entity} owner the caster
+		* @param {number} startTick
+		* @param {number} frames lifetime in ticks (1/60 s)
+		* @param {number} effectId 934, 2373 or 502
+		*/
+		constructor(owner, startTick, frames, effectId) {
+			this.owner = owner || null;
+			this.startTick = startTick || 0;
+			this.frames = Math.max(1, Math.floor(frames));
+			this.schedule = SCHEDULES[effectId];
+			this.add = false;
+			this.glow = false;
+			this.color = null;
+			this.ready = true;
+		}
+		/**
+		* Put the marks of tick `age` on the owner, or take them all off (null)
+		*/
+		mark(age) {
+			const owner = this.owner;
+			const state = age === null ? {
+				add: false,
+				glow: false,
+				split: false
+			} : this.schedule(age);
+			if (state.add !== this.add) {
+				owner._additiveBody = Math.max(0, (owner._additiveBody || 0) + (state.add ? 1 : -1));
+				this.add = state.add;
+			}
+			if (state.glow !== this.glow) {
+				owner._castGlow = Math.max(0, (owner._castGlow || 0) + (state.glow ? 1 : -1));
+				this.glow = state.glow;
+			}
+			if (state.split) {
+				owner._splitImageAge = age;
+				this._split = true;
+			} else if (this._split) {
+				owner._splitImageAge = void 0;
+				this._split = false;
+			}
+			if (age !== null && owner._flashColor) {
+				const color = colorAt(this.schedule, age);
+				if (color || this.color) {
+					const c = color || WHITE;
+					owner._flashColor[0] = c[0] / 255;
+					owner._flashColor[1] = c[1] / 255;
+					owner._flashColor[2] = c[2] / 255;
+					owner.recalculateBlendingColor();
+					this.color = color;
+				}
+			}
+		}
+		render(gl, tick) {
+			if (!this.owner || EntityManager.get(this.owner.GID) !== this.owner) {
+				this.needCleanUp = true;
+				return;
+			}
+			if (tick < this.startTick) return;
+			const age = Math.floor((tick - this.startTick) / PRIM_TICK_MS);
+			if (age >= this.frames) {
+				this.needCleanUp = true;
+				return;
+			}
+			this.mark(age);
+		}
+		free() {
+			if (this.owner) {
+				this.mark(null);
+				if (this.color && this.color.some((c) => c < 255)) recoverColor(this.owner, this.color);
+			}
+			this.owner = null;
+		}
+	};
+}));
+// src/Renderer/Effects/RotateLineSim.js
+/**
+* How long the effect plays, in ticks, for a cast of `castTime` ms.
+*
+* @param {number} castTime ms
+* @return {number}
+*/
+function rotateLineFrames(castTime) {
+	return Math.max(0, Math.floor((castTime || 0) / 16));
+}
+/**
+* The four ribbons as the client sets them up.
+*
+* @param {number} effectId 986 or 1000
+* @param {function} random returns 0 <= x < 1 (the tilts)
+* @return {Array<object>}
+*/
+function createLines(effectId, random = Math.random) {
+	const look = LOOKS[effectId] || LOOKS[986];
+	const lines = [];
+	for (let L = 0; L < 4; L++) {
+		const points = [];
+		for (let i = 0; i < 21; i++) points.push({
+			angle: START.turn * L,
+			span: START.span,
+			alpha: START.alpha,
+			radius: START.radius - START.radiusStep * L + look.radius
+		});
+		lines.push({
+			tilt: START.tiltMin + Math.floor(random() * START.tiltRange),
+			height: START.height - START.heightStep * L,
+			points
+		});
+	}
+	return lines;
+}
+/**
+* One client tick: `age` is the ticks already run (the client reads it before
+* counting the tick).
+*
+* @param {Array<object>} lines from createLines, changed in place
+* @param {number} age
+*/
+function stepLines(lines, age) {
+	for (const line of lines) {
+		const head = line.points[0];
+		head.angle = (head.angle + STEP.turn) % 360;
+		head.span = Math.min(STEP.maxSpan, head.span + STEP.span);
+		if (age < STEP.alphaInTicks) head.alpha += 1;
+		else {
+			head.radius += STEP.grow;
+			if (age > STEP.fadeAfter) head.alpha = Math.max(0, head.alpha - 1);
+		}
+		for (let i = 1; i < 21; i++) {
+			const point = line.points[i];
+			point.angle = (head.angle + STEP.turn * i) % 360;
+			point.span = Math.min(STEP.maxSpan, head.span + STEP.span * i);
+			if (age < STEP.alphaInTicks) point.alpha = head.alpha + i;
+			else {
+				point.radius = head.radius + STEP.grow * i;
+				if (age > STEP.fadeAfter) point.alpha = Math.max(0, head.alpha - i);
+			}
+		}
+	}
+}
+/**
+* Where point i of a ribbon sits on its circle, whole degrees.
+*
+* @param {object} point
+* @param {number} i
+* @return {number}
+*/
+function pointAngle(point, i) {
+	return (Math.trunc(point.span / 21) * i + point.angle) % 360;
+}
+/**
+* The upper and lower corners of point i, in the camera-turned frame: x toward
+* screen right, z away from the camera, y height (negative is up), world units.
+*
+* @param {object} line
+* @param {number} i
+* @param {Float32Array} out [upper x, y, z, lower x, y, z]
+* @return {Float32Array} out
+*/
+function pointCorners(line, i, out) {
+	const point = line.points[i];
+	const p = pointAngle(point, i) * DEG;
+	const cos = Math.cos(p);
+	const sin = Math.sin(p);
+	const lean = Math.cos(line.tilt * DEG);
+	const up = -line.height;
+	out[0] = cos * point.radius;
+	out[1] = up;
+	out[2] = sin * point.radius;
+	out[3] = cos * (point.radius + lean);
+	out[4] = up + START.drop - Math.sin(line.tilt * DEG);
+	out[5] = sin * (point.radius + lean);
+	return out;
+}
+/**
+* Screen right and away-from-camera directions on the ground, from the view matrix.
+*
+* @param {mat4} modelView view matrix (gl-matrix, column-major)
+* @param {Float32Array} right out: screen right, GL world
+* @param {Float32Array} away out: away from the camera, GL world
+*/
+function cameraFrame(modelView, right, away) {
+	let x = modelView[0];
+	let z = modelView[8];
+	let length = Math.hypot(x, z) || 1;
+	right[0] = x / length;
+	right[1] = 0;
+	right[2] = z / length;
+	x = modelView[1];
+	z = modelView[9];
+	length = Math.hypot(x, z);
+	if (length < 1e-6) {
+		away[0] = -right[2];
+		away[2] = right[0];
+	} else {
+		away[0] = x / length;
+		away[2] = z / length;
+	}
+	away[1] = 0;
+}
+var DEG, TEXTURE, LOOKS, START, STEP;
+var init_RotateLineSim = __esmMin((() => {
+	init_EffectPrimSim();
+	DEG = Math.PI / 180;
+	TEXTURE = "cloud11.tga";
+	LOOKS = {
+		986: {
+			rgb: [
+				50,
+				50,
+				50
+			],
+			additive: false,
+			radius: 0
+		},
+		1e3: {
+			rgb: [
+				100,
+				100,
+				255
+			],
+			additive: true,
+			radius: 3
+		}
+	};
+	START = {
+		turn: 90,
+		height: 28,
+		heightStep: 5,
+		radius: 7,
+		radiusStep: 1,
+		span: 30,
+		alpha: 50,
+		drop: 3,
+		tiltMin: 80,
+		tiltRange: 21
+	};
+	STEP = {
+		turn: 5,
+		span: 3,
+		maxSpan: 180,
+		alphaInTicks: 13,
+		fadeAfter: 50,
+		grow: .1
+	};
+}));
+// src/Renderer/Effects/RotateLine.js
+function loadTexture(gl) {
+	if (_texture$1 || _textureLoading) return;
+	_textureLoading = true;
+	Client.loadFile(`data/texture/effect/${TEXTURE}`, (buffer) => {
+		WebGL_default.texture(gl, buffer, (texture) => {
+			if (!_textureLoading) {
+				gl.deleteTexture(texture);
+				return;
+			}
+			_texture$1 = texture;
+		});
+	});
+}
+var _program$1, _texture$1, _textureLoading, _right, _away, _corners, _color, QUADS, QUAD_FLOATS, RotateLine;
+var init_RotateLine = __esmMin((() => {
+	init_WebGL();
+	init_Client();
+	init_SpriteRenderer();
+	init_RotateLineSim();
+	init_EffectPrim$2();
+	init_EffectPrim$1();
+	_program$1 = null;
+	_texture$1 = null;
+	_textureLoading = false;
+	_right = /* @__PURE__ */ new Float32Array(3);
+	_away = /* @__PURE__ */ new Float32Array(3);
+	_corners = /* @__PURE__ */ new Float32Array(6);
+	_color = /* @__PURE__ */ new Float32Array(4);
+	QUADS = 20;
+	QUAD_FLOATS = 30;
+	RotateLine = class {
+		/**
+		* @param {vec3} position caster position (kept by reference, so it follows)
+		* @param {number} startTick
+		* @param {number} castTime cast time, ms
+		* @param {number} effectId 986 gray or 1000 blue
+		*/
+		constructor(position, startTick, castTime, effectId = 986) {
+			this.position = position;
+			this.startTick = startTick || 0;
+			this.frames = rotateLineFrames(castTime);
+			this.endTick = this.startTick + this.frames * PRIM_TICK_MS;
+			this.look = LOOKS[effectId] || LOOKS[986];
+			this.lines = createLines(effectId);
+			this.age = 0;
+			this.vertices = new Float32Array(4 * QUADS * QUAD_FLOATS);
+		}
+		init(gl) {
+			this.buffer = gl.createBuffer();
+			loadTexture(gl);
+			this.ready = true;
+		}
+		free(gl) {
+			this.ready = false;
+			if (this.buffer) {
+				gl.deleteBuffer(this.buffer);
+				this.buffer = null;
+			}
+		}
+		/**
+		* Write one ribbon's quads to the vertex array, in GL world space.
+		*/
+		buildLine(line, offset) {
+			const out = this.vertices;
+			const base = this.position;
+			const cx = base[0] + .5;
+			const cz = base[1] + .5;
+			const cy = -base[2];
+			let prev = null;
+			for (let i = 0; i < 21; i++) {
+				pointCorners(line, i, _corners);
+				const ux = _corners[0] / 5;
+				const uz = _corners[2] / 5;
+				const lx = _corners[3] / 5;
+				const lz = _corners[5] / 5;
+				const cur = [
+					cx + _right[0] * ux + _away[0] * uz,
+					cy + _corners[1] / 5,
+					cz + _right[2] * ux + _away[2] * uz,
+					cx + _right[0] * lx + _away[0] * lz,
+					cy + _corners[4] / 5,
+					cz + _right[2] * lx + _away[2] * lz
+				];
+				if (prev) {
+					const u0 = (i - 1) / 21;
+					const u1 = i / 21;
+					const quad = [
+						[
+							prev[3],
+							prev[4],
+							prev[5],
+							u0,
+							0
+						],
+						[
+							cur[3],
+							cur[4],
+							cur[5],
+							u1,
+							0
+						],
+						[
+							prev[0],
+							prev[1],
+							prev[2],
+							u0,
+							1
+						],
+						[
+							cur[0],
+							cur[1],
+							cur[2],
+							u1,
+							1
+						]
+					];
+					let o = offset + (i - 1) * QUAD_FLOATS;
+					for (const k of [
+						0,
+						1,
+						2,
+						2,
+						1,
+						3
+					]) {
+						out.set(quad[k], o);
+						o += 5;
+					}
+				}
+				prev = cur;
+			}
+		}
+		render(gl, tick) {
+			if (tick < this.startTick) return;
+			if (tick > this.endTick) {
+				this.needCleanUp = true;
+				return;
+			}
+			const t = Math.min(this.frames, Math.floor((tick - this.startTick) / PRIM_TICK_MS) + 1);
+			while (this.age < t) {
+				stepLines(this.lines, this.age);
+				this.age++;
+			}
+			if (!_texture$1) return;
+			const lines = this.lines;
+			for (let L = 0; L < 4; L++) this.buildLine(lines[L], L * QUADS * QUAD_FLOATS);
+			const attribute = _program$1.attribute;
+			const look = this.look;
+			_color[0] = look.rgb[0] / 255;
+			_color[1] = look.rgb[1] / 255;
+			_color[2] = look.rgb[2] / 255;
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+			gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
+			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
+			gl.bindTexture(gl.TEXTURE_2D, _texture$1);
+			gl.blendFunc(gl.SRC_ALPHA, look.additive ? gl.ONE : gl.ONE_MINUS_SRC_ALPHA);
+			SpriteRenderer.runWithDepth(true, false, false, function() {
+				for (let L = 0; L < 4; L++) {
+					const points = lines[L].points;
+					for (let i = 1; i < 21; i++) {
+						const alpha = points[i].alpha;
+						if (alpha <= 0) continue;
+						_color[3] = Math.min(255, alpha) / 255;
+						gl.uniform4fv(_program$1.uniform.uColor, _color);
+						gl.drawArrays(gl.TRIANGLES, (L * QUADS + i - 1) * 6, 6);
+					}
+				}
+			});
+		}
+		static init(gl) {
+			_program$1 = WebGL_default.createShaderProgram(gl, EffectPrim_default$1, EffectPrim_default);
+			this.ready = true;
+			this.renderBeforeEntities = false;
+		}
+		static free(gl) {
+			if (_program$1) {
+				gl.deleteProgram(_program$1);
+				_program$1 = null;
+			}
+			if (_texture$1) {
+				gl.deleteTexture(_texture$1);
+				_texture$1 = null;
+			}
+			_textureLoading = false;
+			this.ready = false;
+		}
+		static beforeRender(gl, modelView, projection, fog) {
+			const uniform = _program$1.uniform;
+			const attribute = _program$1.attribute;
+			gl.useProgram(_program$1);
+			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
+			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
+			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
+			gl.uniform1f(uniform.uFogNear, fog.near);
+			gl.uniform1f(uniform.uFogFar, fog.far);
+			gl.uniform3fv(uniform.uFogColor, fog.color);
+			gl.activeTexture(gl.TEXTURE0);
+			gl.uniform1i(uniform.uDiffuse, 0);
+			gl.enableVertexAttribArray(attribute.aPosition);
+			gl.enableVertexAttribArray(attribute.aTextureCoord);
+			cameraFrame(modelView, _right, _away);
+		}
+		static afterRender(gl) {
+			gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 			gl.disableVertexAttribArray(_program$1.attribute.aPosition);
 			gl.disableVertexAttribArray(_program$1.attribute.aTextureCoord);
 		}
 	};
-	SpiritSphere.renderBeforeEntities = false;
 }));
 // src/Renderer/Effects/WarlockSphere.vs?raw
 var WarlockSphere_default$1;
@@ -268358,6 +272103,13 @@ var init_EffectTable = __esmMin((() => {
 	init_Blind();
 	init_SpiderWeb();
 	init_SpiritSphere();
+	init_CasterStrobe();
+	init_CastCone();
+	init_CastCircle();
+	init_CastRing();
+	init_CastFunnel();
+	init_CasterMarks();
+	init_RotateLine();
 	init_WarlockSphere();
 	init_Altitude();
 	init_Renderer();
@@ -269077,32 +272829,51 @@ var init_EffectTable = __esmMin((() => {
 				attachedEntity: true
 			}
 		],
-		17: [{
-			type: "CYLINDER",
-			alphaMax: .7,
-			animation: 4,
-			attachedEntity: true,
-			bottomSize: 4,
-			duration: 300,
-			fade: true,
-			height: 1,
-			rotate: true,
-			textureName: "ring_yellow",
-			topSize: 6
-		}, {
-			type: "CYLINDER",
-			alphaMax: .6,
-			animation: 4,
-			attachedEntity: true,
-			bottomSize: 4,
-			duration: 300,
-			fade: true,
-			height: 4,
-			rotate: true,
-			textureName: "´ëÆø¹ß",
-			topSize: 1,
-			wav: "effect/ef_magnumbreak"
-		}],
+		17: [
+			{
+				type: "PRIM",
+				prim: "ring",
+				texture: "ring_yellow",
+				attachedEntity: false,
+				duration: 500,
+				frames: 30,
+				radiusSpeed: 1.75,
+				radiusAccel: -.029166666666666667,
+				width: 12,
+				alpha: 0,
+				alphaSpeed: 254 / 15,
+				fadeOutFrame: 15,
+				wav: "effect/ef_magnumbreak"
+			},
+			{
+				type: "PRIM",
+				prim: "sphere",
+				texture: "´ëÆø¹ß",
+				attachedEntity: false,
+				duration: 500,
+				frames: 30,
+				radiusSpeed: 1.15,
+				radiusAccel: -.019166666666666665,
+				spin: 3,
+				alpha: 0,
+				alphaSpeed: 254 / 15,
+				fadeOutFrame: 15
+			},
+			{
+				type: "PRIM",
+				prim: "ring",
+				texture: "ring_yellow",
+				attachedEntity: false,
+				duration: 500,
+				frames: 30,
+				radiusSpeed: 1.75,
+				radiusAccel: -.029166666666666667,
+				width: 12,
+				alpha: 0,
+				alphaSpeed: 254 / 15,
+				fadeOutFrame: 15
+			}
+		],
 		18: [{
 			alphaMax: 1,
 			attachedEntity: false,
@@ -273282,20 +277053,12 @@ var init_EffectTable = __esmMin((() => {
 			file: "hyper_novice/hn_breakinglimit/breakinglimit/breakinglimit",
 			texturePath: "hyper_novice/hn_breakinglimit/breakinglimit/",
 			wav: "effect/hyper_novice/hn_breakinglimit"
-		}, {
-			type: "STR",
-			file: "hyper_novice/hn_breakinglimit/breakinglimit_buff/breakinglimit_buff",
-			texturePath: "hyper_novice/hn_breakinglimit/breakinglimit_buff/"
 		}],
 		ef_hn_rulebreak: [{
 			type: "STR",
 			file: "hyper_novice/hn_rulebreak/rulebreak/rulebreak",
 			texturePath: "hyper_novice/hn_rulebreak/rulebreak/",
 			wav: "effect/hyper_novice/hn_rulebreak"
-		}, {
-			type: "STR",
-			file: "hyper_novice/hn_rulebreak/rulebreak_buff/rulebreak_buff",
-			texturePath: "hyper_novice/hn_rulebreak/rulebreak_buff/"
 		}],
 		ef_hn_overcoming_crisis: [{
 			type: "STR",
@@ -275656,6 +279419,23 @@ var init_EffectTable = __esmMin((() => {
 			wav: "effect/¾Æ¼ûÇÁÆ¼¿À",
 			attachedEntity: true
 		}],
+		441: [{
+			alphaMax: .8,
+			animation: 2,
+			attachedEntity: true,
+			blendMode: 2,
+			blue: 1,
+			bottomSize: 1,
+			fade: true,
+			green: 1,
+			height: 4,
+			red: 1,
+			rotate: true,
+			textureName: "ring_blue",
+			topSize: 5,
+			type: "CYLINDER",
+			wav: "effect/ef_beginspell"
+		}],
 		444: [{
 			wav: "effect/t_È¿°úÀ½1",
 			attachedEntity: true
@@ -276518,28 +280298,13 @@ var init_EffectTable = __esmMin((() => {
 			min: "spirit_handler/skid_sh_hyun_rok_cannon/min_hyun_rok_cannon",
 			wav: "effect/spirit_handler/sh_hyun_rok_cannon"
 		}],
-		ef_sh_temporary_communion: [
-			{
-				type: "STR",
-				file: "spirit_handler/sh_temporary_communion/temporary_communion/temporary_communion",
-				texturePath: "spirit_handler/sh_temporary_communion/temporary_communion/",
-				min: "spirit_handler/sh_temporary_communion/temporary_communion/min_temporary_communion",
-				wav: "effect/spirit_handler/sh_temporary_communion"
-			},
-			{
-				type: "STR",
-				file: "spirit_handler/sh_temporary_communion/temporary_communion_buff/temporary_communion_buff",
-				texturePath: "spirit_handler/sh_temporary_communion/temporary_communion_buff/",
-				min: "spirit_handler/sh_temporary_communion/temporary_communion_buff/min_temporary_communion_buff"
-			},
-			{
-				type: "STR",
-				file: "spirit_handler/sh_temporary_communion/temporary_communion_buff_bottom/temporary_communion_buff_bottom",
-				texturePath: "spirit_handler/sh_temporary_communion/temporary_communion_buff_bottom/",
-				min: "spirit_handler/sh_temporary_communion/temporary_communion_buff_bottom/min_temporary_communion_buff_bottom",
-				renderBeforeEntities: true
-			}
-		],
+		ef_sh_temporary_communion: [{
+			type: "STR",
+			file: "spirit_handler/sh_temporary_communion/temporary_communion/temporary_communion",
+			texturePath: "spirit_handler/sh_temporary_communion/temporary_communion/",
+			min: "spirit_handler/sh_temporary_communion/temporary_communion/min_temporary_communion",
+			wav: "effect/spirit_handler/sh_temporary_communion"
+		}],
 		ef_sh_blessing_of_mystical_creatures: [{
 			type: "STR",
 			file: "spirit_handler/sh_blessing_of_mystical_creatures/blessing_of_mystical_creatures",
@@ -276562,9 +280327,13 @@ var init_EffectTable = __esmMin((() => {
 		}],
 		ef_sh_chul_ho_battering_cast: [{
 			type: "STR",
+			castLoop: true,
+			attachedEntity: true,
 			file: "spirit_handler/sh_chul_ho_battering/chul_ho_battering_cast/chul_ho_battering_cast",
 			texturePath: "spirit_handler/sh_chul_ho_battering/chul_ho_battering_cast/",
-			min: "spirit_handler/sh_chul_ho_battering/chul_ho_battering_cast/min_chul_ho_battering_cast"
+			min: "spirit_handler/sh_chul_ho_battering/chul_ho_battering_cast/min_chul_ho_battering_cast",
+			wav: "effect/ef_beginspell",
+			yOffset: 10
 		}],
 		ef_sh_chul_ho_battering_hit: [{
 			type: "STR",
@@ -276587,15 +280356,22 @@ var init_EffectTable = __esmMin((() => {
 		}],
 		ef_sh_hyun_rok_spirit_power_cast: [{
 			type: "STR",
+			castLoop: true,
+			attachedEntity: true,
 			file: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast/hyun_rok_spirit_power_cast",
 			texturePath: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast/",
-			min: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast/min_hyun_rok_spirit_power_cast"
+			min: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast/min_hyun_rok_spirit_power_cast",
+			wav: "effect/ef_beginspell",
+			yOffset: 10
 		}, {
 			type: "STR",
+			castLoop: true,
+			attachedEntity: true,
 			file: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast_bottom/hyun_rok_spirit_power_cast_bottom",
 			texturePath: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast_bottom/",
 			min: "spirit_handler/sh_hyun_rok_spirit_power/hyun_rok_spirit_power_cast_bottom/min_hyun_rok_spirit_power_cast_bottom",
-			renderBeforeEntities: true
+			renderBeforeEntities: true,
+			yOffset: 10
 		}],
 		ef_sh_hyun_rok_spirit_power_hit: [{
 			type: "STR",
@@ -276630,6 +280406,15 @@ var init_EffectTable = __esmMin((() => {
 						entity.direction = Math.floor(entity.direction + delta) % 8;
 					}, delay * i);
 				}
+			}
+		}],
+		502: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CasterMarks(Params.Init.ownerEntity, Params.Inst.startTick, Params.Init.duration / 16, 502), Params);
 			}
 		}],
 		504: [{
@@ -277453,13 +281238,20 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "sky_emperor/ske_sky_moon/sky_moon_cast/sky_moon_cast",
 			texturePath: "sky_emperor/ske_sky_moon/sky_moon_cast/",
-			min: "sky_emperor/ske_sky_moon/sky_moon_cast/min_sky_moon_cast"
+			min: "sky_emperor/ske_sky_moon/sky_moon_cast/min_sky_moon_cast",
+			wav: "effect/ef_beginspell",
+			castLoop: true,
+			yOffset: 10,
+			attachedEntity: true
 		}, {
 			type: "STR",
 			file: "sky_emperor/ske_sky_moon/sky_moon_cast_bottom/sky_moon_cast_bottom",
 			texturePath: "sky_emperor/ske_sky_moon/sky_moon_cast_bottom/",
 			min: "sky_emperor/ske_sky_moon/sky_moon_cast_bottom/min_sky_moon_cast_bottom",
-			renderBeforeEntities: true
+			castLoop: true,
+			yOffset: 10,
+			renderBeforeEntities: true,
+			attachedEntity: true
 		}],
 		ef_ske_sky_moon_hit: [{
 			type: "STR",
@@ -278079,11 +281871,6 @@ var init_EffectTable = __esmMin((() => {
 			texturePath: "soul_ascetic/soa_soul_of_heaven_and_earth/soul_of_heaven_and_earth/",
 			min: "soul_ascetic/soa_soul_of_heaven_and_earth/soul_of_heaven_and_earth/min_soul_of_heaven_and_earth",
 			wav: "effect/soul_ascetic/soa_soul_of_heaven_and_earth"
-		}, {
-			type: "STR",
-			file: "soul_ascetic/soa_soul_of_heaven_and_earth/soul_of_heaven_and_earth_buff/soul_of_heaven_and_earth_buff",
-			texturePath: "soul_ascetic/soa_soul_of_heaven_and_earth/soul_of_heaven_and_earth_buff/",
-			min: "soul_ascetic/soa_soul_of_heaven_and_earth/soul_of_heaven_and_earth_buff/min_soul_of_heaven_and_earth_buff"
 		}],
 		709: [{
 			type: "STR",
@@ -279488,6 +283275,33 @@ var init_EffectTable = __esmMin((() => {
 			}
 		}],
 		811: [{ wav: "effect/bodypaint" }],
+		812: [{
+			type: "PRIM",
+			prim: "quad",
+			texture: "fashasha",
+			attachedEntity: false,
+			duration: 950,
+			frames: 57,
+			color: [
+				10,
+				10,
+				10
+			],
+			height: 5,
+			sizeSpeed: 1.5,
+			sizeAccel: 1.5 / 14,
+			sizeChangeFrame: 10,
+			sizeChangeSpeed: .1,
+			sizeChangeAccel: .1 / 30,
+			alpha: 254,
+			fadeOutFrame: 30
+		}, {
+			type: "FUNC",
+			attachedEntity: true,
+			func: function(Params) {
+				startCasterStrobe(Params.Init.ownerEntity);
+			}
+		}],
 		813: [{
 			type: "STR",
 			file: "enervation",
@@ -279525,6 +283339,25 @@ var init_EffectTable = __esmMin((() => {
 		827: [{ wav: "effect/chaospanic" }],
 		828: [{ wav: "effect/maelstrom" }],
 		829: [{ wav: "effect/bloodylust" }],
+		830: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { pulse: true }), Params);
+			}
+		}],
+		831: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, {
+					variant: 0,
+					ground: true
+				}), Params);
+			}
+		}],
 		832: [{ wav: "effect/±â°øÆ÷" }],
 		833: [{
 			type: "FUNC",
@@ -279533,6 +283366,46 @@ var init_EffectTable = __esmMin((() => {
 				const spiritNum = Params.Init.spiritNum || 0;
 				const Spheres = new SpiritSphere(Params.Init.ownerEntity, spiritNum, false);
 				this.add(Spheres, Params);
+			}
+		}],
+		840: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { variant: 3 }), Params);
+			}
+		}],
+		841: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { variant: 4 }), Params);
+			}
+		}],
+		842: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { variant: 5 }), Params);
+			}
+		}],
+		843: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { variant: 6 }), Params);
+			}
+		}],
+		845: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { variant: 8 }), Params);
 			}
 		}],
 		847: [{ wav: "effect/¼öÁÝÀºÇÏ·çÀÇ¿ì¿ï" }],
@@ -279708,9 +283581,13 @@ var init_EffectTable = __esmMin((() => {
 		],
 		ef_ss_raidenpou_cast: [{
 			type: "STR",
+			castLoop: true,
+			attachedEntity: true,
 			file: "shinkiro_shiranui/ss_raidenpou/new_raidenpou_cast/new_raidenpou_cast",
 			texturePath: "shinkiro_shiranui/ss_raidenpou/new_raidenpou_cast/",
-			min: "shinkiro_shiranui/ss_raidenpou/new_raidenpou_cast/min_new_raidenpou_cast"
+			min: "shinkiro_shiranui/ss_raidenpou/new_raidenpou_cast/min_new_raidenpou_cast",
+			wav: "effect/ef_beginspell",
+			yOffset: 8
 		}],
 		ef_ss_raidenpou_hit: [{
 			type: "STR",
@@ -280155,6 +284032,15 @@ var init_EffectTable = __esmMin((() => {
 		908: [{ wav: "effect/lg_prestige" }],
 		909: [{ wav: "effect/lg_banding" }],
 		910: [{ wav: "effect/lg_inspiration" }],
+		911: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastRing(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_white.tga", [15, 15]), Params);
+			}
+		}],
 		920: [{
 			type: "STR",
 			file: "firewall_per",
@@ -280206,6 +284092,19 @@ var init_EffectTable = __esmMin((() => {
 			head: true,
 			yOffset: -50
 		}],
+		934: [{
+			type: "FUNC",
+			attachedEntity: true,
+			func: function(Params) {
+				this.add(new CastFunnel(Params.Init.ownerEntity.position, Params.Inst.startTick, 300, "ring_white.tga"), Params);
+			}
+		}, {
+			type: "FUNC",
+			attachedEntity: true,
+			func: function(Params) {
+				this.add(new CasterMarks(Params.Init.ownerEntity, Params.Inst.startTick, 300, 934), Params);
+			}
+		}],
 		959: [{
 			type: "STR",
 			file: "poison_mist",
@@ -280240,6 +284139,14 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "vash00",
 			attachedEntity: true
+		}],
+		986: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			func: function(Params) {
+				this.add(new RotateLine(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, 986), Params);
+			}
 		}],
 		987: [{
 			type: "STR",
@@ -281123,6 +285030,59 @@ var init_EffectTable = __esmMin((() => {
 			repeat: true,
 			renderBeforeEntities: true
 		}],
+		1446: [{
+			type: "STR",
+			file: "new_jackfrost/new_jackfrost_cast/new_jackfrost_cast",
+			texturePath: "new_jackfrost/new_jackfrost_cast/",
+			min: "new_jackfrost/new_jackfrost_cast/min_new_jackfrost_cast",
+			castLoop: true,
+			attachedEntity: true
+		}],
+		1449: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCircle(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "new_jackfrost/ring_ice.tga", 2), Params);
+			}
+		}],
+		1556: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastRing(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_blue.tga", [20, 21]), Params);
+			}
+		}],
+		1565: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastRing(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_yellow.tga", [23, 23]), Params);
+			}
+		}],
+		1709: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCircle(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "new_earthdrive/ring_brown.tga"), Params);
+			}
+		}],
+		1774: [{
+			type: "STR",
+			file: "mystery_illusion/mystery_illusion_cast_bottom/mystery_illusion_cast_bottom",
+			texturePath: "mystery_illusion/mystery_illusion_cast_bottom/",
+			min: "mystery_illusion/mystery_illusion_cast_bottom/min_mystery_illusion_cast_bottom",
+			wav: "effect/ef_beginspell",
+			renderBeforeEntities: true,
+			castLoop: true,
+			attachedEntity: true
+		}],
 		1869: [
 			{
 				type: "STR",
@@ -281221,6 +285181,74 @@ var init_EffectTable = __esmMin((() => {
 			type: "STR",
 			file: "ui_enchant/ui_fail/ui_reset_fail",
 			texturePath: "ui_enchant/ui_fail/"
+		}],
+		1938: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastRing(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "new_battle_w/abr_battle_warior.tga", [0, 0]), Params);
+			}
+		}],
+		2228: [{
+			type: "STR",
+			file: "acidified_zone_ground/acidified_zone_ground_cast/acidified_zone_ground_cast",
+			texturePath: "acidified_zone_ground/acidified_zone_ground_cast/",
+			min: "acidified_zone_ground/acidified_zone_ground_cast/min_acidified_zone_ground_cast",
+			wav: "effect/ef_beginspell",
+			castLoop: true,
+			attachedEntity: true
+		}],
+		2229: [{
+			type: "STR",
+			file: "acidified_zone_ground/acidified_zone_ground_cast_bottom/acidified_zone_ground_cast_bottom",
+			texturePath: "acidified_zone_ground/acidified_zone_ground_cast_bottom/",
+			min: "acidified_zone_ground/acidified_zone_ground_cast_bottom/min_acidified_zone_ground_cast_bottom",
+			renderBeforeEntities: true,
+			castLoop: true,
+			attachedEntity: true
+		}],
+		2367: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastRing(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_yellow.tga", [0, 0]), Params);
+			}
+		}],
+		2368: [{
+			type: "FUNC",
+			attachedEntity: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCone(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, { variant: 11 }), Params);
+			}
+		}],
+		2369: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastRing(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_white.tga", [0, 0], true), Params);
+			}
+		}],
+		2373: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			func: function(Params) {
+				this.add(new CastFunnel(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration / 16, "ring_black.tga"), Params);
+			}
+		}, {
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			func: function(Params) {
+				this.add(new CasterMarks(Params.Init.ownerEntity, Params.Inst.startTick, Params.Init.duration / 16, 2373), Params);
+			}
 		}],
 		maximize_power_sounds: [{
 			type: "FUNC",
@@ -282027,20 +286055,41 @@ var init_EffectTable = __esmMin((() => {
 			min: "imperial_guard/ig_overslash/new_overslash/new_overslash_hit/min_new_overslash_hit",
 			fallback: ["overslash/overslash_hit/overslash_hit"]
 		}],
-		ef_ig_cross_rain: [{
+		ef_ig_cross_rain_field: [{
+			type: "AREA_SPAWN",
+			spawnEffectId: "ef_ig_cross_rain_drop",
+			interval: 150,
+			intervalByLevel: [
+				150,
+				150,
+				400 / 3,
+				400 / 3,
+				400 / 3,
+				350 / 3,
+				350 / 3,
+				350 / 3,
+				100,
+				100
+			],
+			areaByLevel: [
+				3,
+				3,
+				3,
+				5,
+				5,
+				5,
+				7,
+				7,
+				7,
+				9
+			]
+		}],
+		ef_ig_cross_rain_drop: [{
 			type: "STR",
 			file: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain/new_cross_rain",
 			texturePath: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain/",
 			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain/min_new_cross_rain",
-			fallback: ["crossrain/cross_rain/cross_rain"],
-			wav: "effect/ig_cross_rain"
-		}, {
-			type: "STR",
-			file: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_bottom/new_cross_rain_bottom",
-			texturePath: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_bottom/",
-			min: "imperial_guard/ig_cross_rain/new_crossrain/new_cross_rain_bottom/min_new_cross_rain_bottom",
-			fallback: ["crossrain/cross_rain_bottom/cross_rain_bottom"],
-			renderBeforeEntities: true
+			fallback: ["crossrain/cross_rain/cross_rain"]
 		}],
 		ef_ig_cross_rain_cast: [{
 			type: "STR",
@@ -283240,19 +287289,8 @@ var init_EffectTable = __esmMin((() => {
 			renderBeforeEntities: true
 		}],
 		ef_dk_servant_w_sign: [{
-			type: "STR",
-			file: "dragon_knight/dk_servant_w_sign/servant_sign/servant_sign",
-			texturePath: "dragon_knight/dk_servant_w_sign/servant_sign/",
-			min: "dragon_knight/dk_servant_w_sign/servant_sign/min_servant_sign",
-			fallback: ["servant_sign/servant_sign/servant_sign"],
-			wav: "effect/dk_servant_w_sign"
-		}, {
-			type: "STR",
-			file: "dragon_knight/dk_servant_w_sign/servant_sign_bottom/servant_sign_bottom",
-			texturePath: "dragon_knight/dk_servant_w_sign/servant_sign_bottom/",
-			min: "dragon_knight/dk_servant_w_sign/servant_sign_bottom/min_servant_sign_bottom",
-			fallback: ["servant_sign/servant_sign_bottom/servant_sign_bottom"],
-			renderBeforeEntities: true
+			wav: "effect/dk_servant_w_sign",
+			attachedEntity: true
 		}],
 		ef_dk_servant_w_phantom: [{
 			type: "STR",
@@ -283345,12 +287383,8 @@ var init_EffectTable = __esmMin((() => {
 			renderBeforeEntities: true
 		}],
 		ef_dk_vigor: [{
-			type: "STR",
-			file: "dragon_knight/dk_vigor/vigor_buff/vigor_buff",
-			texturePath: "dragon_knight/dk_vigor/vigor_buff/",
-			min: "dragon_knight/dk_vigor/vigor_buff/min_vigor_buff",
-			fallback: ["vigor/vigor_buff/vigor_buff"],
-			wav: "effect/dk_vigor"
+			wav: "effect/dk_vigor",
+			attachedEntity: true
 		}],
 		ef_dk_vigor_cast: [{
 			type: "STR",
@@ -284644,14 +288678,22 @@ var init_EffectTable = __esmMin((() => {
 			min: "night_watch/nw_hidden_card/hidden_card/min_hiddencard",
 			wav: "effect/night_watch/nw_hidden_card"
 		}],
-		ef_nw_mission_bombard: [{
-			type: "STR",
-			file: "night_watch/nw_mission_bombard/mission_bombard/mission_bombard",
-			texturePath: "night_watch/nw_mission_bombard/mission_bombard/",
-			min: "night_watch/nw_mission_bombard/mission_bombard/min_mission_bombard",
-			wav: "effect/night_watch/nw_mission_bombard"
-		}],
 		ef_nw_mission_bombard_hit: [{
+			type: "STR",
+			file: "night_watch/nw_mission_bombard/mission_bombard/mission_bombard_hit",
+			texturePath: "night_watch/nw_mission_bombard/mission_bombard/",
+			min: "night_watch/nw_mission_bombard/mission_bombard/min_mission_bombard_hit"
+		}],
+		ef_nw_mission_bombard_field: [{
+			type: "AREA_SPAWN",
+			spawnEffectId: "ef_nw_mission_bombard_drop",
+			interval: 250,
+			count: 3,
+			areaByLevel: [9],
+			area: 9,
+			scaleRange: [.5, 1]
+		}],
+		ef_nw_mission_bombard_drop: [{
 			type: "STR",
 			file: "night_watch/nw_mission_bombard/mission_bombard/mission_bombard_hit",
 			texturePath: "night_watch/nw_mission_bombard/mission_bombard/",
@@ -284665,9 +288707,14 @@ var init_EffectTable = __esmMin((() => {
 		}],
 		ef_nw_wild_shot_cast: [{
 			type: "STR",
+			castLoop: true,
+			attachedEntity: true,
 			file: "night_watch/nw_wild_shot/wild_shot_cast/wild_shot_cast",
 			texturePath: "night_watch/nw_wild_shot/wild_shot_cast/",
-			min: "night_watch/nw_wild_shot/wild_shot_cast/min_wild_shot_cast"
+			min: "night_watch/nw_wild_shot/wild_shot_cast/min_wild_shot_cast",
+			wav: "effect/ef_beginspell",
+			renderBeforeEntities: true,
+			yOffset: 11
 		}],
 		ef_nw_wild_shot_hit: [{
 			type: "STR",
@@ -284685,10 +288732,15 @@ var init_EffectTable = __esmMin((() => {
 		}],
 		ef_nw_midnight_fallen_cast: [{
 			type: "STR",
+			castLoop: true,
+			attachedEntity: true,
 			file: "night_watch/nw_midnight_fallen/midnight_fallen_cast_bottom/midnight_fallen_cast_bottom",
 			texturePath: "night_watch/nw_midnight_fallen/midnight_fallen_cast_bottom/",
 			min: "night_watch/nw_midnight_fallen/midnight_fallen_cast_bottom/min_midnight_fallen_cast_bottom",
-			renderBeforeEntities: true
+			wav: "effect/ef_beginspell",
+			renderBeforeEntities: true,
+			xOffset: 1,
+			yOffset: 11
 		}],
 		ef_c_marker2: [{
 			type: "2D",
@@ -285743,6 +289795,42 @@ var init_EffectTable = __esmMin((() => {
 			file: "help_angel/help_angel_bottom/help_angel_bottom",
 			texturePath: "help_angel/help_angel_bottom/",
 			renderBeforeEntities: true
+		}],
+		ef_cast_circle_red: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCircle(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_yellow.tga", 1), Params);
+			}
+		}],
+		ef_cast_circle_violet: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCircle(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "magic_violet.tga"), Params);
+			}
+		}],
+		ef_cast_circle_blue: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCircle(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_blue.tga", 2), Params);
+			}
+		}],
+		ef_cast_circle_yellow: [{
+			type: "FUNC",
+			attachedEntity: true,
+			castLoop: true,
+			wav: "effect/ef_beginspell",
+			func: function(Params) {
+				this.add(new CastCircle(Params.Init.ownerEntity.position, Params.Inst.startTick, Params.Init.duration, "ring_yellow.tga", 0), Params);
+			}
 		}]
 	};
 }));
@@ -305502,6 +309590,73 @@ function loadBSONFile(filename, targetTable, onEnd) {
 	}, onEnd);
 }
 /**
+* The last two parts of an STR path, lower case: its file and own folder.
+* A skill's top and floor layers can share a file name in different folders
+* (hasty_fire_in_the_hole/..._7x7 and hasty_fire_in_the_hole_bottom/..._7x7),
+* so the folder stays part of it.
+*
+* @param {string} file STR path without extension
+* @return {string}
+*/
+function strFileKey(file) {
+	return (file || "").toLowerCase().split("/").slice(-2).join("/");
+}
+/**
+* strFileKey with the variant words taken out, so the variants of one
+* effect (four_charm_earth, four_charm_fire, four_charm_ice) share a key.
+*
+* @param {string} file STR path without extension
+* @return {string}
+*/
+function strVariantKey(file) {
+	return strFileKey(file).split("/").map((part) => part.split("_").filter((word) => !EZ2_VARIANT_WORD.test(word)).map((word) => word.replace(/([a-z])\d+$/, "$1")).join("_")).join("/");
+}
+/**
+* Whether a skill's effects already draw this STR file.
+* Ignores the leading folders: older hand-written rows load the same STR
+* from its pre-4th-job folder (roseblossom/roseblossom_cast/... instead of
+* troubadour_trouvere/tr_roseblossom/roseblossom_cast/...), and the skill
+* would draw both.
+*
+* @param {object} skillEntry SkillEffect row, or undefined
+* @param {object} EffectTable
+* @param {string} file STR path without extension
+* @param {function} [keyOf] what counts as the same file, strFileKey by default
+* @return {boolean}
+*/
+function skillPlaysFile(skillEntry, EffectTable, file, keyOf = strFileKey) {
+	if (!skillEntry || !file) return false;
+	const wanted = keyOf(file);
+	for (const field in skillEntry) {
+		const names = [skillEntry[field]].flat(Infinity).flatMap((name) => name && typeof name === "object" ? Object.values(name) : [name]).flat(Infinity);
+		for (const name of names) {
+			const effects = typeof name === "string" || typeof name === "number" ? EffectTable[name] : null;
+			if (Array.isArray(effects) && effects.some((effect) => effect && effect.type === "STR" && keyOf(effect.file) === wanted)) return true;
+		}
+	}
+	return false;
+}
+/**
+* Whether a status in StatusEffectTable draws this STR file.
+*
+* @param {object} EffectTable
+* @param {string} file STR path without extension
+* @return {boolean}
+*/
+function statusPlaysFile(EffectTable, file) {
+	return Object.values(StatusEffectTable_default).some((row) => skillPlaysFile(row, EffectTable, file));
+}
+/**
+* Whether a skill unit in SkillUnit.js draws this STR file (its start, loop or end rows).
+*
+* @param {object} EffectTable
+* @param {string} file STR path without extension
+* @return {boolean}
+*/
+function unitPlaysFile(EffectTable, file) {
+	return [SkillUnit, SkillUnitEnd].some((table) => skillPlaysFile(table, EffectTable, file));
+}
+/**
 * Merge Ez2STREffect from BSON into EffectTable and SkillEffect
 */
 function mergeEz2Effects(EffectTable, SkillEffect) {
@@ -305565,6 +309720,19 @@ function mergeEz2Effects(EffectTable, SkillEffect) {
 			}
 		}
 	}
+	const siblingIds = {};
+	const skidNames = Object.keys(SkillConst_default).sort();
+	for (let i = 0; i < skidNames.length; i++) {
+		const prefix = skidNames[i] + "_";
+		for (let j = i + 1; j < skidNames.length && skidNames[j].startsWith(skidNames[i]); j++) {
+			const other = SkillConst_default[skidNames[j]];
+			if (skidNames[j].startsWith(prefix) && other !== SkillConst_default[skidNames[i]]) (siblingIds[SkillConst_default[skidNames[i]]] || (siblingIds[SkillConst_default[skidNames[i]]] = [])).push(other);
+		}
+	}
+	function siblingPlaysFile(skillId, file) {
+		const siblings = siblingIds[skillId];
+		return !!siblings && siblings.some((id) => skillPlaysFile(SkillEffect[id], EffectTable, file));
+	}
 	for (const effectName in Ez2streffect) {
 		const entry = Ez2streffect[effectName];
 		const meta = effectMetadata[effectName];
@@ -305588,7 +309756,7 @@ function mergeEz2Effects(EffectTable, SkillEffect) {
 			type: "STR",
 			file: (entry.FilePath || "").replace(/\\/g, "/").replace(/\.str$/i, ""),
 			texturePath,
-			renderBeforeEntities: entry.IsFloor ? false : true,
+			renderBeforeEntities: !!entry.IsFloor,
 			xOffset: entry.PosX || 0,
 			yOffset: entry.PosY || 0,
 			wav: entry.SoundPath ? entry.SoundPath.replace(/\\/g, "/").replace(/\.wav$/i, "") : null,
@@ -305597,7 +309765,8 @@ function mergeEz2Effects(EffectTable, SkillEffect) {
 			attachedEntity: true
 		}];
 		count++;
-		if (skillId) {
+		const file = EffectTable[effectName][0].file;
+		if (skillId && !entry.IsInfinite && !skillPlaysFile(SkillEffect[skillId], EffectTable, file, strVariantKey) && !siblingPlaysFile(skillId, file) && !statusPlaysFile(EffectTable, file) && !unitPlaysFile(EffectTable, file)) {
 			const skillEntry = SkillEffect[skillId] || (SkillEffect[skillId] = {});
 			const field = meta.field;
 			if (skillEntry[field]) {
@@ -307874,7 +312043,7 @@ function updateMapTable() {
 		else MapTable[key] = { name: MapInfo[key].displayName };
 	}
 }
-var lua, HO_AI, MER_AI, default_HO_AI, default_MER_AI, mountPalettes, mountPalettesProbe, MsgStringTable, JokeTable, ScreamTable, MapTable, SkillDescription, SexTable, PetTalkTable, CheckAttendanceTable, buyingStoreItemList, LaphineSysTable, LaphineUpgTable, ItemDBNameTbl, ItemReformTable, EnchantListTable, SignBoardTranslatedTable, SignBoardTable, NaviMapTable, NaviMobTable, NaviNpcTable, NaviLinkTable, NaviLinkDistanceTable, NaviNpcDistanceTable, QuestInfo, TitleTable, PetDBTable, EggIDToJobID, ReputeGroup, ReputeInfo, AchievementTable, MsgEmotionCSV, HatEffectID, HatEffectInfo, FootPrintEffectInfo, CashShopBannerTable, Ez2streffect, unknownItem, servers, langType, userCharpage, userStringDecoder, DB, SUFFIX_TO_FIELD, HARDCODED_FIELD_MAPPING;
+var lua, HO_AI, MER_AI, default_HO_AI, default_MER_AI, mountPalettes, mountPalettesProbe, MsgStringTable, JokeTable, ScreamTable, MapTable, SkillDescription, SexTable, PetTalkTable, CheckAttendanceTable, buyingStoreItemList, LaphineSysTable, LaphineUpgTable, ItemDBNameTbl, ItemReformTable, EnchantListTable, SignBoardTranslatedTable, SignBoardTable, NaviMapTable, NaviMobTable, NaviNpcTable, NaviLinkTable, NaviLinkDistanceTable, NaviNpcDistanceTable, QuestInfo, TitleTable, PetDBTable, EggIDToJobID, ReputeGroup, ReputeInfo, AchievementTable, MsgEmotionCSV, HatEffectID, HatEffectInfo, FootPrintEffectInfo, CashShopBannerTable, Ez2streffect, unknownItem, servers, langType, userCharpage, userStringDecoder, DB, SUFFIX_TO_FIELD, HARDCODED_FIELD_MAPPING, EZ2_VARIANT_WORD;
 var init_DBManager = __esmMin((() => {
 	init_Client();
 	init_Configs();
@@ -307904,12 +312073,14 @@ var init_DBManager = __esmMin((() => {
 	init_SkillConst();
 	init_SkillInfo();
 	init_SkillTreeView();
+	init_SkillUnit();
 	init_SkillTreeMerge();
 	init_JobHitSoundTable();
 	init_WeaponTrailTable();
 	init_TownInfo();
 	init_StatusInfo();
 	init_StatusConst();
+	init_StatusEffectTable();
 	init_xmlparse();
 	init_Base62();
 	init_bson();
@@ -308536,6 +312707,10 @@ var init_DBManager = __esmMin((() => {
 				default: if (typeof id === "string") {
 					if (id.includes("_FALCON")) return "data/sprite/ÀÌÆÑÆ®/¸Å";
 					else if (id.includes("_WUG")) return "data/sprite/¸ó½ºÅÍ/¿ö±×";
+					else if (id.startsWith("CART_")) {
+						const cartNum = parseInt(id.slice(5), 10) || 0;
+						return DB.getCartPath(cartNum);
+					}
 				}
 			}
 			return "data/sprite/¸ó½ºÅÍ/" + (MonsterTable_default[id] || MonsterTable_default[1001]).toLowerCase();
@@ -310665,6 +314840,7 @@ var init_DBManager = __esmMin((() => {
 		broken_limit_buff: "effectId",
 		abyss_flame_target: "hitEffectId"
 	};
+	EZ2_VARIANT_WORD = /^(\d+|\d+x\d+|earth|fire|water|wind|ice|saint|holy|dark|darkness|poison|ghost|undead|neutral|reset|leftdown|rightdown|leftup|rightup)$/;
 }));
 // src/UI/Components/PetInformations/PetInformations.html?raw
 var PetInformations_default$2;
@@ -311906,6 +316082,7 @@ function Init$10() {
 			this.ACTION.ACTION = 7;
 			break;
 		case Entity.TYPE_FALCON:
+		case Entity.TYPE_CART:
 			this.ACTION.IDLE = 0;
 			this.ACTION.WALK = 1;
 	}
@@ -313200,22 +317377,6 @@ function View() {
 	this.accessory3 = new ViewFiles();
 	this.robe = new ViewFiles();
 	this.shadow = new ViewFiles("data/sprite/shadow.spr", "data/sprite/shadow.act");
-	this.cart = [];
-	this.cart[0] = new ViewFiles(DB.getCartPath(0) + ".spr", DB.getCartPath(0) + ".act");
-	this.cart[1] = new ViewFiles(DB.getCartPath(1) + ".spr", DB.getCartPath(1) + ".act");
-	this.cart[2] = new ViewFiles(DB.getCartPath(2) + ".spr", DB.getCartPath(2) + ".act");
-	this.cart[3] = new ViewFiles(DB.getCartPath(3) + ".spr", DB.getCartPath(3) + ".act");
-	this.cart[4] = new ViewFiles(DB.getCartPath(4) + ".spr", DB.getCartPath(4) + ".act");
-	this.cart[5] = new ViewFiles(DB.getCartPath(5) + ".spr", DB.getCartPath(5) + ".act");
-	this.cart[6] = new ViewFiles(DB.getCartPath(6) + ".spr", DB.getCartPath(6) + ".act");
-	this.cart[7] = new ViewFiles(DB.getCartPath(7) + ".spr", DB.getCartPath(7) + ".act");
-	this.cart[8] = new ViewFiles(DB.getCartPath(8) + ".spr", DB.getCartPath(8) + ".act");
-	this.cart[9] = new ViewFiles(DB.getCartPath(9) + ".spr", DB.getCartPath(9) + ".act");
-	this.cart[10] = new ViewFiles(DB.getCartPath(10) + ".spr", DB.getCartPath(10) + ".act");
-	this.cart[11] = new ViewFiles(DB.getCartPath(11) + ".spr", DB.getCartPath(11) + ".act");
-	this.cart[12] = new ViewFiles(DB.getCartPath(12) + ".spr", DB.getCartPath(12) + ".act");
-	this.cart[13] = new ViewFiles(DB.getCartPath(13) + ".spr", DB.getCartPath(13) + ".act");
-	this.cart_shadow = new ViewFiles("data/sprite/shadow.spr", "data/sprite/shadow.act");
 }
 /**
 * If changing sex, all files have to be reload
@@ -314325,6 +318486,60 @@ function walkProcess() {
 function entitiesWalkProcess() {
 	const ownerCellX = this.position[0];
 	const ownerCellY = this.position[1];
+	if (this.cart) {
+		const cart = this.cart;
+		const retDist = this.costume !== 0 || !!(this._allRidingState & RIDING_MASK) ? 1.6 : 1;
+		const dx = cart.position[0] - ownerCellX;
+		const dy = cart.position[1] - ownerCellY;
+		const dist = Math.hypot(dx, dy);
+		if (dist > 5) {
+			const angle = (6 - this.direction) * (Math.PI / 4);
+			const behindDx = -Math.cos(angle);
+			const behindDy = -Math.sin(angle);
+			cart.position[0] = ownerCellX + behindDx * retDist;
+			cart.position[1] = ownerCellY + behindDy * retDist;
+			cart.position[2] = Altitude.getCellHeight(cart.position[0], cart.position[1]);
+			cart.direction = this.direction;
+			cart.setAction({
+				action: cart.ACTION.IDLE,
+				frame: 0,
+				play: false,
+				repeat: true
+			});
+		} else if (dist > retDist) {
+			const factor = retDist / dist;
+			const newX = ownerCellX + dx * factor;
+			const newY = ownerCellY + dy * factor;
+			const deltaMove = Math.hypot(newX - cart.position[0], newY - cart.position[1]);
+			cart.position[0] = newX;
+			cart.position[1] = newY;
+			cart.position[2] = Altitude.getCellHeight(newX, newY);
+			if (cart.walk) cart.walk.dist += deltaMove;
+			cart.direction = quantizeDir(offsetToFloatDir(ownerCellX - newX, ownerCellY - newY));
+		}
+		if (dist < .5 || Math.round(cart.position[0]) === Math.round(ownerCellX) && Math.round(cart.position[1]) === Math.round(ownerCellY)) {
+			cart.direction = 2;
+			if (cart.action !== cart.ACTION.IDLE) cart.setAction({
+				action: cart.ACTION.IDLE,
+				frame: 0,
+				play: false,
+				repeat: true
+			});
+		} else if (this.action === this.ACTION.WALK && dist > retDist) {
+			if (cart.action !== cart.ACTION.WALK) cart.setAction({
+				action: cart.ACTION.WALK,
+				play: true,
+				repeat: true
+			});
+		} else if (cart.action !== cart.ACTION.IDLE) cart.setAction({
+			action: cart.ACTION.IDLE,
+			frame: 0,
+			play: false,
+			repeat: true
+		});
+		cart.effectColor.set(this.effectColor);
+		cart.hideEntity = this.hideEntity;
+	}
 	if (this.falcon && !this.falcon.isAttacking && (!this.falcon.walk.lastWalkTick || this.falcon.walk.lastWalkTick + 1e3 < Date.now())) {
 		if (Math.floor(this.distance(this, this.falcon)) < 2) return;
 		if (this.falcon._followTargetX !== ownerCellX || this.falcon._followTargetY !== ownerCellY) {
@@ -314424,11 +318639,12 @@ function Init$4() {
 	this.resetRoute = resetRoute;
 	this.distance = distance;
 }
-var DIRECTION$1, DIAGONAL_FACTOR;
+var DIRECTION$1, DIAGONAL_FACTOR, RIDING_MASK;
 var init_EntityWalk = __esmMin((() => {
 	init_PathFinding();
 	init_Altitude();
 	init_SessionStorage();
+	init_StatusState();
 	DIRECTION$1 = [
 		[
 			1,
@@ -314447,6 +318663,7 @@ var init_EntityWalk = __esmMin((() => {
 		]
 	];
 	DIAGONAL_FACTOR = 1.414;
+	RIDING_MASK = StatusState_default.EffectState.RIDING | StatusState_default.EffectState.DRAGON1 | StatusState_default.EffectState.DRAGON2 | StatusState_default.EffectState.DRAGON3 | StatusState_default.EffectState.DRAGON4 | StatusState_default.EffectState.DRAGON5 | StatusState_default.EffectState.WUGRIDER | StatusState_default.EffectState.MADOGEAR;
 }));
 // src/Renderer/Entity/EntityRender.js
 function acquireSnapshotBuffers() {
@@ -314501,6 +318718,68 @@ function isLookingBack(direction) {
 	return direction > 2 && direction < 6;
 }
 /**
+* Glow copy and split images, as the official client draws them for the marks
+* of cast effects 934, 2373 and 502 (Renderer/Effects/CasterMarks.js).
+*
+*  - Glow copy (entity._castGlow): one more copy of each layer, in the
+*    sprite's own colour, added, 1.5 sin(c) + 5 pixels larger on every side,
+*    c counting the client's draws (60 a second) and wrapping after 180.
+*  - Split images (entity._splitImageAge, the effect's age in ticks): four
+*    white copies, shifted right, left, down and up by age x 5% of the body's
+*    height, alpha (30 - age) x 5 out of 255.
+*
+* @param {Entity} entity
+* @param {Array} layers
+* @param {string} spr
+* @param {string} pal
+* @param {object} files
+* @param {number[]} _position
+*/
+function renderCasterMarks(entity, layers, spr, pal, files, _position) {
+	const color = entity.effectColor;
+	const r = color[0];
+	const g = color[1];
+	const b = color[2];
+	const a = color[3];
+	if (entity._castGlow > 0) {
+		const pad = 1.5 * Math.sin(Math.floor(Date.now() / (1e3 / 60)) % 181 * (Math.PI / 180)) + 5;
+		for (let i = 0; i < layers.length; ++i) {
+			const layer = layers[i];
+			const frame = layer.index >= 0 ? spr.frames[layer.index] : null;
+			if (!frame || !frame.width || !frame.height) continue;
+			const oldX = layer.scale[0];
+			const oldY = layer.scale[1];
+			layer.scale[0] = oldX * (1 + 2 * pad / Math.abs(frame.width * oldX * files.size || 1));
+			layer.scale[1] = oldY * (1 + 2 * pad / Math.abs(frame.height * oldY * files.size || 1));
+			entity.renderLayer(layer, spr, pal, files.size, _position, "glow", true);
+			layer.scale[0] = oldX;
+			layer.scale[1] = oldY;
+		}
+	}
+	const age = entity._splitImageAge;
+	const alpha = age >= 0 ? Math.max(0, (30 - age) * 5) / 255 : 0;
+	if (alpha > 0) {
+		const shift = age * .05 * (entity.bodyHeight ? Math.abs(entity.bodyHeight) : 100);
+		const x = _position[0];
+		const y = _position[1];
+		color[0] = 1;
+		color[1] = 1;
+		color[2] = 1;
+		color[3] = alpha;
+		for (let k = 0; k < 4; k++) {
+			_position[0] = x + (k === 0 ? shift : k === 1 ? -shift : 0);
+			_position[1] = y + (k === 2 ? shift : k === 3 ? -shift : 0);
+			for (let i = 0; i < layers.length; ++i) entity.renderLayer(layers[i], spr, pal, files.size, _position, "split", false);
+		}
+		_position[0] = x;
+		_position[1] = y;
+		color[0] = r;
+		color[1] = g;
+		color[2] = b;
+		color[3] = a;
+	}
+}
+/**
 * Render second body (BL_DOUBLE_BODY + EF_MAKEBLUR)
 * @param {Entity} entity
 * @param {Array} layers
@@ -314514,7 +318793,7 @@ function isLookingBack(direction) {
 function renderSecondBody(entity, layers, spr, pal, files, type, _position, options = {}) {
 	const { enableHalo = false, enableTrail = false, trailLength = 5, blurType = 1 } = options;
 	if (!enableHalo && !enableTrail) return;
-	if (type === "shadow" || type === "cartshadow") return;
+	if (type === "shadow") return;
 	if (enableHalo) {
 		const originalR = entity.effectColor[0];
 		const originalG = entity.effectColor[1];
@@ -314633,7 +318912,7 @@ function getAnimationDelay(type, entity, act) {
 * Calculate animations
 */
 function calcAnimation(entity, act, type, tick) {
-	if (type === "shadow" || type === "cartshadow") return 0;
+	if (type === "shadow") return 0;
 	const ACTION = entity.ACTION;
 	const action = entity.action;
 	const animation = entity.animation;
@@ -314646,7 +318925,6 @@ function calcAnimation(entity, act, type, tick) {
 	let anim = 0;
 	if (animation.length) animCount = animation.length;
 	if (animation.speed) delay = animation.speed;
-	if (type === "cart" && isIdle) return 0;
 	if ((type === "body" || type === "robe") && (entity.objecttype === entity.constructor.TYPE_PC || entity.objecttype === entity.constructor.TYPE_MERC) && isIdle) {
 		if (entity.headDir <= animLastIndex) return entity.headDir;
 		return animLastIndex;
@@ -314786,7 +319064,6 @@ var init_EntityRender = __esmMin((() => {
 	init_SpriteRenderer();
 	init_Ground();
 	init_Altitude();
-	init_SessionStorage();
 	init_DBManager();
 	init_Graphics();
 	init_GR2ModelRenderer();
@@ -314952,20 +319229,8 @@ var init_EntityRender = __esmMin((() => {
 					SpriteRenderer.runWithDepth(true, true, false, function() {
 						SpriteRenderer.zIndex = 150;
 						EntityComposer.begin(self);
-						let cartidx;
 						if (self.shield && behind) renderElement(self, self.files.shield, "shield", _position, true);
-						if (!isLookingBack(direction)) {
-							if (SessionStorage_default.Playing == true && self.hasCart == true) {
-								cartidx = DB.isSuperNovice(self._job) ? 0 : self.CartNum;
-								EntityComposer.suspend(() => {
-									SpriteRenderer.shadowQueue = true;
-									renderElement(self, self.files.cart_shadow, "cartshadow", _position, false);
-									SpriteRenderer.shadowQueue = false;
-								});
-								renderElement(self, self.files.cart[cartidx], "cart", _position, false);
-							}
-							renderElement(self, self.files.robe, "robe", _position, true);
-						}
+						if (!isLookingBack(direction)) renderElement(self, self.files.robe, "robe", _position, true);
 						renderElement(self, self.files.body, "body", _position, true);
 						renderElement(self, self.files.head, "head", _position, false);
 						if (self.accessory3 > 0 && self.accessory3 !== self.accessory) renderElement(self, self.files.accessory3, "head", _position, false);
@@ -314973,15 +319238,6 @@ var init_EntityRender = __esmMin((() => {
 						if (self.accessory > 0) renderElement(self, self.files.accessory, "head", _position, false);
 						if (isLookingBack(direction)) {
 							if (self.robe > 0) renderElement(self, self.files.robe, "robe", _position, true);
-							if (SessionStorage_default.Playing == true && self.hasCart == true) {
-								cartidx = DB.isSuperNovice(self._job) ? 0 : self.CartNum;
-								EntityComposer.suspend(() => {
-									SpriteRenderer.shadowQueue = true;
-									renderElement(self, self.files.cart_shadow, "cartshadow", _position, false);
-									SpriteRenderer.shadowQueue = false;
-								});
-								renderElement(self, self.files.cart[cartidx], "cart", _position, false);
-							}
 						}
 						if (self.weapon > 0) {
 							renderElement(self, self.files.weapon, "weapon", _position, true);
@@ -315005,6 +319261,7 @@ var init_EntityRender = __esmMin((() => {
 						renderElement(self, self.files.body, "body", _position, true);
 					});
 					break;
+				case Entity.TYPE_CART:
 				case Entity.TYPE_MOB:
 				case Entity.TYPE_NPC:
 				case Entity.TYPE_NPC2:
@@ -315046,39 +319303,6 @@ var init_EntityRender = __esmMin((() => {
 				_position[0] = position[0] - animation.pos[0].x;
 				_position[1] = position[1] - animation.pos[0].y;
 			}
-			if (type === "cart" || type === "cartshadow") switch ((Camera.direction + entity.direction + 8) % 8) {
-				case 0:
-					_position[0] = 0;
-					_position[1] = -30;
-					break;
-				case 1:
-					_position[0] = 30;
-					_position[1] = -10;
-					break;
-				case 2:
-					_position[0] = 40;
-					_position[1] = 0;
-					break;
-				case 3:
-					_position[0] = 30;
-					_position[1] = 10;
-					break;
-				case 4:
-					_position[0] = 0;
-					_position[1] = 20;
-					break;
-				case 5:
-					_position[0] = -30;
-					_position[1] = 10;
-					break;
-				case 6:
-					_position[0] = -40;
-					_position[1] = 0;
-					break;
-				case 7:
-					_position[0] = -30;
-					_position[1] = -10;
-			}
 			if (type !== "shadow" && entity.getOpt3(StatusState_default.Status.BERSERK) || entity.getOpt3(StatusState_default.Status.MARIONETTE)) isBlendModeOne = true;
 			const isBUNSIN = entity.getOpt3(StatusState_default.Status.NJ_BUNSINJYUTSU);
 			const isHALLUCINATIONWALK = entity.getOpt3(StatusState_default.Status.HALLUCINATIONWALK);
@@ -315094,6 +319318,11 @@ var init_EntityRender = __esmMin((() => {
 			});
 			if (EntityComposer.active) EntityComposer.suspend(renderSecondary);
 			else renderSecondary();
+			if (type !== "shadow" && type !== "cartshadow" && (entity._castGlow > 0 || entity._splitImageAge >= 0)) {
+				const renderMarks = () => renderCasterMarks(entity, layers, spr, pal, files, _position);
+				if (EntityComposer.active) EntityComposer.suspend(renderMarks);
+				else renderMarks();
+			}
 			for (let i = 0, count = layers.length; i < count; ++i) entity.renderLayer(layers[i], spr, pal, files.size, _position, type, isBlendModeOne);
 			if (is_main && animation.pos.length) {
 				position[0] = animation.pos[0].x;
@@ -316215,6 +320444,8 @@ var init_Entity$1 = __esmMin((() => {
 	init_SessionStorage();
 	init_Client();
 	init_gl_matrix();
+	init_DBManager();
+	init_StatusState();
 	init_EntityControl();
 	init_EntityAction();
 	init_EntityCast();
@@ -316239,6 +320470,7 @@ var init_Entity$1 = __esmMin((() => {
 		/**
 		* Constantes
 		*/
+		static TYPE_CART = -8;
 		static TYPE_WUG = -7;
 		static TYPE_FALCON = -6;
 		static TYPE_EFFECT = -5;
@@ -316291,7 +320523,8 @@ var init_Entity$1 = __esmMin((() => {
 				[Entity.TYPE_TRAP]: 0,
 				[Entity.TYPE_EFFECT]: -1,
 				[Entity.TYPE_FALCON]: -1,
-				[Entity.TYPE_WUG]: -1
+				[Entity.TYPE_WUG]: -1,
+				[Entity.TYPE_CART]: -1
 			},
 			Support: {
 				[Entity.TYPE_PC]: 3,
@@ -316312,7 +320545,8 @@ var init_Entity$1 = __esmMin((() => {
 				[Entity.TYPE_TRAP]: 0,
 				[Entity.TYPE_EFFECT]: -1,
 				[Entity.TYPE_FALCON]: -1,
-				[Entity.TYPE_WUG]: -1
+				[Entity.TYPE_WUG]: -1,
+				[Entity.TYPE_CART]: -1
 			}
 		};
 		constructor(data) {
@@ -316497,6 +320731,12 @@ var init_Entity$1 = __esmMin((() => {
 			this.dropEffect.free();
 			this.remove_tick = 0;
 			this.remove_delay = 0;
+			if (this.cart) {
+				this.cart.owner = null;
+				EntityManager.remove(this.cart.GID);
+				this.cart = null;
+			}
+			this.owner = null;
 			this.falcon = null;
 			this.wug = null;
 			this.GID = -1;
@@ -316508,6 +320748,14 @@ var init_Entity$1 = __esmMin((() => {
 		* @return {boolean} removed immediatly ?
 		*/
 		remove(type) {
+			if (this.cart) {
+				if (type === Entity.VT.DEAD) {
+					const cart = this.cart;
+					cart.owner = null;
+					EntityManager.remove(cart.GID);
+				} else this.cart.remove(type);
+				this.cart = null;
+			}
 			switch (type) {
 				case Entity.VT.OUTOFSIGHT:
 					this.clean();
@@ -316518,7 +320766,8 @@ var init_Entity$1 = __esmMin((() => {
 					const is_pc = this.objecttype === Entity.TYPE_PC;
 					const is_falcon = this.objecttype === Entity.TYPE_FALCON;
 					const is_wug = this.objecttype === Entity.TYPE_WUG;
-					if (!is_falcon) {
+					const is_cart = this.objecttype === Entity.TYPE_CART;
+					if (!is_falcon && !is_cart) {
 						this.setAction({
 							action: this.ACTION.DIE,
 							repeat: is_pc,
@@ -316538,6 +320787,67 @@ var init_Entity$1 = __esmMin((() => {
 					this.clean();
 					this.remove_tick = Date.now();
 					this.remove_delay = 0;
+			}
+		}
+		/**
+		* Attach or remove pushcart companion entity
+		*
+		* @param {boolean} enabled
+		* @param {number} [cartNum]
+		*/
+		setCart(enabled, cartNum) {
+			this.hasCart = !!enabled;
+			if (typeof cartNum === "number") this.CartNum = cartNum;
+			if (this.hasCart) {
+				const cartJob = "CART_" + (DB.isSuperNovice(this._job) ? 0 : this.CartNum || 1);
+				if (!this.cart) {
+					const cart = new Entity();
+					cart.set({
+						objecttype: Entity.TYPE_CART,
+						GID: this.GID + "_CART",
+						job: cartJob,
+						speed: this.walk ? this.walk.speed : 150,
+						name: "",
+						hp: -1,
+						maxhp: -1
+					});
+					const RIDING_MASK = StatusState_default.EffectState.RIDING | StatusState_default.EffectState.DRAGON1 | StatusState_default.EffectState.DRAGON2 | StatusState_default.EffectState.DRAGON3 | StatusState_default.EffectState.DRAGON4 | StatusState_default.EffectState.DRAGON5 | StatusState_default.EffectState.WUGRIDER | StatusState_default.EffectState.MADOGEAR;
+					const retDist = this.costume !== 0 || !!(this._allRidingState & RIDING_MASK) ? 1.6 : 1;
+					const angle = (6 - this.direction) * (Math.PI / 4);
+					const behindDx = -Math.cos(angle);
+					const behindDy = -Math.sin(angle);
+					cart.position[0] = this.position[0] + behindDx * retDist;
+					cart.position[1] = this.position[1] + behindDy * retDist;
+					cart.position[2] = Altitude.getCellHeight(cart.position[0], cart.position[1]);
+					cart.direction = this.direction;
+					cart.depth = this.depth;
+					cart.setAction({
+						action: cart.ACTION.IDLE,
+						frame: 0,
+						play: false,
+						repeat: true
+					});
+					this.cart = cart;
+					cart.owner = this;
+					EntityManager.add(cart);
+				} else {
+					if (this.cart.job !== cartJob) this.cart.job = cartJob;
+					const RIDING_MASK = StatusState_default.EffectState.RIDING | StatusState_default.EffectState.DRAGON1 | StatusState_default.EffectState.DRAGON2 | StatusState_default.EffectState.DRAGON3 | StatusState_default.EffectState.DRAGON4 | StatusState_default.EffectState.DRAGON5 | StatusState_default.EffectState.WUGRIDER | StatusState_default.EffectState.MADOGEAR;
+					const retDist = this.costume !== 0 || !!(this._allRidingState & RIDING_MASK) ? 1.6 : 1;
+					if (Math.hypot(this.cart.position[0] - this.position[0], this.cart.position[1] - this.position[1]) > 5) {
+						const angle = (6 - this.direction) * (Math.PI / 4);
+						const behindDx = -Math.cos(angle);
+						const behindDy = -Math.sin(angle);
+						this.cart.position[0] = this.position[0] + behindDx * retDist;
+						this.cart.position[1] = this.position[1] + behindDy * retDist;
+						this.cart.position[2] = Altitude.getCellHeight(this.cart.position[0], this.cart.position[1]);
+						this.cart.direction = this.direction;
+					}
+				}
+			} else if (this.cart) {
+				this.cart.owner = null;
+				EntityManager.remove(this.cart.GID);
+				this.cart = null;
 			}
 		}
 		/**
@@ -316669,6 +320979,8 @@ var init_Entity$1 = __esmMin((() => {
 	Entity.prototype.isOverWeight = false;
 	Entity.prototype.falcon = null;
 	Entity.prototype.wug = null;
+	Entity.prototype.cart = null;
+	Entity.prototype.owner = null;
 	Entity.prototype.hideShadow = false;
 	Entity.prototype.call_flag = 0;
 	Object.defineProperty(Entity.prototype, "level", {
@@ -316805,11 +321117,16 @@ function addEntity(entity) {
 * Clean up entities from list
 */
 function free() {
-	_list.forEach((entity) => {
+	const snapshot = _list.slice();
+	const live = new Set(snapshot);
+	for (let i = 0; i < snapshot.length; ++i) {
+		const entity = snapshot[i];
+		if (!live.has(entity) || !_list.includes(entity)) continue;
 		releaseGr2(entity);
 		EntityComposer.remove(entity);
 		entity.clean();
-	});
+		live.delete(entity);
+	}
 	_list.length = 0;
 	_gidMap.clear();
 	_over = null;
@@ -316833,6 +321150,18 @@ function removeGID(gid) {
 function removeEntity(gid) {
 	const entity = _gidMap.get(gid);
 	if (entity) {
+		if (entity.cart) {
+			removeEntity(entity.cart.GID);
+			entity.cart = null;
+		}
+		if (entity.falcon) {
+			removeEntity(entity.falcon.GID);
+			entity.falcon = null;
+		}
+		if (entity.wug) {
+			removeEntity(entity.wug.GID);
+			entity.wug = null;
+		}
 		releaseGr2(entity);
 		EntityComposer.remove(entity);
 		entity.clean();
@@ -316879,8 +321208,10 @@ function setFocusEntity(entity) {
 * @param {Entity} b
 */
 function sort(a, b) {
-	const aDepth = a.depth + a.GID % 100 / 1e3;
-	return b.depth + b.GID % 100 / 1e3 - aDepth;
+	const aGID = typeof a.GID === "number" ? a.GID : parseInt(a.GID, 10) || 0;
+	const bGID = typeof b.GID === "number" ? b.GID : parseInt(b.GID, 10) || 0;
+	const aDepth = a.depth + aGID % 100 / 1e3;
+	return b.depth + bGID % 100 / 1e3 - aDepth;
 }
 /**
 * Set reverse priority for entity sorting (for supportive skills)
@@ -317048,6 +321379,7 @@ function intersect() {
 			const dy = entity.position[1] - playerY;
 			if (dx * dx + dy * dy > viewAreaSq) continue;
 		}
+		if (entity.objecttype === Entity.TYPE_EFFECT || entity.objecttype === Entity.TYPE_FALCON || entity.objecttype === Entity.TYPE_WUG || entity.objecttype === Entity.TYPE_CART) continue;
 		if ((entity.action !== entity.ACTION.DIE || entity.objecttype === Entity.TYPE_PC) && entity.remove_tick === 0) {
 			if (x > entity.boundingRect.x1 && x < entity.boundingRect.x2 && y > entity.boundingRect.y1 && y < entity.boundingRect.y2) return entity;
 		}
@@ -320147,7 +324479,7 @@ function isFreeCell$2(x, y) {
 	if (!(Altitude.getCellType(x, y) & Altitude.TYPE.WALKABLE)) return false;
 	let free = true;
 	EntityManager.forEach((entity) => {
-		if (entity.objecttype !== entity.constructor.TYPE_EFFECT && entity.objecttype !== entity.constructor.TYPE_UNIT && entity.objecttype !== entity.constructor.TYPE_TRAP && Math.round(entity.position[0]) === x && Math.round(entity.position[1]) === y) {
+		if (entity !== SessionStorage_default.Entity && entity.objecttype !== entity.constructor.TYPE_EFFECT && entity.objecttype !== entity.constructor.TYPE_UNIT && entity.objecttype !== entity.constructor.TYPE_TRAP && entity.objecttype !== entity.constructor.TYPE_CART && entity.objecttype !== entity.constructor.TYPE_FALCON && entity.objecttype !== entity.constructor.TYPE_WUG && Math.round(entity.position[0]) === x && Math.round(entity.position[1]) === y) {
 			free = false;
 			return false;
 		}
@@ -322665,7 +326997,7 @@ function isFreeCell$1(x, y) {
 	if (!(Altitude.getCellType(x, y) & Altitude.TYPE.WALKABLE)) return false;
 	let free = true;
 	EntityManager.forEach(function(entity) {
-		if (entity.objecttype != entity.constructor.TYPE_EFFECT && entity.objecttype != entity.constructor.TYPE_UNIT && entity.objecttype != entity.constructor.TYPE_TRAP && Math.round(entity.position[0]) === x && Math.round(entity.position[1]) === y) {
+		if (entity !== SessionStorage_default.Entity && entity.objecttype !== entity.constructor.TYPE_EFFECT && entity.objecttype !== entity.constructor.TYPE_UNIT && entity.objecttype !== entity.constructor.TYPE_TRAP && entity.objecttype !== entity.constructor.TYPE_CART && entity.objecttype !== entity.constructor.TYPE_FALCON && entity.objecttype !== entity.constructor.TYPE_WUG && Math.round(entity.position[0]) === x && Math.round(entity.position[1]) === y) {
 			free = false;
 			return false;
 		}
@@ -330683,6 +335015,20 @@ var init_NPC = __esmMin((() => {
 		NpcBox_default.remove();
 	};
 }));
+// src/DB/Skills/CastAuraRule.js
+/**
+* Does the client play the element cast aura for this skill?
+*
+* @param {number} skillId
+* @return {boolean}
+*/
+function hasElementCastAura(skillId) {
+	return !NO_ELEMENT_AURA_RANGES.some(([first, last]) => skillId >= first && skillId <= last);
+}
+var NO_ELEMENT_AURA_RANGES;
+var init_CastAuraRule = __esmMin((() => {
+	NO_ELEMENT_AURA_RANGES = [[5401, 5507], [6001, 6006]];
+}));
 // src/DB/Skills/SkillAction.js
 var SkillAction, makeAttackSkillAction, makeGenericSkillAction, makeSliceAttackAction;
 var init_SkillAction = __esmMin((() => {
@@ -331264,6 +335610,34 @@ var init_AttackEffectTable = __esmMin((() => {
 	AE.SPAWN[JOB.MAVKA] = AE.SPAWN[JOB.G_MAVKA] = "ef_mavka_attack";
 	AE.SPAWN[JOB.ENTWEIHEN] = AE.SPAWN[JOB.G_ENTWEIHEN_R] = AE.SPAWN[JOB.G_ENTWEIHEN_H] = AE.SPAWN[JOB.G_ENTWEIHEN_M] = AE.SPAWN[JOB.G_ENTWEIHEN_S] = AE.SPAWN[JOB.VH_ENTWEIHEN] = AE.SPAWN[JOB.VH_ENTWEIHEN_R] = AE.SPAWN[JOB.VH_ENTWEIHEN_H] = AE.SPAWN[JOB.VH_ENTWEIHEN_M] = AE.SPAWN[JOB.VH_ENTWEIHEN_S] = AE.SPAWN[JOB.MD_G_ENTWEIHEN_M] = "ef_entweihen_attack";
 }));
+// src/Engine/MapEngine/StatusEffects.js
+/**
+* @param {number} AID actor id
+* @param {number} status status id (StatusConst)
+* @param {number} state 1 on, 0 off
+*/
+function updateStatusEffects(AID, status, state) {
+	const row = StatusEffectTable_default[status];
+	if (!row) return;
+	const loops = row.loop || [];
+	if (state == 1) {
+		(row.start || []).forEach((effectId) => EffectManager.spam({
+			effectId,
+			ownerAID: AID
+		}));
+		loops.forEach((effectId) => {
+			if (!EffectManager.has(AID, effectId)) EffectManager.spam({
+				effectId,
+				ownerAID: AID,
+				persistent: true
+			});
+		});
+	} else if (state == 0) loops.forEach((effectId) => EffectManager.remove(null, AID, effectId));
+}
+var init_StatusEffects = __esmMin((() => {
+	init_StatusEffectTable();
+	init_EffectManager();
+}));
 // src/Engine/MapEngine/Entity.js
 /**
 * Spam an entity on the map
@@ -331339,6 +335713,16 @@ function onEntitySpam(pkt) {
 			maxhp: -1
 		});
 		EntityManager.add(entity.wug);
+	}
+	let cartNum = 0;
+	if (pkt.effectState & StatusState_default.EffectState.CART1) cartNum = 1;
+	else if (pkt.effectState & StatusState_default.EffectState.CART2) cartNum = 2;
+	else if (pkt.effectState & StatusState_default.EffectState.CART3) cartNum = 3;
+	else if (pkt.effectState & StatusState_default.EffectState.CART4) cartNum = 4;
+	else if (pkt.effectState & StatusState_default.EffectState.CART5) cartNum = 5;
+	if (cartNum > 0 || entity.hasCart || SessionStorage_default.Entity && entity.GID === SessionStorage_default.Entity.GID && SessionStorage_default.hasCart) {
+		const realCartNum = DB.isSuperNovice(entity._job) ? 0 : cartNum || entity.CartNum || SessionStorage_default.CartNum || 1;
+		entity.setCart(true, realCartNum);
 	}
 	if (entity.objecttype === Entity.TYPE_PC) {
 		const resolved = resolveEntityWeapons(pkt.weapon, pkt.shield, entity, SessionStorage_default.Entity, InventoryController, EquipmentController);
@@ -332118,7 +336502,7 @@ function onEntityUseSkill(pkt) {
 			}
 		}
 		EffectManager.spamSkill(pkt.SKID, pkt.targetAID, null, null, pkt.srcAID);
-		if (pkt.result == 1) EffectManager.spamSkillSuccess(pkt.SKID, pkt.targetAID, null, pkt.srcAID);
+		if (pkt.result == 1) EffectManager.spamSkillSuccess(pkt.SKID, pkt.targetAID, null, pkt.srcAID, pkt.level);
 	}
 }
 /**
@@ -332127,7 +336511,7 @@ function onEntityUseSkill(pkt) {
 * @param {object} pkt - PACKET.ZC.SKILL_ENTRY
 */
 function onSkillAppear(pkt) {
-	EffectManager.spamSkillZone(pkt.job, pkt.xPos, pkt.yPos, pkt.AID, pkt.creatorAID);
+	EffectManager.spamSkillZone(pkt.job, pkt.xPos, pkt.yPos, pkt.AID, pkt.creatorAID, pkt.level, pkt.range);
 }
 /**
 * Remove a skill from screen
@@ -332135,6 +336519,7 @@ function onSkillAppear(pkt) {
 * @param {object} pkt - PACKET.ZC.SKILL_DISAPPEAR
 */
 function onSkillDisapear(pkt) {
+	EffectManager.spamSkillZoneEnd(pkt.AID);
 	EffectManager.remove(null, pkt.AID);
 	const entity = EntityManager.get(pkt.AID);
 	if (entity) entity.remove();
@@ -332226,6 +336611,7 @@ function onEntityUseSkillToAttack(pkt) {
 			if (pushedEntity) pushedEntity.fastMoveTo(pkt.xPos, pkt.yPos, 20, null, true);
 		}
 	}
+	EffectManager.spamSkillDamage(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID);
 	if (srcEntity && dstEntity && pkt.action != SkillAction$1.SPLASH) {
 		EffectManager.spamSkillRelease(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID);
 		EffectManager.spamSkill(pkt.SKID, pkt.targetID, null, Renderer.tick + pkt.attackMT, pkt.AID);
@@ -332278,7 +336664,7 @@ function onEntityCastSkill(pkt) {
 	if (srcEntity.objecttype === Entity.TYPE_PC || srcEntity.objecttype === Entity.TYPE_DISGUISED || srcEntity.objecttype === Entity.TYPE_PET || srcEntity.objecttype === Entity.TYPE_HOM || srcEntity.objecttype === Entity.TYPE_MERC || srcEntity.objecttype === Entity.TYPE_ELEM) {
 		if (!SkillNameDisplayExclude.includes(pkt.SKID)) srcEntity.dialog.set((SkillInfo[pkt.SKID] && SkillInfo[pkt.SKID].SkillName || "Unknown Skill") + " !!", "white");
 	}
-	EffectManager.spamSkillCast(pkt.SKID, pkt.AID, null, pkt.targetID);
+	EffectManager.spamSkillCast(pkt.SKID, pkt.AID, null, pkt.targetID, pkt.delayTime);
 	if (dstEntity && dstEntity !== srcEntity) {
 		srcEntity.lookTo(dstEntity.position[0], dstEntity.position[1]);
 		if (pkt.delayTime) {
@@ -332307,7 +336693,8 @@ function onEntityCastSkill(pkt) {
 			EffectManager.spam(EF_Init_Par);
 		}
 	}
-	hideCastAura = pkt.SKID in SkillEffect && SkillEffect[pkt.SKID].hideCastAura;
+	const castSkill = pkt.SKID in SkillEffect ? SkillEffect[pkt.SKID] : null;
+	hideCastAura = castSkill && castSkill.hideCastAura || !hasElementCastAura(pkt.SKID) && !(castSkill && castSkill.castAuraEffectId);
 	if (pkt.delayTime && !hideCastAura) {
 		const EF_Init_Par = {
 			effectId: EffectConst_default.EF_BEGINSPELL,
@@ -332345,7 +336732,13 @@ function onEntityCastSkill(pkt) {
 				break;
 			case 9: EF_Init_Par.effectId = EffectConst_default.EF_DARKCASTING;
 		}
-		EffectManager.spam(EF_Init_Par);
+		if (castSkill && castSkill.castAuraEffectId) [castSkill.castAuraEffectId].flat().forEach((effectId) => {
+			EffectManager.spam({
+				...EF_Init_Par,
+				effectId
+			});
+		});
+		else EffectManager.spam(EF_Init_Par);
 	}
 }
 /**
@@ -332359,16 +336752,26 @@ function onEntityCastCancel(pkt) {
 		entity.cast.clean();
 		EffectManager.remove(null, entity.GID, [
 			12,
+			1709,
 			54,
 			55,
 			56,
 			57,
 			58,
 			59,
+			830,
+			2368,
 			454,
 			60,
-			513
+			513,
+			831,
+			840,
+			841,
+			842,
+			843,
+			845
 		]);
+		EffectManager.removeCastLoops(entity.GID);
 		EffectManager.remove(LockOnTarget, entity.GID);
 		EffectManager.remove(MagicTarget, entity.GID);
 		EffectManager.remove(MagicRing, entity.GID);
@@ -332424,6 +336827,14 @@ function onEntityStatusChange(pkt) {
 		case StatusConst_default.ON_PUSH_CART:
 			entity.hasCart = pkt.state || !pkt.hasOwnProperty("state");
 			if (pkt.val && (pkt.state || !pkt.hasOwnProperty("state"))) entity.CartNum = pkt.val[0];
+			if (SessionStorage_default.Entity && entity.GID === SessionStorage_default.Entity.GID) {
+				SessionStorage_default.hasCart = entity.hasCart;
+				SessionStorage_default.CartNum = entity.CartNum;
+			}
+			entity._statusCart = !!entity.hasCart;
+			if (entity._statusCart || !(entity.effectState & (StatusState_default.EffectState.CART1 | StatusState_default.EffectState.CART2 | StatusState_default.EffectState.CART3 | StatusState_default.EffectState.CART4 | StatusState_default.EffectState.CART5))) entity.setCart(entity._statusCart, entity.CartNum);
+			else entity.hasCart = true;
+			if (SessionStorage_default.Entity && entity.GID === SessionStorage_default.Entity.GID && entity.hasCart && !CartItems_default._host?.isConnected) CartItems_default.append();
 			break;
 		case StatusConst_default.HIDING: {
 			const EF_Init_Par = {
@@ -332720,6 +337131,7 @@ function onEntityStatusChange(pkt) {
 			updateEntityStyle(entity);
 		});
 	}
+	updateStatusEffects(pkt.AID, pkt.index, Object.prototype.hasOwnProperty.call(pkt, "state") ? pkt.state : 1);
 	processBlockStatus(entity, pkt);
 	if (entity === SessionStorage_default.Entity) StatusIcons_default.update(pkt.index, pkt.state, pkt.RemainMS);
 }
@@ -332795,6 +337207,17 @@ function onEntityOptionChange(pkt) {
 		entity.wug.remove();
 		entity.wug = null;
 	}
+	let statusCartNum = 0;
+	if (entity.effectState & StatusState_default.EffectState.CART1) statusCartNum = 1;
+	else if (entity.effectState & StatusState_default.EffectState.CART2) statusCartNum = 2;
+	else if (entity.effectState & StatusState_default.EffectState.CART3) statusCartNum = 3;
+	else if (entity.effectState & StatusState_default.EffectState.CART4) statusCartNum = 4;
+	else if (entity.effectState & StatusState_default.EffectState.CART5) statusCartNum = 5;
+	const keepViaFlag = !!entity._statusCart || entity === SessionStorage_default.Entity && entity.hasCart;
+	if (statusCartNum > 0 || keepViaFlag) {
+		const realCartNum = DB.isSuperNovice(entity._job) ? 0 : statusCartNum || entity.CartNum || 1;
+		entity.setCart(true, realCartNum);
+	} else if (entity.cart) entity.setCart(false);
 }
 /**
 * Display a shop above entity's head
@@ -333159,6 +337582,7 @@ var init_Entity = __esmMin((() => {
 	init_StatusState();
 	init_Emotions();
 	init_SkillEffect();
+	init_CastAuraRule();
 	init_SkillAction();
 	init_EffectConst();
 	init_PetMessageConst();
@@ -333193,7 +337617,9 @@ var init_Entity = __esmMin((() => {
 	init_MiniMap();
 	init_PartyFriends();
 	init_Equipment();
+	init_CartItems();
 	init_ScreenEffectManager();
+	init_StatusEffects();
 	SkillNameDisplayExclude = [
 		SkillConst_default.TF_HIDING,
 		SkillConst_default.AS_CLOAKING,
@@ -334901,6 +339327,14 @@ function onCartSetInfo(pkt) {
 function onCartRemoveItem(pkt) {
 	CartItems_default.removeItem(pkt.index, pkt.count);
 }
+function onCartOff() {
+	SessionStorage_default.hasCart = false;
+	if (SessionStorage_default.Entity) {
+		SessionStorage_default.Entity._statusCart = false;
+		SessionStorage_default.Entity.setCart(false);
+	}
+	CartItems_default.remove();
+}
 function reqMoveItemToCart(index, count) {
 	if (count <= 0) return;
 	const pkt = new PACKET.CZ.MOVE_ITEM_FROM_BODY_TO_CART();
@@ -335125,6 +339559,7 @@ function ItemEngine() {
 	Network.hookPacket(PACKET.ZC.ACK_WEAR_EQUIP_V5, onItemEquip);
 	Network.hookPacket(PACKET.ZC.DELETE_ITEM_FROM_BODY, onIventoryRemoveItem);
 	Network.hookPacket(PACKET.ZC.DELETE_ITEM_FROM_CART, onCartRemoveItem);
+	Network.hookPacket(PACKET.ZC.CARTOFF, onCartOff);
 	Network.hookPacket(PACKET.ZC.USE_ITEM_ACK, onItemUseAnswer);
 	Network.hookPacket(PACKET.ZC.USE_ITEM_ACK2, onItemUseAnswer);
 	Network.hookPacket(PACKET.ZC.EQUIP_ARROW, onArrowEquipped);
@@ -336550,7 +340985,7 @@ function onSkillToGround(pkt) {
 	position[0] = pkt.xPos;
 	position[1] = pkt.yPos;
 	position[2] = Altitude.getCellHeight(pkt.xPos, pkt.yPos);
-	EffectManager.spamSkill(pkt.SKID, pkt.AID, position, null, pkt.AID);
+	EffectManager.spamSkill(pkt.SKID, pkt.AID, position, null, pkt.AID, pkt.level);
 	switch (pkt.SKID) {
 		case SkillConst_default.MO_BODYRELOCATION: {
 			const entity = EntityManager.get(pkt.AID);
@@ -341609,6 +346044,10 @@ function onMapChange(pkt) {
 			});
 			EntityManager.add(SessionStorage_default.Entity.wug);
 		}
+		if (SessionStorage_default.hasCart || SessionStorage_default.Entity.hasCart) {
+			const realCartNum = DB.isSuperNovice(SessionStorage_default.Entity._job) ? 0 : SessionStorage_default.CartNum || SessionStorage_default.Entity.CartNum || 1;
+			SessionStorage_default.Entity.setCart(true, realCartNum);
+		}
 		SessionStorage_default.Entity.aura.free();
 		SessionStorage_default.Entity.aura.load(EffectManager);
 		const mapName = MapRenderer.currentMap.replace(".gat", "").toLowerCase();
@@ -341917,7 +346356,7 @@ function isFreeCell(x, y) {
 	if (!(Altitude.getCellType(x, y) & Altitude.TYPE.WALKABLE)) return false;
 	let free = true;
 	EntityManager.forEach(function(entity) {
-		if (entity.objecttype != entity.constructor.TYPE_EFFECT && entity.objecttype != entity.constructor.TYPE_UNIT && entity.objecttype != entity.constructor.TYPE_TRAP && Math.round(entity.position[0]) === x && Math.round(entity.position[1]) === y) {
+		if (entity !== SessionStorage_default.Entity && entity.objecttype !== entity.constructor.TYPE_EFFECT && entity.objecttype !== entity.constructor.TYPE_UNIT && entity.objecttype !== entity.constructor.TYPE_TRAP && entity.objecttype !== entity.constructor.TYPE_CART && entity.objecttype !== entity.constructor.TYPE_FALCON && entity.objecttype !== entity.constructor.TYPE_WUG && Math.round(entity.position[0]) === x && Math.round(entity.position[1]) === y) {
 			free = false;
 			return false;
 		}

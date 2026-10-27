@@ -316363,7 +316363,11 @@ var init_Entity$1 = __esmMin((() => {
 		*/
 		remove(type) {
 			if (this.cart) {
-				this.cart.remove(type);
+				if (type === Entity.VT.DEAD) {
+					const cart = this.cart;
+					cart.owner = null;
+					EntityManager.remove(cart.GID);
+				} else this.cart.remove(type);
 				this.cart = null;
 			}
 			switch (type) {
@@ -316727,11 +316731,16 @@ function addEntity(entity) {
 * Clean up entities from list
 */
 function free() {
-	_list.forEach((entity) => {
+	const snapshot = _list.slice();
+	const live = new Set(snapshot);
+	for (let i = 0; i < snapshot.length; ++i) {
+		const entity = snapshot[i];
+		if (!live.has(entity) || !_list.includes(entity)) continue;
 		releaseGr2(entity);
 		EntityComposer.remove(entity);
 		entity.clean();
-	});
+		live.delete(entity);
+	}
 	_list.length = 0;
 	_gidMap.clear();
 	_over = null;
@@ -333250,6 +333259,7 @@ function onEntityStatusChange(pkt) {
 				SessionStorage_default.CartNum = entity.CartNum;
 			}
 			entity.setCart(entity.hasCart, entity.CartNum);
+			if (SessionStorage_default.Entity && entity.GID === SessionStorage_default.Entity.GID && entity.hasCart && !CartItems_default._host?.isConnected) CartItems_default.append();
 			break;
 		case StatusConst_default.HIDING: {
 			const EF_Init_Par = {
@@ -333627,7 +333637,8 @@ function onEntityOptionChange(pkt) {
 	else if (entity.effectState & StatusState_default.EffectState.CART3) statusCartNum = 3;
 	else if (entity.effectState & StatusState_default.EffectState.CART4) statusCartNum = 4;
 	else if (entity.effectState & StatusState_default.EffectState.CART5) statusCartNum = 5;
-	if (statusCartNum > 0 || entity.hasCart) {
+	const keepViaFlag = entity === SessionStorage_default.Entity && entity.hasCart;
+	if (statusCartNum > 0 || keepViaFlag) {
 		const realCartNum = DB.isSuperNovice(entity._job) ? 0 : statusCartNum || entity.CartNum || 1;
 		entity.setCart(true, realCartNum);
 	} else if (entity.cart) entity.setCart(false);
@@ -334029,6 +334040,7 @@ var init_Entity = __esmMin((() => {
 	init_MiniMap();
 	init_PartyFriends();
 	init_Equipment();
+	init_CartItems();
 	init_ScreenEffectManager();
 	SkillNameDisplayExclude = [
 		SkillConst_default.TF_HIDING,

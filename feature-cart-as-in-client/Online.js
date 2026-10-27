@@ -335753,7 +335753,10 @@ function onCartRemoveItem(pkt) {
 }
 function onCartOff() {
 	SessionStorage_default.hasCart = false;
-	if (SessionStorage_default.Entity) SessionStorage_default.Entity.setCart(false);
+	if (SessionStorage_default.Entity) {
+		SessionStorage_default.Entity._statusCart = false;
+		SessionStorage_default.Entity.setCart(false);
+	}
 	CartItems_default.remove();
 }
 function reqMoveItemToCart(index, count) {

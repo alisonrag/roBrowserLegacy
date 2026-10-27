@@ -9,24 +9,6 @@ Instructions for working on the WebGL renderer, Entity composition system (`src/
 
 ---
 
-## Core Renderer & Entity Invariants
-
-1. **Do Not Convert the Entity Mixin/Composition System into Class Inheritance:**
-    - `Entity.js` is composition-based. 17 mixins (16 under `src/Renderer/Entity/` plus `Controls/EntityControl.js`) are applied dynamically in `Entity`'s constructor via `.call(this)`.
-    - Add or modify entity behavior through the appropriate mixin or composition path. Never replace mixins with subclasses or a new inheritance tree.
-    - Note that `EntityComposer.js` and `EntityOverlay.js` in `src/Renderer/Entity/` are helper/compositing modules, and `Player.js` extends `Entity` for the local player session (`Session.Entity`).
-2. **Keep `Entity.prototype` Data Whitelist Intact:**
-    - `Entity.prototype` explicitly declares data fields (`objecttype`, `GID`, `AID`, `_sex`, `_job`, `_head`, `clevel`, `joblevel`, `money`, etc.) on the prototype rather than as ES2022 class instance fields.
-    - `Entity.prototype.set(unit)` uses `Entity.prototype.hasOwnProperty(key)` (and `_${key}`) as a security/safety whitelist to decide which server packet properties can be auto-assigned. Moving these properties to class fields on `this` breaks `hasOwnProperty` checks on `Entity.prototype`.
-    - Before changing Entity state, inspect creation, transformation (`EntityManager.pendingTransformations`), removal (`clean` / `remove`), and map-transition flows.
-3. **Preserve Frame-Loop Performance & Scratchpad Buffers:**
-    - Module-scoped `const` scratchpads/caches (such as preallocated `Float32Array`, `mat4`, `vec3` buffers reused per frame to avoid GC allocations, and module-private WebGL handles like `_program` / `_buffer`) are an intentional performance pattern in `src/Renderer/`. Do not flag them as global state or move them into per-frame allocations.
-4. **WebGL & GPU Resource Lifecycle:**
-    - Requires OpenGL ES 2.0 / WebGL support. Watch for maximum texture dimensions when packing or uploading sprite sheets (`SpriteAtlas`, `EntityComposer`).
-    - When deleting WebGL textures or buffers in batched paths (`SpriteBatch`, `EntityComposer`), ensure queued draws are flushed first or defer deletion until `endFrame(gl)` to avoid blanking in-flight draws, and handle WebGL context loss gracefully.
-
----
-
 ## Subsystem Inventory (`src/Renderer/`)
 
 ### Top-Level Orchestrators
@@ -56,6 +38,10 @@ Instructions for working on the WebGL renderer, Entity composition system (`src/
 - **Ground:** `GroundEffect`, `FlatColorTile`, `PropertyGround`, `LPEffect`, `SpiderWeb`, `Tiles`.
 - **Combat:** `Damage`, `MagnumBreak`, `PoisonEffect`, `MagicTarget`, `MagicRing`, `LockOnTarget`.
 - **Visual & World:** `StrEffect`, `RsmEffect`, `ThreeDEffect`, `TwoDEffect`, `Cylinder`, `Songs`, `Trail`, `WaterfallEffect`.
+- **Official primitives:** `EffectPrim` (`PRIM` rows) with its pure simulation `EffectPrimSim` (the official client's ring, sphere and flat square primitives, advanced on its 60-tick clock), and `CasterStrobe` (the black and white caster strobe of effect 812).
+- **Cast shapes:** the official client's 4th-job cast auras, each drawing class with a pure simulation beside it (`*Sim.js`): `CastCircle` (tinted cast circle), `CastCone` (bubble cones and crowns), `CastRing` (cast-aura ring and its colour-cycling twin), `CastFunnel` (opening rings), `RotateLine` (ribbons spiralling round the caster) and `CasterMarks` (the caster's glow and split images, drawn by `EntityRender`). Rows marked `castLoop` replay until the cast ends (`EffectManager.spamSkillCast` gets the cast time) and `EffectManager.removeCastLoops` stops them on cancel.
+- **Spawners:** `AreaSpawner` (`AREA_SPAWN` rows: while it lives, spams another effect at random points of a square, for ground units such as Cross Rain).
+- **Placement helpers** (used by `SkillEffect` fields in `EffectManager.js`): `ScreenDirection` (where a target is on screen from the caster), `ShuffledGrid`, `SpinSets`, `GroundScatter`, `BezierArcThrow` + `BezierArcThrowSim` (a STR thrown on an arc, `arcThrow` rows).
 - **Screen & Post-Processing:** `PostProcess.js` and `Effects/Shaders/` (`Blind`, `Bloom`, `CAS`, `Cartoon`, `FXAA`, `GaussianBlur`, `Upsampling`, `VerticalFlip`, `Vibrance`).
 - _Known note:_ `Damage.js` and `Sky.js` contain legacy particle class management TODOs; inspect carefully when modifying.
 
@@ -66,6 +52,59 @@ Instructions for working on the WebGL renderer, Entity composition system (`src/
 ### Granny3D Skeletal Models (`src/Renderer/GR2/`)
 
 - `GR2ModelRenderer.js`, `GR2ViewerRenderer.js`, `actorAction.js`, `gr2Banks.js`, `gr2Math.js`, `gr2Pack.js`, `gr2World.js` (plus `GR2Model.vs`/`GR2Model.fs`).
+
+---
+
+### Renderer entity modules — `src/Renderer/Entity/`
+
+**Composition:**
+
+- `Entity.js` composes `Controls/EntityControl.js` with 16 behavior mixins.
+- `Player.js` specializes the player entity.
+
+**Behavior mixins:**
+
+- `EntityAction`
+- `EntityAnimations`
+- `EntityAttachments`
+- `EntityAura`
+- `EntityCast`
+- `EntityDialog`
+- `EntityDisplay`
+- `EntityDropEffect`
+- `EntityEmblem`
+- `EntityLife`
+- `EntityRender`
+- `EntityRoom`
+- `EntitySound`
+- `EntityState`
+- `EntityView`
+- `EntityWalk`
+
+**Sprite composition and lifecycle:**
+
+`EntityRender` delegates layered player-sprite capture and composition to `EntityComposer`. The composer caches the combined texture for `SpriteBatch` rendering.
+
+- `EntityManager` releases cached composites when entities are removed and after batch rendering.
+- `Renderer` resets composites after WebGL context loss.
+
+Preserve these ownership and cleanup paths when changing entity rendering, caching, or WebGL resource lifecycle behavior.
+
+## Core Renderer & Entity Invariants
+
+1. **Do Not Convert the Entity Mixin/Composition System into Class Inheritance:**
+    - `Entity.js` is composition-based. 17 mixins (16 under `src/Renderer/Entity/` plus `Controls/EntityControl.js`) are applied dynamically in `Entity`'s constructor via `.call(this)`.
+    - Add or modify entity behavior through the appropriate mixin or composition path. Never replace mixins with subclasses or a new inheritance tree.
+    - Note that `EntityComposer.js` and `EntityOverlay.js` in `src/Renderer/Entity/` are helper/compositing modules, and `Player.js` extends `Entity` for the local player session (`Session.Entity`).
+2. **Keep `Entity.prototype` Data Whitelist Intact:**
+    - `Entity.prototype` explicitly declares data fields (`objecttype`, `GID`, `AID`, `_sex`, `_job`, `_head`, `clevel`, `joblevel`, `money`, etc.) on the prototype rather than as ES2022 class instance fields.
+    - `Entity.prototype.set(unit)` uses `Entity.prototype.hasOwnProperty(key)` (and `_${key}`) as a security/safety whitelist to decide which server packet properties can be auto-assigned. Moving these properties to class fields on `this` breaks `hasOwnProperty` checks on `Entity.prototype`.
+    - Before changing Entity state, inspect creation, transformation (`EntityManager.pendingTransformations`), removal (`clean` / `remove`), and map-transition flows.
+3. **Preserve Frame-Loop Performance & Scratchpad Buffers:**
+    - Module-scoped `const` scratchpads/caches (such as preallocated `Float32Array`, `mat4`, `vec3` buffers reused per frame to avoid GC allocations, and module-private WebGL handles like `_program` / `_buffer`) are an intentional performance pattern in `src/Renderer/`. Do not flag them as global state or move them into per-frame allocations.
+4. **WebGL & GPU Resource Lifecycle:**
+    - Requires OpenGL ES 2.0 / WebGL support. Watch for maximum texture dimensions when packing or uploading sprite sheets (`SpriteAtlas`, `EntityComposer`).
+    - When deleting WebGL textures or buffers in batched paths (`SpriteBatch`, `EntityComposer`), ensure queued draws are flushed first or defer deletion until `endFrame(gl)` to avoid blanking in-flight draws, and handle WebGL context loss gracefully.
 
 ---
 

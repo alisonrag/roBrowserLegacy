@@ -16,6 +16,7 @@ import StatusConst from 'DB/Status/StatusConst.js';
 import StatusState from 'DB/Status/StatusState.js';
 import Emotions from 'DB/Emotions.js';
 import SkillEffect from 'DB/Skills/SkillEffect.js';
+import { hasElementCastAura } from 'DB/Skills/CastAuraRule.js';
 import SkillActionTable from 'DB/Skills/SkillAction.js';
 import EffectConst from 'DB/Effects/EffectConst.js';
 import PetMessageConst from 'DB/Pets/PetMessageConst.js';
@@ -50,7 +51,9 @@ import StatusIcons from 'UI/Components/StatusIcons/StatusIcons.js';
 import MiniMap from 'UI/Components/MiniMap/MiniMap.js';
 import PartyFriends from 'UI/Components/PartyFriends/PartyFriends.js';
 import Equipment from 'UI/Components/Equipment/Equipment.js';
+import CartItems from 'UI/Components/CartItems/CartItems.js';
 import ScreenEffectManager from 'Renderer/ScreenEffectManager.js';
+import { updateStatusEffects } from 'Engine/MapEngine/StatusEffects.js';
 
 // Excludes for skill name display
 const SkillNameDisplayExclude = [
@@ -181,6 +184,24 @@ function onEntitySpam(pkt) {
 			maxhp: -1
 		});
 		EntityManager.add(entity.wug);
+	}
+
+	let cartNum = 0;
+	if (pkt.effectState & StatusState.EffectState.CART1) {
+		cartNum = 1;
+	} else if (pkt.effectState & StatusState.EffectState.CART2) {
+		cartNum = 2;
+	} else if (pkt.effectState & StatusState.EffectState.CART3) {
+		cartNum = 3;
+	} else if (pkt.effectState & StatusState.EffectState.CART4) {
+		cartNum = 4;
+	} else if (pkt.effectState & StatusState.EffectState.CART5) {
+		cartNum = 5;
+	}
+
+	if (cartNum > 0 || entity.hasCart || (Session.Entity && entity.GID === Session.Entity.GID && Session.hasCart)) {
+		const realCartNum = DB.isSuperNovice(entity._job) ? 0 : cartNum || entity.CartNum || Session.CartNum || 1;
+		entity.setCart(true, realCartNum);
 	}
 
 	if (entity.objecttype === Entity.TYPE_PC) {
@@ -1462,7 +1483,7 @@ function onEntityUseSkill(pkt) {
 		EffectManager.spamSkill(pkt.SKID, pkt.targetAID, null, null, pkt.srcAID);
 
 		if (pkt.result == 1) {
-			EffectManager.spamSkillSuccess(pkt.SKID, pkt.targetAID, null, pkt.srcAID);
+			EffectManager.spamSkillSuccess(pkt.SKID, pkt.targetAID, null, pkt.srcAID, pkt.level);
 		}
 	}
 }
@@ -1473,7 +1494,7 @@ function onEntityUseSkill(pkt) {
  * @param {object} pkt - PACKET.ZC.SKILL_ENTRY
  */
 function onSkillAppear(pkt) {
-	EffectManager.spamSkillZone(pkt.job, pkt.xPos, pkt.yPos, pkt.AID, pkt.creatorAID);
+	EffectManager.spamSkillZone(pkt.job, pkt.xPos, pkt.yPos, pkt.AID, pkt.creatorAID, pkt.level, pkt.range);
 }
 
 /**
@@ -1482,6 +1503,7 @@ function onSkillAppear(pkt) {
  * @param {object} pkt - PACKET.ZC.SKILL_DISAPPEAR
  */
 function onSkillDisapear(pkt) {
+	EffectManager.spamSkillZoneEnd(pkt.AID);
 	EffectManager.remove(null, pkt.AID);
 	const entity = EntityManager.get(pkt.AID);
 	if (entity) {
@@ -1674,6 +1696,9 @@ function onEntityUseSkillToAttack(pkt) {
 		}
 	}
 
+	// Effects the official client plays as each damage packet arrives
+	EffectManager.spamSkillDamage(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID);
+
 	if (srcEntity && dstEntity && pkt.action != SkillAction.SPLASH) {
 		// && pkt.action != SkillAction.MULTI_HIT
 		EffectManager.spamSkillRelease(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID);
@@ -1789,7 +1814,7 @@ function onEntityCastSkill(pkt) {
 	}
 
 	//Spells like Bash, Hide, Double Strafe etc. has special casting effect
-	EffectManager.spamSkillCast(pkt.SKID, pkt.AID, null, pkt.targetID);
+	EffectManager.spamSkillCast(pkt.SKID, pkt.AID, null, pkt.targetID, pkt.delayTime);
 
 	if (dstEntity && dstEntity !== srcEntity) {
 		srcEntity.lookTo(dstEntity.position[0], dstEntity.position[1]);
@@ -1818,8 +1843,12 @@ function onEntityCastSkill(pkt) {
 		}
 	}
 
-	// Check if cast aura needs to be hidden
-	hideCastAura = pkt.SKID in SkillEffect && SkillEffect[pkt.SKID].hideCastAura;
+	// Check if cast aura needs to be hidden. Skills the official client gives
+	// no element aura (DB/Skills/CastAuraRule.js) show only their own cast aura, if any.
+	const castSkill = pkt.SKID in SkillEffect ? SkillEffect[pkt.SKID] : null;
+	hideCastAura =
+		(castSkill && castSkill.hideCastAura) ||
+		(!hasElementCastAura(pkt.SKID) && !(castSkill && castSkill.castAuraEffectId));
 
 	// Cast aura
 	if (pkt.delayTime && !hideCastAura) {
@@ -1863,7 +1892,15 @@ function onEntityCastSkill(pkt) {
 				break;
 		}
 
-		EffectManager.spam(EF_Init_Par);
+		// Some skills always use the same cast aura, whatever the packet's element.
+		// A list plays each of its effects for the cast time.
+		if (castSkill && castSkill.castAuraEffectId) {
+			[castSkill.castAuraEffectId].flat().forEach(effectId => {
+				EffectManager.spam({ ...EF_Init_Par, effectId });
+			});
+		} else {
+			EffectManager.spam(EF_Init_Par);
+		}
 	}
 }
 
@@ -1878,7 +1915,12 @@ function onEntityCastCancel(pkt) {
 		entity.cast.clean();
 
 		// Cancel effects
-		EffectManager.remove(null, entity.GID, [12, 54, 55, 56, 57, 58, 59, 454, 60, 513]);
+		EffectManager.remove(
+			null,
+			entity.GID,
+			[12, 1709, 54, 55, 56, 57, 58, 59, 830, 2368, 454, 60, 513, 831, 840, 841, 842, 843, 845]
+		);
+		EffectManager.removeCastLoops(entity.GID);
 		EffectManager.remove(LockOnTarget, entity.GID);
 		EffectManager.remove(MagicTarget, entity.GID);
 		EffectManager.remove(MagicRing, entity.GID);
@@ -1956,6 +1998,36 @@ function onEntityStatusChange(pkt) {
 			entity.hasCart = pkt.state || !pkt.hasOwnProperty('state');
 			if (pkt.val && (pkt.state || !pkt.hasOwnProperty('state'))) {
 				entity.CartNum = pkt.val[0];
+			}
+			if (Session.Entity && entity.GID === Session.Entity.GID) {
+				Session.hasCart = entity.hasCart;
+				Session.CartNum = entity.CartNum;
+			}
+			entity._statusCart = !!entity.hasCart;
+			if (
+				entity._statusCart ||
+				!(
+					entity.effectState &
+					(StatusState.EffectState.CART1 |
+						StatusState.EffectState.CART2 |
+						StatusState.EffectState.CART3 |
+						StatusState.EffectState.CART4 |
+						StatusState.EffectState.CART5)
+				)
+			) {
+				entity.setCart(entity._statusCart, entity.CartNum);
+			} else {
+				// Option-derived cart still present; keep it
+				entity.hasCart = true;
+			}
+			// CARTOFF removes CartItems from the DOM; mount it again when a cart is re-acquired
+			if (
+				Session.Entity &&
+				entity.GID === Session.Entity.GID &&
+				entity.hasCart &&
+				!CartItems._host?.isConnected
+			) {
+				CartItems.append();
 			}
 			break;
 
@@ -2380,6 +2452,9 @@ function onEntityStatusChange(pkt) {
 			break;
 	}
 
+	// MSG_STATE_CHANGE3 and MSG_STATE_CHANGE5 (0x8ff, 0x984) carry no state: the
+	// server sends them for statuses already on when an actor comes into view.
+	updateStatusEffects(pkt.AID, pkt.index, Object.prototype.hasOwnProperty.call(pkt, 'state') ? pkt.state : 1);
 	processBlockStatus(entity, pkt);
 
 	// Modify icon
@@ -2470,6 +2545,28 @@ function onEntityOptionChange(pkt) {
 	} else if (entity.wug && !(entity.effectState & StatusState.EffectState.WUG)) {
 		entity.wug.remove();
 		entity.wug = null;
+	}
+
+	let statusCartNum = 0;
+	if (entity.effectState & StatusState.EffectState.CART1) {
+		statusCartNum = 1;
+	} else if (entity.effectState & StatusState.EffectState.CART2) {
+		statusCartNum = 2;
+	} else if (entity.effectState & StatusState.EffectState.CART3) {
+		statusCartNum = 3;
+	} else if (entity.effectState & StatusState.EffectState.CART4) {
+		statusCartNum = 4;
+	} else if (entity.effectState & StatusState.EffectState.CART5) {
+		statusCartNum = 5;
+	}
+
+	// Keep the cart while the ON_PUSH_CART status is active (tracked separately from option bits)
+	const keepViaFlag = !!entity._statusCart || (entity === Session.Entity && entity.hasCart);
+	if (statusCartNum > 0 || keepViaFlag) {
+		const realCartNum = DB.isSuperNovice(entity._job) ? 0 : statusCartNum || entity.CartNum || 1;
+		entity.setCart(true, realCartNum);
+	} else if (entity.cart) {
+		entity.setCart(false);
 	}
 }
 

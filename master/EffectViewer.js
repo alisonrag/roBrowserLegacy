@@ -77895,7 +77895,7 @@ var init_Common$1 = __esmMin((() => {
 	Common_default$1 = "/* Avoid input focus border */\r\n:focus {\r\n	outline: none;\r\n}\r\n::-moz-focus-inner {\r\n	border: 0;\r\n}\r\n\r\n* {\r\n	-moz-user-select: none;\r\n}\r\n\r\nhtml,\r\nbody {\r\n	touch-action: manipulation;\r\n	margin: 0;\r\n}\r\n\r\n/* Reference for the viewport sized body below */\r\nhtml {\r\n	height: 100%;\r\n}\r\n\r\n/* Prevent mobile browser auto-zoom on input focus and double-tap */\r\n:host {\r\n	touch-action: manipulation;\r\n}\r\n\r\ninput,\r\ntextarea,\r\nselect {\r\n	touch-action: manipulation;\r\n}\r\n\r\ncanvas {\r\n	touch-action: none;\r\n}\r\n\r\n/* Page zoomed in (browser pinch / input focus zoom, tracked by Core/Mobile.js): hand the\r\n   touches back to the browser so the user can pan and pinch the page back out */\r\nbody.ro-page-zoomed canvas {\r\n	touch-action: auto;\r\n}\r\n\r\nbody {\r\n	background-color: black;\r\n	font-size: 12px;\r\n	/* 'SCDream' first: wins only when the server actually serves the client font (loaded via\r\n	   @font-face in DBManager). When it isn't served it resolves to Arial — the official client's\r\n	   window UI font for intl/america servicetype (Ragexe draws window text with CreateFontA on the\r\n	   Gulim/Arial face table). Liberation Sans / Arimo provide Arial metrics on Linux. */\r\n	font-family: 'SCDream', Arial, 'Liberation Sans', Arimo, sans-serif;\r\n	/* Normalize any resolved font's x-height to Arial's (sxHeight 1062 / unitsPerEm 2048 = 0.5186),\r\n	   so text keeps Arial's apparent size on every OS/font. It's inherited and crosses Shadow DOM\r\n	   hosts, so it also rescales elements that use a non-Arial face; those opt out with\r\n	   `font-size-adjust: none` on the selector declaring that font (Intro, GrfViewer, JoystickUI\r\n	   header). SCDream, when a server serves it, is normalized to Arial on purpose.\r\n	   Progressive enhancement: engines that don't support the numeric form ignore it\r\n	   and render at the resolved font's native x-height (no JS fallback needed — Arial\r\n	   / Liberation Sans already carry correct metrics, only annex fonts degrade). */\r\n	font-size-adjust: 0.5186;\r\n	overflow: hidden;\r\n	-webkit-user-select: none;\r\n	user-select: none;\r\n	min-width: 100vw;\r\n	min-height: 100vh;\r\n	letter-spacing: 0;\r\n	line-height: 1.2;\r\n}\r\n\r\n/* Apps owning the 3D viewport (set by Renderer.init) are a fixed viewport: size the body to it and\r\n   contain it. `overflow: hidden` alone doesn't clip the body box — it propagates to the viewport —\r\n   so content positioned off screen (entity overlays, signboards, dragged windows) still extends the\r\n   document's scrollable area, and the browser scrolls, or on mobile lays the page out at its\r\n   fallback width and scales it down, to reveal it. Paint containment clips the box for real. */\r\nbody.ro-viewport {\r\n	width: 100%;\r\n	height: 100%;\r\n	min-width: 0;\r\n	min-height: 0;\r\n	contain: paint;\r\n}\r\n\r\n.title {\r\n	font-size: 12px;\r\n}\r\n\r\nbutton,\r\nui-button {\r\n	padding: 0;\r\n}\r\n\r\nui-button {\r\n	display: inline-block;\r\n}\r\n\r\n.ui-btn {\r\n	-webkit-appearance: none;\r\n	appearance: none;\r\n	display: inline-flex;\r\n	align-items: center;\r\n	justify-content: center;\r\n\r\n	height: 20px;\r\n	min-width: 52px;\r\n	padding: 0 10px;\r\n\r\n	font-size: 12px;\r\n	line-height: 1;\r\n	color: #3f3f3f;\r\n	text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85);\r\n\r\n	border-radius: 4px;\r\n	border: 1px solid;\r\n\r\n	/* 3D border: top right bottom left */\r\n	border-color: #cfcfcf #a9a9a9 #5f5f5f #bdbdbd;\r\n\r\n	/* glossy + subtle depth */\r\n	background: linear-gradient(to bottom, #ffffff 0%, #f2f2f2 35%, #dcdcdc 55%, #f9f9f9 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		/* top highlight */ inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		/* bottom inner edge */ 0 1px 0 rgba(0, 0, 0, 0.12); /* outer bottom shadow */\r\n\r\n	cursor: pointer;\r\n}\r\n\r\n/* Hover: hơi xanh nhẹ giống button Reset */\r\n.ui-btn:hover {\r\n	border-color: #c9d1dd #8ea2c4 #4d5f86 #b1bfd5;\r\n	background: linear-gradient(to bottom, #f7fbff 0%, #dfe8f6 35%, #c0d0ee 55%, #f0f6ff 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.95),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.12),\r\n		0 1px 0 rgba(0, 0, 0, 0.12);\r\n}\r\n\r\n/* Active: giống \"ấn xuống\" */\r\n.ui-btn:active {\r\n	border-color: #9fb0c9 #6f86a6 #3b4b67 #7f96b6;\r\n\r\n	background: linear-gradient(to bottom, #cdd8eb 0%, #b7c8e5 45%, #dfe9fb 100%);\r\n\r\n	box-shadow:\r\n		inset 0 2px 3px rgba(0, 0, 0, 0.18),\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.35);\r\n\r\n	transform: translateY(1px); /* cảm giác bị nhấn */\r\n}\r\n\r\n/* Disabled */\r\n.ui-btn:disabled,\r\n.ui-btn.is-disabled {\r\n	cursor: default;\r\n	color: #8f8f8f;\r\n	text-shadow: none;\r\n\r\n	border-color: #d3d3d3 #bdbdbd #9b9b9b #c9c9c9;\r\n\r\n	background: linear-gradient(to bottom, #f6f6f6 0%, #e7e7e7 55%, #fafafa 100%);\r\n\r\n	box-shadow:\r\n		inset 0 1px 0 rgba(255, 255, 255, 0.9),\r\n		inset 0 -1px 0 rgba(0, 0, 0, 0.08),\r\n		0 1px 0 rgba(0, 0, 0, 0.08);\r\n\r\n	transform: none;\r\n}\r\n\r\n/* Hide native cursor inside Shadow DOM when custom cursor is active */\r\n@container style(--ro-game-cursor: on) {\r\n	* {\r\n		cursor: none !important;\r\n	}\r\n}\r\n";
 }));
 // src/Controls/MouseEventHandler.js
-var Mouse;
+var Mouse, trackPointer;
 var init_MouseEventHandler = __esmMin((() => {
 	Mouse = class {
 		/**
@@ -77929,13 +77929,15 @@ var init_MouseEventHandler = __esmMin((() => {
 		*/
 		static state = 0;
 	};
-	/**
-	* Track mouse move event (native, passive)
-	*/
-	window.addEventListener("mousemove", (event) => {
+	trackPointer = (event) => {
 		Mouse.screen.x = event.pageX;
 		Mouse.screen.y = event.pageY;
-	}, { passive: true });
+	};
+	window.addEventListener("mousemove", trackPointer, { passive: true });
+	window.addEventListener("dragover", trackPointer, {
+		passive: true,
+		capture: true
+	});
 }));
 // src/Core/Preferences.js
 /**
@@ -84044,7 +84046,7 @@ var init_VerticalFlip = __esmMin((() => {
 	};
 }));
 // src/Renderer/Map/Altitude.js
-var _cells, _types$1, mat4$24, vec3$7, vec4$8, _from, _to, _unit, _matrix$8, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
+var _cells, _types$1, mat4$24, vec3$7, vec4$8, _from, _to, _unit, _matrix$7, buffer1x1, buffer5x5, buffer7x7, buffer13x13, tmp, Altitude, TYPE_TABLE;
 var init_Altitude = __esmMin((() => {
 	init_gl_matrix$1();
 	init_PathFinding();
@@ -84056,7 +84058,7 @@ var init_Altitude = __esmMin((() => {
 	_from = vec3$7.create();
 	_to = vec4$8.create();
 	_unit = vec3$7.create();
-	_matrix$8 = mat4$24.create();
+	_matrix$7 = mat4$24.create();
 	buffer1x1 = /* @__PURE__ */ new Float32Array(30);
 	buffer5x5 = /* @__PURE__ */ new Float32Array(750);
 	buffer7x7 = /* @__PURE__ */ new Float32Array(1470);
@@ -84153,18 +84155,18 @@ var init_Altitude = __esmMin((() => {
 		static intersect(modelView, projection, out) {
 			let i;
 			const count = Altitude.MAX_INTERSECT_COUNT;
-			mat4$24.invert(_matrix$8, modelView);
-			_from[0] = _matrix$8[12];
-			_from[1] = _matrix$8[13];
-			_from[2] = _matrix$8[14];
+			mat4$24.invert(_matrix$7, modelView);
+			_from[0] = _matrix$7[12];
+			_from[1] = _matrix$7[13];
+			_from[2] = _matrix$7[14];
 			_to[0] = Mouse.screen.x / Mouse.screen.width * 2 - 1;
 			_to[1] = -(Mouse.screen.y / Mouse.screen.height) * 2 + 1;
 			if (VerticalFlip.isActive()) _to[1] = -_to[1];
 			_to[2] = 1;
 			_to[3] = 1;
-			mat4$24.multiply(_matrix$8, projection, modelView);
-			mat4$24.invert(_matrix$8, _matrix$8);
-			vec4$8.transformMat4(_to, _to, _matrix$8);
+			mat4$24.multiply(_matrix$7, projection, modelView);
+			mat4$24.invert(_matrix$7, _matrix$7);
+			vec4$8.transformMat4(_to, _to, _matrix$7);
 			_to[0] /= _to[3];
 			_to[1] /= _to[3];
 			_to[2] /= _to[3];
@@ -84214,7 +84216,7 @@ var init_Altitude = __esmMin((() => {
 					break;
 				default: buffer = new Float32Array(size * size * 30);
 			}
-			for (x = -middle; x <= middle; ++x) for (y = -middle; y <= middle; ++y, i += 30) {
+			for (x = -middle; x < size - middle; ++x) for (y = -middle; y < size - middle; ++y, i += 30) {
 				const gx = pos_x + x;
 				const gy = pos_y + y;
 				const oob = gx < 0 || gy < 0 || gx >= Altitude.width || gy >= Altitude.height;
@@ -142213,6 +142215,84 @@ var init_TownInfo = __esmMin((() => {
 		}
 	];
 }));
+// src/DB/Map/PrivateAirship.js
+/**
+* Map name as the tables hold it: lower case, no extension.
+*
+* @param {string} mapName
+* @return {string}
+*/
+function normalize(mapName) {
+	return String(mapName || "").trim().toLowerCase().replace(/\.(gat|rsw|gnd)$/, "");
+}
+var DEFAULT_NEED_ITEMS, _startable, _endable, _needItems, _loaded, PrivateAirship$1;
+var init_PrivateAirship$3 = __esmMin((() => {
+	DEFAULT_NEED_ITEMS = [6909, 25464];
+	_startable = /* @__PURE__ */ new Set();
+	_endable = /* @__PURE__ */ new Set();
+	_needItems = [];
+	_loaded = false;
+	PrivateAirship$1 = {
+		normalize,
+		/**
+		* Forget everything loaded so far.
+		*/
+		reset() {
+			_startable.clear();
+			_endable.clear();
+			_needItems.length = 0;
+			_loaded = false;
+		},
+		/**
+		* @param {string} mapName - a map a flight may start from
+		*/
+		addStartableMap(mapName) {
+			_startable.add(normalize(mapName));
+			_loaded = true;
+		},
+		/**
+		* @param {string} mapName - a map a flight may land on
+		*/
+		addEndableMap(mapName) {
+			_endable.add(normalize(mapName));
+			_loaded = true;
+		},
+		/**
+		* @param {number} itemId - an item that pays for a flight
+		*/
+		addNeedItem(itemId) {
+			itemId = Number(itemId);
+			if (itemId > 0 && _needItems.indexOf(itemId) === -1) _needItems.push(itemId);
+			_loaded = true;
+		},
+		/**
+		* @return {boolean} whether the client's table was read
+		*/
+		isLoaded() {
+			return _loaded;
+		},
+		/**
+		* @param {string} mapName
+		* @return {boolean} whether a flight may start on this map
+		*/
+		isStartableMap(mapName) {
+			return !_startable.size || _startable.has(normalize(mapName));
+		},
+		/**
+		* @param {string} mapName
+		* @return {boolean} whether a flight may land on this map
+		*/
+		isEndableMap(mapName) {
+			return !_endable.size || _endable.has(normalize(mapName));
+		},
+		/**
+		* @return {Array<number>} the items that pay for a flight, in the file's order
+		*/
+		getNeedItems() {
+			return _needItems.length ? _needItems.slice() : DEFAULT_NEED_ITEMS.slice();
+		}
+	};
+}));
 // src/DB/Status/StatusConst.js
 var StatusConst_default;
 var init_StatusConst = __esmMin((() => {
@@ -168955,6 +169035,22 @@ var init_PacketStructure = __esmMin((() => {
 		})();
 	};
 	PACKET.ZC.GROUP_LIST2.size = -1;
+	PACKET.CZ.PRIVATE_AIRSHIP_REQUEST = function PACKET_CZ_PRIVATE_AIRSHIP_REQUEST() {
+		this.mapName = "";
+		this.ItemID = 0;
+	};
+	PACKET.CZ.PRIVATE_AIRSHIP_REQUEST.prototype.build = function() {
+		const pkt_buf = new BinaryWriter(18 + (PacketVerManager_default.value >= 20181121 ? 4 : 2));
+		pkt_buf.writeShort(2633);
+		pkt_buf.writeString(this.mapName, 16);
+		if (PacketVerManager_default.value >= 20181121) pkt_buf.writeULong(this.ItemID);
+		else pkt_buf.writeUShort(this.ItemID);
+		return pkt_buf;
+	};
+	PACKET.ZC.PRIVATE_AIRSHIP_RESPONSE = function PACKET_ZC_PRIVATE_AIRSHIP_RESPONSE(fp, end) {
+		this.result = fp.readULong();
+	};
+	PACKET.ZC.PRIVATE_AIRSHIP_RESPONSE.size = 6;
 	PACKET.ZC.RANDOM_COMBINE_ITEM_UI_OPEN = function PACKET_ZC_RANDOM_COMBINE_ITEM_UI_OPEN(fp, end) {
 		this.itemId = PacketVerManager_default.value >= 20181121 ? fp.readLong() : fp.readShort();
 	};
@@ -204991,6 +205087,8 @@ var init_PacketRegister = __esmMin((() => {
 		2625: PACKET.ZC.SKILL_SCALE,
 		2627: PACKET.ZC.ADD_MEMBER_TO_GROUP3,
 		2628: PACKET.ZC.GROUP_LIST2,
+		2633: PACKET.CZ.PRIVATE_AIRSHIP_REQUEST,
+		2634: PACKET.ZC.PRIVATE_AIRSHIP_RESPONSE,
 		2638: PACKET.ZC.RANDOM_COMBINE_ITEM_UI_OPEN,
 		2639: PACKET.CZ.REQ_RANDOM_COMBINE_ITEM,
 		2640: PACKET.ZC.ACK_RANDOM_COMBINE_ITEM,
@@ -211536,9 +211634,9 @@ function RenderCanvas3D(isBlendModeOne) {
 	gl.uniform1f(uniform.uSpriteRendererZindex, this.zIndex++);
 	if (this.angle !== _angle) {
 		_angle = this.angle;
-		mat4$22.identity(_matrix$7);
-		if (_angle) mat4$22.rotateZ(_matrix$7, _matrix$7, -_angle / 180 * Math.PI);
-		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$7);
+		mat4$22.identity(_matrix$6);
+		if (_angle) mat4$22.rotateZ(_matrix$6, _matrix$6, -_angle / 180 * Math.PI);
+		gl.uniformMatrix4fv(uniform.uSpriteRendererAngle, false, _matrix$6);
 	}
 	_offset[0] = this.offset[0] / 175 * this.xSize;
 	_offset[1] = this.offset[1] / 175 * this.ySize - .5;
@@ -211741,7 +211839,7 @@ function syncAfterBatch() {
 	_texture$5 = null;
 	_groupId++;
 }
-var mat4$22, MAX_COLORS_PER_PALETTE, RenderCanvas2D, _program$30, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$5, _usepal, _pos$8, _matrix$7, _size$7, _offset, SpriteRenderer;
+var mat4$22, MAX_COLORS_PER_PALETTE, RenderCanvas2D, _program$30, _buffer$18, _ctx$4, _gl$3, _groupId, _lastGroupId, _shadow, _angle, _depth, _disableDepthCorrection, _depthMask, _depthTest, _blendOne, _texture$5, _usepal, _pos$8, _matrix$6, _size$7, _offset, SpriteRenderer;
 var init_SpriteRenderer = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -211799,7 +211897,7 @@ var init_SpriteRenderer = __esmMin((() => {
 	_texture$5 = null;
 	_usepal = null;
 	_pos$8 = /* @__PURE__ */ new Int16Array(2);
-	_matrix$7 = /* @__PURE__ */ new Float32Array(16);
+	_matrix$6 = /* @__PURE__ */ new Float32Array(16);
 	_size$7 = /* @__PURE__ */ new Float32Array(2);
 	_offset = /* @__PURE__ */ new Float32Array(2);
 	SpriteRenderer = class {
@@ -211943,7 +212041,7 @@ var init_SpriteRenderer = __esmMin((() => {
 			gl.useProgram(_program$30);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
-			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$22.invert(_matrix$7, modelView));
+			gl.uniformMatrix4fv(uniform.uViewModelMat, false, mat4$22.invert(_matrix$6, modelView));
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -217999,7 +218097,7 @@ var init_SkillEffect = __esmMin((() => {
 		groundEffectId: 171
 	};
 	SkillEffect[SkillConst_default.AS_SPLASHER] = { effectId: 129 };
-	SkillEffect[SkillConst_default.NV_FIRSTAID] = { effectId: 309 };
+	SkillEffect[SkillConst_default.NV_FIRSTAID] = { successEffectIdOnCaster: 309 };
 	SkillEffect[SkillConst_default.NV_TRICKDEAD] = {};
 	SkillEffect[SkillConst_default.HN_DOUBLEBOWLINGBASH] = {
 		effectId: "ef_hn_doublebowlingbash",
@@ -220150,7 +220248,7 @@ var init_SkillEffect = __esmMin((() => {
 	SkillEffect[SkillConst_default.SP_SOULGOLEM] = { effectId: "ef_sp_soulgolem" };
 	SkillEffect[SkillConst_default.SP_SOULCURSE] = { effectId: "ef_sp_soulcurse" };
 	SkillEffect[SkillConst_default.SP_SOULREVOLVE] = { effectId: "ef_sp_soulrevolve" };
-	SkillEffect[SkillConst_default.NV_HELPANGEL] = { effectId: "ef_nv_helpangel" };
+	SkillEffect[SkillConst_default.NV_HELPANGEL] = { successEffectIdOnCaster: "ef_nv_helpangel" };
 }));
 // src/DB/Items/ItemEffect.js
 var ItemEffect;
@@ -226721,12 +226819,12 @@ var init_WorldMap$1 = __esmMin((() => {
 // src/UI/Components/Navigation/Navigation.html?raw
 var Navigation_default$2;
 var init_Navigation$2 = __esmMin((() => {
-	Navigation_default$2 = "<div class=\"Navigation\">\r\n	<div class=\"titlebar\">\r\n		<div class=\"left\" data-background=\"basic_interface/titlebar_left.bmp\"></div>\r\n		<div class=\"center\" data-background=\"basic_interface/titlebar_mid.bmp\"></div>\r\n		<div class=\"right\" data-background=\"basic_interface/titlebar_right.bmp\"></div>\r\n		<div class=\"title\">Navigation</div>\r\n		<ui-button\r\n			class=\"close\"\r\n			bg=\"basic_interface/sys_close_off.bmp\"\r\n			hover=\"basic_interface/sys_close_on.bmp\"\r\n		></ui-button>\r\n	</div>\r\n	<div class=\"content\">\r\n		<div class=\"search-container\">\r\n			<select class=\"search-type\">\r\n				<option value=\"ALL\">ALL</option>\r\n				<option value=\"NPC\">NPC</option>\r\n				<option value=\"MOB\">MOB</option>\r\n			</select>\r\n			<div class=\"search-left\" data-background=\"basic_interface/txtbox_l.bmp\"></div>\r\n			<div class=\"search-middle\" data-background=\"basic_interface/txtbox_m.bmp\"></div>\r\n			<div class=\"search-right\" data-background=\"basic_interface/txtbox_r.bmp\"></div>\r\n			<input type=\"text\" class=\"search-input\" placeholder=\"Search...\" />\r\n			<ui-button\r\n				class=\"search-button\"\r\n				bg=\"navigation_interface/navisearch_a.bmp\"\r\n				hover=\"navigation_interface/navisearch_b.bmp\"\r\n				down=\"navigation_interface/navisearch_c.bmp\"\r\n			></ui-button>\r\n		</div>\r\n		<div class=\"map-container\">\r\n			<div class=\"services-toggle-container\">\r\n				<label class=\"services-checkbox\"> <input type=\"checkbox\" class=\"services-toggle\" /> Services </label>\r\n			</div>\r\n			<div class=\"location-title\"></div>\r\n			<div class=\"map-display\">\r\n				<!-- Map will be displayed here -->\r\n			</div>\r\n		</div>\r\n	</div>\r\n	<div class=\"footer\">\r\n		<div class=\"coordinates-bar\">\r\n			<div class=\"map-name\"></div>\r\n			<div class=\"mouse-info\">\r\n				<span class=\"mouse-label\">Mouse:</span>\r\n				<span class=\"mouse-coordinates\"></span>\r\n			</div>\r\n			<div class=\"target-info\">\r\n				<span class=\"target-label\">Target:</span>\r\n				<span class=\"target-coordinates\"></span>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>\r\n";
+	Navigation_default$2 = "<div class=\"Navigation\">\r\n	<div class=\"titlebar\">\r\n		<div class=\"left\" data-background=\"basic_interface/titlebar_left.bmp\"></div>\r\n		<div class=\"center\" data-background=\"basic_interface/titlebar_mid.bmp\"></div>\r\n		<div class=\"right\" data-background=\"basic_interface/titlebar_right.bmp\"></div>\r\n		<div class=\"title\">Navigation</div>\r\n		<ui-button\r\n			class=\"close\"\r\n			bg=\"basic_interface/sys_close_off.bmp\"\r\n			hover=\"basic_interface/sys_close_on.bmp\"\r\n		></ui-button>\r\n	</div>\r\n	<div class=\"content\">\r\n		<div class=\"search-container\">\r\n			<select class=\"search-type\">\r\n				<option value=\"ALL\">ALL</option>\r\n				<option value=\"NPC\">NPC</option>\r\n				<option value=\"MOB\">MOB</option>\r\n			</select>\r\n			<div class=\"search-left\" data-background=\"basic_interface/txtbox_l.bmp\"></div>\r\n			<div class=\"search-middle\" data-background=\"basic_interface/txtbox_m.bmp\"></div>\r\n			<div class=\"search-right\" data-background=\"basic_interface/txtbox_r.bmp\"></div>\r\n			<input type=\"text\" class=\"search-input\" placeholder=\"Search...\" />\r\n			<ui-button\r\n				class=\"search-button\"\r\n				bg=\"navigation_interface/navisearch_a.bmp\"\r\n				hover=\"navigation_interface/navisearch_b.bmp\"\r\n				down=\"navigation_interface/navisearch_c.bmp\"\r\n			></ui-button>\r\n		</div>\r\n		<div class=\"map-container\">\r\n			<div class=\"services-toggle-container\">\r\n				<label class=\"services-checkbox\"> <input type=\"checkbox\" class=\"services-toggle\" /> Services </label>\r\n			</div>\r\n			<div class=\"location-title\"></div>\r\n			<div class=\"map-display\">\r\n				<!-- Map will be displayed here -->\r\n			</div>\r\n		</div>\r\n		<div class=\"airship-bar\">\r\n			<ui-button\r\n				class=\"airship-move\"\r\n				bg=\"private_airplane/btn_move_normal.bmp\"\r\n				hover=\"private_airplane/btn_move_over.bmp\"\r\n				down=\"private_airplane/btn_move_press.bmp\"\r\n				disabled\r\n			></ui-button>\r\n		</div>\r\n	</div>\r\n	<div class=\"footer\">\r\n		<div class=\"coordinates-bar\">\r\n			<div class=\"map-name\"></div>\r\n			<div class=\"mouse-info\">\r\n				<span class=\"mouse-label\">Mouse:</span>\r\n				<span class=\"mouse-coordinates\"></span>\r\n			</div>\r\n			<div class=\"target-info\">\r\n				<span class=\"target-label\">Target:</span>\r\n				<span class=\"target-coordinates\"></span>\r\n			</div>\r\n		</div>\r\n	</div>\r\n</div>\r\n";
 }));
 // src/UI/Components/Navigation/Navigation.css?raw
 var Navigation_default$1;
 var init_Navigation$1 = __esmMin((() => {
-	Navigation_default$1 = ":host {\r\n	top: 200px;\r\n	left: 200px;\r\n}\r\n\r\n.Navigation {\r\n	width: 300px;\r\n	height: 300px;\r\n	z-index: 50;\r\n	background-repeat: repeat-y;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .titlebar {\r\n	width: 100%;\r\n	height: 17px;\r\n	position: relative;\r\n	z-index: 2;\r\n	cursor: move;\r\n}\r\n\r\n.Navigation .titlebar .left {\r\n	width: 15px;\r\n	height: 17px;\r\n	background-repeat: no-repeat;\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n.Navigation .titlebar .center {\r\n	width: calc(100% - 20px);\r\n	height: 17px;\r\n	background-repeat: repeat-x;\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 12px;\r\n}\r\n\r\n.Navigation .titlebar .right {\r\n	width: 12px;\r\n	height: 17px;\r\n	background-repeat: no-repeat;\r\n	position: absolute;\r\n	top: 0px;\r\n	right: 0px;\r\n}\r\n\r\n.Navigation .titlebar .title {\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 10px;\r\n	height: 17px;\r\n	line-height: 17px;\r\n	white-space: nowrap;\r\n	text-shadow: 1px 1px white;\r\n	color: #000000;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n.Navigation .titlebar .close {\r\n	position: absolute;\r\n	top: 2px;\r\n	right: 2px;\r\n	width: 13px;\r\n	height: 13px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	cursor: pointer;\r\n}\r\n\r\n.Navigation .content {\r\n	width: 100%;\r\n	height: calc(100% - 17px);\r\n	position: relative;\r\n	display: flex;\r\n	flex-direction: column;\r\n	background-color: #f7f7f7;\r\n	border: 1px solid #d4d4d4;\r\n	border-top: none;\r\n	box-sizing: border-box;\r\n}\r\n\r\n.Navigation .search-container {\r\n	width: 100%;\r\n	height: 25px;\r\n	position: relative;\r\n	display: flex;\r\n	align-items: center;\r\n	padding: 5px 10px;\r\n	box-sizing: border-box;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .services-toggle-container {\r\n	display: flex;\r\n	align-items: center;\r\n	padding: 0;\r\n	margin: 0;\r\n	background-color: #f7f7f7;\r\n	position: absolute;\r\n	left: 6px;\r\n}\r\n\r\n.Navigation .services-checkbox {\r\n	color: #000;\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n.Navigation .services-toggle {\r\n	margin-right: 4px;\r\n	margin-top: 3px;\r\n}\r\n\r\n.Navigation .search-type {\r\n	top: 3px;\r\n	height: 20px;\r\n	margin-right: 5px;\r\n	border: 1px solid #ccc;\r\n	background-color: #fff;\r\n	padding: 0 2px;\r\n	cursor: pointer;\r\n	width: 50px;\r\n	z-index: 2;\r\n	position: relative;\r\n}\r\n\r\n.Navigation .search-left {\r\n	position: absolute;\r\n	top: 5px;\r\n	left: 65px;\r\n	width: 3px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .search-middle {\r\n	position: absolute;\r\n	top: 5px;\r\n	left: 68px;\r\n	right: 38px;\r\n	height: 20px;\r\n	background-repeat: repeat-x;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .search-right {\r\n	position: absolute;\r\n	top: 5px;\r\n	right: 35px;\r\n	width: 3px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .search-input {\r\n	position: absolute;\r\n	top: 5px;\r\n	left: 68px;\r\n	right: 38px;\r\n	height: 20px;\r\n	border: none;\r\n	background-color: transparent;\r\n	padding: 0 5px;\r\n	z-index: 1;\r\n}\r\n\r\n.Navigation .search-button {\r\n	position: absolute;\r\n	top: 7px;\r\n	right: 5px;\r\n	width: 33px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	cursor: pointer;\r\n}\r\n\r\n.Navigation .map-container {\r\n	width: 100%;\r\n	flex: 1;\r\n	position: relative;\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	padding: 0 10px 10px 10px;\r\n	box-sizing: border-box;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .location-title {\r\n	width: 100%;\r\n	height: 16px;\r\n	line-height: 16px;\r\n	text-align: center;\r\n	color: #000000;\r\n	text-shadow: none;\r\n	margin-bottom: 2px;\r\n	font-weight: bold;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .map-display {\r\n	width: 280px;\r\n	height: 230px;\r\n	margin: 0 auto;\r\n	position: relative;\r\n	background-color: #000000;\r\n	border: 1px solid #666666;\r\n	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);\r\n}\r\n\r\n.Navigation .footer {\r\n	width: 100%;\r\n	position: relative;\r\n	height: 20px;\r\n	background-color: #f7f7f7;\r\n	border-top: 1px solid #d4d4d4;\r\n	box-sizing: border-box;\r\n}\r\n\r\n.Navigation .coordinates-bar {\r\n	position: relative;\r\n	width: 100%;\r\n	padding: 1px 5px;\r\n	box-sizing: border-box;\r\n	display: flex;\r\n	justify-content: space-between;\r\n	align-items: center;\r\n	height: 20px;\r\n	overflow: hidden;\r\n}\r\n\r\n.Navigation .map-name {\r\n	font-weight: bold;\r\n	color: #000;\r\n	flex: 1;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	text-overflow: ellipsis;\r\n}\r\n\r\n.Navigation .mouse-info,\r\n.Navigation .target-info {\r\n	display: none;\r\n	align-items: center;\r\n	color: #000;\r\n	margin-left: 8px;\r\n	white-space: nowrap;\r\n}\r\n\r\n.Navigation .mouse-label,\r\n.Navigation .target-label {\r\n	margin-right: 2px;\r\n}\r\n\r\n/* Path marker styles */\r\n.Navigation .start-marker,\r\n.Navigation .end-marker {\r\n	position: absolute;\r\n	width: 16px;\r\n	height: 16px;\r\n	transform: translate(-50%, -50%);\r\n}\r\n\r\n.Navigation .start-marker {\r\n	background-color: blue;\r\n}\r\n\r\n.Navigation .end-marker {\r\n	background-color: red;\r\n}\r\n\r\n.Navigation .path-line {\r\n	stroke: yellow;\r\n	stroke-width: 2;\r\n	fill: none;\r\n}\r\n\r\n.Navigation .search-results {\r\n	position: absolute;\r\n	top: 30px;\r\n	left: 10px;\r\n	right: 10px;\r\n	max-height: 200px;\r\n	background-color: #fff;\r\n	border: 1px solid #ccc;\r\n	z-index: 100;\r\n	overflow-y: auto;\r\n	display: none;\r\n	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\r\n}\r\n\r\n.Navigation .no-results {\r\n	padding: 10px;\r\n	text-align: center;\r\n	color: #666;\r\n}\r\n\r\n.Navigation .results-list {\r\n	list-style: none;\r\n	margin: 0;\r\n	padding: 0;\r\n}\r\n\r\n.Navigation .result-item {\r\n	padding: 5px 10px;\r\n	border-bottom: 1px solid #eee;\r\n	cursor: pointer;\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n.Navigation .result-item:last-child {\r\n	border-bottom: none;\r\n}\r\n\r\n.Navigation .result-item:hover {\r\n	background-color: #f0f0f0;\r\n}\r\n\r\n.Navigation .result-type {\r\n	margin-right: 5px;\r\n	font-weight: bold;\r\n	color: #666;\r\n	width: 30px;\r\n}\r\n\r\n.Navigation .npc_icon {\r\n	color: #0066cc;\r\n}\r\n\r\n.Navigation .mob_icon {\r\n	color: #cc0000;\r\n}\r\n\r\n.Navigation .result-name {\r\n	flex: 1;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	text-overflow: ellipsis;\r\n}\r\n\r\n.Navigation .result-map {\r\n	color: #666;\r\n	margin-left: 5px;\r\n}\r\n";
+	Navigation_default$1 = ":host {\r\n	top: 200px;\r\n	left: 200px;\r\n}\r\n\r\n.Navigation {\r\n	width: 300px;\r\n	height: 324px;\r\n	z-index: 50;\r\n	background-repeat: repeat-y;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .titlebar {\r\n	width: 100%;\r\n	height: 17px;\r\n	position: relative;\r\n	z-index: 2;\r\n	cursor: move;\r\n}\r\n\r\n.Navigation .titlebar .left {\r\n	width: 15px;\r\n	height: 17px;\r\n	background-repeat: no-repeat;\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n.Navigation .titlebar .center {\r\n	width: calc(100% - 20px);\r\n	height: 17px;\r\n	background-repeat: repeat-x;\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 12px;\r\n}\r\n\r\n.Navigation .titlebar .right {\r\n	width: 12px;\r\n	height: 17px;\r\n	background-repeat: no-repeat;\r\n	position: absolute;\r\n	top: 0px;\r\n	right: 0px;\r\n}\r\n\r\n.Navigation .titlebar .title {\r\n	position: absolute;\r\n	top: 0px;\r\n	left: 10px;\r\n	height: 17px;\r\n	line-height: 17px;\r\n	white-space: nowrap;\r\n	text-shadow: 1px 1px white;\r\n	color: #000000;\r\n	font-size: 11px;\r\n	font-weight: bold;\r\n}\r\n\r\n.Navigation .titlebar .close {\r\n	position: absolute;\r\n	top: 2px;\r\n	right: 2px;\r\n	width: 13px;\r\n	height: 13px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	cursor: pointer;\r\n}\r\n\r\n.Navigation .content {\r\n	width: 100%;\r\n	height: calc(100% - 17px);\r\n	position: relative;\r\n	display: flex;\r\n	flex-direction: column;\r\n	background-color: #f7f7f7;\r\n	border: 1px solid #d4d4d4;\r\n	border-top: none;\r\n	box-sizing: border-box;\r\n}\r\n\r\n.Navigation .search-container {\r\n	width: 100%;\r\n	height: 25px;\r\n	position: relative;\r\n	display: flex;\r\n	align-items: center;\r\n	padding: 5px 10px;\r\n	box-sizing: border-box;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .services-toggle-container {\r\n	display: flex;\r\n	align-items: center;\r\n	padding: 0;\r\n	margin: 0;\r\n	background-color: #f7f7f7;\r\n	position: absolute;\r\n	left: 6px;\r\n}\r\n\r\n.Navigation .services-checkbox {\r\n	color: #000;\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n.Navigation .services-toggle {\r\n	margin-right: 4px;\r\n	margin-top: 3px;\r\n}\r\n\r\n.Navigation .search-type {\r\n	top: 3px;\r\n	height: 20px;\r\n	margin-right: 5px;\r\n	border: 1px solid #ccc;\r\n	background-color: #fff;\r\n	padding: 0 2px;\r\n	cursor: pointer;\r\n	width: 50px;\r\n	z-index: 2;\r\n	position: relative;\r\n}\r\n\r\n.Navigation .search-left {\r\n	position: absolute;\r\n	top: 5px;\r\n	left: 65px;\r\n	width: 3px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .search-middle {\r\n	position: absolute;\r\n	top: 5px;\r\n	left: 68px;\r\n	right: 38px;\r\n	height: 20px;\r\n	background-repeat: repeat-x;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .search-right {\r\n	position: absolute;\r\n	top: 5px;\r\n	right: 35px;\r\n	width: 3px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n}\r\n\r\n.Navigation .search-input {\r\n	position: absolute;\r\n	top: 5px;\r\n	left: 68px;\r\n	right: 38px;\r\n	height: 20px;\r\n	border: none;\r\n	background-color: transparent;\r\n	padding: 0 5px;\r\n	z-index: 1;\r\n}\r\n\r\n.Navigation .search-button {\r\n	position: absolute;\r\n	top: 7px;\r\n	right: 5px;\r\n	width: 33px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	background-color: transparent;\r\n	border: none;\r\n	cursor: pointer;\r\n}\r\n\r\n.Navigation .map-container {\r\n	width: 100%;\r\n	flex: 1;\r\n	position: relative;\r\n	display: flex;\r\n	flex-direction: column;\r\n	align-items: center;\r\n	padding: 0 10px 10px 10px;\r\n	box-sizing: border-box;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .location-title {\r\n	width: 100%;\r\n	height: 16px;\r\n	line-height: 16px;\r\n	text-align: center;\r\n	color: #000000;\r\n	text-shadow: none;\r\n	margin-bottom: 2px;\r\n	font-weight: bold;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .map-display {\r\n	width: 280px;\r\n	height: 230px;\r\n	margin: 0 auto;\r\n	position: relative;\r\n	background-color: #000000;\r\n	border: 1px solid #666666;\r\n	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);\r\n}\r\n\r\n.Navigation .airship-bar {\r\n	width: 100%;\r\n	height: 24px;\r\n	display: flex;\r\n	justify-content: center;\r\n	align-items: flex-start;\r\n	background-color: #f7f7f7;\r\n}\r\n\r\n.Navigation .airship-move {\r\n	width: 120px;\r\n	height: 20px;\r\n	background-repeat: no-repeat;\r\n	cursor: pointer;\r\n}\r\n\r\n.Navigation .footer {\r\n	width: 100%;\r\n	position: relative;\r\n	height: 20px;\r\n	background-color: #f7f7f7;\r\n	border-top: 1px solid #d4d4d4;\r\n	box-sizing: border-box;\r\n}\r\n\r\n.Navigation .coordinates-bar {\r\n	position: relative;\r\n	width: 100%;\r\n	padding: 1px 5px;\r\n	box-sizing: border-box;\r\n	display: flex;\r\n	justify-content: space-between;\r\n	align-items: center;\r\n	height: 20px;\r\n	overflow: hidden;\r\n}\r\n\r\n.Navigation .map-name {\r\n	font-weight: bold;\r\n	color: #000;\r\n	flex: 1;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	text-overflow: ellipsis;\r\n}\r\n\r\n.Navigation .mouse-info,\r\n.Navigation .target-info {\r\n	display: none;\r\n	align-items: center;\r\n	color: #000;\r\n	margin-left: 8px;\r\n	white-space: nowrap;\r\n}\r\n\r\n.Navigation .mouse-label,\r\n.Navigation .target-label {\r\n	margin-right: 2px;\r\n}\r\n\r\n/* Path marker styles */\r\n.Navigation .start-marker,\r\n.Navigation .end-marker {\r\n	position: absolute;\r\n	width: 16px;\r\n	height: 16px;\r\n	transform: translate(-50%, -50%);\r\n}\r\n\r\n.Navigation .start-marker {\r\n	background-color: blue;\r\n}\r\n\r\n.Navigation .end-marker {\r\n	background-color: red;\r\n}\r\n\r\n.Navigation .path-line {\r\n	stroke: yellow;\r\n	stroke-width: 2;\r\n	fill: none;\r\n}\r\n\r\n.Navigation .search-results {\r\n	position: absolute;\r\n	top: 30px;\r\n	left: 10px;\r\n	right: 10px;\r\n	max-height: 200px;\r\n	background-color: #fff;\r\n	border: 1px solid #ccc;\r\n	z-index: 100;\r\n	overflow-y: auto;\r\n	display: none;\r\n	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);\r\n}\r\n\r\n.Navigation .no-results {\r\n	padding: 10px;\r\n	text-align: center;\r\n	color: #666;\r\n}\r\n\r\n.Navigation .results-list {\r\n	list-style: none;\r\n	margin: 0;\r\n	padding: 0;\r\n}\r\n\r\n.Navigation .result-item {\r\n	padding: 5px 10px;\r\n	border-bottom: 1px solid #eee;\r\n	cursor: pointer;\r\n	display: flex;\r\n	align-items: center;\r\n}\r\n\r\n.Navigation .result-item:last-child {\r\n	border-bottom: none;\r\n}\r\n\r\n.Navigation .result-item:hover {\r\n	background-color: #f0f0f0;\r\n}\r\n\r\n.Navigation .result-type {\r\n	margin-right: 5px;\r\n	font-weight: bold;\r\n	color: #666;\r\n	width: 30px;\r\n}\r\n\r\n.Navigation .npc_icon {\r\n	color: #0066cc;\r\n}\r\n\r\n.Navigation .mob_icon {\r\n	color: #cc0000;\r\n}\r\n\r\n.Navigation .result-name {\r\n	flex: 1;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	text-overflow: ellipsis;\r\n}\r\n\r\n.Navigation .result-map {\r\n	color: #666;\r\n	margin-left: 5px;\r\n}\r\n";
 }));
 // src/UI/Components/Navigation/MapPathFinder.js
 var MapPathFinder;
@@ -226893,6 +226991,272 @@ var init_MapPathFinder = __esmMin((() => {
 		return path;
 	};
 }));
+// src/UI/Components/PrivateAirship/PrivateAirship.html?raw
+var PrivateAirship_default$2;
+var init_PrivateAirship$2 = __esmMin((() => {
+	PrivateAirship_default$2 = "<div class=\"PrivateAirship\" data-background=\"private_airplane/bg_pay.bmp\">\r\n	<div class=\"titlebar\">\r\n		<div class=\"title\"><ui-text msg=\"3330\">Payment</ui-text></div>\r\n		<ui-button\r\n			class=\"close\"\r\n			bg=\"basic_interface/sys_close_off.bmp\"\r\n			hover=\"basic_interface/sys_close_on.bmp\"\r\n		></ui-button>\r\n	</div>\r\n	<div class=\"items\"></div>\r\n	<div class=\"notice\">\r\n		<div class=\"notice-icon\" data-background=\"private_airplane/ico_notic.bmp\"></div>\r\n		<div class=\"notice-text\"></div>\r\n	</div>\r\n</div>\r\n";
+}));
+// src/UI/Components/PrivateAirship/PrivateAirship.css?raw
+var PrivateAirship_default$1;
+var init_PrivateAirship$1 = __esmMin((() => {
+	PrivateAirship_default$1 = ":host {\r\n	width: 208px;\r\n	height: 110px;\r\n	top: 0px;\r\n	left: 0px;\r\n}\r\n\r\n.PrivateAirship {\r\n	position: relative;\r\n	width: 100%;\r\n	height: 100%;\r\n	background-color: #eef3fd;\r\n	background-repeat: no-repeat;\r\n	color: #000;\r\n	font-size: 12px;\r\n}\r\n\r\n.PrivateAirship .titlebar {\r\n	position: absolute;\r\n	top: 0;\r\n	left: 0;\r\n	width: 208px;\r\n	height: 17px;\r\n	cursor: move;\r\n}\r\n\r\n.PrivateAirship .title {\r\n	position: absolute;\r\n	top: 3px;\r\n	left: 18px;\r\n	color: #000;\r\n	text-shadow: 1px 1px 0 #fff;\r\n	white-space: nowrap;\r\n}\r\n\r\n.PrivateAirship .close {\r\n	position: absolute;\r\n	top: 3px;\r\n	right: 4px;\r\n	width: 11px;\r\n	height: 11px;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n.PrivateAirship .items {\r\n	position: absolute;\r\n	top: 0;\r\n	left: 0;\r\n}\r\n\r\n.PrivateAirship .item {\r\n	position: absolute;\r\n	left: 8px;\r\n	width: 192px;\r\n	height: 20px;\r\n	padding: 0 4px;\r\n	box-sizing: border-box;\r\n	border: 1px solid #9eaecb;\r\n	border-radius: 3px;\r\n	background: linear-gradient(#ffffff, #dfe6f4);\r\n	color: #000;\r\n	font-size: 12px;\r\n	line-height: 18px;\r\n	text-align: center;\r\n	white-space: nowrap;\r\n	overflow: hidden;\r\n	text-overflow: ellipsis;\r\n	cursor: pointer;\r\n}\r\n\r\n.PrivateAirship .item:hover {\r\n	background: linear-gradient(#ffffff, #c9d6ef);\r\n}\r\n\r\n.PrivateAirship .item.disabled {\r\n	opacity: 0.5;\r\n	cursor: default;\r\n	pointer-events: none;\r\n}\r\n\r\n.PrivateAirship .notice {\r\n	display: none;\r\n}\r\n\r\n.PrivateAirship .notice.visible {\r\n	display: block;\r\n}\r\n\r\n.PrivateAirship .notice-icon {\r\n	position: absolute;\r\n	top: calc(86px + var(--extra-rows-height, 0px));\r\n	left: 7px;\r\n	width: 14px;\r\n	height: 13px;\r\n	background-repeat: no-repeat;\r\n}\r\n\r\n.PrivateAirship .notice-text {\r\n	position: absolute;\r\n	top: calc(80px + var(--extra-rows-height, 0px));\r\n	left: 26px;\r\n	width: 164px;\r\n	height: 26px;\r\n	display: flex;\r\n	align-items: center;\r\n	color: #b51235;\r\n	line-height: 12px;\r\n	overflow: hidden;\r\n}\r\n";
+}));
+// src/UI/Components/PrivateAirship/PrivateAirship.js
+/**
+* Forget the requests of an earlier map load: the server answers a refusal at
+* once and moves you on success, and a lost connection means a new map load.
+*/
+function syncRequests() {
+	if (_requests.loadId !== MapRenderer._loadId) Object.assign(_requests, {
+		loadId: MapRenderer._loadId,
+		waiting: false,
+		lastSent: 0
+	});
+}
+/**
+* @return {boolean} a request is on its way
+*/
+function isPending() {
+	syncRequests();
+	return _requests.waiting && Date.now() - _requests.lastSent < PENDING_TIMEOUT;
+}
+/**
+* Text for a message id, without RO colour codes.
+*
+* @param {number} id
+* @return {string}
+*/
+function message(id) {
+	return String(DB.getMessage(id, FALLBACK[id] || "")).replace(/\^[0-9a-fA-F]{6}/g, "");
+}
+/**
+* Item name, or '' when the client does not know the item.
+*
+* @param {number} itemId
+* @return {string}
+*/
+function itemName(itemId) {
+	const info = DB.getItemInfo(itemId);
+	if (!info || info === DB.getItemInfo(-1)) return "";
+	return info.identifiedDisplayName || "";
+}
+/**
+* Current map, without extension.
+*
+* @return {string}
+*/
+function currentMap() {
+	return PrivateAirship$1.normalize(MapRenderer.currentMap);
+}
+var MSG, FALLBACK, NYANGVINE_FRUIT, RESULT_MESSAGE, ITEM_ROW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, BASE_ITEM_ROWS, PrivateAirship, _targetMap, _requests, PENDING_TIMEOUT, PrivateAirship_default;
+var init_PrivateAirship = __esmMin((() => {
+	init_DBManager();
+	init_PrivateAirship$3();
+	init_NetworkManager();
+	init_PacketStructure();
+	init_Renderer();
+	init_MapRenderer();
+	init_SessionStorage();
+	init_KeyEventHandler();
+	init_UIManager();
+	init_GUIComponent();
+	init_Elements();
+	init_PrivateAirship$2();
+	init_PrivateAirship$1();
+	MSG = {
+		PAYMENT: 3330,
+		USE_ITEM: 3329,
+		NPC_RANDOM_CELL: 3387,
+		NOT_STARTABLE: 3331,
+		NOT_ENDABLE: 3332,
+		NOT_ENOUGH_ITEM: 3333,
+		CANNOT_USE_ITEM: 3352,
+		SAME_MAP: 3353,
+		DEAD: 3354,
+		TRY_AGAIN: 2825,
+		NYANGVINE_NO_REFUND: 4033
+	};
+	FALLBACK = {
+		[MSG.PAYMENT]: "Payment",
+		[MSG.USE_ITEM]: "Use %s",
+		[MSG.NPC_RANDOM_CELL]: "You will land at a random spot on the map.",
+		[MSG.NOT_STARTABLE]: "This map isn't available for teleport.",
+		[MSG.NOT_ENDABLE]: "You can't teleport in this map",
+		[MSG.NOT_ENOUGH_ITEM]: "Insufficient item.",
+		[MSG.CANNOT_USE_ITEM]: "You can not use items.",
+		[MSG.SAME_MAP]: "Can not move to the same map.",
+		[MSG.DEAD]: "It is impossible to move when your character KO'ed",
+		[MSG.TRY_AGAIN]: "Please try again in a moment.",
+		[MSG.NYANGVINE_NO_REFUND]: "Used Nyangvine Fruits cannot be refunded."
+	};
+	NYANGVINE_FRUIT = 6909;
+	RESULT_MESSAGE = {
+		1: MSG.TRY_AGAIN,
+		2: MSG.NOT_ENOUGH_ITEM,
+		3: MSG.NOT_ENDABLE,
+		4: MSG.NOT_STARTABLE,
+		5: MSG.CANNOT_USE_ITEM
+	};
+	ITEM_ROW_HEIGHT = 26;
+	WINDOW_WIDTH = 208;
+	WINDOW_HEIGHT = 110;
+	BASE_ITEM_ROWS = 2;
+	PrivateAirship = new GUIComponent("PrivateAirship", PrivateAirship_default$1);
+	PrivateAirship.render = () => PrivateAirship_default$2;
+	PrivateAirship.needFocus = true;
+	_targetMap = "";
+	_requests = {
+		loadId: null,
+		waiting: false,
+		lastSent: 0
+	};
+	PENDING_TIMEOUT = 15e3;
+	/**
+	* The checks the official client makes before it sends the request, in its order.
+	*
+	* @param {string} targetMap
+	* @return {number} message id of the first failed check, or 0
+	*/
+	PrivateAirship.precheck = function precheck(targetMap) {
+		const from = currentMap();
+		const to = PrivateAirship$1.normalize(targetMap);
+		if (!PrivateAirship$1.isStartableMap(from)) return MSG.NOT_STARTABLE;
+		if (!PrivateAirship$1.isEndableMap(to)) return MSG.NOT_ENDABLE;
+		if (!to || to === from) return MSG.SAME_MAP;
+		const entity = SessionStorage_default.Entity;
+		if (entity && entity.ACTION && entity.action === entity.ACTION.DIE) return MSG.DEAD;
+		return 0;
+	};
+	/**
+	* Initialize component
+	*/
+	PrivateAirship.init = function init() {
+		(this._shadow || this._host).querySelector(".close").addEventListener("click", () => this.remove());
+		this.draggable(".titlebar");
+	};
+	/**
+	* Center on screen when it opens
+	*/
+	PrivateAirship.onAppend = function onAppend() {
+		Object.assign(this._host.style, {
+			top: `${Math.max(0, Math.floor((Renderer.height - WINDOW_HEIGHT) / 2))}px`,
+			left: `${Math.max(0, Math.floor((Renderer.width - WINDOW_WIDTH) / 2))}px`
+		});
+	};
+	/**
+	* Close on Escape
+	*/
+	PrivateAirship.onKeyDown = function onKeyDown(event) {
+		if (event.which === KEYS.ESCAPE || event.key === "Escape") {
+			this.remove();
+			event.preventDefault();
+			event.stopImmediatePropagation();
+		}
+	};
+	/**
+	* Open the window to fly to a map.
+	*
+	* @param {object} options
+	* @param {string} options.targetMap - map to fly to
+	* @param {boolean} [options.toNpc] - the navigation target is an NPC, which the flight does not reach
+	*/
+	PrivateAirship.open = function open(options) {
+		_targetMap = PrivateAirship$1.normalize(options && options.targetMap);
+		if (this.__active) this.remove();
+		this.append();
+		const failed = this.precheck(_targetMap);
+		this.buildItems(!failed);
+		if (failed) this.setNotice(message(failed));
+		else if (options && options.toNpc) this.setNotice(message(MSG.NPC_RANDOM_CELL));
+		else this.setNotice("");
+	};
+	/**
+	* One button per payment item the client knows.
+	*
+	* @param {boolean} enabled
+	*/
+	PrivateAirship.buildItems = function buildItems(enabled) {
+		const list = (this._shadow || this._host).querySelector(".items");
+		list.textContent = "";
+		const items = PrivateAirship$1.getNeedItems();
+		let row = 0;
+		for (let i = 0; i < items.length; i++) {
+			const itemId = items[i];
+			const name = itemName(itemId);
+			if (!name) continue;
+			row++;
+			const button = document.createElement("div");
+			button.className = "item" + (enabled ? "" : " disabled");
+			button.style.top = `${row * ITEM_ROW_HEIGHT}px`;
+			button.textContent = message(MSG.USE_ITEM).replace("%s", name);
+			button.dataset.itemId = String(itemId);
+			button.addEventListener("click", () => this.pay(itemId));
+			list.appendChild(button);
+		}
+		const extra = Math.max(0, row - BASE_ITEM_ROWS) * ITEM_ROW_HEIGHT;
+		this._host.style.height = `${WINDOW_HEIGHT + extra}px`;
+		this._host.style.setProperty("--extra-rows-height", `${extra}px`);
+	};
+	/**
+	* Show or clear the red notice line.
+	*
+	* @param {string} text
+	*/
+	PrivateAirship.setNotice = function setNotice(text) {
+		const root = this._shadow || this._host;
+		const notice = root.querySelector(".notice");
+		root.querySelector(".notice-text").textContent = text || "";
+		notice.classList.toggle("visible", !!text);
+	};
+	/**
+	* Pay with an item and send the request.
+	*
+	* @param {number} itemId
+	*/
+	PrivateAirship.pay = function pay(itemId) {
+		if (isPending() || !_targetMap) return;
+		if (itemId === NYANGVINE_FRUIT) {
+			UIManager.showPromptBox(message(MSG.NYANGVINE_NO_REFUND), "ok", "cancel", () => PrivateAirship.sendRequest(itemId));
+			return;
+		}
+		this.sendRequest(itemId);
+	};
+	/**
+	* Send CZ_PRIVATE_AIRSHIP_REQUEST.
+	*
+	* @param {number} itemId
+	*/
+	PrivateAirship.sendRequest = function sendRequest(itemId) {
+		if (isPending() || !_targetMap) return;
+		syncRequests();
+		_requests.waiting = true;
+		_requests.lastSent = Date.now();
+		const pkt = new PACKET.CZ.PRIVATE_AIRSHIP_REQUEST();
+		pkt.mapName = _targetMap + ".gat";
+		pkt.ItemID = itemId;
+		Network.sendPacket(pkt);
+	};
+	/**
+	* ZC_PRIVATE_AIRSHIP_RESPONSE: close on success, otherwise say why.
+	*
+	* @param {object} pkt
+	*/
+	PrivateAirship.onResponse = function onResponse(pkt) {
+		syncRequests();
+		_requests.waiting = false;
+		if (!PrivateAirship.__active) return;
+		if (pkt.result === 0) {
+			PrivateAirship.remove();
+			return;
+		}
+		PrivateAirship.setNotice(message(RESULT_MESSAGE[pkt.result] || MSG.TRY_AGAIN));
+	};
+	/**
+	* Packet Hooks to functions
+	*/
+	Network.hookPacket(PACKET.ZC.PRIVATE_AIRSHIP_RESPONSE, PrivateAirship.onResponse);
+	PrivateAirship_default = UIManager.addComponent(PrivateAirship);
+}));
 // src/UI/Components/Navigation/Navigation.js
 /**
 * Async image create helper
@@ -227021,7 +227385,7 @@ function resetPathFindingWorker() {
 	terminatePathFindingWorker();
 	initializePathFindingWorker();
 }
-var Navigation, _arrow, _toolDealer, _weaponDealer, _armorDealer, _blacksmith, _guide, _inn, _kafra, _map, _ctx$1, _towninfo, _markers, _path, _lastPathUpdate, _pathUpdateThrottle, _pathUpdateLock, _pathFindingWorker, _mapData, _targetData, _finalTargetData, _isMapClickTarget, _blinking, _fadeInterval, _originalColor, _documentClickHandler, Navigation_default;
+var PRIVATE_AIRSHIP_PACKETVER, Navigation, _arrow, _toolDealer, _weaponDealer, _armorDealer, _blacksmith, _guide, _inn, _kafra, _map, _ctx$1, _towninfo, _markers, _path, _lastPathUpdate, _pathUpdateThrottle, _pathUpdateLock, _pathFindingWorker, _mapData, _targetData, _finalTargetData, _isMapClickTarget, _blinking, _fadeInterval, _originalColor, _documentClickHandler, Navigation_default;
 var init_Navigation = __esmMin((() => {
 	init_KeyEventHandler();
 	init_Renderer();
@@ -227036,6 +227400,9 @@ var init_Navigation = __esmMin((() => {
 	init_Navigation$2();
 	init_Navigation$1();
 	init_MapPathFinder();
+	init_PrivateAirship();
+	init_PacketVerManager();
+	PRIVATE_AIRSHIP_PACKETVER = 20180321;
 	Navigation = new GUIComponent("Navigation", Navigation_default$1);
 	Navigation.render = () => Navigation_default$2;
 	_arrow = createAsyncImage();
@@ -227125,6 +227492,7 @@ var init_Navigation = __esmMin((() => {
 		});
 		root.querySelector(".close").addEventListener("click", () => this.hide());
 		root.querySelector(".search-button").addEventListener("click", () => this.onSearch());
+		root.querySelector(".airship-move").addEventListener("click", () => this.onAirshipMove());
 		const searchInput = root.querySelector(".search-input");
 		searchInput.addEventListener("keypress", (e) => {
 			if (e.which === KEYS.ENTER || e.key === "Enter") this.onSearch();
@@ -227155,16 +227523,18 @@ var init_Navigation = __esmMin((() => {
 		initializePathFindingWorker();
 		const mapName = getCurrentMap();
 		this.loadMap(mapName);
+		this.updateAirshipButton();
 		if (_finalTargetData) {
 			const currentPos = getPlayerPosition();
 			this.navigateTo({
 				startMap: mapName,
 				startX: currentPos.x,
 				startY: currentPos.y,
-				endMap: _finalTargetData.map,
+				endMap: _finalTargetData.airshipMap || _finalTargetData.map,
 				endX: _finalTargetData.x,
 				endY: _finalTargetData.y,
-				displayName: _finalTargetData.displayName
+				displayName: _finalTargetData.displayName,
+				isNpc: _finalTargetData.isNpc
 			});
 		}
 	};
@@ -227235,7 +227605,8 @@ var init_Navigation = __esmMin((() => {
 			endMap: result.mapName,
 			endX: result.x,
 			endY: result.y,
-			displayName: result.name
+			displayName: result.name,
+			isNpc: result.type === "NPC"
 		});
 		const resultsContainer = Navigation.getRoot().querySelector(".search-results");
 		if (resultsContainer) resultsContainer.style.display = "none";
@@ -227297,7 +227668,8 @@ var init_Navigation = __esmMin((() => {
 			endMap: currentMap,
 			endX: mapCoords.x,
 			endY: mapCoords.y,
-			displayName: "Map Click"
+			displayName: "Map Click",
+			airshipMap: MapRenderer.currentMap
 		});
 	};
 	/**
@@ -227351,6 +227723,29 @@ var init_Navigation = __esmMin((() => {
 		if (targetInfo) targetInfo.style.display = "none";
 		const currentMap = getCurrentMap();
 		if (currentMap) this.setLocationTitle(currentMap, null);
+		this.updateAirshipButton();
+	};
+	/**
+	* Enable the Private Airship Move button while there is a target
+	*/
+	Navigation.updateAirshipButton = function updateAirshipButton() {
+		const root = Navigation.getRoot();
+		const bar = root && root.querySelector(".airship-bar");
+		const button = root && root.querySelector(".airship-move");
+		if (!bar || !button) return;
+		const supported = PacketVerManager_default.value >= PRIVATE_AIRSHIP_PACKETVER;
+		bar.style.display = supported ? "" : "none";
+		button.disabled = !supported || !_finalTargetData;
+	};
+	/**
+	* Move button: fly to the target's map with the Private Airship
+	*/
+	Navigation.onAirshipMove = function onAirshipMove() {
+		if (!_finalTargetData || PacketVerManager_default.value < PRIVATE_AIRSHIP_PACKETVER) return;
+		PrivateAirship_default.open({
+			targetMap: _finalTargetData.airshipMap || _finalTargetData.map,
+			toNpc: !!_finalTargetData.isNpc
+		});
 	};
 	Navigation.clearPath = function clearPath() {
 		_path = [];
@@ -227384,10 +227779,11 @@ var init_Navigation = __esmMin((() => {
 				startMap: currentMap,
 				startX: currentPos.x,
 				startY: currentPos.y,
-				endMap: _finalTargetData.map,
+				endMap: _finalTargetData.airshipMap || _finalTargetData.map,
 				endX: _finalTargetData.x,
 				endY: _finalTargetData.y,
-				displayName: _finalTargetData.displayName
+				displayName: _finalTargetData.displayName,
+				isNpc: _finalTargetData.isNpc
 			});
 			_lastPathUpdate = tick;
 		}
@@ -227653,10 +228049,11 @@ var init_Navigation = __esmMin((() => {
 			startMap: mapName,
 			startX: currentPos.x,
 			startY: currentPos.y,
-			endMap: _finalTargetData.map,
+			endMap: _finalTargetData.airshipMap || _finalTargetData.map,
 			endX: _finalTargetData.x,
 			endY: _finalTargetData.y,
-			displayName: _finalTargetData.displayName
+			displayName: _finalTargetData.displayName,
+			isNpc: _finalTargetData.isNpc
 		});
 		this.setMapNameText(mapName);
 		const locationTitle = root.querySelector(".location-title");
@@ -227743,12 +228140,16 @@ var init_Navigation = __esmMin((() => {
 			this.setTargetCoordinatesText(options.endX, options.endY, { targetMap: endMap });
 			this.setTargetCoordinatesBlinking(true);
 		}
+		const airshipMap = String(options.airshipMap || options.endMap || "").replace(/\.gat$/, "").toLowerCase();
 		_finalTargetData = {
 			map: endMap,
 			x: options.endX,
 			y: options.endY,
-			displayName
+			displayName,
+			airshipMap,
+			isNpc: !!options.isNpc
 		};
+		this.updateAirshipButton();
 		let warpTypes = [200, 201];
 		const servicesToggle = root.querySelector(".services-toggle");
 		if (servicesToggle && servicesToggle.checked) warpTypes = [
@@ -255869,7 +256270,7 @@ function generateCylinder(totalCircleSides, circleSides, repeatTextureX) {
 	}
 	return new Float32Array(mesh);
 }
-var _program$24, blendMode$3, mat4$18, _matrix$6, Cylinder;
+var _program$24, blendMode$3, mat4$18, _matrix$5, Cylinder;
 var init_Cylinder = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -255880,7 +256281,7 @@ var init_Cylinder = __esmMin((() => {
 	init_Cylinder$1();
 	blendMode$3 = {};
 	mat4$18 = gl_matrix_default.mat4;
-	_matrix$6 = mat4$18.create();
+	_matrix$5 = mat4$18.create();
 	Cylinder = class {
 		constructor(effect, EF_Inst_Par, EF_Init_Par) {
 			const position = EF_Inst_Par.position;
@@ -256032,11 +256433,11 @@ var init_Cylinder = __esmMin((() => {
 				this.position[2]
 			];
 			if (this.rotate || this.angleX || this.angleY || this.angleZ || this.rotateWithCamera || this.fixedPerspective) {
-				mat4$18.identity(_matrix$6);
-				if (this.rotate) mat4$18.rotateY(_matrix$6, _matrix$6, tick / 4 / 180 * Math.PI);
-				if (this.angleX) mat4$18.rotateX(_matrix$6, _matrix$6, this.angleX / 180 * Math.PI);
-				if (this.angleY) mat4$18.rotateY(_matrix$6, _matrix$6, this.angleY / 180 * Math.PI);
-				if (this.angleZ) mat4$18.rotateZ(_matrix$6, _matrix$6, this.angleZ / 180 * Math.PI);
+				mat4$18.identity(_matrix$5);
+				if (this.rotate) mat4$18.rotateY(_matrix$5, _matrix$5, tick / 4 / 180 * Math.PI);
+				if (this.angleX) mat4$18.rotateX(_matrix$5, _matrix$5, this.angleX / 180 * Math.PI);
+				if (this.angleY) mat4$18.rotateY(_matrix$5, _matrix$5, this.angleY / 180 * Math.PI);
+				if (this.angleZ) mat4$18.rotateZ(_matrix$5, _matrix$5, this.angleZ / 180 * Math.PI);
 				if (this.rotateWithCamera || this.fixedPerspective) {
 					let magic = this.posY;
 					if (this.fixedPerspective) {
@@ -256045,21 +256446,21 @@ var init_Cylinder = __esmMin((() => {
 							currentPosition[2] += this.posZ * Math.cos(vcRad) - this.posY * Math.sin(vcRad);
 							magic = this.posY * Math.sin(vcRad) + this.posZ * Math.sin(vcRad);
 						}
-						mat4$18.rotateX(_matrix$6, _matrix$6, vcRad);
+						mat4$18.rotateX(_matrix$5, _matrix$5, vcRad);
 					}
 					const hcRad = Camera.angle[1] * Math.PI / 180;
 					if (this.posX || this.posY) {
 						currentPosition[0] += this.posX * Math.cos(hcRad) - magic * Math.sin(hcRad);
 						currentPosition[1] += magic * Math.cos(hcRad) + this.posX * Math.sin(hcRad);
 					}
-					mat4$18.rotateY(_matrix$6, _matrix$6, hcRad);
+					mat4$18.rotateY(_matrix$5, _matrix$5, hcRad);
 				} else {
 					currentPosition[0] += this.posX;
 					currentPosition[1] += this.posY;
 					currentPosition[2] += this.posZ;
 				}
 				gl.uniform1i(uniform.uRotate, true);
-				gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$6);
+				gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$5);
 			} else {
 				currentPosition[0] += this.posX;
 				currentPosition[1] += this.posY;
@@ -258626,6 +259027,31 @@ function getRandomIntInclusive(min, max) {
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1) + min);
 }
+/**
+* Alpha of a 2D effect at a time
+*
+* @param {object} fx alphaMax, fadeIn, fadeOut, fadeInMs, fadeOutStartMs
+* @param {number} start ms since the effect started
+* @param {number} duration ms
+* @return {number} alpha, 0..1
+*/
+function twoDAlpha(fx, start, duration) {
+	let alpha = fx.alphaMax;
+	if (fx.fadeInMs && start < fx.fadeInMs) alpha = start * fx.alphaMax / fx.fadeInMs;
+	else if (fx.fadeOutStartMs >= 0 && start > fx.fadeOutStartMs) alpha = (duration - start) * fx.alphaMax / Math.max(duration - fx.fadeOutStartMs, 1);
+	else if (fx.fadeIn && start < duration / 4) alpha = start * fx.alphaMax / (duration / 4);
+	else if (fx.fadeOut && start > duration / 2 + duration / 4) alpha = (duration - start) * fx.alphaMax / (duration / 4);
+	return Math.min(Math.max(alpha, 0), 1);
+}
+/**
+* Size factor of a pulsing 2D effect: 1 + amount * sin(phase), where the phase starts at
+* fx.pulsePhase (degrees) and advances fx.sizePulse.degPerTick each 60 Hz tick.
+*/
+function twoDPulse(fx, start) {
+	if (!fx.sizePulse) return 1;
+	const phase = fx.pulsePhase + start / (1e3 / 60) * fx.sizePulse.degPerTick;
+	return 1 + fx.sizePulse.amount * Math.sin(phase * Math.PI / 180);
+}
 var blendMode$2, shadow_index, TwoDEffect;
 var init_TwoDEffect = __esmMin((() => {
 	init_WebGL();
@@ -258647,6 +259073,8 @@ var init_TwoDEffect = __esmMin((() => {
 			this.zIndex = effect.zIndex ? effect.zIndex : 0;
 			this.fadeOut = effect.fadeOut ? true : false;
 			this.fadeIn = effect.fadeIn ? true : false;
+			this.fadeInMs = effect.fadeInMs > 0 ? effect.fadeInMs : 0;
+			this.fadeOutStartMs = effect.fadeOutStartMs >= 0 ? effect.fadeOutStartMs : -1;
 			this.overlay = effect.overlay ? true : false;
 			this.alphaMax = !isNaN(effect.alphaMax) ? Math.max(Math.min(effect.alphaMax, 1), 0) : 1;
 			this.shadowTexture = effect.shadowTexture ? true : false;
@@ -258850,6 +259278,8 @@ var init_TwoDEffect = __esmMin((() => {
 			if (effect.sizeRandStartY) this.sizeStartY = getRandomIntInclusive(effect.sizeRandStartY[0], effect.sizeRandStartY[1]);
 			if (effect.sizeRandEndY) this.sizeEndY = getRandomIntInclusive(effect.sizeRandEndY[0], effect.sizeRandEndY[1]);
 			if (effect.sizeRandEndX) this.sizeEndX = getRandomIntInclusive(effect.sizeRandEndX[0], effect.sizeRandEndX[1]);
+			this.sizePulse = effect.sizePulse || null;
+			this.pulsePhase = this.sizePulse ? getRandomIntInclusive(0, 359) : 0;
 			if (effect.durationRand) effect.duration = getRandomIntInclusive(effect.durationRand[0], effect.durationRand[1]);
 			if (this.ownerEntity && this.shadowTexture) this.ownerEntity.attachments.add({
 				completeFile: "data/sprite/shadow",
@@ -258960,11 +259390,7 @@ var init_TwoDEffect = __esmMin((() => {
 			} else currentOffsetY = this.offsetyStart;
 			SpriteRenderer.offset[0] = currentOffsetX;
 			SpriteRenderer.offset[1] = currentOffsetY;
-			let alpha = this.alphaMax;
-			if (this.fadeIn && start < duration / 4) alpha = start * this.alphaMax / (duration / 4);
-			else if (this.fadeOut && start > duration / 2 + duration / 4) alpha = (duration - start) * this.alphaMax / (duration / 4);
-			if (alpha < 0) alpha = 0;
-			else if (alpha > 1) alpha = 1;
+			const alpha = twoDAlpha(this, start, duration);
 			SpriteRenderer.color[3] = alpha;
 			SpriteRenderer.color[0] = this.red;
 			SpriteRenderer.color[1] = this.green;
@@ -258997,8 +259423,9 @@ var init_TwoDEffect = __esmMin((() => {
 					currentYSize = steps * step + _start;
 				} else currentYSize = this.sizeStartY;
 			}
-			SpriteRenderer.size[0] = currentXSize;
-			SpriteRenderer.size[1] = currentYSize;
+			const pulse = twoDPulse(this, start);
+			SpriteRenderer.size[0] = currentXSize * pulse;
+			SpriteRenderer.size[1] = currentYSize * pulse;
 			if (this.rotate) {
 				const step = (this.toAngle - this.angle) / 100;
 				const startAngle = this.angle;
@@ -259650,7 +260077,7 @@ function toScreen(position, matrix, width, height) {
 * @return {number}
 */
 function screenAngle(from, to, matrix, width = Renderer.width, height = Renderer.height) {
-	if (!matrix) matrix = mat4$15.multiply(_matrix$5, Camera.projection, Camera.modelView);
+	if (!matrix) matrix = mat4$15.multiply(_matrix$4, Camera.projection, Camera.modelView);
 	const [x1, y1] = toScreen(from, matrix, width, height);
 	const [x2, y2] = toScreen(to, matrix, width, height);
 	const dx = x2 - x1;
@@ -259681,13 +260108,13 @@ function screenSector(angle) {
 function screenSide(angle) {
 	return angle <= 90 || angle >= 270 ? "right" : "left";
 }
-var mat4$15, vec4$7, _matrix$5, _point;
+var mat4$15, vec4$7, _matrix$4, _point;
 var init_ScreenDirection = __esmMin((() => {
 	init_gl_matrix();
 	init_Camera();
 	init_Renderer();
 	({mat4: mat4$15, vec4: vec4$7} = gl_matrix_default);
-	_matrix$5 = mat4$15.create();
+	_matrix$4 = mat4$15.create();
 	_point = vec4$7.create();
 }));
 // src/Renderer/Effects/ShuffledGrid.js
@@ -260241,7 +260668,7 @@ function setVertex(index, x, y, z, u, v) {
 	_vertices[offset + 3] = u;
 	_vertices[offset + 4] = v;
 }
-var mat4$13, _matrix$4, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$20, _particleProgram, _textureCache, _vertices, WaterfallEffect;
+var mat4$13, _matrix$3, UNIT, LAYER_COUNT, SEGMENT_COUNT, TEXTURE_COUNT, SEGMENT_HEIGHT, EFFECT_TICK_MS, OPACITY, PARTICLE_TEXTURE, PARTICLE_CYCLE_MS, PARTICLE_SIZE, PARTICLE_COLOR, PARTICLE_FLOATS, PARTICLE_CORNERS, _program$20, _particleProgram, _textureCache, _vertices, WaterfallEffect;
 var init_WaterfallEffect = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -260251,7 +260678,7 @@ var init_WaterfallEffect = __esmMin((() => {
 	init_WaterfallParticle$1();
 	init_WaterfallParticle();
 	mat4$13 = gl_matrix_default.mat4;
-	_matrix$4 = mat4$13.create();
+	_matrix$3 = mat4$13.create();
 	UNIT = 1 / 5;
 	LAYER_COUNT = 4;
 	SEGMENT_COUNT = 5;
@@ -260316,14 +260743,14 @@ var init_WaterfallEffect = __esmMin((() => {
 		render(gl, tick) {
 			const uniform = _program$20.uniform;
 			const attribute = _program$20.attribute;
-			mat4$13.identity(_matrix$4);
-			mat4$13.translate(_matrix$4, _matrix$4, [
+			mat4$13.identity(_matrix$3);
+			mat4$13.translate(_matrix$3, _matrix$3, [
 				this.position[0] + .5,
 				1 - this.position[2],
 				this.position[1] + .5
 			]);
-			if (this.vertical) mat4$13.rotateY(_matrix$4, _matrix$4, Math.PI / 2);
-			gl.uniformMatrix4fv(uniform.uModelMat, false, _matrix$4);
+			if (this.vertical) mat4$13.rotateY(_matrix$3, _matrix$3, Math.PI / 2);
+			gl.uniformMatrix4fv(uniform.uModelMat, false, _matrix$3);
 			const elapsed = tick - this.startTick;
 			const process = Math.floor(elapsed / EFFECT_TICK_MS);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -260369,7 +260796,7 @@ var init_WaterfallEffect = __esmMin((() => {
 			const uniform = _particleProgram.uniform;
 			const attribute = _particleProgram.attribute;
 			gl.useProgram(_particleProgram);
-			gl.uniformMatrix4fv(uniform.uModelMat, false, _matrix$4);
+			gl.uniformMatrix4fv(uniform.uModelMat, false, _matrix$3);
 			gl.uniform1f(uniform.uTime, elapsed / PARTICLE_CYCLE_MS);
 			gl.uniform1f(uniform.uSize, PARTICLE_SIZE);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -268432,7 +268859,7 @@ var init_LockOnTarget$1 = __esmMin((() => {
 	LockOnTarget_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\n\r\nuniform sampler2D uDiffuse;\r\nuniform float uColor;\r\nout vec4 fragColor;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n    if (textureSample.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    fragColor     = textureSample;\r\n    fragColor.gb *= uColor;\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
 }));
 // src/Renderer/Effects/LockOnTarget.js
-var _texture$4, _program$10, _buffer$4, mat4$7, _matrix$3, LockOnTarget;
+var _texture$4, _program$10, _buffer$4, mat4$7, _matrix$2, LockOnTarget;
 var init_LockOnTarget = __esmMin((() => {
 	init_WebGL();
 	init_Texture();
@@ -268442,7 +268869,7 @@ var init_LockOnTarget = __esmMin((() => {
 	init_LockOnTarget$2();
 	init_LockOnTarget$1();
 	mat4$7 = gl_matrix_default.mat4;
-	_matrix$3 = mat4$7.create();
+	_matrix$2 = mat4$7.create();
 	LockOnTarget = class LockOnTarget {
 		constructor(target, startTick, endTick) {
 			this.target = target;
@@ -268563,12 +268990,12 @@ var init_LockOnTarget = __esmMin((() => {
 		static beforeRender(gl, modelView, projection, fog, tick) {
 			const uniform = _program$10.uniform;
 			const attribute = _program$10.attribute;
-			mat4$7.identity(_matrix$3);
-			mat4$7.rotateY(_matrix$3, _matrix$3, tick / 4 / 180 * Math.PI);
+			mat4$7.identity(_matrix$2);
+			mat4$7.rotateY(_matrix$2, _matrix$2, tick / 4 / 180 * Math.PI);
 			gl.useProgram(_program$10);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
-			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$3);
+			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$2);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -268683,7 +269110,7 @@ function generateMagicRing() {
 	}
 	return new Float32Array(mesh);
 }
-var _program$9, _buffer$3, mat4$6, _matrix$2, _verticeCount$1, MagicRing;
+var _program$9, _buffer$3, mat4$6, _matrix$1, _verticeCount$1, MagicRing;
 var init_MagicRing = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
@@ -268691,7 +269118,7 @@ var init_MagicRing = __esmMin((() => {
 	init_MagicRing$2();
 	init_MagicRing$1();
 	mat4$6 = gl_matrix_default.mat4;
-	_matrix$2 = mat4$6.create();
+	_matrix$1 = mat4$6.create();
 	_verticeCount$1 = 0;
 	MagicRing = class {
 		constructor(target, topSize, bottomSize, height, textureName, endTick) {
@@ -268780,12 +269207,12 @@ var init_MagicRing = __esmMin((() => {
 		*/
 		static beforeRender(gl, modelView, projection, fog, tick) {
 			const uniform = _program$9.uniform;
-			mat4$6.identity(_matrix$2);
-			mat4$6.rotateY(_matrix$2, _matrix$2, tick / 4 / 180 * Math.PI);
+			mat4$6.identity(_matrix$1);
+			mat4$6.rotateY(_matrix$1, _matrix$1, tick / 4 / 180 * Math.PI);
 			gl.useProgram(_program$9);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
-			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$2);
+			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$1);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -268804,6 +269231,131 @@ var init_MagicRing = __esmMin((() => {
 		}
 	};
 }));
+// src/Renderer/Effects/MagicTargetSim.js
+/**
+* Cells across the square for a skill; 0 means no circle.
+*
+* @param {number} skillId
+* @return {number}
+*/
+function castSize(skillId) {
+	const area = skillId in CAST_AREA ? CAST_AREA[skillId] : 0;
+	return Math.max(0, area + 2);
+}
+/**
+* Texture angle on tick `t` (0 on the first) of a square `size` cells across.
+*
+* @param {number} t
+* @param {number} size
+* @return {number} radians
+*/
+function spinAngle(t, size) {
+	return .5 / size * t;
+}
+/**
+* Alpha (0-255) at texture angle `angle`.
+*
+* @param {number} angle radians
+* @return {number}
+*/
+function targetAlpha(angle) {
+	return 128 + Math.trunc(40 * Math.sin(angle));
+}
+var CAST_AREA;
+var init_MagicTargetSim = __esmMin((() => {
+	init_SkillConst();
+	init_EffectPrimSim();
+	CAST_AREA = {};
+	for (const [area, names] of Object.entries({
+		3: [
+			"MG_NAPALMBEAT",
+			"AL_PNEUMA",
+			"AC_SHOWER",
+			"PR_BENEDICTIO",
+			"WZ_FIREPILLAR",
+			"WZ_WATERBALL",
+			"WZ_FROSTNOVA",
+			"BS_HAMMERFALL",
+			"HT_BLITZBEAT",
+			"HT_DETECTING",
+			"AS_GRIMTOOTH",
+			"AS_VENOMDUST",
+			"SN_FALCONASSAULT",
+			"HW_GANBANTEIN",
+			"NC_ARMSCANNON",
+			"NW_BASIC_GRENADE",
+			"NW_GRENADES_DROPPING"
+		],
+		5: [
+			"MG_FIREBALL",
+			"MG_THUNDERSTORM",
+			"PR_SANCTUARY",
+			"WZ_HEAVENDRIVE",
+			"WZ_QUAGMIRE",
+			"HW_GRAVITATION",
+			"NPC_GROUNDDRIVE",
+			"RK_WINDCUTTER",
+			"GC_POISONSMOKE",
+			"AB_EPICLESIS",
+			"NW_WILD_FIRE",
+			"NW_HASTY_FIRE_IN_THE_HOLE"
+		],
+		7: [
+			"PR_MAGNUS",
+			"CR_SLIMPITCHER",
+			"NPC_MAGMA_ERUPTION",
+			"NPC_CLOUD_KILL",
+			"RA_DETONATOR",
+			"SO_CLOUD_KILL",
+			"SO_WARMER",
+			"SO_VACUUM_EXTREME",
+			"SO_VARETYR_SPEAR",
+			"NC_MAGMA_ERUPTION",
+			"LG_KINGS_GRACE",
+			"SU_CN_METEOR",
+			"SU_CN_METEOR2",
+			"AG_TORNADO_STORM",
+			"AG_FLORAL_FLARE_ROAD",
+			"AG_ASTRAL_STRIKE",
+			"CD_PNEUMATICUS_PROCELLA",
+			"SOA_TOTEM_OF_TUTELARY",
+			"HN_METEOR_STORM_BUSTER",
+			"NW_MIDNIGHT_FALLEN"
+		],
+		9: [
+			"WZ_METEOR",
+			"WZ_STORMGUST",
+			"NPC_STORMGUST2",
+			"NPC_DRAGONBREATH",
+			"NPC_RAINOFMETEOR",
+			"RK_DRAGONBREATH",
+			"NC_COLDSLOWER",
+			"SO_EARTHGRAVE",
+			"RK_DRAGONBREATH_WATER",
+			"AG_VIOLENT_QUAKE",
+			"AG_ALL_BLOOM",
+			"IG_CROSS_RAIN",
+			"ABC_ABYSS_STRIKE",
+			"EM_DIAMOND_STORM",
+			"EM_LIGHTNING_LAND",
+			"EM_VENOM_SWAMP",
+			"EM_CONFLAGRATION",
+			"EM_TERRA_DRIVE",
+			"NW_MISSION_BOMBARD",
+			"SOA_TALISMAN_OF_BLACK_TORTOISE",
+			"SH_HYUN_ROKS_BREEZE"
+		],
+		11: ["WZ_VERMILION", "AG_MYSTERY_ILLUSION"],
+		18: ["NPC_COMET", "WL_COMET"],
+		19: ["CD_COMPETENTIA"],
+		"-2": [
+			"NPC_PSYCHIC_WAVE",
+			"SO_DIAMONDDUST",
+			"SO_PSYCHIC_WAVE",
+			"HN_JACK_FROST_NOVA"
+		]
+	})) for (const name of names) if (name in SkillConst_default) CAST_AREA[SkillConst_default[name]] = Number(area);
+}));
 // src/Renderer/Effects/MagicTarget.vs?raw
 var MagicTarget_default$1;
 var init_MagicTarget$2 = __esmMin((() => {
@@ -268812,244 +269364,28 @@ var init_MagicTarget$2 = __esmMin((() => {
 // src/Renderer/Effects/MagicTarget.fs?raw
 var MagicTarget_default;
 var init_MagicTarget$1 = __esmMin((() => {
-	MagicTarget_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uDiffuse;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n    if (textureSample.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    if (textureSample.r < 0.1 || textureSample.g < 0.1 || textureSample.b < 0.1) {\r\n        discard;\r\n    }\r\n\r\n    fragColor = textureSample;\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
+	MagicTarget_default = "#version 300 es\r\n#pragma vscode_glsllint_stage : frag\r\nprecision highp float;\r\n\r\nin vec2 vTextureCoord;\r\nout vec4 fragColor;\r\n\r\nuniform sampler2D uDiffuse;\r\nuniform float uAlpha;\r\n\r\nuniform bool  uFogUse;\r\nuniform float uFogNear;\r\nuniform float uFogFar;\r\nuniform vec3  uFogColor;\r\n\r\nvoid main(void) {\r\n    vec4 textureSample = texture( uDiffuse,  vTextureCoord.st );\r\n\r\n    if (textureSample.a == 0.0) {\r\n        discard;\r\n    }\r\n\r\n    if (textureSample.r < 0.1 || textureSample.g < 0.1 || textureSample.b < 0.1) {\r\n        discard;\r\n    }\r\n\r\n    fragColor = vec4(textureSample.rgb, textureSample.a * uAlpha);\r\n\r\n    if (uFogUse) {\r\n        float depth     = gl_FragCoord.z / gl_FragCoord.w;\r\n        float fogFactor = smoothstep( uFogNear, uFogFar, depth );\r\n        fragColor    = mix( fragColor, vec4( uFogColor, fragColor.w ), fogFactor );\r\n    }\r\n}";
 }));
 // src/Renderer/Effects/MagicTarget.js
-var _texture$3, _program$8, mat4$5, _matrix$1, CastSize, MagicTarget;
+var _texture$3, _program$8, mat4$5, MagicTarget;
 var init_MagicTarget = __esmMin((() => {
 	init_WebGL();
 	init_gl_matrix();
-	init_SkillConst();
 	init_Client();
 	init_Altitude();
-	init_SessionStorage();
 	init_Camera();
+	init_MagicTargetSim();
 	init_MagicTarget$2();
 	init_MagicTarget$1();
 	mat4$5 = gl_matrix_default.mat4;
-	_matrix$1 = mat4$5.create();
-	CastSize = {};
-	CastSize[SkillConst_default.CR_SLIMPITCHER] = [7];
-	CastSize[SkillConst_default.SO_ARRULLO] = [
-		3,
-		3,
-		5,
-		5,
-		7
-	];
-	CastSize[SkillConst_default.AC_SHOWER] = [
-		3,
-		3,
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		5,
-		5
-	];
-	CastSize[SkillConst_default.NC_ARMSCANNON] = [
-		7,
-		5,
-		3
-	];
-	CastSize[SkillConst_default.AM_DEMONSTRATION] = [3];
-	CastSize[SkillConst_default.SC_BLOODYLUST] = [7];
-	CastSize[SkillConst_default.PF_FOGWALL] = [3];
-	CastSize[SkillConst_default.PR_BENEDICTIO] = [3];
-	CastSize[SkillConst_default.KO_ZENKAI] = [5];
-	CastSize[SkillConst_default.WL_CRIMSONROCK] = [7];
-	CastSize[SkillConst_default.GN_CRAZYWEED] = [9];
-	CastSize[SkillConst_default.NPC_COMET] = CastSize[SkillConst_default.WL_COMET] = [19];
-	CastSize[SkillConst_default.HT_CLAYMORETRAP] = [5];
-	CastSize[SkillConst_default.SC_CHAOSPANIC] = [5];
-	CastSize[SkillConst_default.RK_DRAGONBREATH_WATER] = [
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		7,
-		7,
-		9,
-		9
-	];
-	CastSize[SkillConst_default.RK_DRAGONBREATH] = [
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		7,
-		7,
-		9,
-		9
-	];
-	CastSize[SkillConst_default.SC_DIMENSIONDOOR] = [1];
-	CastSize[SkillConst_default.SO_DIAMONDDUST] = [
-		7,
-		7,
-		7,
-		9,
-		9
-	];
-	CastSize[SkillConst_default.HT_DETECTING] = [3];
-	CastSize[SkillConst_default.GN_DEMONIC_FIRE] = [5];
-	CastSize[SkillConst_default.SA_DELUGE] = [7];
-	CastSize[SkillConst_default.SO_VACUUM_EXTREME] = [
-		3,
-		3,
-		5,
-		5,
-		7
-	];
-	CastSize[SkillConst_default.NPC_EVILLAND] = [11];
-	CastSize[SkillConst_default.AB_EPICLESIS] = [5];
-	CastSize[SkillConst_default.SO_EARTH_INSIGNIA] = [3];
-	CastSize[SkillConst_default.SO_EARTHGRAVE] = [
-		7,
-		7,
-		7,
-		9,
-		9
-	];
-	CastSize[SkillConst_default.HT_FLASHER] = [3];
-	CastSize[SkillConst_default.MG_FIREWALL] = [1];
-	CastSize[SkillConst_default.RA_FIRINGTRAP] = [5];
-	CastSize[SkillConst_default.SO_FIRE_INSIGNIA] = [3];
-	CastSize[SkillConst_default.GN_FIRE_EXPANSION] = [5];
-	CastSize[SkillConst_default.GN_HELLS_PLANT] = [3];
-	CastSize[SkillConst_default.WZ_HEAVENDRIVE] = [5];
-	CastSize[SkillConst_default.HW_GRAVITATION] = [5];
-	CastSize[SkillConst_default.RL_HAMMER_OF_GOD] = [5];
-	CastSize[SkillConst_default.NPC_RAYOFGENESIS] = CastSize[SkillConst_default.LG_RAYOFGENESIS] = [11];
-	CastSize[SkillConst_default.HW_GANBANTEIN] = [3];
-	CastSize[SkillConst_default.NC_COLDSLOWER] = [
-		5,
-		7,
-		9
-	];
-	CastSize[SkillConst_default.WZ_VERMILION] = [11];
-	CastSize[SkillConst_default.SR_RIDEINLIGHTNING] = [
-		3,
-		3,
-		5,
-		5,
-		7
-	];
-	CastSize[SkillConst_default.NJ_RAIGEKISAI] = [
-		3,
-		3,
-		5,
-		5,
-		7
-	];
-	CastSize[SkillConst_default.MH_LAVA_SLIDE] = [
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		7,
-		7,
-		7,
-		9
-	];
-	CastSize[SkillConst_default.NPC_MAGMA_ERUPTION] = CastSize[SkillConst_default.NC_MAGMA_ERUPTION] = [7];
-	CastSize[SkillConst_default.KO_BAKURETSU] = [3];
-	CastSize[SkillConst_default.NPC_CLOUD_KILL] = CastSize[SkillConst_default.SO_CLOUD_KILL] = [7];
-	CastSize[SkillConst_default.WZ_METEOR] = [7];
-	CastSize[SkillConst_default.SC_MANHOLE] = [3];
-	CastSize[SkillConst_default.PR_MAGNUS] = [7];
-	CastSize[SkillConst_default.SA_LANDPROTECTOR] = [
-		7,
-		7,
-		9,
-		9,
-		11
-	];
-	CastSize[SkillConst_default.SC_MAELSTROM] = [5];
-	CastSize[SkillConst_default.KO_MUCHANAGE] = [
-		3,
-		3,
-		3,
-		3,
-		3,
-		3,
-		3,
-		3,
-		5
-	];
-	CastSize[SkillConst_default.WZ_QUAGMIRE] = [5];
-	CastSize[SkillConst_default.NPC_PSYCHIC_WAVE] = CastSize[SkillConst_default.SO_PSYCHIC_WAVE] = [
-		7,
-		7,
-		9,
-		9,
-		11
-	];
-	CastSize[SkillConst_default.GC_POISONSMOKE] = [5];
-	CastSize[SkillConst_default.MH_POISON_MIST] = [7];
-	CastSize[SkillConst_default.AL_PNEUMA] = [3];
-	CastSize[SkillConst_default.LG_OVERBRAND] = [3];
-	CastSize[SkillConst_default.WM_SEVERE_RAINSTORM] = [11];
-	CastSize[SkillConst_default.RG_GRAFFITI] = [5];
-	CastSize[SkillConst_default.PR_SANCTUARY] = [5];
-	CastSize[SkillConst_default.MG_THUNDERSTORM] = [5];
-	CastSize[SkillConst_default.WZ_STORMGUST] = [11];
-	CastSize[SkillConst_default.WM_SOUND_OF_DESTRUCTION] = [
-		9,
-		9,
-		11,
-		13,
-		15
-	];
-	CastSize[SkillConst_default.WM_POEMOFNETHERWORLD] = [3];
-	CastSize[SkillConst_default.MH_XENO_SLASHER] = [
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		7,
-		7,
-		7,
-		9
-	];
-	CastSize[SkillConst_default.SO_WIND_INSIGNIA] = [3];
-	CastSize[SkillConst_default.SA_VIOLENTGALE] = [7];
-	CastSize[SkillConst_default.NJ_SUITON] = [
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		7,
-		7,
-		7,
-		9
-	];
-	CastSize[SkillConst_default.SO_WATER_INSIGNIA] = [3];
-	CastSize[SkillConst_default.SO_WARMER] = [7];
-	CastSize[SkillConst_default.SA_VOLCANO] = [7];
-	CastSize[SkillConst_default.MH_VOLCANIC_ASH] = [3];
-	CastSize[SkillConst_default.AS_VENOMDUST] = [2];
-	CastSize[SkillConst_default.KO_HUUMARANKA] = [7];
 	MagicTarget = class {
-		constructor(id, x, y, endTick, srcEntity) {
+		constructor(id, x, y, endTick, srcEntity, startTick) {
 			this.x = x;
 			this.y = y;
-			if (CastSize[id]) {
-				if (SessionStorage_default.Entity == srcEntity && id == SessionStorage_default.Entity.lastSKID && SessionStorage_default.Entity.lastSkLvl && CastSize[id].length >= SessionStorage_default.Entity.lastSkLvl) this.size = CastSize[id][SessionStorage_default.Entity.lastSkLvl - 1] || 1;
-				else this.size = CastSize[id][0] || 1;
-			} else this.size = 1;
+			this.size = castSize(id);
+			this.startTick = startTick || 0;
 			this.endTick = endTick;
+			this.matrix = mat4$5.create();
 		}
 		/**
 		* Preparing for render
@@ -269057,6 +269393,11 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		init(gl) {
+			if (!this.size) {
+				this.vertCount = 0;
+				this.ready = true;
+				return;
+			}
 			const data = Altitude.generatePlane(this.x, this.y, this.size);
 			this.buffer = gl.createBuffer();
 			this.vertCount = data.length / 5;
@@ -269070,7 +269411,7 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} webgl context
 		*/
 		free(gl) {
-			gl.deleteBuffer(this.buffer);
+			if (this.buffer) gl.deleteBuffer(this.buffer);
 			this.ready = false;
 		}
 		/**
@@ -269079,13 +269420,19 @@ var init_MagicTarget = __esmMin((() => {
 		* @param {object} wegl context
 		*/
 		render(gl, tick) {
+			this.needCleanUp = this.endTick < tick;
+			if (!this.vertCount) return;
 			const attribute = _program$8.attribute;
+			const angle = spinAngle(Math.max(0, Math.floor((tick - this.startTick) / PRIM_TICK_MS)), this.size);
+			mat4$5.identity(this.matrix);
+			mat4$5.rotateZ(this.matrix, this.matrix, angle);
+			gl.uniformMatrix4fv(_program$8.uniform.uRotationMat, false, this.matrix);
+			gl.uniform1f(_program$8.uniform.uAlpha, targetAlpha(angle) / 255);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 			gl.uniform1f(_program$8.uniform.uCameraLatitude, Camera.getLatitude());
 			gl.vertexAttribPointer(attribute.aPosition, 3, gl.FLOAT, false, 20, 0);
 			gl.vertexAttribPointer(attribute.aTextureCoord, 2, gl.FLOAT, false, 20, 12);
 			gl.drawArrays(gl.TRIANGLES, 0, this.vertCount);
-			this.needCleanUp = this.endTick < tick;
 		}
 		/**
 		* Initialize effect
@@ -269125,12 +269472,9 @@ var init_MagicTarget = __esmMin((() => {
 		static beforeRender(gl, modelView, projection, fog, tick) {
 			const uniform = _program$8.uniform;
 			const attribute = _program$8.attribute;
-			mat4$5.identity(_matrix$1);
-			mat4$5.rotateZ(_matrix$1, _matrix$1, tick / 1e3 * 40 / 180 * Math.PI);
 			gl.useProgram(_program$8);
 			gl.uniformMatrix4fv(uniform.uModelViewMat, false, modelView);
 			gl.uniformMatrix4fv(uniform.uProjectionMat, false, projection);
-			gl.uniformMatrix4fv(uniform.uRotationMat, false, _matrix$1);
 			gl.uniform1i(uniform.uFogUse, fog.use && fog.exist);
 			gl.uniform1f(uniform.uFogNear, fog.near);
 			gl.uniform1f(uniform.uFogFar, fog.far);
@@ -276975,13 +277319,22 @@ var init_EffectTable = __esmMin((() => {
 		}],
 		309: [{
 			type: "2D",
-			alphaMax: .2,
+			alphaMax: 80 / 255,
 			blendMode: 2,
 			file: "effect/pikapika2.bmp",
-			fadeOut: true,
-			duration: 1e3,
-			size: 100,
-			posz: 2,
+			red: 150 / 255,
+			green: 150 / 255,
+			blue: 250 / 255,
+			angleRand: [0, 359],
+			fadeInMs: 20 * (1e3 / 60),
+			fadeOutStartMs: 100 * (1e3 / 60),
+			duration: 3e3,
+			size: 140,
+			sizePulse: {
+				amount: .05,
+				degPerTick: 3
+			},
+			posz: 2.4,
 			wav: "_heal_effect"
 		}],
 		ef_hn_doublebowlingbash: [{
@@ -280721,7 +281074,7 @@ var init_EffectTable = __esmMin((() => {
 			type: "FUNC",
 			attachedEntity: false,
 			func: function(Params) {
-				this.add(new MagicTarget(Params.Init.skillId, Params.Init.position[0], Params.Init.position[1], Params.Inst.endTick, Params.Init.otherEntity), Params);
+				this.add(new MagicTarget(Params.Init.skillId, Params.Init.position[0], Params.Init.position[1], Params.Inst.endTick, Params.Init.otherEntity, Params.Inst.startTick), Params);
 			}
 		}],
 		515: [{
@@ -289789,7 +290142,8 @@ var init_EffectTable = __esmMin((() => {
 		ef_nv_helpangel: [{
 			type: "STR",
 			file: "help_angel/help_angel/help_angel",
-			texturePath: "help_angel/help_angel/"
+			texturePath: "help_angel/help_angel/",
+			wav: "effect/priest_sanctuary"
 		}, {
 			type: "STR",
 			file: "help_angel/help_angel_bottom/help_angel_bottom",
@@ -310031,6 +310385,46 @@ function loadTownInfoFile(filename, callback, onEnd) {
 		}
 	}, onEnd);
 }
+/**
+* Loads System/PrivateAirplane_True.lub into DB/Map/PrivateAirship.js
+*
+* @param {string} filename
+* @param {function} callback - unused
+* @param {function} onEnd - called with whether the file was read
+*/
+function loadPrivateAirship(filename, callback, onEnd) {
+	Client.loadFile(filename, async function(file) {
+		console.log("Loading file \"" + filename + "\"...");
+		let success = false;
+		try {
+			const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
+			const ctx = lua.ctx;
+			PrivateAirship$1.reset();
+			ctx.InsertStartableMap = (mapName) => {
+				PrivateAirship$1.addStartableMap(userStringDecoder.decode(mapName));
+				return 1;
+			};
+			ctx.InsertEndableMap = (mapName) => {
+				PrivateAirship$1.addEndableMap(userStringDecoder.decode(mapName));
+				return 1;
+			};
+			ctx.InsertNeedItem = (itemId) => {
+				PrivateAirship$1.addNeedItem(itemId);
+				return 1;
+			};
+			lua.mountFile(filename, buffer);
+			await lua.doFile(filename);
+			lua.doStringSync("main()");
+			success = PrivateAirship$1.isLoaded();
+		} catch (error) {
+			console.error("[loadPrivateAirship] Error: ", error);
+			PrivateAirship$1.reset();
+		} finally {
+			lua.unmountFile(filename);
+			onEnd(success);
+		}
+	}, () => onEnd(false));
+}
 function loadQuestInfo(filename, callback, onEnd) {
 	new Promise((resolve, reject) => {
 		Client.loadFile(filename, resolve, reject);
@@ -312078,6 +312472,7 @@ var init_DBManager = __esmMin((() => {
 	init_JobHitSoundTable();
 	init_WeaponTrailTable();
 	init_TownInfo();
+	init_PrivateAirship$3();
 	init_StatusInfo();
 	init_StatusConst();
 	init_StatusEffectTable();
@@ -312359,6 +312754,8 @@ var init_DBManager = __esmMin((() => {
 			}
 			if (PacketVerManager_default.value >= 20150422) loadMoveInfoTable(onLoad());
 			loadWorldMapInfo(DB.LUA_PATH + "worldviewdata/", onLoad());
+			PrivateAirship$1.reset();
+			if (PacketVerManager_default.value >= 20180321) tryLoadLuaAliases(loadPrivateAirship, ["System/PrivateAirplane_True.lub", ...getSystemAliases("System/PrivateAirplane.lub")], null, onLoad());
 			const onTownInfoEnd = onLoad();
 			loadTownInfoFile("System/Towninfo.lub", null, () => {
 				loadTownInfoFile("SystemEN/Towninfo.lub", null, onTownInfoEnd);
@@ -321616,12 +322013,14 @@ function bindMouseEvents() {
 			Cursor.setType(_restoreType);
 		}
 	});
-	window.addEventListener("pointermove", (e) => {
+	const followPointer = (e) => {
 		Cursor.x = e.pageX;
 		Cursor.y = e.pageY;
 		_selector.style.left = `${e.pageX}px`;
 		_selector.style.top = `${e.pageY}px`;
-	}, true);
+	};
+	window.addEventListener("pointermove", followPointer, true);
+	window.addEventListener("dragover", followPointer, true);
 }
 /**
 * Keep the cursor animated while the scene render loop is stopped (login, server list)
@@ -322374,7 +322773,7 @@ function _untrackNoCursorStyle(style) {
 	const index = _noCursorStyles.indexOf(style);
 	if (index !== -1) _noCursorStyles.splice(index, 1);
 }
-var _Cursor, _DB, _Client, _Renderer, _EntityManager, _ScrollBar, _depsPromise, _noCursorStyles, _noCursorMedia, _snapCache, MouseMode, DENIED_SELECTOR, CSS_NUMBER, GUIComponent;
+var _Cursor, _DB, _Client, _Renderer, _EntityManager, _ScrollBar, _depsPromise, _noCursorStyles, _noCursorMedia, _snapCache, _frozenBy, MouseMode, DENIED_SELECTOR, CSS_NUMBER, GUIComponent;
 var init_GUIComponent = __esmMin((() => {
 	init_Common$1();
 	init_MouseEventHandler();
@@ -322393,6 +322792,7 @@ var init_GUIComponent = __esmMin((() => {
 	_depsPromise = null;
 	_noCursorMedia = "not all";
 	_snapCache = [];
+	_frozenBy = [];
 	MouseMode = Object.freeze({
 		CROSS: 0,
 		STOP: 1,
@@ -322513,6 +322913,7 @@ var init_GUIComponent = __esmMin((() => {
 			if (this._noCursorStyle) _trackNoCursorStyle(this._noCursorStyle);
 			if (this.onKeyDown) this._bindKeyDown();
 			if (this.mouseMode === MouseMode.FREEZE) {
+				if (!_frozenBy.includes(this)) _frozenBy.push(this);
 				Mouse.intersect = false;
 				SessionStorage_default.FreezeUI = true;
 				_EntityManager?.setOverEntity(null);
@@ -322554,8 +322955,12 @@ var init_GUIComponent = __esmMin((() => {
 				whenDrawn.suspend(this._host);
 				if (this._noCursorStyle) _untrackNoCursorStyle(this._noCursorStyle);
 				if (this.mouseMode === MouseMode.FREEZE) {
-					Mouse.intersect = true;
-					SessionStorage_default.FreezeUI = false;
+					const index = _frozenBy.indexOf(this);
+					if (index !== -1) _frozenBy.splice(index, 1);
+					if (!_frozenBy.length) {
+						Mouse.intersect = true;
+						SessionStorage_default.FreezeUI = false;
+					}
 				}
 				if (this.__scrollbarObserver) {
 					this.__scrollbarObserver.disconnect();
@@ -322900,6 +323305,12 @@ var init_GUIComponent = __esmMin((() => {
 				if (related && related.closest && related.closest(CLICKABLE_SELECTOR)) return;
 				_hovering = false;
 				_Cursor?.setType(_savedType);
+			});
+			container.addEventListener("x_remove", () => {
+				if (_hovering) {
+					_hovering = false;
+					_Cursor?.setType(_savedType);
+				}
 			});
 			container.addEventListener("mousedown", (e) => {
 				const target = e.target;

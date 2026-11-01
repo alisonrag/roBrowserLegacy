@@ -54,6 +54,7 @@ import Equipment from 'UI/Components/Equipment/Equipment.js';
 import CartItems from 'UI/Components/CartItems/CartItems.js';
 import ScreenEffectManager from 'Renderer/ScreenEffectManager.js';
 import { updateStatusEffects } from 'Engine/MapEngine/StatusEffects.js';
+import { bowAttackTiming } from 'Renderer/Effects/ArrowFlight.js';
 
 // Excludes for skill name display
 const SkillNameDisplayExclude = [
@@ -164,7 +165,9 @@ function onEntitySpam(pkt) {
 			name: '',
 			hp: -1,
 			maxhp: -1,
-			hideShadow: true
+			hideShadow: true,
+			_followTargetX: entity.position[0],
+			_followTargetY: entity.position[1]
 		});
 		EntityManager.add(entity.falcon);
 	}
@@ -181,7 +184,9 @@ function onEntitySpam(pkt) {
 			speed: Math.max(entity.walk.speed - 50, 1),
 			name: '',
 			hp: -1,
-			maxhp: -1
+			maxhp: -1,
+			_followTargetX: entity.position[0],
+			_followTargetY: entity.position[1]
 		});
 		EntityManager.add(entity.wug);
 	}
@@ -334,10 +339,12 @@ function onEntityVanish(pkt) {
 					EffectManager.spam(EF_Init_Par);
 				}
 				if (entity.falcon) {
+					EntityManager.removeGID(entity.falcon.GID);
 					entity.falcon.remove(pkt.type);
 					entity.falcon = null;
 				}
 				if (entity.wug) {
+					EntityManager.removeGID(entity.wug.GID);
 					entity.wug.remove(pkt.type);
 					entity.wug = null;
 				}
@@ -345,10 +352,12 @@ function onEntityVanish(pkt) {
 			case Entity.VT.OUTOFSIGHT:
 				EffectManager.remove(null, pkt.GID, null);
 				if (entity.falcon) {
+					EntityManager.removeGID(entity.falcon.GID);
 					entity.falcon.remove(pkt.type);
 					entity.falcon = null;
 				}
 				if (entity.wug) {
+					EntityManager.removeGID(entity.wug.GID);
 					entity.wug.remove(pkt.type);
 					entity.wug = null;
 				}
@@ -646,15 +655,17 @@ function onEntityAction(pkt) {
 				const _soundTime = (delayTime = m_attackMotion * m_motionSpeed * 24.0);
 				animSpeed = pkt.attackMT / m_attackMotion;
 
-				// Display throw arrow effect when using bows, not an elegant conditional but it works.. [Waken]
+				// Bows: as in the official client, the arrow leaves at the attack motion's hit frame
+				// and the hit lands 8 arrow frames later (ArrowFlight.js).
 				if (DB.isBow(DB.getWeaponType(srcEntity.weapon, true))) {
-					delayTime = (m_attackMotion + 8 / m_motionSpeed) * m_motionSpeed * 24.0;
-					pkt.attackMT += delayTime;
+					const bow = bowAttackTiming(m_attackMotion, m_motionSpeed);
+					delayTime = bow.hitMs;
+					pkt.attackMT = bow.hitMs;
 					const EF_Init_Par = {
 						effectId: 'ef_arrow_projectile',
 						ownerAID: dstEntity.GID,
 						otherAID: srcEntity.GID,
-						startTick: Renderer.tick + pkt.attackMT,
+						startTick: Renderer.tick + bow.releaseMs,
 						otherPosition: srcEntity.position
 					};
 					EffectManager.spam(EF_Init_Par);
@@ -1652,7 +1663,7 @@ function onEntityUseSkillToAttack(pkt) {
 			const addDamage = function (i, startTick) {
 				if (pkt.damage) {
 					// Only if hits
-					EffectManager.spamSkillHit(pkt.SKID, pkt.targetID, startTick, pkt.AID);
+					EffectManager.spamSkillHit(pkt.SKID, pkt.targetID, startTick, pkt.AID, i);
 				}
 
 				if (!isCombo && isBlueCombo) {
@@ -1697,7 +1708,8 @@ function onEntityUseSkillToAttack(pkt) {
 	}
 
 	// Effects the official client plays as each damage packet arrives
-	EffectManager.spamSkillDamage(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID);
+	EffectManager.spamSkillDamage(pkt.SKID, pkt.targetID, Renderer.tick, pkt.AID, undefined, pkt.count);
+	EffectManager.spamSkillMotion(pkt.SKID, pkt.AID, pkt.targetID, Renderer.tick, pkt.action, pkt.level, !!dstEntity);
 
 	if (srcEntity && dstEntity && pkt.action != SkillAction.SPLASH) {
 		// && pkt.action != SkillAction.MULTI_HIT
@@ -2060,7 +2072,9 @@ function onEntityStatusChange(pkt) {
 					name: '',
 					hp: -1,
 					maxhp: -1,
-					hideShadow: true
+					hideShadow: true,
+					_followTargetX: entity.position[0],
+					_followTargetY: entity.position[1]
 				});
 				EntityManager.add(entity.falcon);
 			}
@@ -2521,11 +2535,13 @@ function onEntityOptionChange(pkt) {
 			name: '',
 			hp: -1,
 			maxhp: -1,
-			hideShadow: true
+			hideShadow: true,
+			_followTargetX: entity.position[0],
+			_followTargetY: entity.position[1]
 		});
 		EntityManager.add(entity.falcon);
 	} else if (entity.falcon && !(entity.effectState & StatusState.EffectState.FALCON)) {
-		entity.falcon.remove();
+		EntityManager.remove(entity.falcon.GID);
 		entity.falcon = null;
 	}
 
@@ -2539,11 +2555,13 @@ function onEntityOptionChange(pkt) {
 			speed: Math.max(entity.walk.speed - 50, 1),
 			name: '',
 			hp: -1,
-			maxhp: -1
+			maxhp: -1,
+			_followTargetX: entity.position[0],
+			_followTargetY: entity.position[1]
 		});
 		EntityManager.add(entity.wug);
 	} else if (entity.wug && !(entity.effectState & StatusState.EffectState.WUG)) {
-		entity.wug.remove();
+		EntityManager.remove(entity.wug.GID);
 		entity.wug = null;
 	}
 

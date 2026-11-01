@@ -11,6 +11,7 @@
  */
 import EffectDB from 'DB/Effects/EffectTable.js';
 import SkillEffect from 'DB/Skills/SkillEffect.js';
+import { motionEffectForPacket } from 'DB/Skills/SkillMotionEffect.js';
 import SkillUnit, { SkillUnitEnd, SkillUnitFallback } from 'DB/Skills/SkillUnit.js';
 import SU from 'DB/Skills/SkillUnitConst.js';
 import ItemEffect from 'DB/Items/ItemEffect.js';
@@ -744,7 +745,13 @@ class EffectManager {
 			Params.effect.attachedEntity && Params.Init.ownerEntity ? Params.Init.ownerEntity.direction : 0;
 
 		//Set delays
-		Params.Inst.duration = !isNaN(Params.effect.duration) ? Params.effect.duration : Params.Init.duration;
+		// duration may be worked out per instance (an arrow's flight from its distance, say)
+		Params.Inst.duration =
+			typeof Params.effect.duration === 'function'
+				? Params.effect.duration(Params)
+				: !isNaN(Params.effect.duration)
+					? Params.effect.duration
+					: Params.Init.duration;
 
 		Params.Inst.delayOffsetDelta = !isNaN(Params.effect.delayOffsetDelta)
 			? Params.effect.delayOffsetDelta * Params.Inst.duplicateID
@@ -1234,8 +1241,9 @@ class EffectManager {
 	 * @param {number} tick
 	 * @param {number} srcAID caster aid
 	 * @param {function} [random] returns a number in [0, 1)
+	 * @param {number} [hitCount] the packet's hit count, handed to the effects as hitCount
 	 */
-	static spamSkillDamage(skillId, destAID, tick, srcAID, random = Math.random) {
+	static spamSkillDamage(skillId, destAID, tick, srcAID, random = Math.random, hitCount = 1) {
 		const skill = SkillEffect[skillId];
 		if (!skill) {
 			return;
@@ -1253,7 +1261,9 @@ class EffectManager {
 					effectId: effectId,
 					ownerAID: ownerAID,
 					startTick: tick,
-					otherAID: otherAID
+					otherAID: otherAID,
+					// The packet's hit count: the bolts draw one bolt per hit
+					hitCount: hitCount
 				});
 			});
 		};
@@ -1263,19 +1273,57 @@ class EffectManager {
 	}
 
 	/**
+	 * Spam the caster's motion effect as a skill damage packet arrives: 16
+	 * (EF_BASH) for most skills, from the official client's table
+	 * (DB/Skills/SkillMotionEffect.js). Not played again when the skill's own
+	 * damageEffectIdOnCaster already lists it.
+	 *
+	 * @param {number} skillId skill id
+	 * @param {number} srcAID caster aid
+	 * @param {number} destAID target aid
+	 * @param {number} tick
+	 * @param {number} damageType the packet's action field
+	 * @param {number} level the packet's level field
+	 * @param {boolean} targetFound is the packet's target a known actor
+	 */
+	static spamSkillMotion(skillId, srcAID, destAID, tick, damageType, level, targetFound) {
+		const effectId = motionEffectForPacket(skillId, damageType, level, targetFound);
+		if (effectId === null || !srcAID) {
+			return;
+		}
+		const own = SkillEffect[skillId] && SkillEffect[skillId].damageEffectIdOnCaster;
+		if (own != null && (Array.isArray(own) ? own : [own]).includes(effectId)) {
+			return;
+		}
+		EffectManager.spam({
+			effectId: effectId,
+			ownerAID: srcAID,
+			startTick: tick,
+			otherAID: destAID
+		});
+	}
+
+	/**
 	 * Spam skill effect on hit with damage
 	 *
 	 * @param {number} skill id
 	 * @param {number} target aid
 	 * @param {number} tick
 	 */
-	static spamSkillHit(skillId, destAID, tick, srcAID) {
+	static spamSkillHit(skillId, destAID, tick, srcAID, hitIndex = 0) {
 		let effects, EF_Init_Par;
 		if (!(skillId in SkillEffect)) {
 			return;
 		}
 
-		if (SkillEffect[skillId].hitEffectId) {
+		// Skills marked hitEffectOnce play their hit effects for the first hit
+		// of a damage packet only.
+		if (SkillEffect[skillId].hitEffectOnce && hitIndex > 0) {
+			return;
+		}
+
+		// 0 is an effect too: the hit flash (EF_HIT1)
+		if (SkillEffect[skillId].hitEffectId != null) {
 			effects = Array.isArray(SkillEffect[skillId].hitEffectId)
 				? SkillEffect[skillId].hitEffectId
 				: [SkillEffect[skillId].hitEffectId];
@@ -1289,6 +1337,23 @@ class EffectManager {
 				};
 
 				EffectManager.spam(EF_Init_Par);
+			});
+		}
+
+		// Only on the first hit of a damage packet: the official client sends the
+		// hit-map effect with the first hit message of a multi-hit packet only
+		if (hitIndex === 0 && SkillEffect[skillId].firstHitEffectId != null) {
+			effects = Array.isArray(SkillEffect[skillId].firstHitEffectId)
+				? SkillEffect[skillId].firstHitEffectId
+				: [SkillEffect[skillId].firstHitEffectId];
+
+			effects.forEach(effectId => {
+				EffectManager.spam({
+					effectId: effectId,
+					ownerAID: destAID,
+					startTick: tick,
+					otherAID: srcAID
+				});
 			});
 		}
 

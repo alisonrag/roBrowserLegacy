@@ -77890,8 +77890,14 @@ var init_preload_helper = __esmMin((() => {
 					if (cspNonce) link.setAttribute("nonce", cspNonce);
 					document.head.appendChild(link);
 					if (isCss) return new Promise((res, rej) => {
-						link.addEventListener("load", res);
-						link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
+						const handleSettle = (e) => {
+							link.removeEventListener("load", handleSettle);
+							link.removeEventListener("error", handleSettle);
+							if (e.type === "error") rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`));
+							else res(e);
+						};
+						link.addEventListener("load", handleSettle);
+						link.addEventListener("error", handleSettle);
 					});
 				});
 			}).filter((p) => p !== void 0));
@@ -106016,6 +106022,18 @@ function isPreSatanMorroc(settings) {
 }
 function isEpisodeInRange(entry, episode) {
 	return episode >= entry.ep_from && episode < entry.ep_to;
+}
+function getIncomingNavigationMapPoint(mapName, links) {
+	const target = String(mapName || "").replace(/\.gat$/i, "").toLowerCase();
+	const incoming = (Array.isArray(links) ? links : []).filter((link) => link && String(link[8] || "").replace(/\.gat$/i, "").toLowerCase() === target);
+	const link = incoming.find((candidate) => Number(candidate[2]) === 200) || incoming[0];
+	if (!link) return null;
+	const x = Number(link[9]);
+	const y = Number(link[10]);
+	return Number.isFinite(x) && Number.isFinite(y) && x >= 0 && y >= 0 ? {
+		x,
+		y
+	} : null;
 }
 function applyNavigationMapEra(maps, settings) {
 	if (!isPreSatanMorroc(settings)) return maps;
@@ -235718,6 +235736,10 @@ var init_Navigation = __esmMin((() => {
 			publishNavigationRoute(true, path, startMap, endMap, displayName);
 			const target = path[0];
 			this.waitForMapData(function() {
+				if (target.map === _mapData.map && (target.x < 0 || target.y < 0 || target.x >= _mapData.width || target.y >= _mapData.height)) {
+					this.clear();
+					return;
+				}
 				let walkableCell;
 				if (target.x < 0 || target.y < 0) {
 					const centerX = Math.floor(_mapData.width / 2);
@@ -236887,7 +236909,7 @@ function onClose$7() {
 	hideTooltip();
 	WorldMap._host.style.display = "none";
 }
-var WorldMap, _preferences$39, _partyMembersByMap, _hoveredSection, _activeWorldMapData, _navigationRoute, _worldRouteIconURI, C_TITLEBARHEIGHT, C_BASEWIDTH, C_BASEHEIGHT, C_ASPECTX, C_ASPECTY, WorldMap_default;
+var WorldMap, _preferences$39, _partyMembersByMap, _hoveredSection, _activeWorldMapData, _navigationRoute, _routeListenerAttached, _worldRouteIconURI, C_TITLEBARHEIGHT, C_BASEWIDTH, C_BASEHEIGHT, C_ASPECTX, C_ASPECTY, WorldMap_default;
 var init_WorldMap = __esmMin((() => {
 	init_DBManager();
 	init_Client();
@@ -236921,6 +236943,7 @@ var init_WorldMap = __esmMin((() => {
 	_hoveredSection = null;
 	_activeWorldMapData = null;
 	_navigationRoute = null;
+	_routeListenerAttached = false;
 	_worldRouteIconURI = {};
 	C_TITLEBARHEIGHT = 17;
 	C_BASEWIDTH = 1280;
@@ -236948,12 +236971,15 @@ var init_WorldMap = __esmMin((() => {
 			content.addEventListener("mouseout", onWorldMapMouseOut);
 		}
 		WorldMap.showLVLMode = false;
-		document.addEventListener("roBrowserNavigationRouteChanged", onNavigationRouteChanged);
 	};
 	/**
 	* Apply preferences once append to body
 	*/
 	WorldMap.onAppend = function onAppend() {
+		if (!_routeListenerAttached) {
+			document.addEventListener("roBrowserNavigationRouteChanged", onNavigationRouteChanged);
+			_routeListenerAttached = true;
+		}
 		if (!_preferences$39.show) this._host.style.display = "none";
 		this.settings = {
 			episode: 98,
@@ -236977,6 +237003,11 @@ var init_WorldMap = __esmMin((() => {
 		this._host.style.left = "0px";
 	};
 	WorldMap.onRemove = function onRemove() {
+		if (_routeListenerAttached) {
+			document.removeEventListener("roBrowserNavigationRouteChanged", onNavigationRouteChanged);
+			_routeListenerAttached = false;
+		}
+		_navigationRoute = null;
 		clearWorldMapServiceState();
 		hideTooltip();
 		_preferences$39.show = this._host.style.display !== "none";
@@ -317463,6 +317494,17 @@ var DBManager_exports = /* @__PURE__ */ __exportAll({ default: () => DB });
 function fillNaviTable(table, json) {
 	table.length = 0;
 	if (json) Object.assign(table, normalizeLuaTable(json));
+	if (table === NaviMobTable) {
+		navigationMobRowsByMap = /* @__PURE__ */ new Map();
+		for (const mob of table) {
+			if (!mob) continue;
+			const mapName = normalizeNaviMapName(mob[0]);
+			if (!mapName) continue;
+			let rows = navigationMobRowsByMap.get(mapName);
+			if (!rows) navigationMobRowsByMap.set(mapName, rows = []);
+			rows.push(mob);
+		}
+	}
 }
 /**
 * Normalize Lua tables converted to JS objects.
@@ -317496,19 +317538,7 @@ function normalizeNaviMapName(mapName) {
 	return String(mapName || "").replace(/\.gat$/, "").toLowerCase();
 }
 function getDefaultNaviMapPoint(mapName) {
-	const targetMap = normalizeNaviMapName(mapName);
-	const maps = applyNavigationMapEra(normalizeLuaTable(NaviMapTable), Configs.get("worldMapSettings", { episode: 98 }));
-	for (let i = 0; i < maps.length; i++) {
-		const map = maps[i];
-		if (!map || normalizeNaviMapName(map[0]) !== targetMap) continue;
-		const x = Number(map[3]);
-		const y = Number(map[4]);
-		if (Number.isFinite(x) && Number.isFinite(y)) return {
-			x,
-			y
-		};
-	}
-	return null;
+	return getIncomingNavigationMapPoint(normalizeNaviMapName(mapName), applyNavigationLinkEra(normalizeLuaTable(NaviLinkTable), Configs.get("worldMapSettings", { episode: 98 })));
 }
 function normalizeSearchText(value) {
 	return String(value || "").toLowerCase().replace(/\.gat$/g, "").replace(/[_\-()\[\],:]+/g, " ").replace(/\s+/g, " ").trim();
@@ -320407,7 +320437,7 @@ function updateMapTable() {
 		else MapTable[key] = { name: MapInfo[key].displayName };
 	}
 }
-var lua, HO_AI, MER_AI, default_HO_AI, default_MER_AI, mountPalettes, mountPalettesProbe, MsgStringTable, JokeTable, ScreamTable, MapTable, SkillDescription, SexTable, PetTalkTable, CheckAttendanceTable, buyingStoreItemList, LaphineSysTable, LaphineUpgTable, ItemDBNameTbl, ItemReformTable, EnchantListTable, SignBoardTranslatedTable, SignBoardTable, NaviMapTable, NaviMobTable, NaviNpcTable, NaviLinkTable, NaviLinkDistanceTable, NaviNpcDistanceTable, QuestInfo, TitleTable, PetDBTable, EggIDToJobID, ReputeGroup, ReputeInfo, AchievementTable, MsgEmotionCSV, HatEffectID, HatEffectInfo, FootPrintEffectInfo, CashShopBannerTable, Ez2streffect, unknownItem, servers, langType, userCharpage, userStringDecoder, DB, SUFFIX_TO_FIELD, HARDCODED_FIELD_MAPPING, EZ2_VARIANT_WORD;
+var lua, HO_AI, MER_AI, default_HO_AI, default_MER_AI, mountPalettes, mountPalettesProbe, MsgStringTable, JokeTable, ScreamTable, MapTable, SkillDescription, SexTable, PetTalkTable, CheckAttendanceTable, buyingStoreItemList, LaphineSysTable, LaphineUpgTable, ItemDBNameTbl, ItemReformTable, EnchantListTable, SignBoardTranslatedTable, SignBoardTable, NaviMapTable, NaviMobTable, navigationMobRowsByMap, NaviNpcTable, NaviLinkTable, NaviLinkDistanceTable, NaviNpcDistanceTable, QuestInfo, TitleTable, PetDBTable, EggIDToJobID, ReputeGroup, ReputeInfo, AchievementTable, MsgEmotionCSV, HatEffectID, HatEffectInfo, FootPrintEffectInfo, CashShopBannerTable, Ez2streffect, unknownItem, servers, langType, userCharpage, userStringDecoder, DB, SUFFIX_TO_FIELD, HARDCODED_FIELD_MAPPING, EZ2_VARIANT_WORD;
 var init_DBManager = __esmMin((() => {
 	init_Client();
 	init_Configs();
@@ -320486,6 +320516,7 @@ var init_DBManager = __esmMin((() => {
 	SignBoardTable = {};
 	NaviMapTable = [];
 	NaviMobTable = [];
+	navigationMobRowsByMap = /* @__PURE__ */ new Map();
 	NaviNpcTable = [];
 	NaviLinkTable = [];
 	NaviLinkDistanceTable = [];
@@ -320558,6 +320589,7 @@ var init_DBManager = __esmMin((() => {
 				NaviLinkDistanceTable,
 				NaviNpcDistanceTable
 			]) table.length = 0;
+			navigationMobRowsByMap.clear();
 			let index = 0, count = 0;
 			function onLoad() {
 				count++;
@@ -322817,12 +322849,15 @@ var init_DBManager = __esmMin((() => {
 		static getNavigationMapMonsters(mapName) {
 			mapName = normalizeNaviMapName(mapName);
 			if (!mapName) return [];
-			const mobTable = normalizeLuaTable(NaviMobTable);
+			const mobTable = navigationMobRowsByMap.get(mapName) || [];
 			const grouped = {};
+			const point = getDefaultNaviMapPoint(mapName) || {
+				x: 0,
+				y: 0
+			};
 			for (let i = 0; i < mobTable.length; i++) {
 				const mob = mobTable[i];
 				if (!mob) continue;
-				if (normalizeNaviMapName(mob[0]) !== mapName) continue;
 				const mobName = mob[4] || "";
 				if (!mobName) continue;
 				const mobClass = decodeNavigationMobClass(mob[3]);
@@ -322830,10 +322865,6 @@ var init_DBManager = __esmMin((() => {
 				const key = [mobClass, mobName].join(":");
 				const mobLevel = Number(mob[6]);
 				const mobType = Number(mob[2]);
-				const point = getDefaultNaviMapPoint(mapName) || {
-					x: 0,
-					y: 0
-				};
 				if (!grouped[key]) grouped[key] = {
 					type: "MOB",
 					id: mobClass,
@@ -322907,10 +322938,8 @@ var init_DBManager = __esmMin((() => {
 					const mapName = normalizeNaviMapName(map[0]);
 					const displayName = getNavigationMapDisplayName(mapName);
 					if (!navigationMapMatchesQuery(mapName, displayName, query)) continue;
-					const point = getDefaultNaviMapPoint(mapName) || {
-						x: map[3],
-						y: map[4]
-					};
+					const point = getDefaultNaviMapPoint(mapName);
+					if (!point) continue;
 					pushResult({
 						type: "MAP",
 						id: mapName,
@@ -322929,10 +322958,8 @@ var init_DBManager = __esmMin((() => {
 						const mapName = normalizeNaviMapName(section.id);
 						const displayName = getNavigationMapDisplayName(mapName);
 						if (!navigationMapMatchesQuery(mapName, displayName, query) && !navigationMapMatchesQuery(mapName, section.name, query)) continue;
-						const point = getDefaultNaviMapPoint(mapName) || {
-							x: 0,
-							y: 0
-						};
+						const point = getDefaultNaviMapPoint(mapName);
+						if (!point) continue;
 						pushResult({
 							type: "MAP",
 							id: mapName,
@@ -323068,14 +323095,7 @@ var init_DBManager = __esmMin((() => {
 		* @returns {{x:number,y:number}|null}
 		*/
 		static getNaviMapPoint(mapName) {
-			const point = getDefaultNaviMapPoint(mapName);
-			if (point) return point;
-			mapName = normalizeNaviMapName(mapName);
-			const incoming = this.getNaviLinkTable().find((link) => normalizeNaviMapName(link[8]) === mapName);
-			return incoming ? {
-				x: Number(incoming[9]) || 0,
-				y: Number(incoming[10]) || 0
-			} : null;
+			return getDefaultNaviMapPoint(mapName);
 		}
 		/**
 		* Get a readable navigation map name when available.

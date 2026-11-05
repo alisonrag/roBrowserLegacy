@@ -316199,6 +316199,8 @@ var init_DBManager = __esmMin((() => {
 			}
 			if (isAxe(first)) {
 				if (isAxe(second)) return WeaponType_default.AXE_AXE;
+				if (isDagger(second)) return WeaponType_default.SHORTSWORD_AXE;
+				if (isSword(second)) return WeaponType_default.SWORD_AXE;
 				return WeaponType_default.AXE;
 			}
 			return WeaponType_default.NONE;

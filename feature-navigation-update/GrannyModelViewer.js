@@ -235725,12 +235725,13 @@ var init_Navigation = __esmMin((() => {
 			publishNavigationRoute(true, path, startMap, endMap, displayName);
 			const target = path[0];
 			this.waitForMapData(function() {
-				if (target.map === _mapData.map && (target.x < 0 || target.y < 0 || target.x >= _mapData.width || target.y >= _mapData.height)) {
+				const useMapCenterFallback = target.x === -1 && target.y === -1;
+				if (!useMapCenterFallback && (target.x < 0 || target.y < 0 || target.map === _mapData.map && (target.x >= _mapData.width || target.y >= _mapData.height))) {
 					this.clear();
 					return;
 				}
 				let walkableCell;
-				if (target.x < 0 || target.y < 0) {
+				if (useMapCenterFallback) {
 					const centerX = Math.floor(_mapData.width / 2);
 					const centerY = Math.floor(_mapData.height / 2);
 					let bestDistance = Infinity;
@@ -322928,14 +322929,13 @@ var init_DBManager = __esmMin((() => {
 					const displayName = getNavigationMapDisplayName(mapName);
 					if (!navigationMapMatchesQuery(mapName, displayName, query)) continue;
 					const point = getDefaultNaviMapPoint(mapName);
-					if (!point) continue;
 					pushResult({
 						type: "MAP",
 						id: mapName,
 						name: displayName,
 						mapName,
-						x: point.x,
-						y: point.y
+						x: point ? point.x : -1,
+						y: point ? point.y : -1
 					});
 				}
 				for (let i = 0; i < WorldMap_default$3.length; i++) {
@@ -322948,14 +322948,13 @@ var init_DBManager = __esmMin((() => {
 						const displayName = getNavigationMapDisplayName(mapName);
 						if (!navigationMapMatchesQuery(mapName, displayName, query) && !navigationMapMatchesQuery(mapName, section.name, query)) continue;
 						const point = getDefaultNaviMapPoint(mapName);
-						if (!point) continue;
 						pushResult({
 							type: "MAP",
 							id: mapName,
 							name: displayName || section.name || mapName,
 							mapName,
-							x: point.x,
-							y: point.y
+							x: point ? point.x : -1,
+							y: point ? point.y : -1
 						});
 					}
 				}

@@ -33,6 +33,12 @@ import WeaponHitSoundTable from './Items/WeaponHitSoundTable.js';
 import RobeTable from './Items/RobeTable.js';
 import RandomOption from 'DB/Items/ItemRandomOptionTable.js';
 import WorldMap from './Map/WorldMap.js';
+import {
+	applyNavigationDistanceEra,
+	applyNavigationLinkEra,
+	applyNavigationMapEra,
+	getIncomingNavigationMapPoint
+} from './Map/NavigationEra.js';
 import SKID from './Skills/SkillConst.js';
 import SkillInfo from './Skills/SkillInfo.js';
 import SkillTreeView from './Skills/SkillTreeView.js';
@@ -58,6 +64,194 @@ import PACKET from 'Network/PacketStructure.js';
 import PACKETVER from 'Network/PacketVerManager.js';
 import MemoryManager from 'Core/MemoryManager.js';
 import LuaModuleLoader from 'Core/LuaModuleLoader.js';
+
+const ASSASSIN_DUAL_WEAPON_TYPES = new Set([
+	WeaponType.KATAR,
+	WeaponType.SHORTSWORD_SHORTSWORD,
+	WeaponType.SHORTSWORD_SWORD,
+	WeaponType.SHORTSWORD_AXE,
+	WeaponType.SWORD_SWORD,
+	WeaponType.SWORD_AXE,
+	WeaponType.AXE_AXE
+]);
+
+const PRIEST_KNUCKLE_INCOMPATIBLE_JOBS = new Set([
+	JobId.PRIEST,
+	JobId.PRIEST_H,
+	JobId.PRIEST_B,
+	JobId.ARCHBISHOP,
+	JobId.ARCHBISHOP_H,
+	JobId.ARCHBISHOP_B,
+	JobId.ARCH_BISHOP_2ND,
+	JobId.CARDINAL,
+	JobId.CARDINAL_RIDING
+]);
+
+const SHIELD_VIEW_1_JOBS = new Set([
+	JobId.NOVICE,
+	JobId.MAGICIAN,
+	JobId.ARCHER,
+	JobId.WIZARD,
+	JobId.HUNTER,
+	JobId.SAGE,
+	JobId.BARD,
+	JobId.DANCER,
+	JobId.SUPERNOVICE,
+	JobId.NOVICE_H,
+	JobId.MAGICIAN_H,
+	JobId.ARCHER_H,
+	JobId.WIZARD_H,
+	JobId.HUNTER_H,
+	JobId.SAGE_H,
+	JobId.BARD_H,
+	JobId.DANCER_H,
+	JobId.NOVICE_B,
+	JobId.MAGICIAN_B,
+	JobId.ARCHER_B,
+	JobId.WIZARD_B,
+	JobId.HUNTER_B,
+	JobId.SAGE_B,
+	JobId.BARD_B,
+	JobId.DANCER_B,
+	JobId.SUPERNOVICE_B,
+	JobId.WARLOCK,
+	JobId.RANGER,
+	JobId.WARLOCK_H,
+	JobId.RANGER_H,
+	JobId.SORCERER,
+	JobId.MINSTREL,
+	JobId.WANDERER,
+	JobId.SORCERER_H,
+	JobId.MINSTREL_H,
+	JobId.WANDERER_H,
+	JobId.WARLOCK_B,
+	JobId.RANGER_B,
+	JobId.SORCERER_B,
+	JobId.MINSTREL_B,
+	JobId.WANDERER_B,
+	JobId.SUPERNOVICE2,
+	JobId.SUPERNOVICE2_B,
+	JobId.ARCH_MAGE,
+	JobId.WINDHAWK,
+	JobId.ELEMENTAL_MASTER,
+	JobId.TROUBADOUR,
+	JobId.TROUVERE,
+	JobId.HYPER_NOVICE
+]);
+
+const SHIELD_VIEW_1_2_JOBS = new Set([
+	JobId.ACOLYTE,
+	JobId.MERCHANT,
+	JobId.THIEF,
+	JobId.PRIEST,
+	JobId.BLACKSMITH,
+	JobId.ASSASSIN,
+	JobId.ROGUE,
+	JobId.ALCHEMIST,
+	JobId.ACOLYTE_H,
+	JobId.MERCHANT_H,
+	JobId.THIEF_H,
+	JobId.PRIEST_H,
+	JobId.BLACKSMITH_H,
+	JobId.ASSASSIN_H,
+	JobId.ROGUE_H,
+	JobId.ALCHEMIST_H,
+	JobId.ACOLYTE_B,
+	JobId.MERCHANT_B,
+	JobId.THIEF_B,
+	JobId.PRIEST_B,
+	JobId.BLACKSMITH_B,
+	JobId.ASSASSIN_B,
+	JobId.ROGUE_B,
+	JobId.ALCHEMIST_B,
+	JobId.ARCHBISHOP,
+	JobId.MECHANIC,
+	JobId.GUILLOTINE_CROSS,
+	JobId.ARCHBISHOP_H,
+	JobId.MECHANIC_H,
+	JobId.GUILLOTINE_CROSS_H,
+	JobId.GENETIC,
+	JobId.SHADOW_CHASER,
+	JobId.GENETIC_H,
+	JobId.SHADOW_CHASER_H,
+	JobId.ARCHBISHOP_B,
+	JobId.MECHANIC_B,
+	JobId.GUILLOTINE_CROSS_B,
+	JobId.GENETIC_B,
+	JobId.SHADOW_CHASER_B,
+	JobId.MEISTER,
+	JobId.SHADOW_CROSS,
+	JobId.CARDINAL,
+	JobId.BIOLO,
+	JobId.ABYSS_CHASER
+]);
+
+const SHIELD_VIEW_1_4_JOBS = new Set([
+	JobId.SWORDMAN,
+	JobId.KNIGHT,
+	JobId.CRUSADER,
+	JobId.SWORDMAN_H,
+	JobId.KNIGHT_H,
+	JobId.CRUSADER_H,
+	JobId.SWORDMAN_B,
+	JobId.KNIGHT_B,
+	JobId.CRUSADER_B,
+	JobId.RUNE_KNIGHT,
+	JobId.RUNE_KNIGHT_H,
+	JobId.ROYAL_GUARD,
+	JobId.ROYAL_GUARD_H,
+	JobId.RUNE_KNIGHT_B,
+	JobId.ROYAL_GUARD_B,
+	JobId.DO_SUMMONER,
+	JobId.DO_SUMMONER_B,
+	JobId.DRAGON_KNIGHT,
+	JobId.IMPERIAL_GUARD,
+	JobId.DRAGON_KNIGHT_RIDING,
+	JobId.IMPERIAL_GUARD_RIDING,
+	JobId.SPIRIT_HANDLER
+]);
+
+const SHIELD_VIEW_1_2_4_JOBS = new Set([JobId.DRUID, JobId.DRUID_B, JobId.KARNOS, JobId.KARNOS_B, JobId.ALITEA]);
+
+const SHIELD_ITEM_UNSUPPORTED_JOBS = new Set([
+	JobId.MARRIED,
+	JobId.XMAS,
+	JobId.SUMMER,
+	JobId.HANBOK,
+	JobId.OKTOBERFEST,
+	JobId.SUMMER2,
+	JobId.GANGSI,
+	JobId.DEATHKNIGHT,
+	JobId.COLLECTOR,
+	JobId.KNIGHT2,
+	JobId.KNIGHT2_H,
+	JobId.KNIGHT2_B,
+	JobId.CRUSADER2,
+	JobId.CRUSADER2_H,
+	JobId.CRUSADER2_B,
+	JobId.RUNE_KNIGHT2,
+	JobId.RUNE_KNIGHT2_H,
+	JobId.RUNE_KNIGHT2_B,
+	JobId.RUNE_CHICKEN2,
+	JobId.RUNE_CHICKEN2_H,
+	JobId.RUNE_CHICKEN3,
+	JobId.RUNE_CHICKEN3_H,
+	JobId.RUNE_CHICKEN4,
+	JobId.RUNE_CHICKEN4_H,
+	JobId.RUNE_CHICKEN5,
+	JobId.RUNE_CHICKEN5_H,
+	JobId.ROYAL_GUARD2,
+	JobId.ROYAL_GUARD2_H,
+	JobId.ROYAL_GUARD2_B,
+	JobId.RANGER2,
+	JobId.RANGER2_H,
+	JobId.RANGER2_B,
+	JobId.MECHANIC2,
+	JobId.MECHANIC2_H,
+	JobId.MECHANIC2_B,
+	JobId.DO_CART_SUMMONER1,
+	JobId.MEISTER_RIDING
+]);
 
 //Pet
 //MapName
@@ -175,6 +369,7 @@ const NaviMapTable = [];
  * @const {Array} NaviMob Table
  */
 const NaviMobTable = [];
+let navigationMobRowsByMap = new Map();
 
 /**
  * @const {Array} NaviNpc Table
@@ -207,8 +402,198 @@ const NaviNpcDistanceTable = [];
 function fillNaviTable(table, json) {
 	table.length = 0;
 	if (json) {
-		Object.assign(table, json);
+		Object.assign(table, normalizeLuaTable(json));
 	}
+	if (table === NaviMobTable) {
+		navigationMobRowsByMap = new Map();
+		for (const mob of table) {
+			if (!mob) continue;
+			const mapName = normalizeNaviMapName(mob[0]);
+			if (!mapName) continue;
+			let rows = navigationMobRowsByMap.get(mapName);
+			if (!rows) navigationMobRowsByMap.set(mapName, (rows = []));
+			rows.push(mob);
+		}
+	}
+}
+
+/**
+ * Normalize Lua tables converted to JS objects.
+ *
+ * Some LUB navigation files use numeric Lua keys. The current Lua-to-JSON
+ * extractor can return those tables as objects like { "1": [...] } instead
+ * of real arrays, so code using .length will silently fail.
+ */
+function isNumericLuaKey(key) {
+	return /^(0|[1-9]\d*)$/.test(String(key));
+}
+
+function normalizeLuaTable(value) {
+	if (Array.isArray(value)) {
+		return value.map(normalizeLuaTable);
+	}
+
+	if (value && typeof value === 'object') {
+		const keys = Object.keys(value);
+
+		if (!keys.length) {
+			return [];
+		}
+
+		if (keys.every(isNumericLuaKey)) {
+			const sorted = keys.sort((a, b) => Number(a) - Number(b));
+			if (sorted.every((key, index) => Number(key) === index + 1)) {
+				return sorted.map(key => normalizeLuaTable(value[key]));
+			}
+		}
+
+		const normalized = Object.create(null);
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			normalized[key] = normalizeLuaTable(value[key]);
+		}
+		return normalized;
+	}
+
+	return value;
+}
+
+function normalizeNaviMapName(mapName) {
+	return String(mapName || '')
+		.replace(/\.gat$/, '')
+		.toLowerCase();
+}
+
+function getDefaultNaviMapPoint(mapName) {
+	const targetMap = normalizeNaviMapName(mapName);
+	const links = applyNavigationLinkEra(
+		normalizeLuaTable(NaviLinkTable),
+		Configs.get('worldMapSettings', { episode: 98 })
+	);
+	return getIncomingNavigationMapPoint(targetMap, links);
+}
+
+function normalizeSearchText(value) {
+	return String(value || '')
+		.toLowerCase()
+		.replace(/\.gat$/g, '')
+		.replace(/[_\-()\[\],:]+/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
+}
+
+function findWorldMapEntry(mapName) {
+	const targetMap = normalizeNaviMapName(mapName);
+
+	for (let i = 0; i < WorldMap.length; i++) {
+		const worldMap = WorldMap[i];
+		if (!worldMap || !worldMap.maps) {
+			continue;
+		}
+
+		for (let j = 0; j < worldMap.maps.length; j++) {
+			const section = worldMap.maps[j];
+			if (section && normalizeNaviMapName(section.id) === targetMap) {
+				return section;
+			}
+		}
+	}
+
+	return null;
+}
+
+function getNavigationMapDisplayName(mapName) {
+	const normalizedMap = normalizeNaviMapName(mapName);
+	const mapInfo = MapInfo[normalizedMap + '.rsw'] || MapInfo[normalizedMap] || null;
+
+	if (mapInfo && mapInfo.displayName) {
+		return mapInfo.displayName;
+	}
+
+	const worldMapEntry = findWorldMapEntry(normalizedMap);
+	if (worldMapEntry && worldMapEntry.name) {
+		return worldMapEntry.name;
+	}
+
+	return normalizedMap;
+}
+
+function navigationMapMatchesQuery(mapName, displayName, query) {
+	const normalizedQuery = normalizeSearchText(query);
+	if (!normalizedQuery) {
+		return false;
+	}
+
+	return (
+		normalizeSearchText(mapName).indexOf(normalizedQuery) !== -1 ||
+		normalizeSearchText(displayName).indexOf(normalizedQuery) !== -1
+	);
+}
+
+function decodeNavigationMobClass(value) {
+	value = Number(value) || 0;
+	// PACKETVER >= 20140000 stores amount in the high 16 bits and look base in
+	// the low 16 bits. Older clients store only look base.
+	return value > 0xffff ? value & 0xffff : value;
+}
+
+function getNavigationMobAmount(value) {
+	value = Number(value) || 0;
+	return value > 0xffff ? value >>> 16 : 1;
+}
+
+function getNavigationSpawnRateLabel(amount) {
+	amount = Number(amount) || 0;
+
+	if (amount >= 60) {
+		return 'Very High';
+	}
+	if (amount >= 25) {
+		return 'High';
+	}
+	if (amount >= 10) {
+		return 'Average';
+	}
+	if (amount >= 3) {
+		return 'Low';
+	}
+	return 'Very Low';
+}
+
+function decodeNavigationMobInfo(value) {
+	value = Number(value) || 0;
+	const race = value & 0xff;
+	const size = (value >> 8) & 0xff;
+	const elementPacked = (value >> 16) & 0xffff;
+	const element = elementPacked % 20;
+	const elementLevel = Math.floor(elementPacked / 20);
+	const elementNames = ['Neutral', 'Water', 'Earth', 'Fire', 'Wind', 'Poison', 'Holy', 'Dark', 'Ghost', 'Undead'];
+	const raceNames = [
+		'Formless',
+		'Undead',
+		'Brute',
+		'Plant',
+		'Insect',
+		'Fish',
+		'Demon',
+		'Demi-Human',
+		'Angel',
+		'Dragon',
+		'Boss',
+		'Non-Boss'
+	];
+	const sizeNames = ['Small', 'Medium', 'Large'];
+
+	return {
+		raw: value,
+		race: race,
+		raceName: raceNames[race] || 'Unknown',
+		size: size,
+		sizeName: sizeNames[size] || 'Medium',
+		element: element,
+		elementLevel: elementLevel,
+		elementName: (elementNames[element] || 'Neutral') + (elementLevel ? ' ' + elementLevel : '')
+	};
 }
 
 /**
@@ -346,6 +731,7 @@ class DB {
 		]) {
 			table.length = 0;
 		}
+		navigationMobRowsByMap.clear();
 
 		// Callback
 		let index = 0,
@@ -462,7 +848,9 @@ class DB {
 				function (json) {
 					Object.assign(HatTable, json);
 				},
-				onLoad()
+				onLoad(),
+				null,
+				false
 			);
 			loadLuaTable(
 				[DB.LUA_PATH + 'datainfo/spriterobeid.lub', DB.LUA_PATH + 'datainfo/spriterobename.lub'],
@@ -470,7 +858,9 @@ class DB {
 				function (json) {
 					Object.assign(RobeTable, json);
 				},
-				onLoad()
+				onLoad(),
+				null,
+				false
 			);
 
 			if (PACKETVER.value >= 20141008) {
@@ -490,7 +880,8 @@ class DB {
 								onLoad()
 							);
 						});
-					}
+					},
+					false
 				);
 			} else {
 				loadLuaTable(
@@ -499,7 +890,9 @@ class DB {
 					function (json) {
 						Object.assign(MonsterTable, json);
 					},
-					onLoad()
+					onLoad(),
+					null,
+					false
 				);
 			}
 
@@ -1020,6 +1413,7 @@ class DB {
 		JobId.ASSASSIN_H,
 		JobId.GUILLOTINE_CROSS,
 		JobId.GUILLOTINE_CROSS_H,
+		JobId.GUILLOTINE_CROSS_2ND,
 		JobId.SHADOW_CROSS,
 
 		JobId.ASSASSIN_B,
@@ -1565,7 +1959,7 @@ class DB {
 	 */
 	static isShieldItem(id) {
 		const num = Number(id);
-		if (isNaN(num) || num <= 0) {
+		if (!Number.isInteger(num) || num <= 0) {
 			return false;
 		}
 		// Shield item ID ranges from official client (CSession_sub_D6EAC0):
@@ -1597,7 +1991,7 @@ class DB {
 	 */
 	static isShield(id, job, isOffhandWeapon) {
 		const num = Number(id);
-		if (isNaN(num) || num <= 0) {
+		if (!Number.isInteger(num) || num <= 0) {
 			return false;
 		}
 
@@ -1624,7 +2018,50 @@ class DB {
 		return true;
 	}
 
+	/**
+	 * Whether the reference client has a shield sprite for this job/view pair.
+	 * The original check uses custom item sprites for IDs above 2000 and fixed
+	 * job/view support for the four generic shield sprites.
+	 * @param {number} job
+	 * @param {number} shieldView shield item ID or generic shield view
+	 * @returns {boolean}
+	 */
+	static hasJobShieldSprite(job, shieldView) {
+		const shield = Number(shieldView);
+		if (!Number.isInteger(shield) || shield <= 0) {
+			return false;
+		}
+
+		if (shield > 2000) {
+			return !SHIELD_ITEM_UNSUPPORTED_JOBS.has(job);
+		}
+
+		switch (shield) {
+			case 1:
+				return (
+					SHIELD_VIEW_1_JOBS.has(job) ||
+					SHIELD_VIEW_1_2_JOBS.has(job) ||
+					SHIELD_VIEW_1_4_JOBS.has(job) ||
+					SHIELD_VIEW_1_2_4_JOBS.has(job)
+				);
+			case 2:
+				return (
+					SHIELD_VIEW_1_2_JOBS.has(job) || SHIELD_VIEW_1_4_JOBS.has(job) || SHIELD_VIEW_1_2_4_JOBS.has(job)
+				);
+			case 3:
+				return SHIELD_VIEW_1_4_JOBS.has(job);
+			case 4:
+				return SHIELD_VIEW_1_4_JOBS.has(job) || SHIELD_VIEW_1_2_4_JOBS.has(job);
+			default:
+				return false;
+		}
+	}
+
 	static getPCAttackMotion(job, sex, itemID, isDualWeapon) {
+		if (DB.isAssassin(job) && ASSASSIN_DUAL_WEAPON_TYPES.has(DB.getWeaponType(itemID))) {
+			return 3.0;
+		}
+
 		if (isDualWeapon) {
 			switch (job) {
 				case JobId.THIEF:
@@ -1649,24 +2086,6 @@ class DB {
 							return 5.85;
 					}
 					break;
-				case JobId.ASSASSIN:
-				case JobId.ASSASSIN_H:
-				case JobId.ASSASSIN_B:
-				case JobId.GUILLOTINE_CROSS:
-				case JobId.GUILLOTINE_CROSS_H:
-				case JobId.GUILLOTINE_CROSS_B:
-				case JobId.SHADOW_CROSS:
-					switch (DB.getWeaponType(itemID)) {
-						case WeaponType.KATAR:
-						case WeaponType.SHORTSWORD_SHORTSWORD:
-						case WeaponType.SWORD_SWORD:
-						case WeaponType.AXE_AXE:
-						case WeaponType.SHORTSWORD_SWORD:
-						case WeaponType.SHORTSWORD_AXE:
-						case WeaponType.SWORD_AXE:
-							return 3.0;
-					}
-					break;
 			}
 		}
 		return 6;
@@ -1674,6 +2093,12 @@ class DB {
 
 	static isDualWeapon(job, sex, weaponType) {
 		let dualWeapon = false;
+		if (!Number.isInteger(weaponType) || weaponType < 0 || weaponType >= WeaponType.MAX) {
+			return false;
+		}
+		if (DB.isAssassin(job) && ASSASSIN_DUAL_WEAPON_TYPES.has(weaponType)) {
+			return true;
+		}
 
 		switch (job) {
 			case JobId.GUNSLINGER:
@@ -1857,10 +2282,11 @@ class DB {
 			case JobId.RUNE_KNIGHT2_H:
 			case JobId.RUNE_KNIGHT2_B:
 			case JobId.DRAGON_KNIGHT:
-			case JobId.DRAGON_KNIGHT2: {
+			case JobId.DRAGON_KNIGHT2:
+			case JobId.DRAGON_KNIGHT_RIDING: {
 				switch (weaponType) {
 					case WeaponType.TWOHANDSPEAR:
-					case WeaponAction.TWOHANDSWORD:
+					case WeaponType.TWOHANDSWORD:
 						dualWeapon = true;
 						break;
 				}
@@ -1872,7 +2298,9 @@ class DB {
 			case JobId.ARCHBISHOP:
 			case JobId.ARCHBISHOP_H:
 			case JobId.ARCHBISHOP_B:
-			case JobId.CARDINAL: {
+			case JobId.CARDINAL:
+			case JobId.ARCH_BISHOP_2ND:
+			case JobId.CARDINAL_RIDING: {
 				switch (weaponType) {
 					case WeaponType.BOOK:
 						dualWeapon = true;
@@ -1886,7 +2314,9 @@ class DB {
 			case JobId.WARLOCK:
 			case JobId.WARLOCK_H:
 			case JobId.WARLOCK_B:
-			case JobId.ARCH_MAGE: {
+			case JobId.ARCH_MAGE:
+			case JobId.WARLOCK_2ND:
+			case JobId.ARCH_MAGE_RIDING: {
 				switch (weaponType) {
 					case WeaponType.SHORTSWORD:
 						if (sex == 1) {
@@ -1912,32 +2342,15 @@ class DB {
 			case JobId.MECHANIC2_H:
 			case JobId.MECHANIC2_B:
 			case JobId.MEISTER:
-			case JobId.MEISTER2: {
+			case JobId.MEISTER2:
+			case JobId.MECHANIC_2ND:
+			case JobId.MECHANIC2_2ND:
+			case JobId.MEISTER_RIDING: {
 				switch (weaponType) {
 					case WeaponType.SWORD:
 					case WeaponType.AXE:
 					case WeaponType.TWOHANDAXE:
 					case WeaponType.MACE:
-						dualWeapon = true;
-						break;
-				}
-				break;
-			}
-			case JobId.ASSASSIN:
-			case JobId.ASSASSIN_H:
-			case JobId.ASSASSIN_B:
-			case JobId.GUILLOTINE_CROSS:
-			case JobId.GUILLOTINE_CROSS_H:
-			case JobId.GUILLOTINE_CROSS_B:
-			case JobId.SHADOW_CROSS: {
-				switch (weaponType) {
-					case WeaponType.KATAR:
-					case WeaponType.SHORTSWORD_SHORTSWORD:
-					case WeaponType.SHORTSWORD_SWORD:
-					case WeaponType.SHORTSWORD_AXE:
-					case WeaponType.SWORD_SWORD:
-					case WeaponType.SWORD_AXE:
-					case WeaponType.AXE_AXE:
 						dualWeapon = true;
 						break;
 				}
@@ -1953,7 +2366,10 @@ class DB {
 			case JobId.RANGER2_H:
 			case JobId.RANGER2_B:
 			case JobId.WINDHAWK:
-			case JobId.WINDHAWK2: {
+			case JobId.WINDHAWK2:
+			case JobId.RANGER_2ND:
+			case JobId.RANGER2_2ND:
+			case JobId.WINDHAWK_RIDING: {
 				switch (weaponType) {
 					case WeaponType.BOW:
 						dualWeapon = true;
@@ -1968,6 +2384,8 @@ class DB {
 			case JobId.SORCERER_H:
 			case JobId.SORCERER_B:
 			case JobId.ELEMENTAL_MASTER:
+			case JobId.ELEMENTAL_MASTER_RIDING:
+			case JobId.SORCERER_2ND:
 				{
 					switch (weaponType) {
 						case WeaponType.BOOK:
@@ -1986,6 +2404,8 @@ class DB {
 			case JobId.GENETIC_H:
 			case JobId.GENETIC_B:
 			case JobId.BIOLO:
+			case JobId.BIOLO_RIDING:
+			case JobId.GENETIC_2ND:
 				{
 					switch (weaponType) {
 						case WeaponType.SWORD:
@@ -2014,6 +2434,9 @@ class DB {
 			case JobId.ROYAL_GUARD2_B:
 			case JobId.IMPERIAL_GUARD:
 			case JobId.IMPERIAL_GUARD2:
+			case JobId.IMPERIAL_GUARD_RIDING:
+			case JobId.ROYAL_GUARD_2ND:
+			case JobId.ROYAL_GUARD2_2ND:
 				{
 					switch (weaponType) {
 						case WeaponType.SPEAR:
@@ -2030,6 +2453,8 @@ class DB {
 			case JobId.SURA_H:
 			case JobId.SURA_B:
 			case JobId.INQUISITOR:
+			case JobId.INQUISITOR_RIDING:
+			case JobId.SURA_2ND:
 				{
 					switch (weaponType) {
 						case WeaponType.KNUKLE:
@@ -2046,6 +2471,8 @@ class DB {
 			case JobId.SHADOW_CHASER_H:
 			case JobId.SHADOW_CHASER_B:
 			case JobId.ABYSS_CHASER:
+			case JobId.ABYSS_CHASER_RIDING:
+			case JobId.SHADOW_CHASER_2ND:
 				{
 					switch (weaponType) {
 						case WeaponType.BOW:
@@ -2068,6 +2495,10 @@ class DB {
 			case JobId.WANDERER_H:
 			case JobId.WANDERER_B:
 			case JobId.TROUVERE:
+			case JobId.TROUBADOUR_RIDING:
+			case JobId.TROUVERE_RIDING:
+			case JobId.MINSTREL_2ND:
+			case JobId.WANDERER_2ND:
 				{
 					switch (weaponType) {
 						case WeaponType.BOW:
@@ -2076,9 +2507,11 @@ class DB {
 					}
 				}
 				break;
-			case JobId.DO_SUMMONER1:
-			case JobId.DO_SUMMONER_B1:
+			case JobId.DO_SUMMONER:
+			case JobId.DO_SUMMONER_B:
+			case JobId.DO_CART_SUMMONER1:
 			case JobId.SPIRIT_HANDLER:
+			case JobId.SPIRIT_HANDLER_RIDING1:
 				break;
 		}
 		return dualWeapon;
@@ -2087,7 +2520,7 @@ class DB {
 	static getWeaponType(itemID, realType = false, considerDualHandIds = false) {
 		const id = Number(itemID);
 
-		if (isNaN(id) || id < 0) {
+		if (!Number.isInteger(id) || id < 0) {
 			return WeaponType.NONE;
 		}
 
@@ -2144,26 +2577,28 @@ class DB {
 				{ min: 21000, max: 21999, type: WeaponType.TWOHANDSWORD }
 			];
 
+			// These firearm subtypes lie inside the broader rifle item-ID range,
+			// so classify them before that range returns the generic rifle type.
+			const gunGatling = [13157, 13158, 13159, 13172, 13177];
+			if (gunGatling.includes(id)) {
+				return WeaponType.GUN_GATLING;
+			}
+
+			const gunShotGun = [13154, 13155, 13156, 13167, 13168, 13169, 13173, 13178];
+			if (gunShotGun.includes(id)) {
+				return WeaponType.GUN_SHOTGUN;
+			}
+
+			const gunGranade = [13160, 13161, 13162, 13174, 13179];
+			if (gunGranade.includes(id)) {
+				return WeaponType.GUN_GRANADE;
+			}
+
 			// Find the corresponding range
 			for (const range of ranges) {
 				if (id >= range.min && id <= range.max) {
 					return range.type;
 				}
-			}
-
-			const gunGatling = [13157, 13158, 13159, 13172, 13177];
-			if (gunGatling.indexOf(id) > -1) {
-				return WeaponType.GUN_GATLING;
-			}
-
-			const gunShotGun = [13154, 13155, 13156, 13167, 13168, 13169, 13173, 13178];
-			if (gunShotGun.indexOf(id) > -1) {
-				return WeaponType.GUN_SHOTGUN;
-			}
-
-			const gunGranade = [13160, 13161, 13162, 13174, 13179];
-			if (gunGranade.indexOf(id) > -1) {
-				return WeaponType.GUN_GRANADE;
 			}
 		}
 
@@ -2177,38 +2612,75 @@ class DB {
 	 * @param {number} job class
 	 * @param {boolean} sex
 	 */
-	static getShieldPath(id, job, sex) {
-		if (!id || id <= 0) {
+	static getShieldPath(id, job, sex, isMounted = false) {
+		const shieldId = Number(id);
+		const gender = SexTable[sex];
+		if (!Number.isInteger(shieldId) || shieldId <= 0 || !gender) {
 			return null;
 		}
+		id = shieldId;
 
-		// Dual weapon (based on range id)
-		if (!DB.isShield(id, job, false)) {
+		// The second packet field can contain an offhand weapon item ID, not a shield ID.
+		if (!DB.isShield(id, job)) {
 			return DB.getWeaponPath(id, job, sex);
+		}
+		if (isMounted) {
+			return null;
 		}
 
 		const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
+		const viewId = DB.getShieldViewID(id);
 
-		// ItemID to View Id
-		let viewId = id;
-		if (id in ItemTable && 'ClassNum' in ItemTable[id]) {
-			viewId = ItemTable[id].ClassNum;
+		// The original client first tries an item-specific sprite when that job
+		// has one, then falls back to its generic view (usually 1-4).
+		if (id > 2000 && DB.hasJobShieldSprite(job, id)) {
+			return (
+				'data/sprite/\xb9\xe6\xc6\xd0/' +
+				baseClass +
+				'/' +
+				baseClass +
+				'_' +
+				SexTable[sex] +
+				'_' +
+				id +
+				'_\xb9\xe6\xc6\xd0'
+			);
 		}
 
-		if (!viewId || viewId <= 0) {
+		if (!DB.hasJobShieldSprite(job, viewId) || !(viewId in ShieldTable)) {
 			return null;
 		}
 
-		let suffix = '';
-		if (viewId in ShieldTable) {
-			suffix = ShieldTable[viewId];
-		} else if (viewId >= 5) {
-			suffix = viewId + '_\xb9\xe6\xc6\xd0';
-		} else {
-			return null;
+		return (
+			'data/sprite/\xb9\xe6\xc6\xd0/' +
+			baseClass +
+			'/' +
+			baseClass +
+			'_' +
+			SexTable[sex] +
+			'_' +
+			ShieldTable[viewId]
+		);
+	}
+
+	/**
+	 * Convert an equipped shield item ID to the view value used by the generic
+	 * shield resource fallback. Packet view IDs are already in this form.
+	 * @param {number} id item ID or view ID
+	 * @returns {number}
+	 */
+	static getShieldViewID(id) {
+		const num = Number(id);
+		if (!Number.isInteger(num) || num <= 0) {
+			return 0;
 		}
 
-		return 'data/sprite/\xb9\xe6\xc6\xd0/' + baseClass + '/' + baseClass + '_' + SexTable[sex] + '_' + suffix;
+		if (num <= 500) {
+			return num;
+		}
+
+		const item = ItemTable[num];
+		return item && Number.isInteger(item.ClassNum) ? item.ClassNum : 0;
 	}
 
 	/**
@@ -2218,13 +2690,19 @@ class DB {
 	 * @param {boolean} sex
 	 */
 	static getWeaponPath(id, job, sex, leftid = false) {
-		if (id === 0) {
+		const weaponId = Number(id);
+		const gender = SexTable[sex];
+		if (!Number.isInteger(weaponId) || weaponId <= 0 || !gender) {
 			return null;
 		}
+		id = weaponId;
 
 		const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
 
 		id = DB.getWeaponType(id);
+		if (DB.getWeaponType(id, true) === WeaponType.KNUKLE && PRIEST_KNUCKLE_INCOMPATIBLE_JOBS.has(job)) {
+			return null;
+		}
 
 		// TODO: CHECK IF THIS IS CORRECT
 		if (leftid) {
@@ -2241,12 +2719,14 @@ class DB {
 		}
 
 		return (
-			'data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/' +
+			'data/sprite/' +
+			(DB.isDoram(job) ? '\xb5\xb5\xb6\xf7\xc1\xb7' : '\xc0\xce\xb0\xa3\xc1\xb7') +
+			'/' +
 			baseClass +
 			'/' +
 			baseClass +
 			'_' +
-			SexTable[sex] +
+			gender +
 			(WeaponTable[id] || '_' + id)
 		);
 	}
@@ -2258,22 +2738,72 @@ class DB {
 	 * @param {boolean} sex
 	 */
 	static getWeaponTrail(id, job, sex) {
-		if (id === 0) {
+		const weaponId = Number(id);
+		const gender = SexTable[sex];
+		if (!Number.isInteger(weaponId) || weaponId <= 0 || !gender) {
 			return null;
 		}
 
 		const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
 
-		const realId = DB.getWeaponType(id, true, true);
+		const realId = DB.getWeaponType(weaponId, true, true);
+		const trail = WeaponTrailTable[realId];
+		if (!trail) {
+			return null;
+		}
 
 		return (
-			'data/sprite/\xc0\xce\xb0\xa3\xc1\xb7/' +
+			'data/sprite/' +
+			(DB.isDoram(job) ? '\xb5\xb5\xb6\xf7\xc1\xb7' : '\xc0\xce\xb0\xa3\xc1\xb7') +
+			'/' +
 			baseClass +
 			'/' +
 			baseClass +
 			'_' +
-			SexTable[sex] +
-			WeaponTrailTable[realId]
+			gender +
+			trail
+		);
+	}
+
+	/**
+	 * Resolve the generic weapon-effect sprite used by ACT layer 6 in the
+	 * reference client. `id` is a weapon item/view ID; -1 selects a class-only
+	 * effect name (used by special job effects).
+	 * @param {number} id weapon item or view ID, or -1 for class-only effects
+	 * @param {number} job class
+	 * @param {number} sex
+	 * @param {number} effect 0 = weapon glow, 1 = class aura
+	 * @returns {string|null}
+	 */
+	static getWeaponEffectPath(id, job, sex, effect = 0) {
+		const weaponId = Number(id);
+		const gender = SexTable[sex];
+		if (!Number.isInteger(weaponId) || weaponId < -1 || !gender || (effect !== 0 && effect !== 1)) {
+			return null;
+		}
+
+		const baseClass = WeaponJobTable[job] || WeaponJobTable[0];
+		let weaponName = '';
+		if (weaponId >= 0) {
+			const weaponType = DB.getWeaponType(weaponId);
+			if (weaponType === WeaponType.NONE || !WeaponTable[weaponType]) {
+				return null;
+			}
+			weaponName = WeaponTable[weaponType];
+		}
+
+		const effectSuffix = effect === 1 ? '_\xb9\xdf\xb1\xa4' : '_\xb0\xcb\xb1\xa4';
+		return (
+			'data/sprite/' +
+			(DB.isDoram(job) ? '\xb5\xb5\xb6\xf7\xc1\xb7' : '\xc0\xce\xb0\xa3\xc1\xb7') +
+			'/' +
+			baseClass +
+			'/' +
+			baseClass +
+			'_' +
+			gender +
+			weaponName +
+			effectSuffix
 		);
 	}
 
@@ -2343,28 +2873,28 @@ class DB {
 	 * @param {number} id weapon
 	 */
 	static getWeaponViewID(id) {
-		// validate if is number
-		if (isNaN(id)) {
+		const num = Number(id);
+		if (!Number.isInteger(num) || num < 0) {
 			return 0;
 		}
 
 		// if id is 0, return 0
-		if (id === 0) {
+		if (num === 0) {
 			return 0;
 		}
 
 		// if less then weapon type.MAX, return the id
-		if (id < WeaponType.MAX) {
-			return id;
+		if (num < WeaponType.MAX) {
+			return num;
 		}
 
 		// try to get view from classnum in ItemTable
-		if (id in ItemTable && 'ClassNum' in ItemTable[id]) {
-			return ItemTable[id].ClassNum;
+		if (num in ItemTable && 'ClassNum' in ItemTable[num]) {
+			return ItemTable[num].ClassNum;
 		}
 
 		// all cases failed, return weapon type to use base sprite
-		return DB.getWeaponType(id);
+		return DB.getWeaponType(num);
 	}
 
 	/**
@@ -2375,6 +2905,9 @@ class DB {
 	 */
 	static getWeaponAction(id, job, sex) {
 		const type = DB.getWeaponType(id, true);
+		if (!Number.isInteger(sex) || (sex !== 0 && sex !== 1)) {
+			return 0;
+		}
 
 		if (job in WeaponAction) {
 			if (WeaponAction[job] instanceof Array) {
@@ -2423,39 +2956,88 @@ class DB {
 		return null;
 	}
 
+	/**
+	 * Resolve Assassin-family dual-wield categories from the original item ID ranges.
+	 * The client uses these ranges in CPc::GetDualWieldWeaponType (RVA 0x00DAB460).
+	 */
+	static getDualWieldWeaponType(firstItemId, secondItemId) {
+		let first = Number(firstItemId) || 0;
+		let second = Number(secondItemId) || 0;
+		if (!Number.isInteger(first) || !Number.isInteger(second) || first < 0 || second < 0) {
+			return WeaponType.NONE;
+		}
+
+		if (first === 0) {
+			if (second === 0) {
+				return WeaponType.NONE;
+			}
+			first = second;
+			second = 0;
+		}
+
+		const isSword = id => (id >= 1100 && id < 1150) || (id >= 13400 && id < 13500) || (id >= 500000 && id < 510000);
+		const isDagger = id =>
+			(id >= 1200 && id < 1250) ||
+			(id >= 13000 && id < 13100) ||
+			(id >= 28700 && id < 28900) ||
+			(id >= 510000 && id < 520000);
+		const isAxe = id => (id >= 1300 && id < 1350) || (id >= 520000 && id < 530000);
+
+		if (isSword(first)) {
+			if (isSword(second)) return WeaponType.SWORD_SWORD;
+			if (isDagger(second)) return WeaponType.SHORTSWORD_SWORD;
+			if (isAxe(second)) return WeaponType.SWORD_AXE;
+			return WeaponType.SWORD;
+		}
+		if (isDagger(first)) {
+			if (isSword(second)) return WeaponType.SHORTSWORD_SWORD;
+			if (isDagger(second)) return WeaponType.SHORTSWORD_SHORTSWORD;
+			if (isAxe(second)) return WeaponType.SHORTSWORD_AXE;
+			return WeaponType.SHORTSWORD;
+		}
+		if (isAxe(first)) {
+			if (isAxe(second)) return WeaponType.AXE_AXE;
+			if (isDagger(second)) return WeaponType.SHORTSWORD_AXE;
+			if (isSword(second)) return WeaponType.SWORD_AXE;
+			return WeaponType.AXE;
+		}
+
+		return WeaponType.NONE;
+	}
+
 	static mountWeapon(weaponID, shieldID) {
 		const _weapon = DB.getWeaponType(weaponID, true);
 		const _shield = DB.getWeaponType(shieldID, true);
-
-		let weapon;
-
-		const viewId = _weapon + _shield;
-
-		switch (viewId) {
-			case 2:
-				weapon = WeaponType.SHORTSWORD_SHORTSWORD;
-				break;
-			case 3:
-				weapon = WeaponType.SHORTSWORD_SWORD;
-				break;
-			case 4:
-				weapon = WeaponType.SWORD_SWORD;
-				break;
-			case 7:
-				weapon = WeaponType.SHORTSWORD_AXE;
-				break;
-			case 8:
-				weapon = WeaponType.SWORD_AXE;
-				break;
-			case 12:
-				weapon = WeaponType.AXE_AXE;
-				break;
-			default:
-				weapon = viewId;
-				break;
+		if (_weapon === WeaponType.SHORTSWORD && _shield === WeaponType.SHORTSWORD) {
+			return WeaponType.SHORTSWORD_SHORTSWORD;
+		}
+		if (_weapon === WeaponType.SWORD && _shield === WeaponType.SWORD) {
+			return WeaponType.SWORD_SWORD;
+		}
+		if (_weapon === WeaponType.AXE && _shield === WeaponType.AXE) {
+			return WeaponType.AXE_AXE;
+		}
+		if (
+			(_weapon === WeaponType.SHORTSWORD && _shield === WeaponType.SWORD) ||
+			(_weapon === WeaponType.SWORD && _shield === WeaponType.SHORTSWORD)
+		) {
+			return WeaponType.SHORTSWORD_SWORD;
+		}
+		if (
+			(_weapon === WeaponType.SHORTSWORD && _shield === WeaponType.AXE) ||
+			(_weapon === WeaponType.AXE && _shield === WeaponType.SHORTSWORD)
+		) {
+			return WeaponType.SHORTSWORD_AXE;
+		}
+		if (
+			(_weapon === WeaponType.SWORD && _shield === WeaponType.AXE) ||
+			(_weapon === WeaponType.AXE && _shield === WeaponType.SWORD)
+		) {
+			return WeaponType.SWORD_AXE;
 		}
 
-		return weapon;
+		// Unknown combinations keep the primary hand's type instead of producing an unrelated type by addition.
+		return _weapon;
 	}
 
 	static isBow(weaponType) {
@@ -3396,7 +3978,9 @@ class DB {
 	static getJobClass(job) {
 		switch (job) {
 			case JobId.NOVICE:
-			case JobId.DO_SUMMONER1:
+			case JobId.DO_SUMMONER:
+			case JobId.DO_SUMMONER_B:
+			case JobId.DO_CART_SUMMONER1:
 				return 'Base_Class';
 
 			case JobId.SWORDMAN:
@@ -3620,6 +4204,69 @@ class DB {
 		});
 	}
 	/**
+	 * Get grouped monster entries for a single navigation map.
+	 *
+	 * @param {string} mapName
+	 * @returns {Array<Object>} grouped monsters in that map
+	 */
+	static getNavigationMapMonsters(mapName) {
+		mapName = normalizeNaviMapName(mapName);
+		if (!mapName) {
+			return [];
+		}
+
+		const mobTable = navigationMobRowsByMap.get(mapName) || [];
+		const grouped = {};
+		const point = getDefaultNaviMapPoint(mapName) || { x: 0, y: 0 };
+
+		for (let i = 0; i < mobTable.length; i++) {
+			const mob = mobTable[i];
+			if (!mob) {
+				continue;
+			}
+
+			const mobName = mob[4] || '';
+			if (!mobName) {
+				continue;
+			}
+
+			const mobClass = decodeNavigationMobClass(mob[3]);
+			const amount = getNavigationMobAmount(mob[3]);
+			const key = [mobClass, mobName].join(':');
+			const mobLevel = Number(mob[6]);
+			const mobType = Number(mob[2]);
+
+			if (!grouped[key]) {
+				grouped[key] = {
+					type: 'MOB',
+					id: mobClass,
+					mobType: mobType,
+					levels: Number.isFinite(mobLevel) && mobLevel > 0 ? [mobLevel] : [],
+					name: mobName,
+					mapName: mapName,
+					x: point.x,
+					y: point.y,
+					amount: amount,
+					rateLabel: getNavigationSpawnRateLabel(amount)
+				};
+			} else if (amount > grouped[key].amount) {
+				grouped[key].amount = amount;
+				grouped[key].rateLabel = getNavigationSpawnRateLabel(amount);
+			}
+			if (Number.isFinite(mobLevel) && mobLevel > 0 && !grouped[key].levels.includes(mobLevel))
+				grouped[key].levels.push(mobLevel);
+		}
+
+		return Object.keys(grouped)
+			.map(key => grouped[key])
+			.sort(function (a, b) {
+				const aName = String(a.name || '').toLowerCase();
+				const bName = String(b.name || '').toLowerCase();
+				return aName.localeCompare(bName) || String(a.id || '').localeCompare(String(b.id || ''));
+			});
+	}
+
+	/**
 	 * Search for NPCs or MOBs in the navigation tables
 	 *
 	 * @param {string} query - The search query
@@ -3632,73 +4279,296 @@ class DB {
 		}
 
 		query = query.toLowerCase();
+		type = type || 'ALL';
 		const results = [];
+		const seen = {};
 
-		// Search NPCs if type is ALL or NPC
-		if (type === 'ALL' || type === 'NPC') {
-			// NaviNpcTable structure: [["map_name", npc_id, npc_type, class_id, "npc_name", "", x, y], ...]
-			for (let i = 0; i < NaviNpcTable.length; i++) {
-				const npc = NaviNpcTable[i];
-				const mapName = npc[0];
-				const npcId = npc[1];
-				const npcName = npc[4] || '';
+		function pushResult(result) {
+			if (!result || !result.mapName) {
+				return;
+			}
 
-				// Skip if no name
-				if (!npcName) {
+			result.mapName = normalizeNaviMapName(result.mapName);
+			result.x = Number(result.x);
+			result.y = Number(result.y);
+
+			if (!Number.isFinite(result.x) || !Number.isFinite(result.y)) {
+				const point = getDefaultNaviMapPoint(result.mapName) || { x: 0, y: 0 };
+				result.x = point.x;
+				result.y = point.y;
+			}
+
+			let key;
+			if (result.type === 'MAP') {
+				key = [result.type, result.mapName].join(':');
+			} else if (result.type === 'NPC' && Array.isArray(result.spawns) && result.spawns.length) {
+				key = [result.type, String(result.name || '').toLowerCase()].join(':');
+			} else {
+				key = [result.type, result.id, result.mapName, result.x, result.y, result.name].join(':');
+			}
+			if (seen[key]) {
+				return;
+			}
+
+			seen[key] = true;
+			results.push(result);
+		}
+
+		// Search map destinations too. World Map clicks put a map display name
+		// in this input, so ALL/MAP must be able to resolve map names, not only NPC/MOB names.
+		if (type === 'ALL' || type === 'MAP') {
+			const maps = applyNavigationMapEra(
+				normalizeLuaTable(NaviMapTable),
+				Configs.get('worldMapSettings', { episode: 98 })
+			);
+			for (let i = 0; i < maps.length; i++) {
+				const map = maps[i];
+				if (!map) {
 					continue;
 				}
 
-				// Check if the NPC name contains the query
-				if (npcName.toLowerCase().indexOf(query) !== -1) {
-					results.push({
+				const mapName = normalizeNaviMapName(map[0]);
+				const displayName = getNavigationMapDisplayName(mapName);
+
+				if (!navigationMapMatchesQuery(mapName, displayName, query)) {
+					continue;
+				}
+
+				const point = getDefaultNaviMapPoint(mapName);
+				pushResult({
+					type: 'MAP',
+					id: mapName,
+					name: displayName,
+					mapName: mapName,
+					x: point ? point.x : -1,
+					y: point ? point.y : -1
+				});
+			}
+
+			// Also search the visible World Map sections. Some custom world maps use
+			// display names that do not exist inside Navi_Map, but the map id can
+			// still be routed through Navi_Link.
+			for (let i = 0; i < WorldMap.length; i++) {
+				const worldMap = WorldMap[i];
+				if (!worldMap || !worldMap.maps) {
+					continue;
+				}
+
+				for (let j = 0; j < worldMap.maps.length; j++) {
+					const section = worldMap.maps[j];
+					if (!section || !section.id) {
+						continue;
+					}
+
+					const mapName = normalizeNaviMapName(section.id);
+					const displayName = getNavigationMapDisplayName(mapName);
+
+					if (
+						!navigationMapMatchesQuery(mapName, displayName, query) &&
+						!navigationMapMatchesQuery(mapName, section.name, query)
+					) {
+						continue;
+					}
+
+					const point = getDefaultNaviMapPoint(mapName);
+					pushResult({
+						type: 'MAP',
+						id: mapName,
+						name: displayName || section.name || mapName,
+						mapName: mapName,
+						x: point ? point.x : -1,
+						y: point ? point.y : -1
+					});
+				}
+			}
+		}
+
+		// Search NPCs if type is ALL or NPC. Group one NPC name in the
+		// left list, then show each map entry on the detail pane.
+		if (type === 'ALL' || type === 'NPC') {
+			// NaviNpcTable structure: [map, npc_id, npc_type, class_id, name, detail, x, y]
+			const npcTable = normalizeLuaTable(NaviNpcTable);
+			const groupedNpcs = {};
+
+			for (let i = 0; i < npcTable.length; i++) {
+				const npc = npcTable[i];
+				if (!npc) {
+					continue;
+				}
+
+				const npcName = npc[4] || '';
+				if (!npcName || npcName.toLowerCase().indexOf(query) === -1) {
+					continue;
+				}
+
+				const mapName = normalizeNaviMapName(npc[0]);
+				const key = String(npcName || '').toLowerCase();
+				if (!groupedNpcs[key]) {
+					groupedNpcs[key] = {
 						type: 'NPC',
-						id: npcId,
+						id: npc[1],
+						classId: Number(npc[3]) || Number(npc[1]) || 0,
+						npcType: npc[2],
 						name: npcName,
 						mapName: mapName,
 						x: npc[6],
-						y: npc[7]
-					});
+						y: npc[7],
+						spawns: []
+					};
 				}
+
+				groupedNpcs[key].spawns.push({
+					mapName: mapName,
+					x: Number(npc[6]) || 0,
+					y: Number(npc[7]) || 0,
+					displayName: getNavigationMapDisplayName(mapName)
+				});
+			}
+
+			const npcKeys = Object.keys(groupedNpcs);
+			for (let i = 0; i < npcKeys.length; i++) {
+				const result = groupedNpcs[npcKeys[i]];
+				result.spawns.sort(function (a, b) {
+					return String(a.mapName || '').localeCompare(String(b.mapName || ''));
+				});
+				if (result.spawns.length) {
+					result.mapName = result.spawns[0].mapName;
+					result.x = result.spawns[0].x;
+					result.y = result.spawns[0].y;
+				}
+				pushResult(result);
 			}
 		}
 
-		// Search MOBs if type is ALL or MOB
+		// Search MOBs if type is ALL or MOB. Official Navigation groups one
+		// monster in the left result list, then shows each spawn map on the
+		// detail pane. Keep that same shape so selecting "Spore" does not show
+		// a separate left-row for every map.
 		if (type === 'ALL' || type === 'MOB') {
-			// NaviMobTable structure: [["map_name", spawn_id, mob_type, mob_class, "mob_name", "sprite_name", level, mob_info], ...]
-			for (let i = 0; i < NaviMobTable.length; i++) {
-				const mob = NaviMobTable[i];
-				const mapName = mob[0];
-				const mobId = mob[3]; // Using mob_class as the ID
-				const mobName = mob[4] || '';
+			// NaviMobTable structure: [map, unique_code, mob_type, mob_class, name, sprite, level, info]
+			const mobTable = normalizeLuaTable(NaviMobTable);
+			const groupedMobs = {};
 
-				// Skip if no name
-				if (!mobName) {
+			for (let i = 0; i < mobTable.length; i++) {
+				const mob = mobTable[i];
+				if (!mob) {
 					continue;
 				}
 
-				// Check if the MOB name contains the query
-				if (mobName.toLowerCase().indexOf(query) !== -1) {
-					// Note: mob_info might contain position data, but structure is unclear
-					// For now, we're not including x/y coordinates for mobs
-					results.push({
+				const mobName = mob[4] || '';
+				if (!mobName || mobName.toLowerCase().indexOf(query) === -1) {
+					continue;
+				}
+
+				const mobClass = decodeNavigationMobClass(mob[3]);
+				const amount = getNavigationMobAmount(mob[3]);
+				const info = decodeNavigationMobInfo(mob[7]);
+				const mapName = normalizeNaviMapName(mob[0]);
+				const point = getDefaultNaviMapPoint(mapName) || { x: 0, y: 0 };
+				const key = [mobClass, mobName].join(':');
+
+				if (!groupedMobs[key]) {
+					groupedMobs[key] = {
 						type: 'MOB',
-						id: mobId,
+						id: mobClass,
+						uniqueCode: mob[1],
+						mobType: mob[2],
 						name: mobName,
 						mapName: mapName,
-						x: null,
-						y: null
-					});
+						x: point.x,
+						y: point.y,
+						sprite: mob[5] || '',
+						level: Number(mob[6]) || 0,
+						info: Number(mob[7]) || 0,
+						race: info.race,
+						raceName: info.raceName,
+						size: info.size,
+						sizeName: info.sizeName,
+						element: info.element,
+						elementLevel: info.elementLevel,
+						elementName: info.elementName,
+						spawns: []
+					};
 				}
+
+				groupedMobs[key].spawns.push({
+					mapName: mapName,
+					x: point.x,
+					y: point.y,
+					amount: amount,
+					rateLabel: getNavigationSpawnRateLabel(amount),
+					displayName: getNavigationMapDisplayName(mapName)
+				});
+			}
+
+			const groupedKeys = Object.keys(groupedMobs);
+			for (let i = 0; i < groupedKeys.length; i++) {
+				const result = groupedMobs[groupedKeys[i]];
+				// Official Navigation keeps the spawn list stable by map order.
+				// Do not sort by amount first, otherwise common maps jump above the
+				// official-looking order shown in the classic result pane.
+				result.spawns.sort(function (a, b) {
+					return String(a.mapName || '').localeCompare(String(b.mapName || ''));
+				});
+
+				if (result.spawns.length) {
+					result.mapName = result.spawns[0].mapName;
+					result.x = result.spawns[0].x;
+					result.y = result.spawns[0].y;
+				}
+
+				pushResult(result);
 			}
 		}
 
-		// Sort results by name
+		for (let i = 0; i < results.length; i++) {
+			if (results[i] && results[i].type === 'MAP') {
+				results[i].monsters = DB.getNavigationMapMonsters(results[i].mapName);
+			}
+		}
+
 		results.sort(function (a, b) {
-			return a.name.localeCompare(b.name);
+			const aName = String(a.name || a.mapName || '').toLowerCase();
+			const bName = String(b.name || b.mapName || '').toLowerCase();
+			const aExact = aName === query ? 0 : 1;
+			const bExact = bName === query ? 0 : 1;
+			const aStarts = aName.indexOf(query) === 0 ? 0 : 1;
+			const bStarts = bName.indexOf(query) === 0 ? 0 : 1;
+
+			return (
+				aExact - bExact ||
+				aStarts - bStarts ||
+				aName.length - bName.length ||
+				aName.localeCompare(bName) ||
+				String(a.mapName || '').localeCompare(String(b.mapName || ''))
+			);
 		});
 
-		// Limit to 50 results to avoid performance issues
-		return results.slice(0, 50);
+		// Return the full list. Kafra/service NPC searches can legitimately
+		// return more than 50 entries because the same service exists in many towns.
+		return results;
+	}
+
+	/**
+	 * Get the default navigation point for a map.
+	 * Used by the World Map and MAP search results to route to a map even
+	 * when there is no exact NPC/monster coordinate.
+	 *
+	 * @param {string} mapName
+	 * @returns {{x:number,y:number}|null}
+	 */
+	static getNaviMapPoint(mapName) {
+		return getDefaultNaviMapPoint(mapName);
+	}
+
+	/**
+	 * Get a readable navigation map name when available.
+	 *
+	 * @param {string} mapName
+	 * @returns {string}
+	 */
+	static getNaviMapDisplayName(mapName) {
+		return getNavigationMapDisplayName(mapName);
 	}
 
 	/**
@@ -3707,7 +4577,10 @@ class DB {
 	 * @returns {Array} The NaviLinkTable
 	 */
 	static getNaviLinkTable() {
-		return NaviLinkTable;
+		return applyNavigationLinkEra(
+			normalizeLuaTable(NaviLinkTable),
+			Configs.get('worldMapSettings', { episode: 98 })
+		);
 	}
 
 	/**
@@ -3716,7 +4589,10 @@ class DB {
 	 * @returns {Array} The NaviLinkDistanceTable
 	 */
 	static getNaviLinkDistanceTable() {
-		return NaviLinkDistanceTable;
+		return applyNavigationDistanceEra(
+			normalizeLuaTable(NaviLinkDistanceTable),
+			Configs.get('worldMapSettings', { episode: 98 })
+		);
 	}
 
 	/**
@@ -3725,7 +4601,7 @@ class DB {
 	 * @returns {Array} The NaviNpcDistanceTable
 	 */
 	static getNaviNpcDistanceTable() {
-		return NaviNpcDistanceTable;
+		return normalizeLuaTable(NaviNpcDistanceTable);
 	}
 
 	static createItemLink(item) {
@@ -7382,10 +8258,13 @@ function loadStateIconInfo(basePath, callback, onEnd) {
  * @param {function} callback to run once the file is loaded
  * @param {function} onEnd to run once the file is loaded
  * @param {function?} contextFunc - Function to execute after parsing but before unmounting
+ * @param {boolean} [useCharPage=true] - The values are user-facing text, decoded with the langtype charset.
+ *   Pass false for tables of resource names (sprite file names): GRF lookup always uses the filesystem
+ *   charset (docs/Encoding.md).
  *
  * @author alisonrag
  */
-function loadLuaTable(file_list, table_name, callback, onEnd, contextFunc) {
+function loadLuaTable(file_list, table_name, callback, onEnd, contextFunc, useCharPage = true) {
 	const id_filename = file_list[0];
 	const value_table_filename = file_list[1];
 
@@ -7431,7 +8310,7 @@ function loadLuaTable(file_list, table_name, callback, onEnd, contextFunc) {
 
 			// create context function
 			ctx.addKeyAndValueToTable = (key, value) => {
-				table[key] = userStringDecoder.decode(value, userCharpage);
+				table[key] = userStringDecoder.decode(value, useCharPage ? userCharpage : grfCharpage);
 				return 1;
 			};
 
@@ -7440,7 +8319,7 @@ function loadLuaTable(file_list, table_name, callback, onEnd, contextFunc) {
 				if (!table[key]) {
 					table[key] = '';
 				}
-				table[key] += userStringDecoder.decode(value, userCharpage) + '\n';
+				table[key] += userStringDecoder.decode(value, useCharPage ? userCharpage : grfCharpage) + '\n';
 				return 1;
 			};
 

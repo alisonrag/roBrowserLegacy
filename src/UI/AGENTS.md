@@ -1,5 +1,14 @@
 # AGENTS.md — UI Subsystem (`src/UI/`)
 
+## Topological snapshot
+
+- `src/UI/Components/` — actual UI components such as `ChatBox`, `Inventory`, `Guild`, `SkillList`, `Storage`, `Rodex`, etc.
+- `src/UI/Elements/` — custom element wrappers used by the component tree (`<ui-button>`, `<ui-text>`, `<ui-image>`).
+- `src/UI/Managers/` — global UI orchestration and lifecycle management.
+- `docs/UIComponent_to_GUIComponent.md` — primary source for invariants and lifecycle rules.
+- `docs/GUIComponent_Version_Dedup_Factory.md` — versioned component factory rules.
+- `docs/CustomElements.md` and `docs/Scrollbar.md` — specialized UI behavior docs.
+
 The UI uses `GUIComponent`, Shadow DOM, native DOM APIs, and Custom Elements.
 
 - All 100 UI components use `GUIComponent`.
@@ -97,6 +106,6 @@ Before modifying or creating UI components, read the applicable reference guides
 - **Communication:** `ChatBox`, `ChatBoxSettings`, `ChatRoom`, `ChatRoomCreate`, `WhisperBox`, `Emoticons`, `Announce`.
 - **NPC, Quests & Commerce:** `NpcBox`, `NpcStore`, `NpcMenu`, `Quest`, `Trade`, `Vending`, `VendingShop`, `VendingReport`, `Mail`, `Rodex`, `RodexIcon`, `Roulette`, `SlotMachine`.
 - **Social & Companions:** `PartyFriends`, `Guild`, `Clan`, `EntityRoom`, `HomunInformations`, `MercenaryInformations`, `PetInformations`, `PetEvolution`.
-- **Navigation:** `MiniMap`, `WorldMap`, `Navigation`, `PrivateAirship` (payment window for the Navigation window's airship Move button), `MapName`.
+- **Navigation:** `MiniMap`, `WorldMap`, `Navigation` (Navi map routing, map path worker, route state), `NavigationRouteState.js` (module-scoped route snapshot shared with WorldMap), `PathFindingWorker.js` (same-map walk and portal paths), `MapPathFinder.js` (map-level route graph), `WorldMapMonsterTooltip.js` (monster detail and level badges), `WorldMapServiceOverlay.js` (Kafra and airship overlays), `PrivateAirship` (payment window for the Navigation window's airship Move button), `MapName`.
 - **System, Settings & Overlays:** `GraphicsOption`, `SoundOption`, `FPS`, `Escape`, `Error`, `WinPopup`, `WinPrompt`, `Captcha`, `CheckAttendance`, `Reputation`, `PvPCount`, `PvPTimer`, `PCGoldTimer`, `ContextMenu`, `EntitySignboard`, `JoystickUI`, `MobileUI`.
 - **Asset Viewers:** `GrfViewer`, `ModelViewer`, `StrViewer`, `EffectViewer`, `GrannyModelViewer`.

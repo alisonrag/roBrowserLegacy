@@ -1,5 +1,14 @@
 # AGENTS.md — Renderer Subsystem (`src/Renderer/`)
 
+## Topological snapshot
+
+- `Renderer.js` / `MapRenderer.js` / `EntityManager.js` — render loop, world and entity coordination.
+- `Entity/` — composed entity system, palette and lifecycle rules.
+- `Effects/` — combat, aura, ground and screen effects.
+- `Map/` — terrain, occlusion, water, sounds and world layers.
+- `GR2/` — Granny3D model rendering and actor behavior.
+- `docs/reference/renderer/README.md` — rendering behavior and palette references.
+
 Instructions for working on the WebGL renderer, Entity composition system (`src/Renderer/Entity/`), visual effects (`src/Renderer/Effects/`), map rendering (`src/Renderer/Map/`), and Granny3D skeletal models (`src/Renderer/GR2/`).
 
 ## Mandatory References
@@ -31,7 +40,7 @@ Instructions for working on the WebGL renderer, Entity composition system (`src/
 - **16 Mixins in `src/Renderer/Entity/` (plus `Controls/EntityControl.js` = 17 total):**
   `EntityAction.js`, `EntityAnimations.js`, `EntityAttachments.js`, `EntityAura.js`, `EntityCast.js`, `EntityDialog.js`, `EntityDisplay.js`, `EntityDropEffect.js`, `EntityEmblem.js`, `EntityLife.js`, `EntityRender.js`, `EntityRoom.js`, `EntitySound.js`, `EntityState.js`, `EntityView.js`, `EntityWalk.js`.
 
-### Effects (`src/Renderer/Effects/`, 33 effect JS files + GLSL shaders + 9 post-processing shaders)
+### Effects (`src/Renderer/Effects/`, 33 effect JS files + GLSL shaders + 11 post-processing shaders)
 
 - **Weather:** `CloudWeatherEffect`, `PokJukWeatherEffect`, `RainWeather`, `SakuraWeatherEffect`, `SnowWeather`, `Sky`.
 - **Auras & Spheres:** `GroundAura`, `SwirlingAura`, `SpiritSphere`, `WarlockSphere`, `Level99Bubble`, `QuadHorn`.
@@ -43,7 +52,7 @@ Instructions for working on the WebGL renderer, Entity composition system (`src/
 - **Cast shapes:** the official client's 4th-job cast auras, each drawing class with a pure simulation beside it (`*Sim.js`): `CastCircle` (tinted cast circle), `CastCone` (bubble cones and crowns), `CastRing` (cast-aura ring and its colour-cycling twin), `CastFunnel` (opening rings), `RotateLine` (ribbons spiralling round the caster) and `CasterMarks` (the caster's glow and split images, drawn by `EntityRender`). Rows marked `castLoop` replay until the cast ends (`EffectManager.spamSkillCast` gets the cast time) and `EffectManager.removeCastLoops` stops them on cancel.
 - **Spawners:** `AreaSpawner` (`AREA_SPAWN` rows: while it lives, spams another effect at random points of a square, for ground units such as Cross Rain).
 - **Placement helpers** (used by `SkillEffect` fields in `EffectManager.js`): `ScreenDirection` (where a target is on screen from the caster), `ShuffledGrid`, `SpinSets`, `GroundScatter`, `BezierArcThrow` + `BezierArcThrowSim` (a STR thrown on an arc, `arcThrow` rows).
-- **Screen & Post-Processing:** `PostProcess.js` and `Effects/Shaders/` (`Blind`, `Bloom`, `CAS`, `Cartoon`, `FXAA`, `GaussianBlur`, `Upsampling`, `VerticalFlip`, `Vibrance`).
+- **Screen & Post-Processing:** `PostProcess.js` and `Effects/Shaders/` (`Blind`, `Bloom`, `CAS`, `Cartoon`, `FXAA`, `GaussianBlur`, `Upsampling`, `VerticalFlip`, `Vibrance`, `RainOverlay.js`, `RainLightning.js`).
 - _Known note:_ `Damage.js` and `Sky.js` contain legacy particle class management TODOs; inspect carefully when modifying.
 
 ### Map Rendering (`src/Renderer/Map/`)

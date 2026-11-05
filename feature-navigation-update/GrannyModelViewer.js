@@ -263646,18 +263646,21 @@ var init_ProcessCommand = __esmMin((() => {
 			}
 		},
 		navi: {
-			description: "Navigate to a map location. Usage: /navi mapname x y",
+			description: "Navigate to a map location. Usage: /navi mapname x y (use -1 -1 for map center)",
 			callback: function(text) {
-				const matches = text.match(/^navi\s+(\S+)\s+(\d+)\s+(\d+)/);
+				const matches = text.match(/^navi\s+(\S+)\s+(-?\d+)\s+(-?\d+)/);
 				if (matches) {
+					const x = parseInt(matches[2], 10);
+					const y = parseInt(matches[3], 10);
+					if (!(x === -1 && y === -1 || x >= 0 && y >= 0)) return;
 					Navigation_default.append();
 					Navigation_default.navigateTo({
 						startMap: MapRenderer.currentMap,
 						startX: SessionStorage_default.Entity.position[0] | 0,
 						startY: SessionStorage_default.Entity.position[1] | 0,
 						endMap: matches[1],
-						endX: parseInt(matches[2], 10),
-						endY: parseInt(matches[3], 10),
+						endX: x,
+						endY: y,
 						displayName: matches[1] + " (" + matches[2] + ", " + matches[3] + ")"
 					});
 					return;

@@ -148129,7 +148129,7 @@ function calculateElementSize(name, value, serializeFunctions = false, isArray =
 	switch (typeof value) {
 		case "string": return 1 + ByteUtils.utf8ByteLength(name) + 1 + 4 + ByteUtils.utf8ByteLength(value) + 1;
 		case "number": if (Math.floor(value) === value && value >= JS_INT_MIN && value <= JS_INT_MAX) {
-			if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) return ByteUtils.utf8ByteLength(name) + 1 + 5;
+			if (!Object.is(value, -0) && value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) return ByteUtils.utf8ByteLength(name) + 1 + 5;
 			else return ByteUtils.utf8ByteLength(name) + 1 + 9;
 		} else return ByteUtils.utf8ByteLength(name) + 1 + 9;
 		case "undefined":
@@ -148145,7 +148145,7 @@ function calculateElementSize(name, value, serializeFunctions = false, isArray =
 		else if (value._bsontype === "Decimal128") return ByteUtils.utf8ByteLength(name) + 1 + 17;
 		else if (value._bsontype === "Int32") return ByteUtils.utf8ByteLength(name) + 1 + 5;
 		else if (value._bsontype === "Code") {
-			if (value.scope != null && Object.keys(value.scope).length > 0) {
+			if (value.scope != null && typeof value.scope === "object") {
 				if (path.has(value.scope)) throw new BSONError("Cannot convert circular structure to BSON");
 				objectStack.push({
 					object: value.scope,
@@ -149134,8 +149134,8 @@ function getSize$1(source, offset) {
 }
 function findNull(bytes, offset) {
 	let nullTerminatorOffset = offset;
-	for (; bytes[nullTerminatorOffset] !== 0; nullTerminatorOffset++);
-	if (nullTerminatorOffset === bytes.length - 1) throw new BSONOffsetError("Null terminator not found", offset);
+	for (; bytes[nullTerminatorOffset]; nullTerminatorOffset++);
+	if (nullTerminatorOffset >= bytes.length - 1) throw new BSONOffsetError("Null terminator not found", offset);
 	return nullTerminatorOffset;
 }
 function parseToElements(bytes, startOffset = 0) {
@@ -149170,7 +149170,7 @@ function parseToElements(bytes, startOffset = 0) {
 			if (type === BSONElementType.binData) length += 1;
 			if (type === BSONElementType.dbPointer) length += 12;
 		} else throw new BSONOffsetError(`Invalid 0x${type.toString(16).padStart(2, "0")} type byte`, offset);
-		if (length > documentSize) throw new BSONOffsetError("value reports length larger than document", offset);
+		if (offset + length > startOffset + documentSize - 1) throw new BSONOffsetError("value reports length larger than document", offset);
 		elements.push([
 			type,
 			nameOffset,
@@ -151442,8 +151442,16 @@ var init_bson = __esmMin((() => {
 		};
 		static {
 			this.resetState();
-			const { startupSnapshot } = globalThis?.process?.getBuiltinModule?.("v8") ?? {};
-			if (startupSnapshot?.isBuildingSnapshot?.()) startupSnapshot?.addDeserializeCallback?.(this.resetState);
+			let v8Module;
+			let isBuildingSnapshot = false;
+			try {
+				v8Module = globalThis?.process?.getBuiltinModule?.("v8") ?? {};
+			} catch {}
+			const startupSnapshot = v8Module?.startupSnapshot;
+			try {
+				isBuildingSnapshot = startupSnapshot?.isBuildingSnapshot?.();
+			} catch {}
+			if (isBuildingSnapshot) startupSnapshot?.addDeserializeCallback?.(this.resetState);
 		}
 		static cacheHexString;
 		i0;
@@ -237189,6 +237197,7 @@ function _escapeHTML$4(text) {
 * Submit an index
 */
 function validate() {
+	if (!Number.isInteger(_index) || _index < 0) return;
 	NpcMenu.onSelectMenu(_ownerID, _index + 1);
 }
 /**
@@ -237239,12 +237248,12 @@ var init_NpcMenu = __esmMin((() => {
 		const content = root.querySelector(".content");
 		if (content) {
 			content.addEventListener("mousedown", (e) => {
-				const div = e.target.closest("div");
+				const div = e.target.closest("div[data-index]");
 				if (div && content.contains(div)) selectIndex(div);
 				e.stopImmediatePropagation();
 			});
 			content.addEventListener("dblclick", (e) => {
-				const div = e.target.closest("div");
+				const div = e.target.closest("div[data-index]");
 				if (div && content.contains(div)) validate();
 			});
 		}
@@ -245989,7 +245998,7 @@ function createSkillList({ name, htmlText, cssText, hasTabs = false, showDescOnM
 				return positions;
 			}
 		}
-		positions[SkillTreeView[JobId]["list"]] = SkillTreeView[JobId];
+		positions[SkillTreeView[JobId]["list"]] = { ...SkillTreeView[JobId] };
 		if (SkillTreeView[JobId]["beforeJob"] !== null) {
 			const beforeJob = SkillTreeView[JobId]["beforeJob"];
 			getSkillPosition(beforeJob).forEach((items, list) => {
@@ -343518,6 +343527,7 @@ function onParameterChange$1(pkt) {
 			WinStatsController.update("aspd", amount);
 			break;
 		case StatusProperty_default.JOBLEVEL:
+			SessionStorage_default.Entity.joblevel = amount;
 			BasicInfoController.update("jlvl", amount);
 			Controller$4.onLevelUp();
 			break;

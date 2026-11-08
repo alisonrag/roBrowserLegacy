@@ -264018,6 +264018,25 @@ var init_DBLoadContext = __esmMin((() => {
 	init_LuaRuntime();
 }));
 // src/DB/System/SystemDatabase.js
+function resetSystemData() {
+	for (const table of [
+		MsgStringTable,
+		JokeTable,
+		ScreamTable,
+		CheckAttendanceTable.Config,
+		CheckAttendanceTable.Rewards,
+		QuestInfo,
+		TitleTable,
+		ReputeGroup,
+		ReputeInfo,
+		AchievementTable,
+		MsgEmotionCSV,
+		CashShopBannerTable
+	]) {
+		for (const key of Object.keys(table)) delete table[key];
+		if (Array.isArray(table)) table.length = 0;
+	}
+}
 function setMessageRow(index, value) {
 	MsgStringTable[index] = value;
 }
@@ -287083,7 +287102,7 @@ var init_DBLoadPlan = __esmMin((() => {
 }));
 // src/DB/Bootstrap/DBBootstrap.js
 function createDBBootstrap(DB, context) {
-	const { Client, JobId, LuaModuleLoader, MemoryManager, NaviLinkDistanceTable, NaviLinkTable, NaviMapTable, NaviMobTable, NaviNpcDistanceTable, NaviNpcTable, clearNavigationMobIndex, invalidateLuaRuntime, startLua } = context;
+	const { Client, JobId, LuaModuleLoader, MemoryManager, NaviLinkDistanceTable, NaviLinkTable, NaviMapTable, NaviMobTable, NaviNpcDistanceTable, NaviNpcTable, clearNavigationMobIndex, resetLoadedMapNames, resetClientData, invalidateLuaRuntime, startLua } = context;
 	const plan = createDBLoadPlan(DB, context);
 	let mountPalettes;
 	let mountPalettesProbe = null;
@@ -287140,6 +287159,8 @@ function createDBBootstrap(DB, context) {
 				NaviNpcDistanceTable
 			]) table.length = 0;
 			clearNavigationMobIndex();
+			if (resetLoadedMapNames) resetLoadedMapNames();
+			if (resetClientData) resetClientData();
 			const tracker = createTracker(current, (index, count) => {
 				if (DB.onProgress) DB.onProgress(index, count);
 			}, () => {
@@ -301166,6 +301187,10 @@ var init_ItemRandomOptionTable = __esmMin((() => {
 	};
 }));
 // src/DB/Items/ItemDatabase.js
+function clearTable(table) {
+	for (const key of Object.keys(table)) delete table[key];
+	if (Array.isArray(table)) table.length = 0;
+}
 function createItemDatabase(DB, userCharpage, MsgStringTable) {
 	const userStringDecoder = CodepageManager;
 	const buyingStoreItemList = new Array();
@@ -301179,7 +301204,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 		ReformInfo: {},
 		ReformItemList: {}
 	};
-	let EnchantListTable = {};
+	const EnchantListTable = {};
 	const unknownItem = {
 		unidentifiedDisplayName: "Unknown Item",
 		unidentifiedResourceName: "»ç°ú",
@@ -301190,6 +301215,23 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 		slotCount: 0,
 		ClassNum: 0
 	};
+	function resetItemData() {
+		for (const id of Object.keys(ItemTable_default)) if (!Object.prototype.hasOwnProperty.call(defaultItems, id)) delete ItemTable_default[id];
+		for (const [id, defaults] of Object.entries(defaultItems)) {
+			if (!ItemTable_default[id] || typeof ItemTable_default[id] !== "object") ItemTable_default[id] = {};
+			clearTable(ItemTable_default[id]);
+			Object.assign(ItemTable_default[id], defaults);
+		}
+		for (const table of [
+			buyingStoreItemList,
+			LaphineSysTable,
+			LaphineUpgTable,
+			ItemDBNameTbl,
+			ItemReformTable.ReformInfo,
+			ItemReformTable.ReformItemList,
+			EnchantListTable
+		]) clearTable(table);
+	}
 	function loadItemInfo(filename, callback, onEnd) {
 		const { lua, loadFile, guard } = createDBLoadContext();
 		callback = guard(callback);
@@ -301561,7 +301603,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 				console.log("Loading file \"" + defFile + "\"...");
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = lua.ctx;
-				EnchantListTable = {};
+				clearTable(EnchantListTable);
 				const decodeLuaString = (value) => {
 					if (value == null) return null;
 					if (typeof value === "string") return value;
@@ -302100,6 +302142,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 	}
 	return {
 		ItemDatabase,
+		resetItemData,
 		buyingStoreItemList,
 		parseBuyingStoreItem,
 		loadItemInfo,
@@ -302110,11 +302153,13 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 		loadEnchantListFile
 	};
 }
+var defaultItems;
 var init_ItemDatabase = __esmMin((() => {
 	init_CodepageManager();
 	init_DBLoadContext();
 	init_ItemTable();
 	init_ItemRandomOptionTable();
+	defaultItems = Object.fromEntries(Object.entries(ItemTable_default).map(([id, item]) => [id, { ...item }]));
 }));
 // src/DB/Monsters/MonsterNameTable.js
 var MonsterNameTable_default;
@@ -306205,7 +306250,7 @@ function createMapLoaders(userCharpage) {
 		}, onEnd);
 	}
 	function loadPrivateAirship(filename, callback, onEnd) {
-		const { lua, loadFile, guard } = createDBLoadContext();
+		const { lua, loadFile, guard, isCurrent } = createDBLoadContext();
 		callback = guard(callback);
 		onEnd = guard(onEnd);
 		loadFile(filename, async function(file) {
@@ -306233,7 +306278,7 @@ function createMapLoaders(userCharpage) {
 				success = PrivateAirship$1.isLoaded();
 			} catch (error) {
 				console.error("[loadPrivateAirship] Error: ", error);
-				PrivateAirship$1.reset();
+				if (isCurrent()) PrivateAirship$1.reset();
 			} finally {
 				lua.unmountFile(filename);
 				onEnd(success);
@@ -313169,6 +313214,9 @@ var init_MapTable = __esmMin((() => {
 	};
 }));
 // src/DB/Map/MapDatabase.js
+function resetLoadedMapNames() {
+	loadedDisplayNames.clear();
+}
 function ensureMap(key) {
 	return MapTable[key] || (MapTable[key] = {});
 }
@@ -313180,10 +313228,10 @@ function attachMapName(key, map) {
 		enumerable: true,
 		configurable: true,
 		get() {
-			return MapInfo[key] && MapInfo[key].displayName || state.legacyName;
+			return loadedDisplayNames.has(key) && MapInfo[key] && MapInfo[key].displayName || state.legacyName;
 		},
 		set(value) {
-			if (MapInfo[key] && MapInfo[key].displayName) MapInfo[key].displayName = value;
+			if (loadedDisplayNames.has(key) && MapInfo[key] && MapInfo[key].displayName) MapInfo[key].displayName = value;
 			else state.legacyName = value;
 		}
 	});
@@ -313215,6 +313263,7 @@ function createMapDatabase(DB, userCharpage) {
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = instance.ctx;
 				ctx.AddMapDisplayName = (name, displayName, notify_enter) => {
+					if (!isCurrent()) return 1;
 					const decoded_name = userStringDecoder.decode(name);
 					MapInfo[decoded_name] = {
 						displayName: userStringDecoder.decode(displayName, userCharpage),
@@ -313225,9 +313274,11 @@ function createMapDatabase(DB, userCharpage) {
 						},
 						backgroundBmp: null
 					};
+					loadedDisplayNames.add(decoded_name);
 					return 1;
 				};
 				ctx.AddMapSignName = (name, subTitle, mainTitle) => {
+					if (!isCurrent()) return 1;
 					const decoded_name = userStringDecoder.decode(name);
 					const decoded_subTitle = subTitle && subTitle.length > 1 ? userStringDecoder.decode(subTitle, userCharpage) : null;
 					const decoded_mainTitle = mainTitle && mainTitle.length > 1 ? userStringDecoder.decode(mainTitle, userCharpage) : null;
@@ -313238,6 +313289,7 @@ function createMapDatabase(DB, userCharpage) {
 					return 1;
 				};
 				ctx.AddMapBackgroundBmp = (name, backgroundBmp) => {
+					if (!isCurrent()) return 1;
 					const decoded_name = userStringDecoder.decode(name);
 					MapInfo[decoded_name].backgroundBmp = backgroundBmp ? userStringDecoder.decode(backgroundBmp) : "field";
 					return 1;
@@ -313278,7 +313330,7 @@ function createMapDatabase(DB, userCharpage) {
 		map.indoor = true;
 	}
 	function updateMapTable() {
-		for (const key in MapInfo) if (MapInfo.hasOwnProperty(key)) attachMapName(key, ensureMap(key));
+		for (const key of loadedDisplayNames) attachMapName(key, ensureMap(key));
 	}
 	class MapDatabase {
 		static getTownInfo(mapname) {
@@ -313287,13 +313339,12 @@ function createMapDatabase(DB, userCharpage) {
 		static getMap(mapname) {
 			const map = mapname.replace(".gat", ".rsw");
 			const entry = MapTable[map];
-			if (entry && ("name" in entry || MapInfo[map] && MapInfo[map].displayName)) attachMapName(map, entry);
+			if (entry && ("name" in entry || loadedDisplayNames.has(map))) attachMapName(map, entry);
 			return entry || null;
 		}
 		static getMapName(mapname, defaultName) {
 			if (!mapname) return typeof defaultName === "undefined" ? DB.getMessage(187) : defaultName;
 			const map = mapname.replace(".gat", ".rsw");
-			if (MapInfo[map] && MapInfo[map].displayName) return MapInfo[map].displayName;
 			if (!(map in MapTable) || !MapTable[map].name) return typeof defaultName === "undefined" ? DB.getMessage(187) : defaultName;
 			return MapTable[map].name;
 		}
@@ -313318,7 +313369,7 @@ function createMapDatabase(DB, userCharpage) {
 		setMapAlias
 	};
 }
-var MapTable, mapNames;
+var MapTable, mapNames, loadedDisplayNames;
 var init_MapDatabase = __esmMin((() => {
 	init_Client();
 	init_CodepageManager();
@@ -313327,6 +313378,7 @@ var init_MapDatabase = __esmMin((() => {
 	init_TownInfo();
 	MapTable = {};
 	mapNames = /* @__PURE__ */ new WeakMap();
+	loadedDisplayNames = /* @__PURE__ */ new Set();
 }));
 // src/DB/Map/SignBoardDatabase.js
 function createSignBoardDatabase(userCharpage) {
@@ -323229,6 +323281,11 @@ function createDBServices(DB) {
 			LuaModuleLoader,
 			setLegacyMapMusic,
 			setLegacyMapName,
+			resetLoadedMapNames,
+			resetClientData: () => {
+				itemDatabase.resetItemData();
+				resetSystemData();
+			},
 			setMapAlias,
 			MemoryManager,
 			mergeMonsterNames,

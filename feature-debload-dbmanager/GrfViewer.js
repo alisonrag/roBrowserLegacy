@@ -313214,7 +313214,7 @@ function attachMapName(key, map) {
 		enumerable: true,
 		configurable: true,
 		get() {
-			return loadedDisplayNames.has(key) && MapInfo[key] && MapInfo[key].displayName || state.legacyName;
+			return loadedDisplayNames.has(key) && MapInfo[key] && MapInfo[key].displayName || state.legacyName || builtInDisplayNames.get(key);
 		},
 		set(value) {
 			if (loadedDisplayNames.has(key) && MapInfo[key] && MapInfo[key].displayName) MapInfo[key].displayName = value;
@@ -313325,14 +313325,17 @@ function createMapDatabase(DB, userCharpage) {
 		static getMap(mapname) {
 			const map = mapname.replace(".gat", ".rsw");
 			const entry = MapTable[map];
-			if (entry && ("name" in entry || loadedDisplayNames.has(map))) attachMapName(map, entry);
+			if (entry && ("name" in entry || loadedDisplayNames.has(map) || builtInDisplayNames.has(map))) attachMapName(map, entry);
 			return entry || null;
 		}
 		static getMapName(mapname, defaultName) {
 			if (!mapname) return typeof defaultName === "undefined" ? DB.getMessage(187) : defaultName;
 			const map = mapname.replace(".gat", ".rsw");
-			if (!(map in MapTable) || !MapTable[map].name) return typeof defaultName === "undefined" ? DB.getMessage(187) : defaultName;
-			return MapTable[map].name;
+			const entry = MapTable[map];
+			if (entry && ("name" in entry || loadedDisplayNames.has(map) || builtInDisplayNames.has(map))) attachMapName(map, entry);
+			const name = entry && entry.name || builtInDisplayNames.get(map);
+			if (!name) return typeof defaultName === "undefined" ? DB.getMessage(187) : defaultName;
+			return name;
 		}
 		static getMapInfo(mapname) {
 			return MapInfo[mapname] || null;
@@ -313355,7 +313358,7 @@ function createMapDatabase(DB, userCharpage) {
 		setMapAlias
 	};
 }
-var MapTable, mapNames, loadedDisplayNames;
+var MapTable, mapNames, loadedDisplayNames, builtInDisplayNames;
 var init_MapDatabase = __esmMin((() => {
 	init_Client();
 	init_CodepageManager();
@@ -313365,6 +313368,7 @@ var init_MapDatabase = __esmMin((() => {
 	MapTable = {};
 	mapNames = /* @__PURE__ */ new WeakMap();
 	loadedDisplayNames = /* @__PURE__ */ new Set();
+	builtInDisplayNames = new Map(Object.entries(MapInfo).map(([key, info]) => [key, info.displayName]));
 }));
 // src/DB/Map/SignBoardDatabase.js
 function createSignBoardDatabase(userCharpage) {

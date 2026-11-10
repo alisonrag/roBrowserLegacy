@@ -264040,8 +264040,9 @@ function getEffectJoke() {
 function getEffectScream() {
 	return effectScreamResolver();
 }
-function createSystemDatabase(DB, userCharpage) {
+function createSystemDatabase(DB, getUserCharpage) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	function loadAttendanceFile(filename, callback, onEnd) {
 		const { lua, loadFile, guard } = createDBLoadContext();
 		callback = guard(callback);
@@ -264084,7 +264085,7 @@ function createSystemDatabase(DB, userCharpage) {
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = lua.ctx;
 				ctx.AddTitle = function(titleID, titleName) {
-					TitleTable[titleID] = userStringDecoder.decode(titleName, userCharpage);
+					TitleTable[titleID] = userStringDecoder.decode(titleName, resolveUserCharpage());
 					return 1;
 				};
 				lua.mountFile(filename, buffer);
@@ -264123,6 +264124,7 @@ function createSystemDatabase(DB, userCharpage) {
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = lua.ctx;
 				ctx.AddQuestInfo = (QuestID, Title, Summary, IconName, NpcSpr, NpcNavi, NpcPosX, NpcPosY, RewardEXP, RewardJEXP) => {
+					const userCharpage = resolveUserCharpage();
 					QuestInfo[QuestID] = {
 						Title: userStringDecoder.decode(Title, userCharpage),
 						Summary: userStringDecoder.decode(Summary, userCharpage),
@@ -264139,7 +264141,7 @@ function createSystemDatabase(DB, userCharpage) {
 					return 1;
 				};
 				ctx.AddQuestDescription = (QuestID, QuestDescription) => {
-					QuestInfo[QuestID].Description.push(userStringDecoder.decode(QuestDescription, userCharpage));
+					QuestInfo[QuestID].Description.push(userStringDecoder.decode(QuestDescription, resolveUserCharpage()));
 					return 1;
 				};
 				ctx.AddQuestRewardItem = (QuestID, ItemID, ItemNum) => {
@@ -286902,7 +286904,8 @@ var init_EffectTable = __esmMin((() => {
 }));
 // src/DB/Bootstrap/DBLoadPlan.js
 function createDBLoadPlan(DB, context) {
-	const { mergeAchievements, Configs, Ez2streffect, mergeAccessoryNames, legacyItemRows, setJokeRow, setLegacyMapMusic, setLegacyMapName, setMapAlias, mergeMonsterNames, MsgEmotionCSV, MsgStringTable, setMessageRow, mergeSkillIds, NaviLinkDistanceTable, NaviLinkTable, NaviMapTable, NaviMobTable, NaviNpcDistanceTable, NaviNpcTable, Network, PACKET, PACKETVER, PrivateAirship, mergeRandomOptions, ReputeGroup, ReputeInfo, mergeRobeNames, setScreamRow, parseBuyingStoreItem, fillNaviTable, getSystemAliases, loadAttendanceFile, loadBSONFile, loadCSV, loadCashShopBanner, loadEnchantListFile, loadFontFromClient, loadHatEffectInfo, loadItemDBTable, loadItemInfo, loadItemReformFile, loadLaphineSysFile, loadLaphineUpgFile, loadLuaTable, loadLuaValue, loadMapTbl, loadMoveInfoTable, loadPetEvolution, loadPetInfo, loadPrivateAirship, loadQuestInfo, loadSignBoardData, loadSignBoardList, loadSkillInfoList, loadSkillTreeView, loadStateIconInfo, loadTable, loadTitleTable, loadTownInfoFile, loadWeaponTable, loadWorldMapInfo, loadXMLFile, mergeEz2Effects, ownerNames, parseFogEntry, parseIndoorEntry, parseQuestEntry, parseLegacySkillDescription, setPetTalkTable, setSkillDescription, tryLoadLuaAliases, userCharpage } = context;
+	const { mergeAchievements, Configs, Ez2streffect, mergeAccessoryNames, legacyItemRows, setJokeRow, setLegacyMapMusic, setLegacyMapName, setMapAlias, mergeMonsterNames, MsgEmotionCSV, MsgStringTable, setMessageRow, mergeSkillIds, NaviLinkDistanceTable, NaviLinkTable, NaviMapTable, NaviMobTable, NaviNpcDistanceTable, NaviNpcTable, Network, PACKET, PACKETVER, PrivateAirship, mergeRandomOptions, ReputeGroup, ReputeInfo, mergeRobeNames, setScreamRow, parseBuyingStoreItem, fillNaviTable, getSystemAliases, loadAttendanceFile, loadBSONFile, loadCSV, loadCashShopBanner, loadEnchantListFile, loadFontFromClient, loadHatEffectInfo, loadItemDBTable, loadItemInfo, loadItemReformFile, loadLaphineSysFile, loadLaphineUpgFile, loadLuaTable, loadLuaValue, loadMapTbl, loadMoveInfoTable, loadPetEvolution, loadPetInfo, loadPrivateAirship, loadQuestInfo, loadSignBoardData, loadSignBoardList, loadSkillInfoList, loadSkillTreeView, loadStateIconInfo, loadTable, loadTitleTable, loadTownInfoFile, loadWeaponTable, loadWorldMapInfo, loadXMLFile, mergeEz2Effects, ownerNames, parseFogEntry, parseIndoorEntry, parseQuestEntry, parseLegacySkillDescription, setPetTalkTable, setSkillDescription, tryLoadLuaAliases, getUserCharpage, userCharpage } = context;
+	const resolveUserCharpage = getUserCharpage ?? userCharpage;
 	function loadInitial(onLoad, isCurrent) {
 		loadFontFromClient("System/Font/");
 		loadTable("data/mp3nametable.txt", "#", 2, function(_index, key, val) {
@@ -286984,7 +286987,7 @@ function createDBLoadPlan(DB, context) {
 					});
 				});
 			});
-			loadStateIconInfo(DB.LUA_PATH + "stateicon/", null, onLoad(), userCharpage);
+			loadStateIconInfo(DB.LUA_PATH + "stateicon/", null, onLoad(), resolveUserCharpage);
 			if (PACKETVER.value >= 20111010) {
 				loadLuaValue(DB.LUA_PATH + "navigation/navi_map_krpri.lub", "Navi_Map", function(json) {
 					fillNaviTable(NaviMapTable, json);
@@ -287033,7 +287036,7 @@ function createDBLoadPlan(DB, context) {
 			guardedLoadTable("data/skilldesctable.txt", "#", 2, parseLegacySkillDescription, onLoad(), true);
 			guardedLoadTable("data/questid2display.txt", "#", 6, parseQuestEntry, onLoad(), true);
 		}
-		if (PACKETVER.value >= 20150422) loadMoveInfoTable(userCharpage, onLoad());
+		if (PACKETVER.value >= 20150422) loadMoveInfoTable(resolveUserCharpage, onLoad());
 		loadWorldMapInfo(DB.LUA_PATH + "worldviewdata/", onLoad());
 		PrivateAirship.reset();
 		if (PACKETVER.value >= 20180321) tryLoadLuaAliases(loadPrivateAirship, ["System/PrivateAirplane_True.lub", ...getSystemAliases("System/PrivateAirplane.lub")], null, onLoad());
@@ -300924,13 +300927,14 @@ var init_EquipmentRules = __esmMin((() => {
 	]);
 }));
 // src/DB/Items/ItemMoveInfoLoader.js
-function loadMoveInfoTable(userCharpage, onEnd) {
+function loadMoveInfoTable(getUserCharpage, onEnd) {
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	const { loadFile, guard } = createDBFileContext();
 	onEnd = guard(onEnd);
 	loadFile("data/ItemMoveInfoV5.txt", function(file) {
 		console.log("Loading file \"ItemMoveInfoV5.txt\"...");
 		let data = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
-		data = CodepageManager.decode(data, userCharpage);
+		data = CodepageManager.decode(data, resolveUserCharpage());
 		const lines = data.split(/\r?\n/);
 		for (let line of lines) {
 			line = line.trim();
@@ -301166,8 +301170,9 @@ function clearTable(table) {
 	for (const key of Object.keys(table)) delete table[key];
 	if (Array.isArray(table)) table.length = 0;
 }
-function createItemDatabase(DB, userCharpage, MsgStringTable) {
+function createItemDatabase(DB, getUserCharpage, MsgStringTable) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	const buyingStoreItemList = new Array();
 	function parseBuyingStoreItem(_index, key) {
 		buyingStoreItemList.push(parseInt(key, 10));
@@ -301219,6 +301224,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 				console.log("Loading file \"" + filename + "\"...");
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = lua.ctx;
+				const userCharpage = resolveUserCharpage();
 				ctx.AddItem = (ItemID, unidentifiedDisplayName, unidentifiedResourceName, identifiedDisplayName, identifiedResourceName, slotCount, ClassNum) => {
 					ItemTable_default[ItemID] = {
 						...typeof ItemTable_default[ItemID] === "object" && ItemTable_default[ItemID],
@@ -301324,6 +301330,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 				console.log("Loading file \"" + filename + "\"...");
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = lua.ctx;
+				const userCharpage = resolveUserCharpage();
 				ctx.AddLaphineSysItem = (key, ItemID, NeedCount, NeedRefineMin, NeedRefineMax, NeedSource_String) => {
 					const decoded_key = key && key.length > 1 ? userStringDecoder.decode(key) : null;
 					const decoded_NeedSource_String = NeedSource_String && NeedSource_String.length > 1 ? userStringDecoder.decode(NeedSource_String, userCharpage) : "";
@@ -301384,6 +301391,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 				console.log("Loading file \"" + filename + "\"...");
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = lua.ctx;
+				const userCharpage = resolveUserCharpage();
 				ctx.AddLaphineUpgradeItem = (key, ItemID, NeedCount, NeedRefineMin, NeedRefineMax, NeedSource_String, NeedOptionNumMin, NotSocketEnchantItem) => {
 					const decoded_key = key && key.length > 1 ? userStringDecoder.decode(key) : null;
 					const decoded_NeedSource_String = NeedSource_String && NeedSource_String.length > 1 ? userStringDecoder.decode(NeedSource_String, userCharpage) : "";
@@ -301503,7 +301511,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 					return 1;
 				};
 				ctx.ReformInfoAddInformationString = (key, string) => {
-					const decoded_string = string && string.length > 1 ? userStringDecoder.decode(string, userCharpage) : null;
+					const decoded_string = string && string.length > 1 ? userStringDecoder.decode(string, resolveUserCharpage()) : null;
 					ItemReformTable.ReformInfo[key].InformationString.push(decoded_string);
 					return 1;
 				};
@@ -301682,7 +301690,7 @@ function createItemDatabase(DB, userCharpage, MsgStringTable) {
 				};
 				ctx.SetEnchantCaution = (enchantId, message) => {
 					const group = ensureGroup(enchantId);
-					group.caution = userStringDecoder.decode(message, userCharpage);
+					group.caution = userStringDecoder.decode(message, resolveUserCharpage());
 					return 1;
 				};
 				ctx.AddEnchantResetMaterial = (enchantId, itemDb, count) => {
@@ -306049,8 +306057,9 @@ var init_TownInfo = __esmMin((() => {
 	];
 }));
 // src/DB/Map/MapLoaders.js
-function createMapLoaders(userCharpage) {
+function createMapLoaders(getUserCharpage) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	function loadWorldMapInfo(basePath, onEnd) {
 		const { lua, loadFile, guard } = createDBLoadContext();
 		onEnd = guard(onEnd);
@@ -306099,7 +306108,7 @@ function createMapLoaders(userCharpage) {
 				ctx.AddMapToWorld = (dgIndex, worldTableKey, rswName, left, top, right, bottom, nameDisplay, level, mapType) => {
 					const decodedTableKey = userStringDecoder.decode(worldTableKey);
 					let decodedRsw = userStringDecoder.decode(rswName);
-					const decodedName = userStringDecoder.decode(nameDisplay, userCharpage);
+					const decodedName = userStringDecoder.decode(nameDisplay, resolveUserCharpage());
 					const decodedLevel = level ? userStringDecoder.decode(level) : "";
 					const world = WorldMap_default$3.find((w) => w._tableKey === decodedTableKey);
 					if (mapType === 1) {
@@ -306207,7 +306216,7 @@ function createMapLoaders(userCharpage) {
 					mapName = userStringDecoder.decode(mapName);
 					exports$1[mapName] = [];
 					exports$1[mapName].push({
-						Name: userStringDecoder.decode(name, userCharpage),
+						Name: userStringDecoder.decode(name, resolveUserCharpage()),
 						X,
 						Y,
 						Type: TYPE
@@ -313219,8 +313228,9 @@ function setLegacyMapName(_index, key, value) {
 	attachMapName(key, map);
 	mapNames.get(map).legacyName = value;
 }
-function createMapDatabase(DB, userCharpage) {
+function createMapDatabase(DB, getUserCharpage) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	function setMapAlias(_index, key, value) {
 		DB.mapalias[key] = value;
 	}
@@ -313237,6 +313247,7 @@ function createMapDatabase(DB, userCharpage) {
 				console.log("Loading file \"" + filename + "\"...");
 				const buffer = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
 				const ctx = instance.ctx;
+				const userCharpage = resolveUserCharpage();
 				ctx.AddMapDisplayName = (name, displayName, notify_enter) => {
 					if (!isCurrent()) return 1;
 					const decoded_name = userStringDecoder.decode(name);
@@ -313360,8 +313371,9 @@ var init_MapDatabase = __esmMin((() => {
 	builtInDisplayNames = new Map(Object.entries(MapInfo).map(([key, info]) => [key, info.displayName]));
 }));
 // src/DB/Map/SignBoardDatabase.js
-function createSignBoardDatabase(userCharpage) {
+function createSignBoardDatabase(getUserCharpage) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	const SignBoardTranslatedTable = {};
 	let SignBoardTable = {};
 	function loadSignBoardData(filename, callback, onEnd) {
@@ -313413,7 +313425,7 @@ function createSignBoardDatabase(userCharpage) {
 				ctx.AddSignBoard = (mapname, x, y, height, type, icon_location, description, color) => {
 					const decoded_mapname = mapname && mapname.length > 1 ? userStringDecoder.decode(mapname) : null;
 					const decoded_icon_location = icon_location && icon_location.length > 1 ? userStringDecoder.decode(icon_location) : null;
-					const decoded_description = description && description.length > 1 ? userStringDecoder.decode(description, userCharpage) : null;
+					const decoded_description = description && description.length > 1 ? userStringDecoder.decode(description, resolveUserCharpage()) : null;
 					const decoded_color = color && color.length > 1 ? userStringDecoder.decode(color) : null;
 					signBoardList.push({
 						mapname: decoded_mapname,
@@ -313940,8 +313952,9 @@ var init_SkillDescriptions = __esmMin((() => {
 	SkillDescription = {};
 }));
 // src/DB/Skills/SkillLoaders.js
-function createSkillLoaders(DB, userCharpage) {
+function createSkillLoaders(DB, getUserCharpage) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	function loadSkillInfoList(filename, callback, onEnd) {
 		const { lua, loadFile, guard } = createDBLoadContext();
 		callback = guard(callback);
@@ -313973,7 +313986,7 @@ function createSkillLoaders(DB, userCharpage) {
 					};
 					SkillInfo[skillId] = {
 						Name: userStringDecoder.decode(resName),
-						SkillName: userStringDecoder.decode(skillName, userCharpage),
+						SkillName: userStringDecoder.decode(skillName, resolveUserCharpage()),
 						MaxLv: maxLv,
 						SpAmount: toArray(spAmount),
 						bSeperateLv,
@@ -317795,7 +317808,8 @@ var init_StatusInfo = __esmMin((() => {
 	};
 }));
 // src/DB/Status/StatusInfoLoader.js
-function loadStateIconInfo(basePath, callback, onEnd, userCharpage) {
+function loadStateIconInfo(basePath, callback, onEnd, getUserCharpage) {
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	const { lua, loadFile, guard } = createDBLoadContext();
 	callback = guard(callback);
 	onEnd = guard(onEnd);
@@ -317845,7 +317859,7 @@ function loadStateIconInfo(basePath, callback, onEnd, userCharpage) {
 			};
 			ctx.AddStatusDesc = (id, desc, r, g, b) => {
 				if (!StatusInfo[id]) return 0;
-				const text = userStringDecoder$1.decode(desc, userCharpage);
+				const text = userStringDecoder$1.decode(desc, resolveUserCharpage());
 				let color = null;
 				if (r >= 0 && g >= 0 && b >= 0) color = `rgb(${r}, ${g}, ${b})`;
 				StatusInfo[id].descript.push([text, color]);
@@ -322056,12 +322070,13 @@ var init_bson = __esmMin((() => {
 	});
 }));
 // src/DB/Loaders/TableLoader.js
-function createTableLoaders(userCharpage) {
+function createTableLoaders(getUserCharpage) {
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	function loadTable(filename, separator, size, callback, onEnd, useCharPage = false) {
 		Client.loadFile(filename, function(buffer) {
 			console.log("Loading file \"" + filename + "\"...");
 			let data = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer;
-			data = CodepageManager.decode(data, useCharPage ? userCharpage : null);
+			data = CodepageManager.decode(data, useCharPage ? resolveUserCharpage() : null);
 			const elements = ("\n" + data).replace(/\n(\/\/[^\n]+)/g, "").split(separator);
 			const count = elements.length;
 			const args = new Array(size + 1);
@@ -322132,7 +322147,7 @@ function createTableLoaders(userCharpage) {
 		Client.loadFile(filename, async function(file) {
 			console.log("Loading file \"" + filename + "\"...");
 			let xml = file instanceof ArrayBuffer ? new Uint8Array(file) : file;
-			xml = CodepageManager.decode(xml, userCharpage);
+			xml = CodepageManager.decode(xml, resolveUserCharpage());
 			xml = xml.replace(/^.*<\?xml/, "<?xml");
 			const parsedXML = new DOMParser().parseFromString(xml, "application/xml");
 			const json = xmlparse_default.xml2json(parsedXML);
@@ -322303,8 +322318,9 @@ function tryLoadLuaAliases(rFunc, files, callBack, onEnd, loadAll = false) {
 }
 var init_LuaAliases = __esmMin((() => {}));
 // src/DB/Loaders/LuaTableLoader.js
-function createLuaTableLoaders(userCharpage, grfCharpage) {
+function createLuaTableLoaders(getUserCharpage, grfCharpage) {
 	const userStringDecoder = CodepageManager;
+	const resolveUserCharpage = typeof getUserCharpage === "function" ? getUserCharpage : () => getUserCharpage;
 	function loadLuaTable(file_list, table_name, callback, onEnd, contextFunc, useCharPage = true) {
 		const instance = lua;
 		const generation = getLuaGeneration();
@@ -322359,13 +322375,14 @@ function createLuaTableLoaders(userCharpage, grfCharpage) {
 			function parseTable() {
 				const table = {};
 				const ctx = instance.ctx;
+				const charpage = useCharPage ? resolveUserCharpage() : grfCharpage;
 				ctx.addKeyAndValueToTable = (key, value) => {
-					table[key] = userStringDecoder.decode(value, useCharPage ? userCharpage : grfCharpage);
+					table[key] = userStringDecoder.decode(value, charpage);
 					return 1;
 				};
 				ctx.addKeyAndMoreValuesToTable = (key, value) => {
 					if (!table[key]) table[key] = "";
-					table[key] += userStringDecoder.decode(value, useCharPage ? userCharpage : grfCharpage) + "\n";
+					table[key] += userStringDecoder.decode(value, charpage) + "\n";
 					return 1;
 				};
 				instance.doStringSync(`
@@ -323214,29 +323231,33 @@ function createDBServices(DB) {
 	setSkillAttackSliceResolver((job, weapon) => DB.getAttackSlice(job, weapon));
 	setEffectMessageResolvers(() => DB.getRandomJoke(), () => DB.getRandomScream());
 	const SexTable = ["¿©", "³²"];
-	const servers = Configs.get("servers", []);
-	const langType = servers[0] && servers[0].langtype ? parseInt(servers[0].langtype, 0) : 0;
-	const userCharpage = CodepageManager.detectEncodingByLangtype(langType, Configs.get("disableKorean"));
+	function getUserCharpage() {
+		const servers = Configs.get("servers", []);
+		const defaultLangType = Array.isArray(servers) && servers[0] ? servers[0].langtype : 0;
+		const rawLangType = Configs.get("langtype", defaultLangType);
+		const langType = rawLangType ? parseInt(rawLangType, 0) : 0;
+		return CodepageManager.detectEncodingByLangtype(langType, Configs.get("disableKorean"));
+	}
 	const grfCharpage = "windows-1252";
 	CodepageManager.setCharset(grfCharpage);
-	const { loadTable, loadCSV, loadXMLFile, loadBSONFile } = createTableLoaders(userCharpage);
-	const { loadLuaTable, loadLuaValue } = createLuaTableLoaders(userCharpage, grfCharpage);
+	const { loadTable, loadCSV, loadXMLFile, loadBSONFile } = createTableLoaders(getUserCharpage);
+	const { loadLuaTable, loadLuaValue } = createLuaTableLoaders(getUserCharpage, grfCharpage);
 	const EquipmentRules = createEquipmentRules(DB, SexTable);
 	const NavigationSystem = createNavigationSystem(DB);
 	const ActorResourcePaths = createActorResourcePaths(DB, SexTable);
 	const PetDatabase = createPetDatabase(DB);
-	const signBoards = createSignBoardDatabase(userCharpage);
+	const signBoards = createSignBoardDatabase(getUserCharpage);
 	const { loadSignBoardData, loadSignBoardList } = signBoards;
-	const systemDatabase = createSystemDatabase(DB, userCharpage);
+	const systemDatabase = createSystemDatabase(DB, getUserCharpage);
 	const { loadAttendanceFile, loadTitleTable, loadQuestInfo, parseQuestEntry, loadCashShopBanner } = systemDatabase;
-	const itemDatabase = createItemDatabase(DB, userCharpage, MsgStringTable);
+	const itemDatabase = createItemDatabase(DB, getUserCharpage, MsgStringTable);
 	const { parseBuyingStoreItem, loadItemInfo, loadLaphineSysFile, loadLaphineUpgFile, loadItemDBTable, loadItemReformFile, loadEnchantListFile } = itemDatabase;
-	const mapDatabase = createMapDatabase(DB, userCharpage);
+	const mapDatabase = createMapDatabase(DB, getUserCharpage);
 	const { loadMapTbl, parseFogEntry, parseIndoorEntry, setMapAlias } = mapDatabase;
 	const ownerNames = createOwnerNameResolver(DB);
 	const emblemLoader = createEmblemLoader(DB);
-	const { loadWorldMapInfo, loadTownInfoFile, loadPrivateAirship } = createMapLoaders(userCharpage);
-	const { loadSkillInfoList, loadSkillTreeView } = createSkillLoaders(DB, userCharpage);
+	const { loadWorldMapInfo, loadTownInfoFile, loadPrivateAirship } = createMapLoaders(getUserCharpage);
+	const { loadSkillInfoList, loadSkillTreeView } = createSkillLoaders(DB, getUserCharpage);
 	return {
 		EquipmentRules,
 		NavigationSystem,
@@ -323333,7 +323354,7 @@ function createDBServices(DB) {
 			setSkillDescription,
 			startLua,
 			tryLoadLuaAliases,
-			userCharpage
+			getUserCharpage
 		})
 	};
 }

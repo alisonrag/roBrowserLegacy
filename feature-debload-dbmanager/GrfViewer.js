@@ -367457,6 +367457,7 @@ function onLoginServerSelected(index) {
 	if (_previous_server !== void 0 && (_previous_server.address != _servers[index].address || _previous_server.port != _servers[index].port)) {
 		UIManager.removeComponents();
 		Network.close();
+		Configs.setServer(_servers[index]);
 		loadFiles(() => {
 			LoginEngine.setLoadedServer(_servers[index]);
 			onReadyLoginServer(index);
